@@ -1662,6 +1662,80 @@ TrainzUtil, TrainzDiag, JAConverter, XCrashReport.
     overwritten anyway).
 - In game: menu reached, JetLog identical to the baseline. diff_rs_u1/u2/u4 still 0 mismatches.
 
+### WaterSystem_7c U1, noise and the water grids (2026-10-26): 40/490 exports ours
+Started ahead of the Render stack (the plan had WaterSystem at 8e; the inventory was ready). Sources:
+`src/jet/graphics/WaterSystem_7c/{FrameAnimation,PNoise,WaterGrid}.cpp`, headers `src/jet/include/jet/…`,
+unit order in `notes/WaterSystem.md`.
+- **FrameAnimation** (0x18, POD): frame clock `{numFrames, currentFrame, time, sampleRate, period, deltaFrame}`.
+  Update: time += dt, currentFrame = (int)(sampleRate*time) % numFrames, deltaFrame = frac via double floor
+  (the product is x87 53-bit, so it is computed in double like KernelStandard's Math). Dtor shares the no-op
+  body 0x10091D0 with ~PNoise and a dozen other empty functions (identical-code folding); GetSampleRate shares
+  0x1008750 with WaterGrid::GetData.
+- **PNoise** (0x383C, POD): classic Perlin 1/2/3 with the 1985 smoothstep, fBm turbulence, tileable and looping
+  tiled variants. Layout byte-exact (permutation + 4 gradient tables + their shifted wrap copies). Quirks kept:
+  the permutation is 1-based so perm[0] reads numOctaves (and the last cell's second hash index is byte-
+  truncated, reading it again), Turbulence3 doubles x and y but not z, the ctor's Perm(0) read happens before
+  numOctaves is set. All float math follows the module-wide x87 rule: double intermediates, float rounding
+  where the assembly stores to a float local (D-suffixed workers behind the public float exports).
+- **WaterGrid<float>/<Vector2>** (0x10): `{vftable, width, height, data}`, one virtual (Initialize), operator=
+  returns void, the MSVC 2005 array-new overflow guard passed to Alloc::New.
+- Build: WaterSystem_7c joined the drop-in module list (`JET_WS_BUILD`), 40 exports ours, the rest forwards to
+  `WaterSystem_7c_orig.dll`; `tests/diff_ws_u1.cpp` covers the three classes against the original (PNoise tables
+  compare byte for byte: both CRTs start a fresh process at the default seed; plus a cross-assign pass so the
+  noise math is checked independently of the tables). Diff run and in-game check pending the next Windows session.
+
+### WaterSystem_7c U2 + U3 (2026-10-27): 82/490 exports ours
+- **U3, DisplacementHull** (DisplacementHull.cpp): a height field loaded from a bitmap, derives from
+  WaterGrid<float>. Initialize resolves the file through the database exactly like the original: a raw
+  __cdecl call of db's vtable slot 3 with (db, &out node, name) on the stack, both outputs used, the out node
+  released (shared helper CallDbSlot3 in WaterSystemInternal.h; ResourceDatabase's virtuals are __cdecl with
+  `this` pushed and slot 3 is GetFileName, whose by-value PString return slot the caller reuses — the call
+  shape matches the assembly either way).
+- **U2, the config model** (WaterManagerConfig.cpp): AnimProp (0x60, WANI binary load/save, .txt config
+  fallback with the "DetailAnim" key), MaterialProp (0x50), TileProp (0x24), PhysicsProp (0xc) and
+  WaterManagerConfig (0x160, two virtual Loads, the six cube textures). All 46 config keys are interned static
+  PStrings, as the original's init function (0x100198e0..0x10019cc0) creates them. The operator>> overload per
+  field (PString/int/float/Size/Vector2/Color/Vector3) was mapped from the delay/import table, the field types
+  cross-checked against the ctors' constants (450.0 world size, {-15,5} FFT wind, 0.7071 light dir...).
+  AnimProp::LoadFile(File&) returns false for non-"WANI" magic so the .txt fallback runs; the config ctor's
+  detail-anim resolution (relative name under the config's path through the db, then the raw name) follows the
+  assembly including the path/colon/slash checks.
+- WaterGrid's NewBytes guard moved to WaterSystemInternal.h (shared with DisplacementHull). Everything is
+  syntax-checked; bit-exactness waits for the Windows build (diff_ws_u1 first, then diff tests for U2/U3 to be
+  written, then the menu check).
+
+### WaterSystem_7c U4 (2026-10-27): 106/490 exports ours
+- WaterAnimation : PluginInstance (+ protected PluginBase for the factory lookup) and WaterAnimationPN, the
+  noise-driven frame animation (WaterAnimation.cpp). Layouts: WA 0x24, PN 0x3870 (Size + animMaxHeight + the
+  frame bookkeeping + a PNoise member + the virtual ReferenceCount at the end); the vtables/vbtables/vtordisps
+  and adjustor thunks come from the compiler.
+- Quirks kept: GetXYFrame is a null stub (folded with the other "return 0" bodies at 0x10015db0), Init is a
+  "return true" stub (0x10013f10), CreateInstance calls the factory's slot-3 CreateInstance raw through VCall
+  and releases the type, PN multiplies by the float 1/25 constant 0x3d23d70a instead of dividing, and the
+  original's caller-side 53-bit use of the noise exports is kept via PNoise's D-workers (now public).
+- groupUid 2D54F63B-FF0A-4877-9561-0BBC3E2AC6DB, ANIM_NAME "WaterAnimationPN", factory id
+  E43947F9-6280-4141-B8BC-8847196B62AF (RegisterWaterAnimationFactory, called by U10's JetGetPluginsWaterSystem).
+  WaterGrid gained JET_HEAP_OBJECT (the original allocates the grids through Jet::Alloc).
+
+### WaterSystem_7c U6 (2026-10-27): 119/490 exports ours
+- WaterTextureAnimation (WaterTextureAnimation.cpp): the per-frame bump textures, both Initialize overloads and
+  CreateAnimationTexture. RenderSystem is not reconstructed yet, so the module carries a local view of the
+  classes it needs (RenderSystemShell.h, everything imported by name): the Texture ctor and vftable (the
+  original's explicit vftable write reproduced via a linker /alternatename onto ??_7Texture@Jet@@6B@), and the
+  RenderKernel texture manager + DisplayTexture make/fill calls raw through VCall (kernel slot 38, display
+  slots 1 and 3). The bump map keeps the original's quirks: wrapping gradients, the lagging dx and the
+  127.5-scaled channels with the double 1/maxHeight division. Verification stays deferred to the Windows build,
+  per the user's call to pick up the pace.
+
+### WaterSystem_7c U5 (2026-10-27): 152/490 exports ours
+- The geometry unit (WaterGeometry.cpp): WaterGeometry (the chunk holder; CreateGeometryChunk through the
+  material's raw slot 46, the chunk's item arrays through slots 49/47/4/31, GetIndexArray for the indices),
+  PhysicsWaterGeometry (the three-buffer wave simulation, both flavours, the hull displacement overlay),
+  WaterGeometryAnimation (the frame morphing) and WaterGeometryVS (the vertex-program attributes). All
+  RenderSystem types stay local shells / raw VCall (RenderSystemShell.h gained PackedVertexPCT, GeometryChunk,
+  StandardChunkHint); the original's quirks are kept (the last-row overread, the wrapped right neighbour, the
+  unused PNoise constructions, the mixed old/new buffer reads in the attrib gradients). Verification deferred
+  to the Windows build, per the user's call.
 ### RenderSystem_7c U2b2a, the quick parser and the pre-parser (2026-10-27): internal code, no new exports
 - The four shader-language front ends are internal (no exports); only VertexProgram::Load, TextureCombiner::Load and
   VertexProgramManager::RegisterBuiltInPrograms (all U3) run them. U2b2a does two of them; the texture and vertex
@@ -1778,6 +1852,7 @@ TrainzUtil, TrainzDiag, JAConverter, XCrashReport.
 - In game: menu reached, JetLog identical to the baseline (the parsers are not called there until U3).
 
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
+
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is
   the Jet SDK 1.0 headers we already have. (Dark Reign 2 went open source in 2012, but it is Pandemic's
   engine, not Jet.)

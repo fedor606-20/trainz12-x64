@@ -81,7 +81,7 @@ endforeach()
 target_sources(KernelStandard_7c PRIVATE ${SCFG_TABLES})
 
 # step 5, small Jet modules: drop-in proxies, replaced module by module (the rest forwards to <module>_orig.dll)
-foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c)
+foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c WaterSystem_7c)
     jet_module(${m})
     target_compile_definitions(${m} PRIVATE _CRT_SECURE_NO_WARNINGS)
     # each calls the other Jet modules by their original names (our proxies or the originals)
@@ -93,6 +93,8 @@ target_link_libraries(InputWin32_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib")
 # RenderSystem_7c: replaced unit by unit (notes/RenderSystem.md); its module state stays the original's until U9
 target_compile_definitions(RenderSystem_7c PRIVATE JET_RS_BUILD)
 target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.lib")
+# WaterSystem_7c: replaced unit by unit (notes/WaterSystem.md); its module state stays the original's until U10
+target_compile_definitions(WaterSystem_7c PRIVATE JET_WS_BUILD)
 # the map lets the diff tests find the parsers' internal entry points (RsTest*)
 target_link_options(RenderSystem_7c PRIVATE /MAP)
 # the shader-language scanners' DFA tables and their Lemon parsers' tables (generated output with no source), read
@@ -202,6 +204,8 @@ add_executable(diff_rs_u4 tests/diff_rs_u4.cpp)
 add_executable(diff_rs_u2 tests/diff_rs_u2.cpp)
 # RenderSystem U2b: ExtendedGfxLanguage and the texture combiner records (+ the shader-language parsers)
 add_executable(diff_rs_u2b tests/diff_rs_u2b.cpp)
+# WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
+add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)
 add_executable(diff_is_obs tests/diff_is_obs.cpp)
 add_executable(diff_is_dev tests/diff_is_dev.cpp)

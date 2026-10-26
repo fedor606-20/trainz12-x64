@@ -77,7 +77,7 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 | Render3DExtension_7c | 38 KB | 326 | 0/186 | ⬜ not started |
 | RenderOpenGL_7c | 135 KB | 944 | 0/51 | ⬜ not started |
 | RenderDirectX9_7c | 70 KB | 404 | 0/41 | ⬜ not started |
-| WaterSystem_7c | 92 KB | 714 | 0/490 | ⬜ not started |
+| WaterSystem_7c | 92 KB | 714 | 152/490 | 🟡 partial |
 | 🪟 **User interface** | | | | |
 | InterfaceSystem_7c | 319 KB | 3,358 | 0/2022 | ⬜ not started |
 | InterfaceResources_7c | 34 KB | 345 | 0/169 | ⬜ not started |
