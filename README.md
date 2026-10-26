@@ -29,12 +29,12 @@ https://discord.gg/DmqMJGtCZ
 Measured by code size: a finished module counts whole, a partial one by the code behind the exports that are already ours (`tools/progress.py`, 2026-10-27).
 
 ```
-🌍 Whole game         ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   6.6 %   7,209 KB left of 7,719
+🌍 Whole game         ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   6.9 %   7,184 KB left of 7,719
 
-🧩 Jet engine         ███████░░░░░░░░░░░░░░░░░░░░░░░  23.1 %   1,698 KB left of 2,208  7/19 modules
+🧩 Jet engine         ███████░░░░░░░░░░░░░░░░░░░░░░░  24.2 %   1,673 KB left of 2,208  7/19 modules
   🔧 Engine core      ██████████████████████████████ 100.0 %       0 KB left of   378  4/4 modules
   🎮 Input            ████████████████████████░░░░░░  81.2 %      19 KB left of   103  2/3 modules
-  🎨 Graphics         █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   3.5 %   1,307 KB left of 1,355  1/8 modules
+  🎨 Graphics         ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   5.4 %   1,281 KB left of 1,355  1/8 modules
   🪟 User interface   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %     354 KB left of   354  0/2 modules
   🐞 Debug            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %      18 KB left of    18  0/2 modules
 
