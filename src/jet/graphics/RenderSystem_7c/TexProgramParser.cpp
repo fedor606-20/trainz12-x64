@@ -830,6 +830,13 @@ bool TextureProgramParser::Run(const PString& file, ExtendedGfxLanguage* languag
     return ok;
 }
 
+// ---- TextureCombiner::Load (0x10040550)
+bool TextureProgramParse(MemoryFile* in, int api, const PString& file, ExtendedGfxLanguage* lang)
+{
+    TextureProgramParser parser(in, api);
+    return parser.Run(file, lang);
+}
+
 // ---- entry points for the differential test (found through the linker map; nothing else calls them)
 
 extern "C" void __cdecl RsTestTpCtor(void* mem, MemoryFile* in, int api) { ::new (mem) TextureProgramParser(in, api); }

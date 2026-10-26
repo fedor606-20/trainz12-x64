@@ -416,4 +416,12 @@ private:
     }
 };
 
+class ExtendedGfxLanguage;
+
+// the parsers' entry points for unit U3 (their classes are local to their files)
+bool GfxPreParse(int api, MemoryFile* in, const PString& program, const PString& file, ExtendedGfxLanguage* lang,
+                 bool (*then)(const AnsiString& output, void* ctx), void* ctx);
+bool VertexProgramParse(MemoryFile* in, const PString& program, const PString& file, ExtendedGfxLanguage* lang);
+bool TextureProgramParse(MemoryFile* in, int api, const PString& file, ExtendedGfxLanguage* lang);
+
 }  // namespace Jet

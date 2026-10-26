@@ -29,12 +29,12 @@ https://discord.gg/DmqMJGtCZ
 Measured by code size: a finished module counts whole, a partial one by the code behind the exports that are already ours (`tools/progress.py`, 2026-10-27).
 
 ```
-🌍 Whole game         ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   6.5 %   7,216 KB left of 7,719
+🌍 Whole game         ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   6.6 %   7,209 KB left of 7,719
 
-🧩 Jet engine         ███████░░░░░░░░░░░░░░░░░░░░░░░  22.8 %   1,705 KB left of 2,208  7/19 modules
+🧩 Jet engine         ███████░░░░░░░░░░░░░░░░░░░░░░░  23.1 %   1,698 KB left of 2,208  7/19 modules
   🔧 Engine core      ██████████████████████████████ 100.0 %       0 KB left of   378  4/4 modules
   🎮 Input            ████████████████████████░░░░░░  81.2 %      19 KB left of   103  2/3 modules
-  🎨 Graphics         █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   3.0 %   1,314 KB left of 1,355  1/8 modules
+  🎨 Graphics         █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   3.5 %   1,307 KB left of 1,355  1/8 modules
   🪟 User interface   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %     354 KB left of   354  0/2 modules
   🐞 Debug            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %      18 KB left of    18  0/2 modules
 
@@ -71,7 +71,7 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 | InputDirectX_7c | 19 KB | 122 | 0/1 | ⬜ not started |
 | 🎨 **Graphics** | | | | |
 | Render2DCore_7c | 17 KB | 167 | 85/85 | ✅ done |
-| RenderSystem_7c | 351 KB | 3,628 | 1136/2687 | 🟡 partial |
+| RenderSystem_7c | 351 KB | 3,628 | 1186/2687 | 🟡 partial |
 | Render3DCore_7c | 458 KB | 3,168 | 0/2500 | ⬜ not started |
 | Render3DFoundation_7c | 194 KB | 1,453 | 0/1084 | ⬜ not started |
 | Render3DExtension_7c | 38 KB | 326 | 0/186 | ⬜ not started |

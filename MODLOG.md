@@ -1851,6 +1851,42 @@ unit order in `notes/WaterSystem.md`.
     texture coordinate "s", and the alias DecRef.
 - In game: menu reached, JetLog identical to the baseline (the parsers are not called there until U3).
 
+### RenderSystem_7c U3a1, VertexProgram and TextureCombiner (2026-10-27): 1186/2687 exports ours
+- U3 (215 exports, ~40 KB) is split: U3a1 the two program base classes (50 exports, this step), U3a2 their
+  managers, resources and the Cg/GLSL helpers, U3b VertexProgramBasic (the text program generator, 14 KB).
+- `VertexProgram.cpp`: VertexProgram (0x50 bytes: ExtendedGfxLanguage, then vertex type +0x34 (referenced),
+  influence base/max registers +0x38/+0x3c (-1), a byte +0x40, the manager +0x44; ReferenceCount virtual base
+  +0x48). Its ExtendedGfxLanguage vftable has 35 slots; slots 9, 12-15, 20-27, 30-34 answer 0 in the base and are
+  the API module's: 13 symbol table, 14 instructions, 17 SetProgramState, 19 LoadConstantRegisters (both empty),
+  23/24/27 SetLocalConstant / SetLocalConstantDirect / SetEnvConstant (int, Vector4), 26 several constants,
+  30-32 the register limits, 33 the API id handed to the pre-parser, 34 the native program text. The Vector3 and
+  Color forms are exported non-virtual helpers (w = 1).
+- Load (0x10049540) runs the pre-parser with the API id, then the vertex program parser over the pre-parser's
+  output (both ours since U2b2; entry points `GfxPreParse` / `VertexProgramParse` in GfxParse.h).
+- LoadCommonStates (0x100499b0, 2.6 KB) fills the render-state constants (ConstantData: register +0, kind +4
+  (4 = state), state id +8 (0x12..0x27), light index +0x10 among lights of type +0x1c (5 or more: all lights)):
+  material colours and power, light colours / attenuation, light position or direction and the spot direction in
+  view space (w = cos(cut-off) through x87 fcos), the half vector (normalised with StdMath's table 1/sqrt), ambient
+  times material plus emissive, light times material colour, the display's ambient (state block +0x7c) and fog
+  (+0x8c..+0x94, w = 1 / (end - start)). The lights are sorted into five FastDynamicArrays by type on first use.
+  Ours keeps the original's order of float operations (the test compares bits).
+- `TextureCombiner.cpp`: TextureCombiner (0x6c bytes: tracked constants +0x34 (Array of {index, Vector4}), a
+  16-slot table of them by register +0x40, bump scale/bias per stage +0x44, bump matrices +0x50, a changed flag
+  +0x5c, the manager +0x60 (left uninitialised by the constructor, as in the original)). 18-slot vftable: 11 the
+  program parser's instructions and 17 the API id are the API module's. Load runs the texture program parser.
+- Both classes' support flags (`supported`/`supportChecked`, VertexProgram's by generation 1..2) and the register
+  limits stay the original's statics (imported), since the original's Display and materials ask them too.
+- Test `tests/diff_rs_u3.cpp` (200 scenarios, 0 mismatches): programs and combiners built with each side's
+  constructor and a logging copy of its vftable, a stand-in Display (capabilities, a program for the register
+  limits, a random render-state block), stand-in lights; random constants, influences (transposed matrices),
+  LoadCommonStates over random states/lights/matrices, vertex types, InitInstance, and real program texts from the
+  render modules through LoadProgram (910 vertex program and 1226 texture program loads succeed). The original's
+  scanner statics (0x100b7dc8..0x100b8127) hold these statics too, so the test keeps them across its resets.
+  - Mutations caught: 15 of 16 (float regrouping in the transform, swapped operands, the light-type limit, the
+    fog reciprocal, influence stride, support range, bump defaults, the symbol's local flag...). Survivor: the CRT's
+    cos instead of x87 fcos gives the same bits for the cut-off angles tried.
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

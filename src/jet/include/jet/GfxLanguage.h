@@ -4,8 +4,10 @@
 #pragma once
 
 #include <jet/DynamicArray.h>
+#include <jet/FastDynamicArray.h>
 #include <jet/KernelStandard.h>
 #include <jet/PString.h>
+#include <jet/RenderTypes.h>
 
 namespace Jet {
 
@@ -267,9 +269,18 @@ struct ParseList {
     JET_HEAP_OBJECT
 };
 
-// The texture combiner's parse records (its program parser builds them). TextureCombiner itself is unit U3; only
-// the nested records are declared here.
-class TextureCombiner {
+// ---- U3a (RenderSystem_7c/VertexProgram.cpp, TextureCombiner.cpp)
+
+class TextureCombinerManager;
+class VertexProgramManager;
+class VertexType;
+
+using DisplayLightList = FastDynamicArray<DisplayLight*, 13, Less<DisplayLight*, DisplayLight*>>;
+
+// A texture combiner (pixel program) of the API modules (0x6c bytes with its virtual ReferenceCount at +0x64): the
+// constants its program declares (by register, 16 at most), the bump-environment settings per stage and its
+// manager. The API module's class fills the slots that answer 0 here.
+class TextureCombiner : public ExtendedGfxLanguage {
 public:
     enum TextureOpcode {};
     enum TextureAddressType {};
@@ -316,6 +327,144 @@ public:
         float value;                             // +0x28
         JET_HEAP_OBJECT
     };
+
+    struct Constant {  // a tracked constant register (0x14)
+        int index;
+        Vector4 value;
+    };
+    struct BumpEnv {  // a stage's bump scale and bias (0x14; the last two are never set)
+        int stage;
+        float scale, bias, unused0c, unused10;
+    };
+    struct BumpMatrix {  // 0x14
+        int stage;
+        Vector4 matrix;
+    };
+
+    static bool __cdecl SupportedByPlatform(Display* display, float generation);
+    bool __cdecl SupportedByPlatform(float generation) override;  // the display's capability 0x15, asked once
+
+    virtual void __cdecl SetCombinerManager(TextureCombinerManager* m);  // 9
+    virtual TextureCombinerManager* __cdecl GetCombinerManager();         // 10
+    virtual bool __cdecl AddInstruction(const Instruction* i);           // 11 (the program parser's lines): false
+    virtual bool __cdecl SetConstantRegister(int index, const Vector4& v);  // 12: false when not tracked
+    // 13: a new constant register (index < 16, not tracked yet) and its symbol name when it has one
+    virtual bool __cdecl TrackConstant(int index, const AnsiString& name, const Vector4& v);
+    virtual void __cdecl SetBumpEnvScale(int stage, float scale, bool apply);           // 14
+    virtual void __cdecl SetBumpEnvBias(int stage, float bias, bool apply);             // 15
+    virtual void __cdecl SetBumpEnvMatrix(int stage, const Vector4& matrix, bool apply);  // 16
+    virtual int __cdecl GetApi() const;  // 17: handed to the program parser (0 here)
+
+    bool __cdecl SetConstantRegister(int index, const Color& c);
+    bool __cdecl SetConstantRegister(int index, const Vector3& v);  // w = 1
+
+protected:
+    explicit TextureCombiner(Display* display);
+    ~TextureCombiner() override;
+
+    bool __cdecl Load(MemoryFile& file, const PString& name, const PString& fileName) override;
+
+    Array<Constant*, 128> constants;       // +0x34
+    Constant** constantTable;              // +0x40 (16 slots, by register)
+    Array<BumpEnv*, 128> bumpEnv;          // +0x44
+    Array<BumpMatrix*, 128> bumpMatrices;  // +0x50
+    bool bumpChanged;                      // +0x5c
+    TextureCombinerManager* manager;       // +0x60
+
+    static __declspec(dllimport) bool supportChecked;  // the original's until U9
+    static __declspec(dllimport) bool supported;
 };
+JET_LAYOUT32(sizeof(TextureCombiner) == 0x6c);
+
+// A vertex program of the API modules (0x50 bytes with its virtual ReferenceCount at +0x48): its vertex type, the
+// registers where skinning matrices go and its manager. Load runs the pre-parser, then the vertex program parser
+// over its output. The slots that answer 0 here are the API module's.
+class VertexProgram : public ExtendedGfxLanguage {
+public:
+    // a constant register the program asked for (+0 register, +4 kind: 4 is a render state with its id at +8;
+    // lights by index +0x10 among those of type +0x1c)
+    struct ConstantData {
+        int reg;         // +0
+        int kind;        // +4
+        int state;       // +8
+        int field0c;     // +0xc
+        int lightIndex;  // +0x10
+        int field14, field18;
+        int lightType;   // +0x1c
+    };
+    struct MatrixMap {
+        const Matrix4* matrix;  // +0
+    };
+
+    static bool __cdecl SupportedByPlatform(Display* display, float generation);  // generations 1..2, asked once
+    bool __cdecl SupportedByPlatform(float generation) override;
+    bool __cdecl LoadNativeFormat(const PString& name, const char* source) override;
+
+    virtual int __cdecl Slot9();                                         // 0
+    virtual void __cdecl SetProgramManager(VertexProgramManager* m);     // 10
+    virtual VertexProgramManager* __cdecl GetProgramManager();           // 11
+    virtual int __cdecl Slot12();                                        // the API module's: 0
+    virtual int __cdecl Slot13();
+    virtual int __cdecl Slot14();
+    virtual int __cdecl Slot15();
+    virtual bool __cdecl RestoreProgram();                               // 16: true
+    virtual void __cdecl SetProgramState(const DisplayLightList& lights, Color ambient,
+                                         const DisplayMaterial& material, const Matrix4& view) const;  // 17
+    virtual void __cdecl LoadInfluences(const Array<MatrixMap*, 128>& matrices) const;  // 18
+    virtual void __cdecl LoadConstantRegisters() const;                  // 19
+    virtual int __cdecl Slot20();
+    virtual int __cdecl Slot21();
+    virtual int __cdecl Slot22();
+    virtual bool __cdecl SetLocalConstant(int reg, const Vector4& v) const;        // 23
+    virtual bool __cdecl SetLocalConstantDirect(int reg, const Vector4& v) const;  // 24
+    virtual int __cdecl Slot25();
+    virtual bool __cdecl SetLocalConstants(int reg, const Vector4* v, int count) const;  // 26
+    virtual bool __cdecl SetEnvConstant(int reg, const Vector4& v) const;          // 27
+    virtual bool __cdecl SetVertexType(VertexType* type);                // 28: false when unchanged
+    virtual VertexType* __cdecl GetVertexType() const;                   // 29
+    virtual int __cdecl GetMaxLocalRegisters() const;                    // 30
+    virtual int __cdecl GetMaxEnvRegisters() const;                      // 31
+    virtual int __cdecl GetMaxTotalRegisters() const;                    // 32
+    virtual int __cdecl GetApi() const;                                  // 33: handed to the pre-parser
+    virtual bool __cdecl LoadNativeProgram(AnsiString& text);           // 34
+
+    // the display's limits, read once from a program it makes
+    static int __cdecl GetMaxLocalRegisters(Display* display);
+    static int __cdecl GetMaxEnvRegisters(Display* display);
+    static int __cdecl GetMaxTotalRegisters(Display* display);
+
+    bool __cdecl SetLocalConstant(int reg, const Vector3& v) const;  // w = 1
+    bool __cdecl SetLocalConstant(int reg, const Color& c) const;
+    bool __cdecl SetLocalConstantDirect(int reg, const Vector3& v) const;
+    bool __cdecl SetLocalConstantDirect(int reg, const Color& c) const;
+    bool __cdecl SetEnvConstant(int reg, const Vector3& v) const;
+    bool __cdecl SetEnvConstant(int reg, const Color& c) const;
+    int __cdecl GetInfluenceBaseRegister() const;
+    int __cdecl GetInfluenceMaxRegister() const;
+
+protected:
+    VertexProgram(Display* display, VertexType* type);
+    ~VertexProgram() override;
+
+    bool __cdecl Load(MemoryFile& file, const PString& name, const PString& fileName) override;
+    void __cdecl InitInstance(VertexProgram& copy) const;
+    // the render-state constants (material, lights by type, fog...) through SetLocalConstantDirect
+    void __cdecl LoadCommonStates(const Array<ConstantData*, 3>& constants, const DisplayLightList& lights,
+                                  Color ambient, const DisplayMaterial& material, const Matrix4& view) const;
+    static void __cdecl GetMaxRegisters(Display* display);
+
+    VertexType* vertexType;          // +0x34 (referenced)
+    int influenceBase;               // +0x38 (-1: none)
+    int influenceMax;                // +0x3c
+    bool field40;                    // +0x40
+    VertexProgramManager* manager;   // +0x44
+
+    static __declspec(dllimport) int maxLocalRegs;  // the original's until U9
+    static __declspec(dllimport) int maxEnvRegs;
+    static __declspec(dllimport) int maxTotalRegs;
+    static __declspec(dllimport) bool supportChecked[4];  // by generation - 1
+    static __declspec(dllimport) bool supported[4];
+};
+JET_LAYOUT32(sizeof(VertexProgram) == 0x50);
 
 }  // namespace Jet

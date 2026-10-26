@@ -1094,6 +1094,13 @@ bool VertexProgramParser::Run(const PString& program_, const PString& file_, Ext
     return ok;
 }
 
+// ---- VertexProgram::Load (0x10049540)
+bool VertexProgramParse(MemoryFile* in, const PString& program, const PString& file, ExtendedGfxLanguage* lang)
+{
+    VertexProgramParser parser(in);
+    return parser.Run(program, file, lang);
+}
+
 // ---- entry points for the differential test (found through the linker map; nothing else calls them)
 
 extern "C" void __cdecl RsTestVpCtor(void* mem, MemoryFile* in) { ::new (mem) VertexProgramParser(in); }

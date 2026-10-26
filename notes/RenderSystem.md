@@ -1,9 +1,9 @@
 # RenderSystem_7c.dll: reconstruction plan
 
-Status: 2026-10-27. U0 (proxy), U1 (value types, vertex records; 939 exports), U4 (modifiers; 54 exports), U2a
+Status: 2026-10-26. U0 (proxy), U1 (value types, vertex records; 939 exports), U4 (modifiers; 54 exports), U2a
 (shader-language data; 99 exports) and U2b1 (ExtendedGfxLanguage, TextureCombiner records; 44 exports) are ours and
-verified (`tests/diff_rs_u1.cpp`, `diff_rs_u4.cpp`, `diff_rs_u2.cpp`, `diff_rs_u2b.cpp`, MODLOG): 1136/2687. U2b2
-(the four shader-language scanners and parsers) is ours too (internal code). Next: U3.
+verified (`tests/diff_rs_u1.cpp`, `diff_rs_u4.cpp`, `diff_rs_u2.cpp`, `diff_rs_u2b.cpp`, MODLOG): 1136/2687. Next:
+U2b2 (the scanners/parsers).
 
 U2 is split: U2a the data classes (GfxSymbols.cpp); U2b1 ExtendedGfxLanguage and the TextureCombiner
 Instruction/RegisterItem/ModifierItem records (ExtendedGfxLanguage.cpp); U2b2 four flex 2.5 C++ scanners
@@ -12,14 +12,12 @@ Instruction/RegisterItem/ModifierItem records (ExtendedGfxLanguage.cpp); U2b2 fo
 drive them (pre-parser driver 0x1002cad0 with reduce 0x1002c340, "Syntax error at %s."; texture 0x10044830; vertex
 0x100517d0). Same shape as KernelStandard's ConfigParser: tables read from the installed original at build time.
 U2b2a (2026-10-27): quick parser and pre-parser done (GfxParse.*, GfxQuickParser.cpp, GfxPreParser.cpp; MODLOG).
-U2b2b1 (2026-10-27): tp = TextureProgramParser done (TexProgramParser.cpp; MODLOG): yylex 0x10044d30, driver
-0x10044830, reduce 0x10043760 (builds the records only), run 0x100462d0 (hands them to the combiner: slots 3, 4, 11,
-13), statics 0x100b7fa0 stack, 0x100b8067, 0x100b8090..0x100b809f, and the code text AnsiString at 0x100b8800.
-U2b2b2 (2026-10-27): vp = VertexProgramParser done (VertexProgramParser.cpp; MODLOG): a later Lemon (int actions,
-16-byte values, LemonMinor16), statics 0x100b7ff0, 0x100b80a3, 0x100b8114..0x100b8127, five opcode PString tables
-0x100b8820..0x100b8950. All four shader-language front ends are now ours; U3 (VertexProgram, TextureCombiner and
-their managers) is what calls them. Syntax of any scanner: walk its DFA (scratchpad dfa_examples.py: shortest text
-per rule and start condition).
+U2b2b: tp = TextureProgramParser (yylex 0x10044d30, driver 0x10044830, reduce 0x10043760, run 0x100462d0 called
+by TextureCombiner::Load with ecx = parser object: tpFlexLexer at +0, +0x7c 0, +0x80 line 1, +0x84 the combiner's
+vftable slot 17 value; the reduce calls the combiner's virtuals and builds TexApiSection/TexApiCodeLine/
+TexRegisterDefinition records), vp = VertexProgramParser (yylex 0x10051bd0, driver 0x100518c0, run 0x10054f00).
+Their statics have to be placed against GfxLexStatics (find their addresses first). Syntax of any scanner: walk its
+DFA (scratchpad dfa_examples.py did it for gfxpp: shortest text per rule and start condition).
 U2b2 findings so far: the parsers are an old Lemon with per-state hash tables in .data (pre-parser: states
 {action list VA, mask, default} at 0x100b66c0, entries {byte lookahead, byte action, pad, next VA}; rule
 {lhs, rhs count} bytes at 0x100b6c28; 0x5f shifts, then reduces, 0x95 error, 0x96 accept): the tables hold
@@ -28,6 +26,15 @@ absolute pointers, so the build-time extractor must turn them into indices. Entr
 0x1002bbd0 (both called from VertexProgram::Load 0x10049540); quick parser ctor 0x1002f830 + run 0x1002f930
 (RegisterBuiltInPrograms); texture parser run 0x100462d0 (TextureCombiner::Load); vertex parser run 0x10054f00
 (VertexProgram::Load). Errors go through 0x1002c0c0 ("%s:%s(%u): %s\n").
+U3 is split (2026-10-27): U3a1 VertexProgram + TextureCombiner (VertexProgram.cpp, TextureCombiner.cpp; done,
+`tests/diff_rs_u3.cpp`), U3a2 the managers (VertexProgramManager 0x10053b70..0x10054880, TextureCombinerManager
+0x10040850..0x10041200: a ReferenceCount, the Display +8 and a HashTable of 97 FastDynamicArray buckets +0xc keyed by
+the program's PString node, +0x18 registered name / +0x14 program name), the resources (VertexProgramResource
+0x88 bytes, TextureCombinerResource 0x70, on KernelResource's Resource 0x5c; ResourceType<> 0x1003b920..), CGShader*
+(0x10009180..) and GLSLShaderBase (0x1002faa0..), then U3b VertexProgramBasic. Only the original's
+Display::InitializeState constructs the two managers, so their statics (theManager, builtInProgramList,
+registeredProgramList) stay the original's until U9; the original's scanner statics range 0x100b7dc8..0x100b8127
+also holds VertexProgram/TextureCombiner's support flags and register limits and TextureCombinerManager::theManager.
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile
@@ -62,7 +69,7 @@ Grouping by exported class; code size by Ghidra namespace (the unnamed `Global` 
 | U1 value types and vertex formats (done) | PackedVertex* (60 formats), GeoLOD*/TerrainBlend*/StreamedVertex* tables, Element, TextureArgs, RenderTextureConstruct, DisplayFormat, DisplayDescriptor, DisplayLight, DisplayMaterial, Projector, TextureStage | 980 | 131 | 14 KB |
 | U4 modifiers (done; the lock stays the original's) | Modifier, ModifierList (+ global lock), ModifierHost, ModifierUpdateTask | 55 | 33 | 6 KB |
 | U2 shader language front-end (U2a data done) | GfxLanguagePreParser/QuickParser, ExtendedGfxLanguage, Vertex/TextureProgramParser, symbol tables, Instruction/RegisterItem, PreProcessor* | 102 | 21 | 6 KB (+ ~10 KB parsers in `Global`) |
-| U3 programs and shaders | VertexProgram, VertexProgramBasic (text program generator), VertexProgramManager/Resource, TextureCombiner(+Manager/Resource), CGShader*, GLSLShaderBase | 215 | 78 | 33 KB |
+| U3 programs and shaders (U3a1 done) | VertexProgram, VertexProgramBasic (text program generator), VertexProgramManager/Resource, TextureCombiner(+Manager/Resource), CGShader*, GLSLShaderBase | 215 | 78 | 33 KB |
 | U5 geometry | VertexType (+ its registry, moved from U1), GeometryChunk, Single/MultiStream, Generic*, GeometryChunkTemplate, RenderingCache(+Manager), VertexBufferManager, StaticBuffer, chunk hints | 268 | 193 | 35 KB |
 | U6 textures | Texture, TextureRes, TextureResource, AsciiTextureResource (`.texture.txt`), BitmapTextureResource(+Type), BinaryTextureResourceExport, SharedTextureCollection, TextureManager (streaming), DisplayTexture, DisplayTextureNull | 380 | 113 | 47 KB |
 | U7 materials | Material, NullMaterial, MaterialConfig/Spec, MaterialManager, MaterialResource, MaterialFileSupport, MaterialPlugin | 171 | 97 | 16 KB |

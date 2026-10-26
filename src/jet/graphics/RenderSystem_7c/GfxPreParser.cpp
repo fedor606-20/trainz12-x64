@@ -559,6 +559,15 @@ bool GfxLanguagePreParser::Run(const PString& program, const PString& file, Exte
     return ok;
 }
 
+// ---- VertexProgram::Load (0x10049540): the pre-parser stays alive while `then` reads its output
+bool GfxPreParse(int api, MemoryFile* in, const PString& program, const PString& file, ExtendedGfxLanguage* lang,
+                 bool (*then)(const AnsiString& output, void* ctx), void* ctx)
+{
+    GfxLanguagePreParser pre(api, in);
+    if (!pre.Run(program, file, lang)) return false;
+    return then(pre.output, ctx);
+}
+
 // ---- entry points for the differential test (found through the linker map; nothing else calls them)
 
 extern "C" void __cdecl RsTestPreCtor(void* mem, int param, MemoryFile* in) { ::new (mem) GfxLanguagePreParser(param, in); }

@@ -204,6 +204,8 @@ add_executable(diff_rs_u4 tests/diff_rs_u4.cpp)
 add_executable(diff_rs_u2 tests/diff_rs_u2.cpp)
 # RenderSystem U2b: ExtendedGfxLanguage and the texture combiner records (+ the shader-language parsers)
 add_executable(diff_rs_u2b tests/diff_rs_u2b.cpp)
+# RenderSystem U3a: VertexProgram and TextureCombiner (stand-in Display, lights and API slots)
+add_executable(diff_rs_u3 tests/diff_rs_u3.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)
