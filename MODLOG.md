@@ -1887,6 +1887,43 @@ unit order in `notes/WaterSystem.md`.
     cos instead of x87 fcos gives the same bits for the cut-off angles tried.
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U3a2, the program managers and resources (2026-10-27): 1221/2687 exports ours
+- `ProgramManagers.cpp`: VertexProgramManager and TextureCombinerManager (0x18 bytes each: ReferenceCount, the
+  Display +8, a HashTable of 97 FastDynamicArray buckets +0xc keyed by the PString node address modulo 97). The
+  vertex manager's vftable holds its three Creates in reverse order (slot 2 the protected one, 3 by type, 4 by id).
+  - VertexProgramManager::Create registers a program as "file:program" + the defines' text. A program already
+    made is shared through slot 9 CreateShared (null in the base class) or referenced; without a database it
+    comes from the built-in lists (result 2 becomes 4); else from the `.vtx` resource (the file, or
+    "<program>.vtx"): 2 no resource or no instance, 6 the program failed to load, 8 the resource did not lock.
+    A vertex type asked by id comes from Display slot 0x110 (referenced, none from id 99 on) and is released.
+  - RegisterBuiltInPrograms parses a program list once (the quick parser of U2b2a) into {list, program, text}
+    items; RestorePrograms asks every program even after one fails (5).
+  - TextureCombinerManager: the latest manager made takes the texts registered so far; Create strips a trailing
+    ".pxl", looks the name up, else loads "<name>.pxl" (4 without a database). When that resource does not lock,
+    `out` is read as the caller left it, as in the original.
+- `ProgramResources.cpp`: VertexProgramResource (0x88 bytes on KernelResource's Resource 0x5c: instances
+  {program, name, defines text}, the last program, the file name, kernel, vertex type, manager, program name, a
+  copy of the defines, error type) and TextureCombinerResource (0x70). CreateInstance reuses the last program or
+  an instance of the same name and defines, else reloads the file with the new defines (the previous copy of the
+  defines is leaked, as in the original).
+- The managers' statics (theManager, builtInProgramList, registeredProgramList) stay the original's until U9, since
+  only the original's Display::InitializeState makes the managers. RenderSystem now links KernelResource_7c.lib.
+- CGShaderLoader/Technique/Constant and GLSLShaderBase moved to U3b: CGShaderLoader holds two MSVC8 std::map trees
+  whose Jet-heap nodes other modules walk inline, so it needs a layout-exact tree.
+- Test `tests/diff_rs_u3.cpp` part "managers" (200 scenarios, 0 mismatches; the whole test 600): both sides' real
+  managers and resources over a stand-in Display/Kernel/database, a stand-in Lock that calls LoadTxt, Resource
+  set up with a zeroed fake ResourceSystem, real program texts from the render modules written as
+  `%TEMP%\rs_u3_*` files. The dump shows every hashed program with its reference count and the vertex types'
+  counts; a success is sometimes asked again with `shared` flipped, and a few programs refuse RestoreProgram.
+  - Program names per run come mostly from one list and the file is often the program's own list, so one
+    resource hands out several programs (335 vertex program creates succeed over 200 runs); loaded resources are
+    also asked for instances directly (slot 18).
+  - Mutations caught: 22 of 22 (the shared/referenced branch, result codes 2/4/6/8, the ".vtx"/".pxl" names, the
+    key separator, missing AddReference/ReleaseReference on programs, combiners and vertex types, Register's
+    duplicate code, RestorePrograms' failure, the instance match without the defines, the copy/assign of the error
+    type, the TC copy's combiner, SetParameters' program name, LoadTxt's last program).
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

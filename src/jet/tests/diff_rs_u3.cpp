@@ -55,6 +55,7 @@ static void*(__fastcall* AnsiFromText)(void*, void*, const char*);
 static void(__fastcall* AnsiDtor)(void*, void*);
 static const char*(__cdecl* AnsiText)(const void*);
 static void(__fastcall* AddRef)(const void*);
+static bool(__fastcall* ReleaseRef)(const void*);
 
 static int cur = -1;  // the side running
 static std::string logText[2];
@@ -393,10 +394,17 @@ static bool __cdecl DisplayCaps(const void* d, int cap)
     ++capsCalls;
     return r;
 }
+static void* (*makeProgram)(void* type);  // the managers part makes a new program each time
+static void* (*makeCombiner)();
 static void* __cdecl DisplayMakeProgram(const void* d, void* type)
 {
     Log("  display %s makes a program (type %s)\n", Name(d).c_str(), Name(type).c_str());
-    return regsProgram[cur];
+    return makeProgram ? makeProgram(type) : regsProgram[cur];
+}
+static void* __cdecl DisplayMakeCombiner(const void* d)
+{
+    Log("  display %s makes a combiner\n", Name(d).c_str());
+    return makeCombiner ? makeCombiner() : nullptr;
 }
 
 // a VertexType: {vftable, references}; only its reference count is used
@@ -580,6 +588,7 @@ static void DumpTc(const char* tag, const void* p)
 }
 
 static int faults, loadsOk, loadsTried;
+static int vpResults[16], tcResults[16];
 static uintptr_t faultAt;
 
 static int FaultFilter(EXCEPTION_POINTERS* e)
@@ -886,9 +895,547 @@ static void RunCombiners(int s, unsigned seed)
 
 // ---------------------------------------------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------------------------------------------
+// managers and resources (U3a2)
+//
+// Both sides use the original's statics (the managers, the built-in lists, the registered program lists): each run
+// starts them empty. The display makes a new program or combiner each time (each side's constructor, the logging
+// vftables); the database hands out each side's VertexProgramResource / TextureCombinerResource, made once per
+// name with a vftable whose Lock / Unlock are stand-ins, and maps file names to corpus texts written to %TEMP%.
+
+#define VPM "VertexProgramManager@Jet@@"
+#define TCM "TextureCombinerManager@Jet@@"
+#define VPR "VertexProgramResource@Jet@@"
+#define TCR "TextureCombinerResource@Jet@@"
+#define RESULT(c) "?AV?$ResultClass@$1?results@" c "2QBUResultTable@2@BW4Results@" c "@2@"
+
+struct ApiM {
+    void*(__fastcall* vpmCtor)(void*, void*, void*);
+    int*(__cdecl* vpmCreateType)(void*, int*, void*, void**, void*, bool, const void*, const void*, const void*, const void*);
+    int*(__cdecl* vpmCreateId)(void*, int*, void*, void**, int, bool, const void*, const void*, const void*, const void*);
+    int*(__cdecl* vpmRegister)(void*, int*, void*);
+    int*(__cdecl* vpmRestore)(void*, int*);
+    void(__cdecl* vpmBuiltIn)(const void*, const char*);
+    void*(__fastcall* tcmCtor)(void*, void*, void*);
+    int*(__cdecl* tcmCreate)(void*, int*, void*, void**, const void*, const void*);
+    int*(__cdecl* tcmRegister)(void*, int*, void*);
+    void(__cdecl* tcmBuiltIn)(const void*, const char*);
+    void*(__fastcall* vprCtor)(void*, void*, const void*, const void*);
+    void*(__fastcall* vprCopy)(void*, void*, const void*);
+    void*(__fastcall* vprAssign)(void*, void*, const void*);
+    void** vprVft;
+    void(__cdecl* vprSetParams)(const void*, void*, void*, const void*, void*, const void*);
+    int(__cdecl* vprGetError)(const void*);
+    void(__cdecl* vprSetError)(const void*, int);
+    void*(__fastcall* tcrCtor)(void*, void*, const void*, const void*);
+    void*(__fastcall* tcrCopy)(void*, void*, const void*);
+    void*(__fastcall* tcrAssign)(void*, void*, const void*);
+    void** tcrVft;
+    void(__cdecl* tcrSetParams)(const void*, void*, void*, const void*);
+    void(__cdecl* setRegistered)(void*, const void*);
+    void(__cdecl* setProgramName)(void*, const void*);
+} apiM[2];
+
+static std::string tempDir;
+static std::vector<std::string> listNames;  // "L<i>": a vertex program list of the corpus
+static std::vector<std::string> tpNames;    // "C<i>": a texture program of the corpus
+static std::map<std::string, void*> nodeOf;
+static void* NodeFor(const std::string& s)
+{
+    auto it = nodeOf.find(s);
+    if (it != nodeOf.end()) return it->second;
+    void* n = s.empty() ? nullptr : CreateNode(*cache, reinterpret_cast<const unsigned char*>(s.c_str()));
+    nodeOf[s] = n;
+    return n;
+}
+static void** NodeRef(const std::string& s)  // a PString (one node pointer) that lives for the whole run
+{
+    static std::map<std::string, void*> boxes;
+    NodeFor(s);
+    return &nodeOf[s];
+}
+
+// the database: slot 1 Get(name, flags), slot 3 GetFileName(name) -> %TEMP%\rs_u3_<name>.src
+static std::map<const void*, void*> resources[2];
+static std::map<const void*, int> loadedRes[2];  // resource -> its load's result
+// as the resource system: the first lock loads the resource (slot 11, LoadTxt with its name); some locks fail
+static int* __cdecl FakeLock(const void* r, int* out)
+{
+    const void* n = *reinterpret_cast<void* const*>(static_cast<const char*>(r) + 4);  // its name
+    if ((reinterpret_cast<uintptr_t>(n) >> 4 ^ scenarioSeed) % 7 == 0) {
+        *out = 3;
+    } else if (!loadedRes[cur].count(r)) {
+        Log("  lock %s loads\n", Name(r).c_str());
+        using LoadFn = int*(__cdecl*)(const void*, int*, const char*);
+        int code = -1;
+        (*reinterpret_cast<LoadFn const*>(*static_cast<void* const* const*>(r) + 11))(r, &code, static_cast<const Node*>(n)->text);
+        loadedRes[cur][r] = code;
+        *out = code;
+    } else {
+        *out = loadedRes[cur][r];
+    }
+    Log("  lock %s -> %d\n", Name(r).c_str(), *out);
+    return out;
+}
+static void __cdecl FakeUnlock(const void* r) { Log("  unlock %s\n", Name(r).c_str()); }
+static void* vprTestVt[2][19];
+static void* tcrTestVt[2][19];
+static unsigned char fakeDbM[0x48];
+static int resCount;
+static const void* __cdecl FakeGet(const void* db, const void* name, int flags)
+{
+    const void* n = *static_cast<void* const*>(name);
+    const std::string text = n ? static_cast<const Node*>(n)->text : "";
+    Log("  db get %s %d\n", NodeText(n).c_str(), flags);
+    auto& m = resources[cur];
+    auto it = m.find(n);
+    if (it != m.end()) return it->second;
+    void* r = nullptr;
+    const bool vtx = (text.size() > 4 && text.compare(text.size() - 4, 4, ".vtx") == 0) || (!text.empty() && text[0] == 'L');
+    const bool pxl = text.size() > 4 && text.compare(text.size() - 4, 4, ".pxl") == 0;
+    if (vtx) {
+        r = TestNew(0x88, "RV%d", resCount++);
+        apiM[cur].vprCtor(r, nullptr, name, db);
+        *static_cast<void**>(r) = vprTestVt[cur];
+    } else if (pxl) {
+        r = TestNew(0x70, "RC%d", resCount++);
+        apiM[cur].tcrCtor(r, nullptr, name, db);
+        *static_cast<void**>(r) = tcrTestVt[cur];
+    }
+    m[n] = r;
+    return r;
+}
+static void* __cdecl FakeFileName(const void* db, void** out, const void* name)
+{
+    const void* n = *static_cast<void* const*>(name);
+    std::string path = tempDir + "rs_u3_" + (n ? static_cast<const Node*>(n)->text : "null") + ".src";
+    Log("  db %s file name %s\n", Name(db).c_str(), NodeText(n).c_str());
+    *out = CreateNode(*cache, reinterpret_cast<const unsigned char*>(path.c_str()));
+    return out;
+}
+static void* dbVtM[5];
+
+static void WriteCorpusFiles()
+{
+    for (size_t i = 0; i < vpTexts.size(); ++i) {
+        listNames.push_back("L" + std::to_string(i));
+        for (const char* ext : {".vtx", ""}) {
+            FILE* f = std::fopen((tempDir + "rs_u3_L" + std::to_string(i) + ext + ".src").c_str(), "wb");
+            if (f) {
+                std::fwrite(vpTexts[i].data(), 1, vpTexts[i].size(), f);
+                std::fclose(f);
+            }
+        }
+    }
+    for (size_t i = 0; i < tpTexts.size(); ++i) {
+        tpNames.push_back("C" + std::to_string(i));
+        FILE* f = std::fopen((tempDir + "rs_u3_C" + std::to_string(i) + ".pxl.src").c_str(), "wb");
+        if (f) {
+            std::fwrite(tpTexts[i].data(), 1, tpTexts[i].size(), f);
+            std::fclose(f);
+        }
+    }
+}
+
+// the original's statics, emptied before each run (what they held is left behind)
+static void ResetManagerStatics()
+{
+    *static_cast<void**>(OrigAt(0xb8128)) = nullptr;  // VertexProgramManager::theManager
+    std::memset(OrigAt(0xb8808), 0, 12);              // VertexProgramManager::builtInProgramList
+    auto* reg = static_cast<unsigned*>(OrigAt(0xb8814));  // registeredProgramList {buckets, count, size}
+    if (reg[0])
+        for (unsigned k = 0; k < reg[2]; ++k) reinterpret_cast<void**>(reg[0])[k] = nullptr;
+    reg[1] = 0;
+    *static_cast<void**>(OrigAt(0xb8088)) = nullptr;  // TextureCombinerManager::theManager
+    std::memset(OrigAt(0xb876c), 0, 12);              // TextureCombinerManager::builtInProgramList
+}
+
+static int madeCount;
+static void* MakeProgram(void* type)
+{
+    void* p = TestNew(0x50, "V%d", madeCount++);
+    api[cur].vpCtor(p, nullptr, displayObj, type, 1);
+    *static_cast<void**>(p) = vpTestVt[cur];
+    return p;
+}
+static void* MakeCombiner()
+{
+    void* c = TestNew(0x6c, "W%d", madeCount++);
+    api[cur].tcCtor(c, nullptr, displayObj, 1);
+    *static_cast<void**>(c) = tcTestVt[cur];
+    return c;
+}
+static void* __cdecl DisplayTypeById(const void* d, int id)
+{
+    void* t = id % 4 == 3 ? nullptr : &types[id % 3];
+    if (t) ++types[id % 3].refs;
+    Log("  display %s type %d -> %s\n", Name(d).c_str(), id, Name(t).c_str());
+    return t;
+}
+
+static std::string NameOfNode(const void* n) { return n ? static_cast<const Node*>(n)->text : "null"; }
+
+static void DumpManager(const char* tag, const void* m, bool vertex)
+{
+    const auto* u = static_cast<const unsigned*>(m);
+    Log("  %s %s: refs %u disp %s table %u/%u:", tag, Name(m).c_str(), u[1], Name(reinterpret_cast<void*>(u[2])).c_str(),
+        u[4], u[5]);
+    void* const* buckets = reinterpret_cast<void* const*>(u[3]);
+    for (unsigned k = 0; buckets && k < u[5]; ++k) {
+        const unsigned* head = static_cast<const unsigned*>(buckets[k]);
+        if (!head) continue;
+        const unsigned* c = head;
+        do {
+            for (unsigned i = 0; i < c[2]; ++i) {
+                const auto* obj = reinterpret_cast<const unsigned char*>(c[3 + i]);
+                const void* key = *reinterpret_cast<void* const*>(obj + (vertex ? 0x18 : 0x14));
+                const unsigned refs = *reinterpret_cast<const unsigned*>(obj + (vertex ? 0x4c : 0x68));
+                Log(" [%u]%s=%s/%u", k, Name(obj).c_str(), NameOfNode(key).c_str(), refs);
+            }
+            c = reinterpret_cast<const unsigned*>(c[0]);
+        } while (c != head);
+    }
+    if (vertex) Log(" types %d %d %d", types[0].refs, types[1].refs, types[2].refs);
+    Log("\n");
+}
+
+// RestorePrograms asks each program in turn: a few say no
+static bool __cdecl FakeRestore(const void* self)
+{
+    const std::string n = Name(self);
+    const bool ok = n.empty() || (n.back() - '0') % 3 != 0;
+    Log("  restore %s -> %d\n", n.c_str(), ok);
+    return ok;
+}
+
+static void DumpStatics()
+{
+    const auto* vl = static_cast<const unsigned*>(OrigAt(0xb8808));
+    Log("  vp built-in %u/%u:", vl[0], vl[1]);
+    for (unsigned i = 0; i < vl[0]; ++i) {
+        const auto* it = reinterpret_cast<void* const*>(vl[2] + 12 * i);
+        Log(" %s/%s", NameOfNode(it[0]).c_str(), NameOfNode(it[1]).c_str());
+    }
+    const auto* reg = static_cast<const unsigned*>(OrigAt(0xb8814));
+    const auto* tl = static_cast<const unsigned*>(OrigAt(0xb876c));
+    Log("\n  registered %u, tc built-in %u/%u:", reg[1], tl[0], tl[1]);
+    for (unsigned i = 0; i < tl[0]; ++i) Log(" %s", NameOfNode(*reinterpret_cast<void* const*>(tl[2] + 8 * i)).c_str());
+    Log("\n  managers %s %s\n", Name(*static_cast<void* const*>(OrigAt(0xb8128))).c_str(),
+        Name(*static_cast<void* const*>(OrigAt(0xb8088))).c_str());
+}
+
+static void DumpVpr(const char* tag, const void* r)
+{
+    const auto* b = static_cast<const unsigned char*>(r);
+    auto u32 = [&](int off) { return *reinterpret_cast<const unsigned*>(b + off); };
+    auto ptr = [&](int off) { return *reinterpret_cast<void* const*>(b + off); };
+    Log("  %s %s: name %s prog %s file %s kernel %s type %s mgr %s pname %s defines %s err %u instances %u/%u:", tag,
+        Name(r).c_str(), NodeText(ptr(4)).c_str(), Name(ptr(0x68)).c_str(), NodeText(ptr(0x6c)).c_str(),
+        Name(ptr(0x70)).c_str(), Name(ptr(0x74)).c_str(), Name(ptr(0x78)).c_str(), NodeText(ptr(0x7c)).c_str(),
+        Name(ptr(0x80)).c_str(), u32(0x84), u32(0x5c), u32(0x60));
+    for (unsigned i = 0; i < u32(0x5c); ++i) {
+        const auto* in = static_cast<const unsigned char*>(ptr(0x64)) + 12 * i;
+        Log(" %s:%s:[%s]", Name(*reinterpret_cast<void* const*>(in)).c_str(),
+            NodeText(*reinterpret_cast<void* const*>(in + 4)).c_str(), AnsiText(in + 8));
+    }
+    Log("\n");
+}
+
+static void DumpTcr(const char* tag, const void* r)
+{
+    const auto* b = static_cast<const unsigned char*>(r);
+    auto ptr = [&](int off) { return *reinterpret_cast<void* const*>(b + off); };
+    Log("  %s %s: name %s combiner %s pname %s kernel %s mgr %s defines %s\n", tag, Name(r).c_str(),
+        NodeText(ptr(4)).c_str(), Name(ptr(0x5c)).c_str(), NodeText(ptr(0x60)).c_str(), Name(ptr(0x64)).c_str(),
+        Name(ptr(0x68)).c_str(), Name(ptr(0x6c)).c_str());
+}
+
+static void LoadApiM(int s)
+{
+    ApiM& a = apiM[s];
+    a.vpmCtor = As<decltype(a.vpmCtor)>(F("??0" VPM "QAE@PAVDisplay@1@@Z"));
+    a.vpmCreateType = As<decltype(a.vpmCreateType)>(F("?Create@" VPM "UAA" RESULT("VertexProgramManager@Jet@@")
+        "PAVRenderKernel@2@AAPAVVertexProgram@2@PAVVertexType@2@_NABVPString@2@4PBVResourceDatabase@2@PBUPreProcessorArray@2@@Z"));
+    a.vpmCreateId = As<decltype(a.vpmCreateId)>(F("?Create@" VPM "UAA" RESULT("VertexProgramManager@Jet@@")
+        "PAVRenderKernel@2@AAPAVVertexProgram@2@W4VertexTypeID@2@_NABVPString@2@4PBVResourceDatabase@2@PBUPreProcessorArray@2@@Z"));
+    a.vpmRegister = As<decltype(a.vpmRegister)>(F("?Register@" VPM "UAA" RESULT("VertexProgramManager@Jet@@") "PAVVertexProgram@2@@Z"));
+    a.vpmRestore = As<decltype(a.vpmRestore)>(F("?RestorePrograms@" VPM "UAA" RESULT("VertexProgramManager@Jet@@") "XZ"));
+    a.vpmBuiltIn = As<decltype(a.vpmBuiltIn)>(F("?RegisterBuiltInPrograms@" VPM "SAXABVPString@2@PBD@Z"));
+    a.tcmCtor = As<decltype(a.tcmCtor)>(F("??0" TCM "QAE@PAVDisplay@1@@Z"));
+    a.tcmCreate = As<decltype(a.tcmCreate)>(F("?Create@" TCM "UAA" RESULT("TextureCombinerManager@Jet@@")
+        "PAVRenderKernel@2@AAPAVTextureCombiner@2@ABVPString@2@PBVResourceDatabase@2@@Z"));
+    a.tcmRegister = As<decltype(a.tcmRegister)>(F("?Register@" TCM "UAA" RESULT("TextureCombinerManager@Jet@@") "PAVTextureCombiner@2@@Z"));
+    a.tcmBuiltIn = As<decltype(a.tcmBuiltIn)>(F("?RegisterBuiltInPrograms@" TCM "SAXABVPString@2@PBD@Z"));
+    a.vprCtor = As<decltype(a.vprCtor)>(F("??0" VPR "QAE@ABVPString@1@PBVResourceDatabase@1@@Z"));
+    a.vprCopy = As<decltype(a.vprCopy)>(F("??0" VPR "QAE@ABV01@@Z"));
+    a.vprAssign = As<decltype(a.vprAssign)>(F("??4" VPR "QAEAAV01@ABV01@@Z"));
+    a.vprVft = static_cast<void**>(F("??_7" VPR "6B@"));
+    a.vprSetParams = As<decltype(a.vprSetParams)>(F("?SetParameters@" VPR
+        "QBAXPAVRenderKernel@2@PAVVertexType@2@ABVPString@2@PAVVertexProgramManager@2@PBUPreProcessorArray@2@@Z"));
+    a.vprGetError = As<decltype(a.vprGetError)>(F("?GetErrorType@" VPR "QBA?AW4ErrorType@12@XZ"));
+    a.vprSetError = As<decltype(a.vprSetError)>(F("?SetErrorType@" VPR "QBAXW4ErrorType@12@@Z"));
+    a.tcrCtor = As<decltype(a.tcrCtor)>(F("??0" TCR "QAE@ABVPString@1@PBVResourceDatabase@1@@Z"));
+    a.tcrCopy = As<decltype(a.tcrCopy)>(F("??0" TCR "QAE@ABV01@@Z"));
+    a.tcrAssign = As<decltype(a.tcrAssign)>(F("??4" TCR "QAEAAV01@ABV01@@Z"));
+    a.tcrVft = static_cast<void**>(F("??_7" TCR "6B@"));
+    a.setRegistered = As<decltype(a.setRegistered)>(F("?SetRegisteredName@ExtendedGfxLanguage@Jet@@QAAXABVPString@2@@Z"));
+    a.setProgramName = As<decltype(a.setProgramName)>(F("?SetProgramName@ExtendedGfxLanguage@Jet@@QAAXABVPString@2@@Z"));
+    std::memcpy(vprTestVt[s], a.vprVft, sizeof vprTestVt[s]);
+    std::memcpy(tcrTestVt[s], a.tcrVft, sizeof tcrTestVt[s]);
+    for (void** v : {vprTestVt[s], tcrTestVt[s]}) {
+        v[0] = reinterpret_cast<void*>(&FakeLock);
+        v[1] = reinterpret_cast<void*>(&FakeUnlock);
+    }
+    a.tcrSetParams = As<decltype(a.tcrSetParams)>(F("?SetParameters@" TCR
+        "QBAXPAVRenderKernel@2@PAVTextureCombinerManager@2@PBUPreProcessorArray@2@@Z"));
+}
+
+static unsigned char kernelObj[0x100];
+
+static void RunManagers(int s, unsigned seed)
+{
+    std::mt19937 r(seed);
+    auto P = [&](int lo, int hi) { return lo + static_cast<int>(r() % static_cast<unsigned>(hi - lo + 1)); };
+    Api& a = api[s];
+    ApiM& m = apiM[s];
+    ResetStatics();
+    ResetManagerStatics();
+    scenarioSeed = seed;
+    apiValue[s] = P(0, 2);
+    madeCount = resCount = 0;
+    resources[s].clear();
+    loadedRes[s].clear();
+    makeProgram = &MakeProgram;
+    makeCombiner = &MakeCombiner;
+    void* const restoreSlot = vpTestVt[s][16];
+    vpTestVt[s][16] = reinterpret_cast<void*>(&FakeRestore);
+    names[s][displayObj] = "Display";
+    names[s][kernelObj] = "Kernel";
+    names[s][fakeDbM] = "db";
+    for (int i = 0; i < 3; ++i) {
+        char b[8];
+        std::snprintf(b, sizeof b, "T%d", i);
+        names[s][&types[i]] = b;
+        types[i].refs = 1000;
+    }
+    auto Builtins = [&]() {
+        for (int k = P(0, 2); k > 0; --k) {
+            const size_t i = r() % vpTexts.size();
+            ResetLexStatics(s);
+            Log("builtin vp %s\n", listNames[i].c_str());
+            m.vpmBuiltIn(NodeRef(listNames[i]), vpTexts[i].c_str());
+        }
+        for (int k = P(0, 3); k > 0; --k) {
+            const size_t i = r() % tpTexts.size();
+            ResetLexStatics(s);
+            Log("builtin tp %s\n", tpNames[i].c_str());
+            m.tcmBuiltIn(NodeRef(tpNames[i]), tpTexts[i].c_str());
+        }
+        DumpStatics();
+    };
+    Builtins();
+    void* vpm = TestNew(0x18, "VPM%d", 0);
+    m.vpmCtor(vpm, nullptr, displayObj);
+    void* tcm = TestNew(0x18, "TCM%d", 0);
+    ResetLexStatics(s);
+    m.tcmCtor(tcm, nullptr, displayObj);
+    DumpManager("new", vpm, true);
+    DumpManager("new", tcm, false);
+    DumpStatics();
+    // program names: those of the lists, and a few others
+    std::vector<std::string> programs;
+    std::vector<int> homeList;  // the list each program comes from (-1: none)
+    for (size_t i = 0; i < vpTexts.size(); ++i)
+        for (const std::string& p : ProgramNames(vpTexts[i])) {
+            programs.push_back(p);
+            homeList.push_back(static_cast<int>(i));
+        }
+    {  // a few per run, so that later requests find what earlier ones made: mostly from one list, so that one
+       // resource hands out several programs (and instances)
+        std::vector<std::string> few;
+        std::vector<int> fewHome;
+        const size_t pick = r() % programs.size();
+        for (size_t k = 0; k < programs.size() && few.size() < 3; ++k)
+            if (homeList[k] == homeList[pick] && P(0, 1)) {
+                few.push_back(programs[k]);
+                fewHome.push_back(homeList[k]);
+            }
+        const size_t other = r() % programs.size();
+        few.push_back(programs[other]);
+        fewHome.push_back(homeList[other]);
+        few.push_back("nothere");
+        fewHome.push_back(-1);
+        programs = few;
+        homeList = fewHome;
+    }
+    std::vector<void*> got;
+    // define arrays: {count, capacity, data} with AnsiString pairs
+    const char* kDefNames[] = {"SKIN", "FOG", "x"};
+    const char* kDefValues[] = {"1", "", "abc"};
+    auto NewDefines = [&](int n) {
+        auto* arr = static_cast<unsigned*>(TestNew(12, "D%d", n));
+        arr[0] = n;
+        arr[1] = n;
+        void** data = n ? static_cast<void**>(RealNew(8 * n)) : nullptr;
+        for (int i = 0; i < n; ++i) {
+            AnsiFromText(&data[2 * i], nullptr, kDefNames[P(0, 2)]);
+            AnsiFromText(&data[2 * i + 1], nullptr, kDefValues[P(0, 2)]);
+        }
+        arr[2] = reinterpret_cast<unsigned>(data);
+        return arr;
+    };
+    unsigned* defs[2] = {NewDefines(1), NewDefines(2)};
+    for (int step = 0; step < 24; ++step) {
+        const int op = P(0, 11);
+        Log("op %d\n", op);
+        int res = -99;
+        void* out = nullptr;  // (TextureCombinerManager::Create reads it back when the resource does not lock)
+        switch (op) {
+        case 0:
+        case 1:
+        case 2:
+        case 3: {
+            const size_t pi = r() % programs.size();
+            const std::string& prog = programs[pi];
+            const int fileKind = P(0, 5);
+            std::string file;
+            if (fileKind == 1) file = listNames[r() % listNames.size()] + ".vtx";
+            else if (fileKind == 2) file = listNames[r() % listNames.size()];
+            else if (fileKind >= 3 && homeList[pi] >= 0) file = listNames[homeList[pi]] + (fileKind < 5 ? ".vtx" : "");
+            const void* db = P(0, 1) ? fakeDbM : nullptr;
+            const void* d = P(0, 2) ? nullptr : defs[P(0, 1)];
+            bool shared = P(0, 4) == 0;
+            const bool byType = P(0, 1);
+            void* type = nullptr;
+            int id = 0;
+            if (byType)
+                type = P(0, 2) ? &types[P(0, 2)] : nullptr;
+            else
+                id = P(0, 6) ? P(0, 20) : P(99, 120);
+            // a success is sometimes asked again at once, the other way round (it is then found)
+            for (int again = P(0, 1); again >= 0; --again) {
+                ResetLexStatics(s);
+                out = nullptr;
+                if (byType) {
+                    Log("  create %s file %s db %d defs %s shared %d type %s\n", prog.c_str(), file.c_str(),
+                        db != nullptr, Name(d).c_str(), shared, Name(type).c_str());
+                    m.vpmCreateType(vpm, &res, kernelObj, &out, type, shared, NodeRef(prog), NodeRef(file), db, d);
+                } else {
+                    Log("  create %s file %s db %d defs %s shared %d id %d\n", prog.c_str(), file.c_str(),
+                        db != nullptr, Name(d).c_str(), shared, id);
+                    m.vpmCreateId(vpm, &res, kernelObj, &out, id, shared, NodeRef(prog), NodeRef(file), db, d);
+                }
+                Log("  -> %d %s\n", res, Name(out).c_str());
+                if (cur == 0) ++vpResults[res & 15];
+                if (res == 0 && out) got.push_back(out);
+                if (res != 0) break;
+                shared = !shared;
+            }
+            break;
+        }
+        case 4: {  // a program of our own, registered
+            void* p = MakeProgram(nullptr);
+            m.setRegistered(p, NodeRef(programs[r() % programs.size()]));
+            m.vpmRegister(vpm, &res, p);
+            Log("  register %s -> %d\n", Name(p).c_str(), res);
+            break;
+        }
+        case 5:
+            m.vpmRestore(vpm, &res);
+            Log("  restore -> %d\n", res);
+            break;
+        case 6:
+        case 7:
+        case 8: {
+            std::string name = tpNames[r() % tpNames.size()];
+            const int kind = P(0, 4);
+            if (kind == 0) name = "nothere";
+            if (kind >= 3) name += ".pxl";
+            const void* db = P(0, 3) ? fakeDbM : nullptr;
+            (void)P(0, 3);
+            ResetLexStatics(s);
+            Log("  tc create %s db %d\n", name.c_str(), db != nullptr);
+            m.tcmCreate(tcm, &res, kernelObj, &out, NodeRef(name), db);
+            Log("  -> %d %s\n", res, Name(out).c_str());
+            if (cur == 0) ++tcResults[res & 15];
+            if (res == 0 && out) got.push_back(out);
+            break;
+        }
+        case 9: {
+            void* c = MakeCombiner();
+            m.setProgramName(c, NodeRef(tpNames[r() % tpNames.size()]));
+            m.tcmRegister(tcm, &res, c);
+            Log("  tc register %s -> %d\n", Name(c).c_str(), res);
+            break;
+        }
+        case 10: Builtins(); break;
+        default: {  // the resources made so far: copies, parameters, error type
+            for (auto& [n, res0] : resources[s]) {
+                if (!res0) continue;
+                const bool vtx = *static_cast<void**>(res0) == vprTestVt[s];
+                if (vtx) {
+                    DumpVpr("res", res0);
+                    if (*reinterpret_cast<void* const*>(static_cast<const char*>(res0) + 0x68)) {
+                        // an instance asked directly (slot 18): the last program, a kept instance, or a reload
+                        using CreateInstanceFn = void*(__cdecl*)(const void*, const void*, const void*);
+                        const auto ci = reinterpret_cast<CreateInstanceFn>((*static_cast<void** const*>(res0))[18]);
+                        const std::string& prog = programs[r() % programs.size()];
+                        const void* d = P(0, 2) ? defs[P(0, 1)] : nullptr;
+                        ResetLexStatics(s);
+                        Log("  instance %s defs %s\n", prog.c_str(), Name(d).c_str());
+                        void* inst = ci(res0, NodeRef(prog), d);
+                        Log("  -> %s\n", Name(inst).c_str());
+                        DumpVpr("after", res0);
+                    }
+                    m.vprSetError(res0, P(0, 2));
+                    Log("  error %d\n", m.vprGetError(res0));
+                    void* copy = TestNew(0x88, "copy%d", step);
+                    m.vprCopy(copy, nullptr, res0);
+                    DumpVpr("copy", copy);
+                    m.vprSetError(copy, (m.vprGetError(res0) + 1) % 3);
+                    m.vprAssign(copy, nullptr, res0);
+                    DumpVpr("assigned", copy);
+                    m.vprSetParams(copy, kernelObj, &types[P(0, 2)], NodeRef(programs[r() % programs.size()]), vpm,
+                                   P(0, 1) ? defs[0] : nullptr);
+                    DumpVpr("params", copy);
+                } else {
+                    DumpTcr("res", res0);
+                    void* copy = TestNew(0x70, "copy%d", step);
+                    m.tcrCopy(copy, nullptr, res0);
+                    DumpTcr("copy", copy);
+                    m.tcrAssign(copy, nullptr, res0);
+                    m.tcrSetParams(copy, kernelObj, tcm, defs[1]);
+                    DumpTcr("params", copy);
+                }
+            }
+            break;
+        }
+        }
+        DumpManager("now", vpm, true);
+        DumpManager("now", tcm, false);
+    }
+    DumpStatics();
+    for (auto& [n, res0] : resources[s])
+        if (res0) *static_cast<void**>(res0) == vprTestVt[s] ? DumpVpr("end", res0) : DumpTcr("end", res0);
+    // the managers go (their programs with them); what was handed out keeps its reference
+    ReleaseRef(vpm);
+    ReleaseRef(tcm);
+    DumpStatics();
+    makeProgram = nullptr;
+    makeCombiner = nullptr;
+    vpTestVt[s][16] = restoreSlot;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+
 static void Compare(const char* part, int round)
 {
     ++checks;
+    if (const char* show = std::getenv("RS_U3_SHOW"); show && round == 0)  // the original's log of a part's first run
+        if (FILE* f = std::fopen((std::string(show) + "." + part + ".txt").c_str(), "w")) {
+            std::fputs(logText[1].c_str(), f);
+            std::fclose(f);
+        }
     if (logText[0] == logText[1]) return;
     if (const char* dump = std::getenv("RS_U3_DUMP"); dump && !bad)  // both logs of the first mismatch
         for (int s = 0; s < 2; ++s)
@@ -949,6 +1496,15 @@ int main(int argc, char** argv)
     AnsiDtor = As<decltype(AnsiDtor)>(Proc(ks, "??1AnsiString@Jet@@QAE@XZ"));
     AnsiText = As<decltype(AnsiText)>(Proc(ks, "??BAnsiString@Jet@@QBAPBDXZ"));
     AddRef = As<decltype(AddRef)>(Proc(ks, "?AddReference@ReferenceCount@Jet@@QBEXXZ"));
+    ReleaseRef = As<decltype(ReleaseRef)>(Proc(ks, "?ReleaseReference@ReferenceCount@Jet@@QBE_NXZ"));
+    // KernelResource's Resource reads the resource system's time: a zeroed stand-in
+    static unsigned char fakeSystem[0x400];
+    As<void(__cdecl*)(void*)>(Proc(GetModuleHandleA("KernelResource_7c.dll"), "?InitRS@Resource@Jet@@CAXPAVResourceSystem@2@@Z"))(fakeSystem);
+    {
+        char t[MAX_PATH];
+        GetTempPathA(MAX_PATH, t);
+        tempDir = t;
+    }
     for (int i = 0; i < kNames; ++i) nodes[i] = CreateNode(*cache, reinterpret_cast<const unsigned char*>(kTexts[i]));
     // stand-in vftables
     for (void*& p : displayVt) p = reinterpret_cast<void*>(&LogSlotInt);
@@ -961,16 +1517,24 @@ int main(int argc, char** argv)
     lightVt[3] = reinterpret_cast<void*>(&LightPos);
     lightVt[5] = reinterpret_cast<void*>(&LightDir);
     CollectCorpus();
+    WriteCorpusFiles();
+    displayVt[0x13c / 4] = reinterpret_cast<void*>(&DisplayMakeCombiner);
+    displayVt[0x110 / 4] = reinterpret_cast<void*>(&DisplayTypeById);
+    *reinterpret_cast<void**>(kernelObj + 0x7c) = displayObj;
+    dbVtM[1] = reinterpret_cast<void*>(&FakeGet);
+    dbVtM[3] = reinterpret_cast<void*>(&FakeFileName);
+    *reinterpret_cast<void**>(fakeDbM) = dbVtM;
     for (int s = 0; s < 2; ++s) {
         LoadApi(s);
         MakeVtables(s);
+        LoadApiM(s);
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
     }
     struct {
         const char* name;
         void (*run)(int, unsigned);
-    } parts[] = {{"programs", RunPrograms}, {"combiners", RunCombiners}};
+    } parts[] = {{"programs", RunPrograms}, {"combiners", RunCombiners}, {"managers", RunManagers}};
     const char* only = std::getenv("RS_U3_ONLY");
     for (auto& p : parts) {
         if (only && !std::strstr((std::string(",") + only + ",").c_str(), (std::string(",") + p.name + ",").c_str()))
@@ -990,6 +1554,11 @@ int main(int argc, char** argv)
         std::printf("-- %s done (display capability calls %d, loads %d, ok %d, that fault %d)\n", p.name, capsCalls,
                     loadsTried, loadsOk, faults);
         std::printf("   light positions %d, directions %d\n", posCalls, dirCalls);
+        std::printf("   vp create results:");
+        for (int k = 0; k < 16; ++k) if (vpResults[k]) std::printf(" %d:%d", k, vpResults[k]);
+        std::printf("; tc:");
+        for (int k = 0; k < 16; ++k) if (tcResults[k]) std::printf(" %d:%d", k, tcResults[k]);
+        std::printf("\n");
         capsCalls = faults = loadsTried = loadsOk = posCalls = dirCalls = 0;
     }
     std::printf("%llu scenarios, %llu mismatches\n", checks, bad);

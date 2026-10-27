@@ -8,6 +8,9 @@
 #include <jet/KernelStandard.h>
 #include <jet/PString.h>
 #include <jet/RenderTypes.h>
+#include <jet/Resource.h>
+#include <jet/Result.h>
+#include <jet/VertexFormats.h>
 
 namespace Jet {
 
@@ -400,7 +403,7 @@ public:
     bool __cdecl SupportedByPlatform(float generation) override;
     bool __cdecl LoadNativeFormat(const PString& name, const char* source) override;
 
-    virtual int __cdecl Slot9();                                         // 0
+    virtual VertexProgram* __cdecl CreateShared();                       // 9: a program to share (the managers ask it): null
     virtual void __cdecl SetProgramManager(VertexProgramManager* m);     // 10
     virtual VertexProgramManager* __cdecl GetProgramManager();           // 11
     virtual int __cdecl Slot12();                                        // the API module's: 0
@@ -466,5 +469,235 @@ protected:
     static __declspec(dllimport) bool supported[4];
 };
 JET_LAYOUT32(sizeof(VertexProgram) == 0x50);
+
+// ---- U3a2 (RenderSystem_7c/ProgramManagers.cpp, ProgramResources.cpp)
+
+class RenderKernel;
+
+// Jet::HashTable<Key, T, Hash, SIZ>: 97 FastDynamicArray buckets of items, an item's key being a PString node (the
+// bucket is the node's address modulo the size). Only what the program managers use.
+template <class K, class T, class H, unsigned int SIZ>
+class HashTable {
+public:
+    using Bucket = FastDynamicArray<T, SIZ, Less<T, T>>;
+
+    void Init();     // 0x10042d80: 97 empty buckets
+    void Destroy();  // the buckets from the last to the first, then their block
+    void Clear();    // 0x10054a10: every bucket's chunks, from the first bucket on; the block stays
+    void Insert(T item, const void* key);  // 0x10040f50 / 0x10054b10 / 0x100549a0: at the end of its bucket
+    template <class F>
+    T* Find(const void* key, F keyOf) const  // 0x10040fc0 / 0x10054b80 / 0x10054a80: the slot, or null
+    {
+        Bucket& b = buckets[reinterpret_cast<unsigned int>(key) % size];
+        for (typename Bucket::Iterator i = b.First(); i != b.End(); ++i)
+            if (keyOf(*i) == key) return &*i;
+        return nullptr;
+    }
+    template <class F>
+    void ForEach(F f)  // 0x10054c10 / 0x10054880: buckets in order, each from its head chunk
+    {
+        for (unsigned int k = 0; k < size; ++k)
+            for (typename Bucket::Iterator i = buckets[k].First(); i != buckets[k].End(); ++i) f(*i);
+    }
+
+    Bucket* buckets;     // +0 (an Alloc block: the count, then the buckets)
+    unsigned int count;  // +4
+    unsigned int size;   // +8 (97)
+};
+
+template <class K, class T, class H, unsigned int SIZ>
+void HashTable<K, T, H, SIZ>::Init()
+{
+    count = 0;
+    size = 0x61;
+    void* const block = Alloc::New(4 + 0x61 * sizeof(Bucket));
+    if (!block) {
+        buckets = nullptr;
+        return;
+    }
+    *static_cast<unsigned int*>(block) = 0x61;
+    buckets = reinterpret_cast<Bucket*>(static_cast<char*>(block) + 4);
+    for (unsigned int k = 0; k < 0x61; ++k) new (&buckets[k]) Bucket();
+}
+
+template <class K, class T, class H, unsigned int SIZ>
+void HashTable<K, T, H, SIZ>::Destroy()
+{
+    if (!buckets) return;
+    for (unsigned int k = reinterpret_cast<unsigned int*>(buckets)[-1]; k-- > 0;) buckets[k].~Bucket();
+    Alloc::Delete(reinterpret_cast<unsigned int*>(buckets) - 1);
+}
+
+template <class K, class T, class H, unsigned int SIZ>
+void HashTable<K, T, H, SIZ>::Clear()
+{
+    for (unsigned int k = 0; k < size; ++k) buckets[k].RemoveAll();
+    count = 0;
+}
+
+template <class K, class T, class H, unsigned int SIZ>
+void HashTable<K, T, H, SIZ>::Insert(T item, const void* key)
+{
+    const unsigned int k = reinterpret_cast<unsigned int>(key) % size;
+    ++count;
+    buckets[k].Add(item);
+}
+
+// Hands out the vertex programs: shared by their registered name (file:program + defines), made from the built-in
+// program texts (RegisterBuiltInPrograms) or from `.vtx` resources (0x18 bytes). Only the original's Display makes
+// one until U9, so the statics stay the original's.
+class VertexProgramManager : public ReferenceCount {
+public:
+    enum Results {};
+    static __declspec(dllimport) const ResultTable* const results;
+    using Result = ResultClass<&results, Results>;
+
+    struct ProgramItem {  // a built-in program: the list's name, the program's name and the list's text (0xc)
+        PString name;
+        PString program;
+        const char* text;
+    };
+    struct RegisteredName {  // a program list already parsed
+        PString name;
+        JET_HEAP_OBJECT
+    };
+    struct NameHash {};
+
+    explicit VertexProgramManager(Display* display);
+    ~VertexProgramManager() override;
+
+    // (the vftable holds the three Creates in reverse: slot 2 the protected one, 3 by type, 4 by id)
+    virtual Result __cdecl Create(RenderKernel* kernel, VertexProgram*& out, VertexTypeID id, bool shared,
+                                  const PString& name, const PString& file, const ResourceDatabase* db,
+                                  const PreProcessorArray* defines);
+    virtual Result __cdecl Create(RenderKernel* kernel, VertexProgram*& out, VertexType* type, bool shared,
+                                  const PString& name, const PString& file, const ResourceDatabase* db,
+                                  const PreProcessorArray* defines);
+
+protected:
+    virtual Result __cdecl Create(RenderKernel* kernel, VertexProgram*& out, bool byId, VertexTypeID id,
+                                  VertexType* type, bool shared, const PString& name, const PString& file,
+                                  const ResourceDatabase* db, const PreProcessorArray* defines);
+
+public:
+    virtual Result __cdecl Register(VertexProgram* program);  // 5: 3 when its registered name is taken
+    virtual Result __cdecl RestorePrograms();                 // 6: 5 when one fails
+
+    // the program list `text` (several programs) under `name`, parsed once (the quick parser) into the list
+    static void __cdecl RegisterBuiltInPrograms(const PString& name, const char* text);
+
+    JET_HEAP_OBJECT
+
+protected:
+    virtual Result __cdecl LoadBuiltInProgram(const PString& key, const PString& name, VertexProgram*& out,
+                                              bool byId, VertexTypeID id, VertexType* type,
+                                              const PreProcessorArray* defines);  // 7
+
+    Display* display;                                                  // +8
+    HashTable<const PString&, VertexProgram*, NameHash, 13> programs;  // +0xc by registered name
+
+    static __declspec(dllimport) VertexProgramManager* theManager;  // the original's until U9
+    static __declspec(dllimport) Array<ProgramItem, 128> builtInProgramList;
+    static __declspec(dllimport) HashTable<const PString&, RegisteredName*, NameHash, 13> registeredProgramList;
+};
+JET_LAYOUT32(sizeof(VertexProgramManager) == 0x18);
+
+// Hands out the texture combiners by program name, made from the built-in texts or from `.pxl` resources (0x18).
+class TextureCombinerManager : public ReferenceCount {
+public:
+    enum Results {};
+    static __declspec(dllimport) const ResultTable* const results;
+    using Result = ResultClass<&results, Results>;
+
+    struct ProgramItem {  // a built-in text waiting for the manager (8)
+        PString name;
+        const char* text;
+    };
+
+    explicit TextureCombinerManager(Display* display);  // loads the texts registered so far
+    ~TextureCombinerManager() override;
+
+    virtual Result __cdecl Create(RenderKernel* kernel, TextureCombiner*& out, const PString& name,
+                                  const ResourceDatabase* db);   // 2
+    virtual Result __cdecl Register(TextureCombiner* combiner);  // 3
+
+    static void __cdecl RegisterBuiltInPrograms(const PString& name, const char* text);
+
+    JET_HEAP_OBJECT
+
+protected:
+    void __cdecl LoadBuiltInPrograms(const PString& name, const char* text);
+
+    Display* display;                                                // +8
+    HashTable<const PString&, TextureCombiner*, int, 13> combiners;  // +0xc by program name
+
+    static __declspec(dllimport) TextureCombinerManager* theManager;  // the original's until U9
+    static __declspec(dllimport) Array<ProgramItem, 128> builtInProgramList;
+};
+JET_LAYOUT32(sizeof(TextureCombinerManager) == 0x18);
+
+// A `.vtx` resource: one vertex program file, an instance per program name and defines (0x88 bytes).
+class VertexProgramResource : public Resource {
+public:
+    enum ErrorType {};
+
+    struct Instance {  // 0xc
+        VertexProgram* program;
+        PString name;
+        AnsiString defines;
+    };
+
+    VertexProgramResource(const PString& name, const ResourceDatabase* owner);
+    VertexProgramResource(const VertexProgramResource& o);
+    ~VertexProgramResource() override;
+    VertexProgramResource& operator=(const VertexProgramResource& o);
+
+    // the program of that name with those defines, loaded on demand (referenced)
+    virtual ExtendedGfxLanguage* __cdecl CreateInstance(const PString& name, const PreProcessorArray* defines) const;  // 18
+
+    void __cdecl SetParameters(RenderKernel* kernel, VertexType* type, const PString& name,
+                               VertexProgramManager* manager, const PreProcessorArray* defines) const;
+    ErrorType __cdecl GetErrorType() const;
+    void __cdecl SetErrorType(ErrorType e) const;
+
+protected:
+    Result __cdecl LoadTxt(const char* name) override;
+
+    mutable Array<Instance, 5> instances;           // +0x5c
+    mutable VertexProgram* program;                 // +0x68 the last loaded
+    mutable PString fileName;                       // +0x6c
+    mutable RenderKernel* kernel;                   // +0x70
+    mutable VertexType* vertexType;                 // +0x74
+    mutable VertexProgramManager* manager;          // +0x78
+    mutable PString programName;                    // +0x7c
+    mutable Array<PreProcessorDefine, 3>* defines;  // +0x80 a copy
+    mutable ErrorType error;                        // +0x84 (1: the program failed to load)
+};
+JET_LAYOUT32(sizeof(VertexProgramResource) == 0x88);
+
+// A `.pxl` resource: one texture combiner (0x70 bytes).
+class TextureCombinerResource : public Resource {
+public:
+    TextureCombinerResource(const PString& name, const ResourceDatabase* owner);
+    TextureCombinerResource(const TextureCombinerResource& o);
+    ~TextureCombinerResource() override;
+    TextureCombinerResource& operator=(const TextureCombinerResource& o);
+
+    virtual ExtendedGfxLanguage* __cdecl CreateInstance() const;  // 18: the combiner, referenced
+
+    void __cdecl SetParameters(RenderKernel* kernel, TextureCombinerManager* manager,
+                               const PreProcessorArray* defines) const;
+
+protected:
+    Result __cdecl LoadTxt(const char* name) override;
+
+    friend class TextureCombinerManager;
+    mutable TextureCombiner* combiner;         // +0x5c
+    mutable PString programName;               // +0x60
+    mutable RenderKernel* kernel;              // +0x64
+    mutable TextureCombinerManager* manager;   // +0x68
+    mutable const PreProcessorArray* defines;  // +0x6c
+};
+JET_LAYOUT32(sizeof(TextureCombinerResource) == 0x70);
 
 }  // namespace Jet

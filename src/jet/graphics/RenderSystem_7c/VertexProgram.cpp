@@ -157,7 +157,7 @@ bool __cdecl VertexProgram::LoadNativeFormat(const PString& name, const char* so
     return LoadNativeProgram(text);
 }
 
-int __cdecl VertexProgram::Slot9() { return 0; }
+VertexProgram* __cdecl VertexProgram::CreateShared() { return nullptr; }
 void __cdecl VertexProgram::SetProgramManager(VertexProgramManager* m) { manager = m; }
 VertexProgramManager* __cdecl VertexProgram::GetProgramManager() { return manager; }
 int __cdecl VertexProgram::Slot12() { return 0; }

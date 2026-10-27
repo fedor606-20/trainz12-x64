@@ -423,5 +423,6 @@ bool GfxPreParse(int api, MemoryFile* in, const PString& program, const PString&
                  bool (*then)(const AnsiString& output, void* ctx), void* ctx);
 bool VertexProgramParse(MemoryFile* in, const PString& program, const PString& file, ExtendedGfxLanguage* lang);
 bool TextureProgramParse(MemoryFile* in, int api, const PString& file, ExtendedGfxLanguage* lang);
+bool GfxQuickParse(MemoryFile* in, const char* name, void (*then)(const GfxNameList& names, void* ctx), void* ctx);
 
 }  // namespace Jet

@@ -96,8 +96,9 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        `tests/diff_rs_u2b.cpp`. U2b2a (the quick parser and the pre-parser: flex skeleton, Lemon engine, internal
        code) done 2026-10-27. U2b2b1 (the texture program parser) and U2b2b2 (the vertex
        program parser, a later Lemon with 16-byte values) done 2026-10-27. U3 split into U3a1 (VertexProgram and
-       TextureCombiner; 50 exports, 1186/2687, `tests/diff_rs_u3.cpp`) done 2026-10-27, U3a2 (their managers,
-       resources, CGShader*, GLSLShaderBase) and U3b (VertexProgramBasic). Next: U3a2.
+       TextureCombiner; 50 exports, 1186/2687, `tests/diff_rs_u3.cpp`) done 2026-10-27, U3a2 (their managers and
+       resources; 35 exports, 1221/2687) done 2026-10-27, and U3b (VertexProgramBasic, CGShader*, GLSLShaderBase).
+       Next: U3b.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX

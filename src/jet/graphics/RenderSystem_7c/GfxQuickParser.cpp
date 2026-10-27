@@ -184,6 +184,20 @@ bool GfxLanguageQuickParser::Run(const AnsiString& programName)
     return !ctx.error;
 }
 
+// ---- VertexProgramManager::RegisterBuiltInPrograms (0x10053dc0): the program names reach `then` while the parser
+// still holds them
+bool GfxQuickParse(MemoryFile* in, const char* name, void (*then)(const GfxNameList& names, void* ctx), void* ctx)
+{
+    GfxLanguageQuickParser parser(in);
+    bool ok;
+    {
+        String s(name);
+        ok = parser.Run(s);
+    }
+    if (ok) then(parser.names, ctx);
+    return ok;
+}
+
 // ---- entry points for the differential test (found through the linker map; nothing else calls them)
 
 extern "C" void __cdecl RsTestQuickCtor(void* mem, MemoryFile* in) { ::new (mem) GfxLanguageQuickParser(in); }

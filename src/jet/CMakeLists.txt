@@ -4,7 +4,10 @@ project(trainz12_jet CXX)
 # Drop-in replacements for the Jet engine modules of Trainz 2012.
 # Built 32-bit (-A Win32) to run inside the original game; the x64 build comes when nothing is forwarded.
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")  # static CRT: no runtime DLL to ship next to the game
+# one shared CRT for all our modules (vcruntime140.dll + msvcp140.dll x86 next to the game, ucrtbase from Windows)
+if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)  # a stand-alone build can still pass MultiThreaded
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+endif()
 set(CMAKE_CXX_STANDARD 20)
 set(PY python)
 set(TOOLS "D:/universal modder/trainz12-x64/tools")
@@ -42,8 +45,9 @@ target_link_options(KernelStandard_7c PRIVATE /MAP)
 target_compile_definitions(KernelStandard_7c PRIVATE _CRT_SECURE_NO_WARNINGS JET_KS_BUILD JET_KS_IMPLEMENTATION)
 # since U14b only the crash report writers and HardwareException::GetCallStack are the original's (called there)
 target_link_libraries(KernelStandard_7c PRIVATE "${IMPLIB}/KernelStandard_7c_orig.lib")
-# Bitmap::SaveJPG: libjpeg-turbo in place of the original's static IJG encoder (vcpkg x86-windows-static)
-set(VCPKG_X86 "D:/trainz12-decomp/thirdparty/vcpkg/installed/x86-windows-static")
+# Bitmap::SaveJPG: libjpeg-turbo in place of the original's static IJG encoder (vcpkg x86-windows-static-md:
+# a static library on the shared CRT)
+set(VCPKG_X86 "D:/trainz12-decomp/thirdparty/vcpkg/installed/x86-windows-static-md")
 target_include_directories(KernelStandard_7c PRIVATE "${VCPKG_X86}/include")
 target_link_libraries(KernelStandard_7c PRIVATE "${VCPKG_X86}/lib/jpeg.lib")
 # tables with no known formula are read from the installed game's original module at build time (never committed)
@@ -92,7 +96,7 @@ target_link_libraries(Render2DCore_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib" 
 target_link_libraries(InputWin32_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib")
 # RenderSystem_7c: replaced unit by unit (notes/RenderSystem.md); its module state stays the original's until U9
 target_compile_definitions(RenderSystem_7c PRIVATE JET_RS_BUILD)
-target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.lib")
+target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.lib" "${IMPLIB}/KernelResource_7c.lib")
 # WaterSystem_7c: replaced unit by unit (notes/WaterSystem.md); its module state stays the original's until U10
 target_compile_definitions(WaterSystem_7c PRIVATE JET_WS_BUILD)
 # the map lets the diff tests find the parsers' internal entry points (RsTest*)
@@ -204,7 +208,8 @@ add_executable(diff_rs_u4 tests/diff_rs_u4.cpp)
 add_executable(diff_rs_u2 tests/diff_rs_u2.cpp)
 # RenderSystem U2b: ExtendedGfxLanguage and the texture combiner records (+ the shader-language parsers)
 add_executable(diff_rs_u2b tests/diff_rs_u2b.cpp)
-# RenderSystem U3a: VertexProgram and TextureCombiner (stand-in Display, lights and API slots)
+# RenderSystem U3a: VertexProgram and TextureCombiner, their managers and resources (stand-in Display, lights,
+# API slots and resource database)
 add_executable(diff_rs_u3 tests/diff_rs_u3.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)

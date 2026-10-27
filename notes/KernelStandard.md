@@ -667,7 +667,7 @@ Internal functions of orig can be reached by RVA (`diff_blowfish.cpp`).
   ProcessFile terminates its buffer with one zero byte, so wcstombs (UTF-16 files) reads one wide char of heap
   garbage past the end unless the file ends with a wide NUL.
 - CRT: atof/atoi/strtol/strtoul/isspace/_strlwr/_stricmp/wcstombs/getenv/printf are msvcr80's
-  (src/jet/core/KernelStandard_7c/Crt80.h). msvcr80 is loaded side-by-side, so GetModuleHandle("msvcr80.dll") fails:
+  (src/jet/KernelStandard_7c/Crt80.h). msvcr80 is loaded side-by-side, so GetModuleHandle("msvcr80.dll") fails:
   Crt80 finds it by enumerating modules (Math2's _CIacos lookup had the same bug and fell back to std::acos).
 - File is 0x13c bytes (+0x38 path, MAX_PATH): the header said 0x3c, so File locals (ours in InputSystem's
   Force.cpp too) were overrun by the original's Open/Close.
