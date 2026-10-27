@@ -161,8 +161,8 @@ VertexProgram* __cdecl VertexProgram::CreateShared() { return nullptr; }
 void __cdecl VertexProgram::SetProgramManager(VertexProgramManager* m) { manager = m; }
 VertexProgramManager* __cdecl VertexProgram::GetProgramManager() { return manager; }
 int __cdecl VertexProgram::Slot12() { return 0; }
-int __cdecl VertexProgram::Slot13() { return 0; }
-int __cdecl VertexProgram::Slot14() { return 0; }
+bool __cdecl VertexProgram::LoadSymbolTable(const VertexSymbolTable&, bool) { return false; }
+bool __cdecl VertexProgram::LoadInstructions(const Array<VertexInstruction*, 128>&) { return false; }
 int __cdecl VertexProgram::Slot15() { return 0; }
 bool __cdecl VertexProgram::RestoreProgram() { return true; }
 void __cdecl VertexProgram::SetProgramState(const DisplayLightList&, Color, const DisplayMaterial&, const Matrix4&) const {}

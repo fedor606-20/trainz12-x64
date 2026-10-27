@@ -81,11 +81,13 @@ static std::string Name(const void* p)
     return "?";
 }
 
+static std::map<const void*, unsigned> blockSize[2];
 static void* __cdecl HookNew(unsigned n)
 {
     void* p = RealNew(n);
     std::memset(p, 0xcd, n);
     if (cur >= 0) {
+        blockSize[cur][p] = n;
         char b[32];
         std::snprintf(b, sizeof b, "A%d", allocCount[cur]++);
         names[cur][p] = b;
@@ -99,6 +101,7 @@ static void __cdecl HookDelete(void* p)
     if (cur >= 0 && p) {
         Log("  free %s\n", Name(p).c_str());
         names[cur].erase(p);
+        blockSize[cur].erase(p);
     }
     RealDelete(p);
 }
@@ -209,14 +212,15 @@ static void ResetLexStatics(int s)
     }
     // the original's range also holds U3's statics (support flags 0xb8065, 0xb80bc..; TextureCombinerManager's
     // manager 0xb8088; the register limits ..0xb80cf): kept
-    unsigned char keep1[3], keep2[4], keep3[0x14];
+    // (and VertexProgramBasic's statics 0xb80a0..0xb8113, set by the API module: here by the test)
+    unsigned char keep1[3], keep2[4], keep3[0x74];
     std::memcpy(keep1, OrigAt(0xb8065), 3);
     std::memcpy(keep2, OrigAt(0xb8088), 4);
-    std::memcpy(keep3, OrigAt(0xb80bc), 0x14);
+    std::memcpy(keep3, OrigAt(0xb80a0), 0x74);
     std::memset(OrigAt(0xb7dc8), 0, 0x360);
     std::memcpy(OrigAt(0xb8065), keep1, 3);
     std::memcpy(OrigAt(0xb8088), keep2, 4);
-    std::memcpy(OrigAt(0xb80bc), keep3, 0x14);
+    std::memcpy(OrigAt(0xb80a0), keep3, 0x74);
 }
 
 // the original's statics both sides use: VertexProgram supported[4] 0xb80bc, supportChecked[4] 0xb80c0, register
@@ -457,8 +461,9 @@ static int apiValue[2];
 static int __cdecl ApiOf(const void* self) { Log("  api of %s\n", Name(self).c_str()); return apiValue[cur]; }
 static bool __cdecl NativeProgram(void* self, const void* text)
 {
-    Log("  native %s [%.200s]\n", Name(self).c_str(), AnsiText(text));
-    return std::strlen(AnsiText(text)) % 2 == 0;
+    const char* t = AnsiText(text);  // (null for an empty string)
+    Log("  native %s [%s]\n", Name(self).c_str(), t ? t : "(null)");
+    return (t ? std::strlen(t) : 0) % 2 == 0;
 }
 static int regsLimits[3];
 static int __cdecl RegsLocal(const void*) { return regsLimits[0]; }
@@ -1427,6 +1432,483 @@ static void RunManagers(int s, unsigned seed)
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+// VertexProgramBasic (U3b1): built by each side's constructor; the API module's statics (limits, names, opcode
+// tables) are the original's on both sides and set here; the API slots 0, 5 and 6 and the matrix slots of the
+// display are stand-ins
+
+#define VPB "VertexProgramBasic@Jet@@"
+#define DECODE "_NAAVAnsiString@2@PBUVertexInstruction@2@@Z"
+
+struct ApiB {
+    void*(__fastcall* ctor)(void*, void*, void*, void*, int);
+    void(__fastcall* vbaseDtor)(void*);
+    void** ownVft;
+    void** eglVft;
+    void(__cdecl* initInstance)(const void*, void*);
+    int(__cdecl* freeRegs)(const void*, int, const void*, bool*, bool);
+    int(__cdecl* nextTemp)(const void*);
+    int(__cdecl* systemTemp)(const void*);
+    void(__cdecl* decodeRegister)(const void*, void*, const void*, bool);
+    bool(__cdecl* decode[14])(void*, void*, const void*);
+} apiB[2];
+
+static const char* kDecodeNames[14] = {"DecodeAbsolute", "DecodeHomoDot", "DecodeFloor", "DecodeLrp", "DecodeNrm",
+                                       "DecodePower", "DecodeSign", "DecodeSub", "DecodeSwizzle", "DecodeXProd",
+                                       "CreateMatrixMacroInstructions", "DecodeExp", "DecodeLog", "DecodeFrac"};
+static const int kDecodeOps[14] = {1, 6, 0xa, 0xf, 0x15, 0x16, 0x1a, 0x1c, 0x1d, 0x1e, 0x23, 0, 0, 0};
+static const int kDecodeArgs[14] = {2, 3, 2, 4, 2, 3, 2, 3, 2, 3, 3, 2, 2, 2};
+
+static void LoadApiB(int s)
+{
+    ApiB& a = apiB[s];
+    a.ctor = As<decltype(a.ctor)>(F("??0" VPB "QAE@PAVDisplay@1@PAVVertexType@1@@Z"));
+    a.vbaseDtor = As<decltype(a.vbaseDtor)>(F("??_D" VPB "QAEXXZ"));
+    a.ownVft = static_cast<void**>(F("??_7" VPB "6B@"));
+    a.eglVft = static_cast<void**>(F("??_7" VPB "6BExtendedGfxLanguage@1@@"));
+    a.initInstance = As<decltype(a.initInstance)>(F("?InitInstance@" VPB "IBAXAAV12@@Z"));
+    a.freeRegs = As<decltype(a.freeRegs)>(F("?GetFreeRegisters@" VPB "IBAHHABVPString@2@PA_N_N@Z"));
+    a.nextTemp = As<decltype(a.nextTemp)>(F("?NextFreeTemp@" VPB "IBAHXZ"));
+    a.systemTemp = As<decltype(a.systemTemp)>(F("?GetSystemTemp@" VPB "IBAHXZ"));
+    a.decodeRegister = As<decltype(a.decodeRegister)>(F("?DecodeRegister@" VPB "IBAXAAVAnsiString@2@PBURegisterItem@2@_N@Z"));
+    for (int k = 0; k < 14; ++k) {
+        const bool nonConst = k == 6 || k == 8;  // DecodeSign, DecodeSwizzle
+        a.decode[k] = As<bool(__cdecl*)(void*, void*, const void*)>(
+            F((std::string("?") + kDecodeNames[k] + "@" VPB + (nonConst ? "IAA" : "IBA") + DECODE).c_str()));
+    }
+}
+
+// the API module's statics (the original's, shared by both sides)
+struct VpbStatics {
+    void** envParameters;
+    int *staticInit, *numTmp, *numEnv, *numLocal, *numTotal;
+    bool *aligned, *programMatrix;
+    const char** strs[8];  // vertex, result, address, temp, separator, log, exp, api
+    const void** maps[3];  // opcode, vertex, result
+} vs;
+static const char* kStrNames[8] = {"vertexSymbol", "resultSymbol", "addressSymbol", "tempSymbol", "instSeperator",
+                                   "logInstr", "expInstr", "apiName"};
+static void LoadVpbStatics()
+{
+    auto G = [](const char* n) { return Proc(mod[1], n); };
+    vs.envParameters = static_cast<void**>(G("?envParameters@" VPB "1PAVVector4@2@A"));
+    vs.staticInit = static_cast<int*>(G("?staticParameterInit@" VPB "1HA"));
+    vs.numTmp = static_cast<int*>(G("?numTmpRegisters@" VPB "1HA"));
+    vs.numEnv = static_cast<int*>(G("?numEnvParameters@" VPB "1HA"));
+    vs.numLocal = static_cast<int*>(G("?numLocalParameters@" VPB "1HA"));
+    vs.numTotal = static_cast<int*>(G("?numTotalParameters@" VPB "1HA"));
+    vs.aligned = static_cast<bool*>(G("?needsAlignedMatrix@" VPB "1_NA"));
+    vs.programMatrix = static_cast<bool*>(G("?supportsProgramMatrix@" VPB "1_NA"));
+    for (int k = 0; k < 8; ++k)
+        vs.strs[k] = static_cast<const char**>(G((std::string("?") + kStrNames[k] + "@" VPB "1PBDB").c_str()));
+    vs.maps[0] = static_cast<const void**>(G("?opcodeMap@" VPB "1PBUOpcodeMap@12@B"));
+    vs.maps[1] = static_cast<const void**>(G("?vertexMap@" VPB "1PBUVertexMap@12@B"));
+    vs.maps[2] = static_cast<const void**>(G("?resultMap@" VPB "1PBUResultMap@12@B"));
+}
+
+struct OpName {
+    const char* name;
+    int extra;
+};
+struct RegMap {
+    int reg;
+    bool indexed;
+    int extra;
+};
+struct ResMap {
+    const char* name;
+    bool indexed;
+    int extra;
+};
+static OpName opMap[64];
+static RegMap vtxMap[64];
+static ResMap resMap[16];
+static char opText[64][12];
+static const char* kResNames[] = {"oPos", "oD", "oT", "oFog", "oPts"};
+
+static void*(__cdecl* AnsiAppend)(void*, const char*);
+static int swizzleReg[2];
+static void __cdecl VpbHeader(const void* self, void* h)
+{
+    Log("  header %s\n", Name(self).c_str());
+    AnsiAppend(h, "vs.1.1\n");
+}
+static int __cdecl VpbSwizzleConst(void* self)
+{
+    const int v = swizzleReg[cur];
+    *reinterpret_cast<int*>(static_cast<char*>(self) + 0x48) = v;
+    Log("  swizzle constant %s -> %d\n", Name(self).c_str(), v);
+    return v;
+}
+static void __cdecl VpbFinish(const void* self, void* line)
+{
+    Log("  finish %s [%s]\n", Name(self).c_str(), AnsiText(line));
+    AnsiAppend(line, "\n");
+}
+// the display's matrices (slots 25 / 26 / 28 / 31): filled from the call count, so both sides see the same
+static int matrixCalls;
+static void FillMatrix(float* m, int slot, int index)
+{
+    std::mt19937 r(scenarioSeed * 31 + matrixCalls++ * 7 + slot);
+    for (int i = 0; i < 16; ++i) m[i] = RandF(r);
+    if (index >= 0) m[0] = static_cast<float>(index);
+    Log("  display matrix %d (%d) %s\n", slot, index, Bits(m, 16).c_str());
+}
+static void __cdecl DispM25(const void*, float* m)
+{
+    for (int i = 0; i < 16; ++i) m[i] = m[i] * 0.5f + static_cast<float>(i);  // after 28 on the same matrix
+    Log("  display matrix 25 %s\n", Bits(m, 16).c_str());
+}
+static void __cdecl DispM26(const void*, int i, float* m) { FillMatrix(m, 26, i); }
+static void __cdecl DispM28(const void*, float* m) { FillMatrix(m, 28, -1); }
+static void __cdecl DispM31(const void*, int i, float* m) { FillMatrix(m, 31, i); }
+
+static void* vpbOwnVt[2][7];
+static void* vpbEglVt[2][35];
+static void MakeVpbVtables(int s)
+{
+    std::memcpy(vpbOwnVt[s], apiB[s].ownVft, sizeof vpbOwnVt[s]);
+    vpbOwnVt[s][0] = reinterpret_cast<void*>(&VpbHeader);
+    vpbOwnVt[s][5] = reinterpret_cast<void*>(&VpbSwizzleConst);
+    vpbOwnVt[s][6] = reinterpret_cast<void*>(&VpbFinish);
+    std::memcpy(vpbEglVt[s], apiB[s].eglVft, sizeof vpbEglVt[s]);
+    void** v = vpbEglVt[s];
+    for (int i : {9, 12, 15, 20, 21, 22, 25}) v[i] = reinterpret_cast<void*>(&LogSlotInt);
+    v[12] = reinterpret_cast<void*>(&VpNames);
+    v[23] = reinterpret_cast<void*>(&VpLocal);
+    v[24] = reinterpret_cast<void*>(&VpDirect);
+    v[26] = reinterpret_cast<void*>(&VpLocals);
+    v[27] = reinterpret_cast<void*>(&VpEnv);
+    v[28] = reinterpret_cast<void*>(&VpSetType);
+    v[29] = reinterpret_cast<void*>(&VpGetType);
+    v[33] = reinterpret_cast<void*>(&ApiOf);
+    v[34] = reinterpret_cast<void*>(&NativeProgram);
+}
+
+static void* envBlock[2];
+static std::string ConstText(const void* c)
+{
+    if (!c) return "null";
+    const int* x = static_cast<const int*>(c);
+    char b[160];
+    const uintptr_t envAt = reinterpret_cast<uintptr_t>(*vs.envParameters);
+    std::string st = x[1] == 2 && static_cast<uintptr_t>(x[2]) - envAt < 0x10000
+                         ? "env+" + std::to_string(static_cast<uintptr_t>(x[2]) - envAt)
+                         : std::to_string(x[2]);
+    // (a local parameter's value is the parser's symbol +0x24..: uninitialised stack in the original's vertex
+    // program parser for program.local[] bindings, see U2b2b2; masked)
+    if (x[1] == 1) {
+        std::snprintf(b, sizeof b, "%s{r%d k1 v v v v %08x lt%d}", Name(c).c_str(), x[0], x[6], x[7]);
+        return b;
+    }
+    std::snprintf(b, sizeof b, "%s{r%d k%d %s %08x %08x %08x %08x lt%d}", Name(c).c_str(), x[0], x[1], st.c_str(),
+                  x[3], x[4], x[5], x[6], x[7]);
+    return b;
+}
+
+static void DumpVpb(const char* tag, const void* p)
+{
+    const auto* b = static_cast<const unsigned char*>(p);
+    auto u32 = [&](int off) { return *reinterpret_cast<const unsigned*>(b + off); };
+    auto i32 = [&](int off) { return *reinterpret_cast<const int*>(b + off); };
+    auto ptr = [&](int off) { return *reinterpret_cast<void* const*>(b + off); };
+    Log("  %s %s: decl [%s] min/max %d %d env %d %d f48 %d f4c %d temps %d %d f5c %u rc %u\n", tag, Name(p).c_str(),
+        AnsiText(b + 8), i32(0x34), i32(0x38), i32(0x40), i32(0x44), i32(0x48), i32(0x4c), i32(0x50), i32(0x54),
+        b[0x5c], u32(0x64));
+    const char* labels[] = {"constants", "states", "matrices"};
+    for (int k = 0; k < 3; ++k) {
+        const int off = 0xc + 0xc * k;
+        Log("    %s %u/%u %s:", labels[k], u32(off), u32(off + 4), Name(ptr(off + 8)).c_str());
+        for (unsigned i = 0; i < u32(off); ++i) Log(" %s", ConstText(static_cast<void* const*>(ptr(off + 8))[i]).c_str());
+        Log("\n");
+    }
+    // (a load that failed after widening the range leaves the older, smaller map: only its own slots are shown)
+    auto Map = [&](const char* label, int off) {
+        void* const* map = static_cast<void* const*>(ptr(off));
+        Log("\n    %s map %s:", label, Name(map).c_str());
+        if (!map) return;
+        auto it = blockSize[cur].find(map);
+        const unsigned slots = it == blockSize[cur].end() ? 0 : it->second / 4;
+        for (int r = i32(off + 4); r <= i32(off + 8); ++r)
+            if (static_cast<unsigned>(r - i32(off + 4)) < slots) Log(" %d=%s", r, Name(map[r - i32(off + 4)]).c_str());
+            else Log(" %d=#", r);
+    };
+    Map("local", 0x30);
+    Map("env", 0x3c);
+    Log("\n    used %s:", Name(ptr(0x58)).c_str());
+    if (ptr(0x58))
+        for (int r = 0; r < *vs.numEnv; ++r) Log("%d", static_cast<const unsigned char*>(ptr(0x58))[r]);
+    // the VertexProgram part (+0x6c)
+    const unsigned char* v = b + 0x6c;
+    auto vptr = [&](int off) { return *reinterpret_cast<void* const*>(v + off); };
+    Log("\n    program: src [%s] file %s prog %s gen %08x type %s inf %d %d b40 %u mgr %s\n", AnsiText(v + 0xc),
+        NodeText(vptr(0x10)).c_str(), NodeText(vptr(0x14)).c_str(), *reinterpret_cast<const unsigned*>(v + 0x1c),
+        Name(vptr(0x34)).c_str(), *reinterpret_cast<const int*>(v + 0x38), *reinterpret_cast<const int*>(v + 0x3c),
+        v[0x40], Name(vptr(0x44)).c_str());
+    const unsigned n = *reinterpret_cast<const unsigned*>(v + 0x20);
+    const auto* data = static_cast<const unsigned char*>(vptr(0x28));
+    Log("    symbols %u:", n);
+    for (unsigned i = 0; i < n; ++i) {
+        const auto* e = data + 16 * i;
+        Log(" %s:%d,%d,%d", NodeText(*reinterpret_cast<void* const*>(e)).c_str(), e[4],
+            *reinterpret_cast<const int*>(e + 8), *reinterpret_cast<const int*>(e + 12));
+    }
+    Log("\n");
+}
+
+static int decodeStats[14][2], generated;
+static int vpbMade;
+static void* MakeVpb(int s, void* type)
+{
+    void* p = TestNew(0xb4, "B%d", vpbMade++);
+    apiB[s].ctor(p, nullptr, displayObj, type, 1);
+    *static_cast<void**>(p) = vpbOwnVt[s];
+    *reinterpret_cast<void**>(static_cast<char*>(p) + 0x6c) = vpbEglVt[s];
+    return p;
+}
+static void FreeVpb(int s, void* p)
+{
+    apiB[s].vbaseDtor(p);
+    TestDelete(p);
+}
+
+// fake operands for the macros: a symbol is {.., api +0x44}, its api a VPSymbol {vft, indexed, name, number}
+struct FakeSym {
+    unsigned char pad[0x44];
+    void* api;
+};
+struct FakeApi {
+    void* vt;
+    bool indexed;
+    void* name;  // an AnsiString
+    int number;
+};
+struct FakeReg {
+    void* symbol;
+    void* offset;
+    char* swizzle;
+    bool flag;
+    void* m1;
+    void* m2;
+};
+struct FakeIns {
+    void* vt;
+    unsigned* operands;  // {count, capacity, data}
+    int opcode;
+};
+static FakeSym fakeSyms[6];
+static FakeApi fakeApis[6];
+static const char* kSymNames[6] = {"r0", "r1", "v0", "oPos", "c", "a0.x"};
+
+static char* SwizzleText(std::mt19937& r, bool swz)
+{
+    char* t = static_cast<char*>(RealNew(16));
+    std::memset(t, 0, 16);
+    if (swz) {  // "+x,-y,+0,+1" as SWZ wants
+        const char comps[] = "xyzw01";
+        for (int i = 0; i < 4; ++i) {
+            t[3 * i] = r() % 3 ? '+' : '-';
+            t[3 * i + 1] = comps[r() % 6];
+            t[3 * i + 2] = i < 3 ? ',' : 0;
+        }
+        return t;
+    }
+    const char* masks[] = {"x", "y", "z", "w", "xy", "xyz", "xyzw", "yz", "zw", "wzyx", "yxzw"};
+    std::strcpy(t, masks[r() % 11]);
+    return t;
+}
+
+static void RunBasic(int s, unsigned seed)
+{
+    std::mt19937 r(seed);
+    auto P = [&](int lo, int hi) { return lo + static_cast<int>(r() % static_cast<unsigned>(hi - lo + 1)); };
+    ApiB& a = apiB[s];
+    ResetStatics();
+    scenarioSeed = seed;
+    matrixCalls = 0;
+    vpbMade = 0;
+    apiValue[s] = P(0, 2);
+    swizzleReg[s] = P(0, 5) ? P(0, 90) : -1;
+    names[s][displayObj] = "Display";
+    for (int i = 0; i < 3; ++i) {
+        char b[8];
+        std::snprintf(b, sizeof b, "T%d", i);
+        names[s][&types[i]] = b;
+        types[i].refs = 1000;
+    }
+    // the API module's statics
+    *vs.numEnv = P(0, 4) ? 96 : P(8, 128);
+    *vs.numLocal = P(0, 3) ? P(4, *vs.numEnv) : *vs.numEnv;
+    *vs.numTmp = P(0, 2) ? P(2, 16) : P(0, 4);
+    *vs.numTotal = P(0, 300);
+    *vs.aligned = P(0, 1);
+    *vs.programMatrix = P(0, 1);
+    *vs.staticInit = P(0, 2) ? 1000 : 3;  // 3: the last program destroyed frees the env parameters
+    envBlock[s] = RealNew(*vs.numEnv * 16);
+    std::memset(envBlock[s], 0, *vs.numEnv * 16);
+    *vs.envParameters = envBlock[s];
+    names[s][envBlock[s]] = "Env";
+    const char* strs[8] = {"v%d", "%s%d", P(0, 1) ? "a0.x" : "a0", "r%d", P(0, 3) ? "\n" : ";", "log", "exp", "DX"};
+    for (int k = 0; k < 8; ++k) *vs.strs[k] = strs[k];
+    for (int op = 0; op < 64; ++op) {
+        std::snprintf(opText[op], sizeof opText[op], "op%02x ", op);
+        const bool macro = std::find(std::begin(kDecodeOps), std::end(kDecodeOps), op) != std::end(kDecodeOps) ||
+                           (op >= 0x1f && op <= 0x23) || op == 8 || op == 0xb || op == 0xc;
+        opMap[op].name = macro ? (P(0, 3) ? nullptr : opText[op]) : (P(0, 9) ? opText[op] : nullptr);
+    }
+    for (auto& m : vtxMap) m = {P(0, 15), P(0, 2) == 0, 0};
+    for (auto& m : resMap) m = {kResNames[P(0, 4)], P(0, 1) != 0, 0};
+    *vs.maps[0] = opMap;
+    *vs.maps[1] = vtxMap;
+    *vs.maps[2] = resMap;
+    for (int k = 0; k < 6; ++k) {
+        fakeApis[k].vt = nullptr;
+        fakeApis[k].indexed = k == 4;
+        AnsiFromText(&fakeApis[k].name, nullptr, kSymNames[k]);
+        fakeApis[k].number = P(0, 20);
+        fakeSyms[k].api = P(0, 9) ? &fakeApis[k] : nullptr;
+    }
+    // the display's matrix slots for this part
+    void* const saved[4] = {displayVt[25], displayVt[26], displayVt[28], displayVt[31]};
+    displayVt[25] = reinterpret_cast<void*>(&DispM25);
+    displayVt[26] = reinterpret_cast<void*>(&DispM26);
+    displayVt[28] = reinterpret_cast<void*>(&DispM28);
+    displayVt[31] = reinterpret_cast<void*>(&DispM31);
+
+    void* prog[2] = {MakeVpb(s, &types[0]), MakeVpb(s, P(0, 1) ? &types[1] : nullptr)};
+    DumpVpb("new", prog[0]);
+    for (int step = 0; step < 16; ++step) {
+        void* p = prog[P(0, 1)];
+        void* vp = static_cast<char*>(p) + 0x6c;
+        const int op = P(0, 15);
+        Log("op %d on %s\n", op, Name(p).c_str());
+        switch (op) {
+        case 0: {  // the generated text to the API
+            Log("  compile -> %d\n", reinterpret_cast<bool(__cdecl*)(void*)>(vpbEglVt[s][4])(vp));
+            break;
+        }
+        case 1:  // the matrix states
+            reinterpret_cast<void(__cdecl*)(const void*)>(vpbOwnVt[s][2])(p);
+            break;
+        case 2: {  // the render states (no lights)
+            float mat[17], view[16];
+            Col c{RandF(r), RandF(r), RandF(r), RandF(r)};
+            for (float& f : mat) f = RandF(r);
+            for (float& f : view) f = RandF(r);
+            void* noLights = nullptr;
+            reinterpret_cast<void(__cdecl*)(const void*, const void*, Col, const void*, const void*)>(vpbEglVt[s][17])(
+                vp, &noLights, c, mat, view);
+            break;
+        }
+        case 3: {  // a copy
+            void* q = MakeVpb(s, nullptr);
+            if (P(0, 1)) *reinterpret_cast<int*>(static_cast<char*>(p) + 0x54) = P(-1, 6);  // a system temporary
+            a.initInstance(p, q);
+            DumpVpb("copy", q);
+            FreeVpb(s, q);
+            break;
+        }
+        case 4: {  // registers and temporaries
+            Log("  limits %d %d %d\n", reinterpret_cast<int(__cdecl*)(const void*)>(vpbEglVt[s][30])(vp),
+                reinterpret_cast<int(__cdecl*)(const void*)>(vpbEglVt[s][31])(vp),
+                reinterpret_cast<int(__cdecl*)(const void*)>(vpbEglVt[s][32])(vp));
+            bool used[160] = {};
+            for (int i = 0; i < *vs.numEnv; ++i) used[i] = P(0, 2) == 0;
+            for (int k = 0; k < 4; ++k) {
+                const int n = P(1, 6);
+                const bool al = P(0, 1);
+                Log("  free %d %d -> %d\n", n, al, a.freeRegs(p, n, &nodes[0], used, al));
+            }
+            Log("  temps %d %d %d\n", a.nextTemp(p), a.systemTemp(p), a.systemTemp(p));
+            break;
+        }
+        case 5:
+        case 6:
+        case 7: {  // a macro on made-up operands
+            const int k = P(0, 13);
+            // (the macros read their operands before any count check: only LRP, NRM and SGN check, after two)
+            const bool checks = k == 3 || k == 4 || k == 6;
+            const int nOps = checks && P(0, 3) == 0 ? P(2, 4) : kDecodeArgs[k];
+            FakeReg regs[4];
+            void* data[4];
+            for (int i = 0; i < nOps; ++i) {
+                FakeReg& g = regs[i];
+                g.symbol = &fakeSyms[P(0, 5)];
+                if (!static_cast<FakeSym*>(g.symbol)->api) g.symbol = &fakeSyms[0];
+                // (XPD's and FLR's stack copies free a source's swizzle: those get none, or a fresh one)
+                const bool swz = k == 8 && i == 1;  // (SWZ reads its source's text without a check)
+                g.swizzle = swz || P(0, 3) ? SwizzleText(r, swz) : nullptr;
+                g.flag = P(0, 3) == 0;
+                g.offset = nullptr;
+                g.m1 = g.m2 = nullptr;
+                data[i] = &g;
+            }
+            if (k == 2 && nOps > 1 && P(0, 2) == 0) regs[1].symbol = regs[0].symbol;  // FLR on its own register
+            static unsigned char offs[2][8];
+            if (k == 10 && nOps > 2 && P(0, 1)) {  // a relative matrix operand
+                *reinterpret_cast<void**>(offs[s]) = P(0, 1) ? &regs[1] : nullptr;
+                *reinterpret_cast<int*>(offs[s] + 4) = P(-3, 3);
+                regs[2].offset = offs[s];
+            }
+            unsigned arr[3] = {static_cast<unsigned>(nOps), 128, reinterpret_cast<unsigned>(data)};
+            FakeIns in{nullptr, arr, k == 10 ? P(0x1f, 0x23) : kDecodeOps[k]};
+            void* out = nullptr;
+            AnsiFromText(&out, nullptr, "");
+            ResetLexStatics(s);
+            const bool res = a.decode[k](p, &out, &in);
+            if (cur == 0) ++decodeStats[k][res];
+            Log("  %s op %x n%d -> %d [%s]\n", kDecodeNames[k], in.opcode, nOps, res, AnsiText(&out));
+            AnsiDtor(&out, nullptr);
+            break;
+        }
+        case 8: {  // one operand's text
+            FakeReg g{&fakeSyms[P(0, 1) ? 4 : P(0, 5)], nullptr, P(0, 1) ? SwizzleText(r, false) : nullptr,
+                      P(0, 3) == 0, nullptr, nullptr};
+            fakeApis[4].number = P(0, 3);  // (so that a relative address can come out at 0)
+            FakeReg idx{&fakeSyms[5], nullptr, nullptr, false, nullptr, nullptr};
+            unsigned char off[8];
+            if (P(0, 1)) {
+                *reinterpret_cast<void**>(off) = P(0, 1) ? &idx : nullptr;
+                *reinterpret_cast<int*>(off + 4) = P(-4, 4);
+                g.offset = off;
+            }
+            *reinterpret_cast<int*>(static_cast<char*>(p) + 0x4c) = P(-2, 2);
+            void* out = nullptr;
+            AnsiFromText(&out, nullptr, "x ");
+            a.decodeRegister(p, &out, &g, P(0, 1) != 0);
+            Log("  register [%s]\n", AnsiText(&out));
+            AnsiDtor(&out, nullptr);
+            break;
+        }
+        default: {  // a real program through LoadProgram: the parser hands the symbols and instructions over
+            if (vpTexts.empty()) break;
+            const std::string& text = vpTexts[r() % vpTexts.size()];
+            std::vector<std::string> programs = ProgramNames(text);
+            std::string program = programs.empty() || P(0, 9) == 0 ? "none" : programs[r() % programs.size()];
+            void* node = CreateNode(*cache, reinterpret_cast<const unsigned char*>(program.c_str()));
+            ResetLexStatics(s);
+            const bool ok = GuardedLoad(s, vp, &node, text.c_str());
+            Log("  load %s -> %d\n", program.c_str(), ok);
+            if (cur == 0) ++vpResults[ok];
+            if (const char* t = AnsiText(static_cast<char*>(vp) + 0xc); cur == 0 && t && !std::strncmp(t, "vs.1.1", 6))
+                ++generated;
+            DestroyNode(*cache, node);
+            break;
+        }
+        }
+        DumpVpb("now", p);
+    }
+    for (void* p : prog) FreeVpb(s, p);
+    Log("statics %d %d %s\n", *vs.staticInit, *vs.numEnv, Name(*vs.envParameters).c_str());
+    if (*vs.envParameters) RealDelete(*vs.envParameters);
+    *vs.envParameters = nullptr;
+    for (int k = 0; k < 6; ++k) AnsiDtor(&fakeApis[k].name, nullptr);
+    displayVt[25] = saved[0];
+    displayVt[26] = saved[1];
+    displayVt[28] = saved[2];
+    displayVt[31] = saved[3];
+}
+
+// ---------------------------------------------------------------------------------------------------------------
 
 static void Compare(const char* part, int round)
 {
@@ -1524,17 +2006,21 @@ int main(int argc, char** argv)
     dbVtM[1] = reinterpret_cast<void*>(&FakeGet);
     dbVtM[3] = reinterpret_cast<void*>(&FakeFileName);
     *reinterpret_cast<void**>(fakeDbM) = dbVtM;
+    AnsiAppend = As<decltype(AnsiAppend)>(Proc(ks, "??YAnsiString@Jet@@QAAAAV01@PBD@Z"));
+    LoadVpbStatics();
     for (int s = 0; s < 2; ++s) {
         LoadApi(s);
         MakeVtables(s);
         LoadApiM(s);
+        LoadApiB(s);
+        MakeVpbVtables(s);
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
     }
     struct {
         const char* name;
         void (*run)(int, unsigned);
-    } parts[] = {{"programs", RunPrograms}, {"combiners", RunCombiners}, {"managers", RunManagers}};
+    } parts[] = {{"programs", RunPrograms}, {"combiners", RunCombiners}, {"managers", RunManagers}, {"basic", RunBasic}};
     const char* only = std::getenv("RS_U3_ONLY");
     for (auto& p : parts) {
         if (only && !std::strstr((std::string(",") + only + ",").c_str(), (std::string(",") + p.name + ",").c_str()))
@@ -1545,6 +2031,7 @@ int main(int argc, char** argv)
                 cur = s;
                 logText[s].clear();
                 names[s].clear();
+                blockSize[s].clear();
                 allocCount[s] = 0;
                 p.run(s, seed);
                 cur = -1;
@@ -1554,6 +2041,11 @@ int main(int argc, char** argv)
         std::printf("-- %s done (display capability calls %d, loads %d, ok %d, that fault %d)\n", p.name, capsCalls,
                     loadsTried, loadsOk, faults);
         std::printf("   light positions %d, directions %d\n", posCalls, dirCalls);
+        if (!std::strcmp(p.name, "basic")) {
+            std::printf("   programs generated %d; macros (false/true):", generated);
+            for (int k = 0; k < 14; ++k) std::printf(" %s %d/%d", kDecodeNames[k] + 6, decodeStats[k][0], decodeStats[k][1]);
+            std::printf("\n");
+        }
         std::printf("   vp create results:");
         for (int k = 0; k < 16; ++k) if (vpResults[k]) std::printf(" %d:%d", k, vpResults[k]);
         std::printf("; tc:");

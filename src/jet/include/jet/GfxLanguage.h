@@ -14,7 +14,15 @@
 
 namespace Jet {
 
-struct ApiDataBase;  // the renderer's per-symbol data (U9); deleted through its virtual destructor
+// the renderer's per-symbol data, deleted through its virtual destructor (VertexProgramBasic's VPSymbol and the
+// API modules' derive from it)
+struct ApiDataBase {
+    ApiDataBase();
+    ApiDataBase(const ApiDataBase& o);
+    virtual ~ApiDataBase();
+    ApiDataBase& operator=(const ApiDataBase& o);
+    JET_HEAP_OBJECT
+};
 
 enum SymbolType {};
 enum VertexSymbolClass {};
@@ -124,6 +132,11 @@ struct OffsetAddress {
 struct RegisterItem {
     RegisterItem(SymbolEntry* symbol, char* swizzle, bool flag, RegisterModifier* m1, RegisterModifier* m2);
     explicit RegisterItem(const RegisterItem* o);  // a copy without the modifiers; the offset's register is shared
+    // the six fields as they are, on the stack (VertexProgramBasic's macros; the destructor then frees what the
+    // original operand owns, as in the original)
+    enum ShallowCopy { Shallow };
+    RegisterItem(const RegisterItem& o, ShallowCopy)
+        : symbol(o.symbol), offset(o.offset), swizzle(o.swizzle), flag(o.flag), m1(o.m1), m2(o.m2) {}
     ~RegisterItem();
     RegisterItem& operator=(const RegisterItem& o);  // a plain copy of the six fields
 
@@ -407,8 +420,9 @@ public:
     virtual void __cdecl SetProgramManager(VertexProgramManager* m);     // 10
     virtual VertexProgramManager* __cdecl GetProgramManager();           // 11
     virtual int __cdecl Slot12();                                        // the API module's: 0
-    virtual int __cdecl Slot13();
-    virtual int __cdecl Slot14();
+    // 13 / 14: the vertex program parser's symbols and instructions (false here; VertexProgramBasic's)
+    virtual bool __cdecl LoadSymbolTable(const VertexSymbolTable& table, bool native);
+    virtual bool __cdecl LoadInstructions(const Array<VertexInstruction*, 128>& list);
     virtual int __cdecl Slot15();
     virtual bool __cdecl RestoreProgram();                               // 16: true
     virtual void __cdecl SetProgramState(const DisplayLightList& lights, Color ambient,
@@ -699,5 +713,129 @@ protected:
     mutable const PreProcessorArray* defines;  // +0x6c
 };
 JET_LAYOUT32(sizeof(TextureCombinerResource) == 0x70);
+
+// ---- U3b1 (RenderSystem_7c/VertexProgramBasic.cpp)
+
+// The text program generator under the API modules' vertex programs (0xb4 bytes: its own part 0x60, then the
+// virtual ReferenceCount +0x60, the vtordisp +0x68 and the virtual VertexProgram +0x6c). The parser's symbols
+// become constant lists and register maps, its instructions assembly text; slots 0, 5 and 6 and the statics are
+// the API module's.
+class VertexProgramBasic : public virtual VertexProgram {
+public:
+    // a register's text: the API name, or (indexed) a constant number written as c[...]
+    struct VPSymbol : ApiDataBase {
+        VPSymbol();
+        ~VPSymbol() override;
+        bool indexed;     // +4
+        AnsiString name;  // +8
+        int number;       // +0xc
+    };
+    struct OpcodeMap {  // by VertexOpcode: the API's name for it (null: a macro or the operands alone)
+        const char* name;
+        int extra;
+    };
+    struct VertexMap {  // by vertex input (type - 3)
+        int reg;
+        bool indexed;
+        int extra;
+    };
+    struct ResultMap {  // by output (type - 0x2c)
+        const char* name;
+        bool indexed;
+        int extra;
+    };
+
+    VertexProgramBasic(Display* display, VertexType* type);
+    ~VertexProgramBasic() override;
+
+    bool __cdecl CompileProgram() override;
+    bool __cdecl LoadSymbolTable(const VertexSymbolTable& table, bool native) override;
+    bool __cdecl LoadInstructions(const Array<VertexInstruction*, 128>& list) override;
+    void __cdecl SetProgramState(const DisplayLightList& lights, Color ambient, const DisplayMaterial& material,
+                                 const Matrix4& view) const override;
+    int __cdecl GetMaxLocalRegisters() const override;
+    int __cdecl GetMaxEnvRegisters() const override;
+    int __cdecl GetMaxTotalRegisters() const override;
+
+protected:
+    // its own vftable (+0); 0, 5 and 6 answer 0 here
+    virtual void __cdecl GetProgramHeader(AnsiString& header) const;  // 0: the API's program header
+    virtual bool __cdecl AddSingleInstruction(const VertexInstruction* in);  // 1
+    virtual void __cdecl LoadProgramMatrices() const;                      // 2
+    virtual bool __cdecl ProcessLocalConstSymbol(const VertexSymbolEntry* s, bool* used);  // 3
+    virtual bool __cdecl ProcessVertexSymbol(const VertexSymbolEntry* s);  // 4
+    virtual int __cdecl GetSwizzleConstant();                // 5: sets field48 to the API's constant register
+    virtual void __cdecl FinishLine(AnsiString& line) const;  // 6: the API's last touch on each macro line
+
+    void __cdecl InitInstance(VertexProgramBasic& copy) const;
+    ConstantData** __cdecl LocalRegMap(int reg) const;
+    void __cdecl SetLocalRegMap(int reg, ConstantData* c);
+    ConstantData* __cdecl EnvRegMap(int reg) const;
+    void __cdecl SetEnvRegMap(int reg, ConstantData* c);
+
+    bool __cdecl DecodeSwizzle(AnsiString& out, const VertexInstruction* in);
+    bool __cdecl DecodePower(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeAbsolute(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeHomoDot(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeFloor(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeSub(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeXProd(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeLrp(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeNrm(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeSign(AnsiString& out, const VertexInstruction* in);
+    bool __cdecl DecodeExp(AnsiString& out, const VertexInstruction* in) const;  // (shared "false" bodies)
+    bool __cdecl DecodeLog(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl DecodeFrac(AnsiString& out, const VertexInstruction* in) const;
+    bool __cdecl CreateMatrixMacroInstructions(AnsiString& out, const VertexInstruction* in) const;
+    void __cdecl DecodeRegister(AnsiString& out, const RegisterItem* r, bool swizzle) const;
+
+    bool __cdecl ProcessProgramSymbol(const VertexSymbolEntry* s, bool local, bool* used);
+    bool __cdecl ProcessJetSymbol(const VertexSymbolEntry* s, bool* used);
+    bool __cdecl ProcessStateSymbol(const VertexSymbolEntry* s, bool* used);
+    bool __cdecl ProcessResultSymbol(const VertexSymbolEntry* s);
+    bool __cdecl ProcessAddressSymbol(const VertexSymbolEntry* s) const;
+    bool __cdecl ProcessAliasSymbol(const VertexSymbolEntry* s) const;
+    bool __cdecl ProcessTempSymbol(const VertexSymbolEntry* s, int& next) const;
+    int __cdecl NextFreeTemp() const;
+    int __cdecl GetSystemTemp() const;
+    int __cdecl GetFreeRegisters(int count, const PString& name, bool* used, bool aligned) const;
+
+    AnsiString declarations;                   // +8 (the "def" lines)
+    Array<ConstantData*, 3> constants;         // +0xc local (1) and env (2) parameters
+    Array<ConstantData*, 3> stateConstants;    // +0x18 render states
+    Array<ConstantData*, 3> matrixConstants;   // +0x24 matrix states (0xc..0x11)
+    ConstantData** localRegMap;                // +0x30 by local register - localMin
+    int localMin, localMax;                    // +0x34 (999999), +0x38
+    ConstantData** envRegMap;                  // +0x3c
+    int envMin, envMax;                        // +0x40 (999999), +0x44
+    int field48;                               // +0x48 the API's constant register for the macros (-1)
+    int field4c;                               // +0x4c added to relative constant addresses
+    mutable int nextTemp;                      // +0x50
+    mutable int systemTemp;                    // +0x54 (-1 until taken)
+    bool* used;                                // +0x58 registers taken (numEnvParameters bytes)
+    bool field5c;                              // +0x5c the program writes output 0x2e
+
+    // set by the API module (the original's, written there)
+    static __declspec(dllimport) Vector4* envParameters;
+    static __declspec(dllimport) int staticParameterInit;
+    static __declspec(dllimport) int numTmpRegisters;
+    static __declspec(dllimport) int numEnvParameters;
+    static __declspec(dllimport) int numLocalParameters;
+    static __declspec(dllimport) int numTotalParameters;
+    static __declspec(dllimport) bool needsAlignedMatrix;
+    static __declspec(dllimport) bool supportsProgramMatrix;
+    static __declspec(dllimport) const char* const vertexSymbol;
+    static __declspec(dllimport) const char* const resultSymbol;
+    static __declspec(dllimport) const char* const addressSymbol;
+    static __declspec(dllimport) const char* const tempSymbol;
+    static __declspec(dllimport) const char* const instSeperator;
+    static __declspec(dllimport) const char* const logInstr;
+    static __declspec(dllimport) const char* const expInstr;
+    static __declspec(dllimport) const char* const apiName;
+    static __declspec(dllimport) const OpcodeMap* const opcodeMap;
+    static __declspec(dllimport) const VertexMap* const vertexMap;
+    static __declspec(dllimport) const ResultMap* const resultMap;
+};
+JET_LAYOUT32(sizeof(VertexProgramBasic) == 0xb4);
 
 }  // namespace Jet

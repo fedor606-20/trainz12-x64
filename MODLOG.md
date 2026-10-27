@@ -1925,6 +1925,43 @@ unit order in `notes/WaterSystem.md`.
     type, the TC copy's combiner, SetParameters' program name, LoadTxt's last program).
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U3b1, VertexProgramBasic (2026-10-27): 1275/2687 exports ours
+- U3b is split: U3b1 VertexProgramBasic (this step, 54 exports with ApiDataBase), U3b2 CGShaderLoader/Technique/
+  Constant and GLSLShaderBase.
+- `VertexProgramBasic.cpp`: the generator under the API modules' vertex programs. It writes DirectX vertex
+  shader assembly ("def c%d, ..." declarations, "dp3"/"mad" macros). Layout 0xb4 bytes: its own part (vftable,
+  vbptr, the declarations text +8, three ConstantData lists +0xc/+0x18/+0x24 for parameters, render states and
+  matrix states, local and env register maps +0x30/+0x3c with their ranges starting at 999999, the API's
+  constant register for the macros +0x48, an address offset +0x4c, temporaries +0x50/+0x54, the used-register
+  table +0x58, an output flag +0x5c), then the virtual ReferenceCount +0x60, a vtordisp +0x68 and the virtual
+  VertexProgram +0x6c. Today's compiler gives the same layout, vbtables and vtordisp thunks.
+  - Own vftable: 1 AddSingleInstruction, 2 LoadProgramMatrices, 3 ProcessLocalConstSymbol, 4 ProcessVertexSymbol;
+    0, 5 and 6 (the program header, the macros' constant register, a last touch on each macro line) answer 0
+    and belong to the API module. VertexProgram's slots 13/14 are LoadSymbolTable / LoadInstructions.
+  - LoadSymbolTable sorts the parser's symbols by class (program parameters, constants, states, address,
+    vertex inputs, outputs, aliases, temporaries, Jet symbols) and gives each a VPSymbol {indexed, name,
+    number} as its API data. LoadInstructions writes each instruction by the API's opcode name, or as a macro
+    for ABS, DPH, FLR, LRP, NRM, POW, SGN, SUB, SWZ, XPD and M3x2..M4x4, then puts the API's header and the
+    declarations in front of the text.
+  - The statics (limits, symbol names, opcode/vertex/result maps, envParameters) are written by the API module,
+    so they stay the original's. VS2005 mangled their `T const * const` type as P..B, today's compiler as Q..B:
+    the imports are mapped with /alternatename.
+  - Kept as in the original: FLR and XPD destroy a field-by-field copy of an operand, which frees that
+    operand's swizzle, offset and modifiers; a failed load leaves wider register ranges over the older map;
+    an unhandled matrix state leaves the stack's matrix.
+- Test `tests/diff_rs_u3.cpp` part "basic" (200 scenarios, 0 mismatches; the whole test 800). Each side's
+  constructor, the shared API statics set by the test, stand-in slots 0/5/6 and display matrix slots. Real
+  programs go through LoadProgram (the parser calls slots 13/14). The macros also run directly on made-up
+  operands (each both succeeds and fails), along with registers, temporaries, InitInstance, CompileProgram,
+  LoadProgramMatrices and SetProgramState. Local parameter values are masked: they come from the parser's
+  uninitialised stack in the original (U2b2b2).
+  - Mutations caught: 32 of 36 (every macro's text and signs, matrix rows and offsets, the relative-address
+    forms, free-register search and alignment, the program text order, the matrix product's order of
+    operations, transposes, InitInstance's copies, the env parameters' release). Survivors are inputs the
+    corpus never produces: the parser's hint bit 0 on local parameters, 3-row aligned matrix states, env
+    parameters in a copied program, an alias with an empty name.
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Shared CRT for all modules (2026-10-27)
 - Every module builds with /MD (`CMAKE_MSVC_RUNTIME_LIBRARY` MultiThreadedDLL unless a build passes its own):
   one CRT heap and one set of CRT statics for all of our modules instead of one per DLL. All modules now import
