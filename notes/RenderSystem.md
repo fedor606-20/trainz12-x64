@@ -39,7 +39,22 @@ U3a2 done 2026-10-27: managers and resources (ProgramManagers.cpp, ProgramResour
 tests/diff_rs_u3.cpp part "managers" 0 mismatches, 22/22 mutants caught (MODLOG). U3b1 VertexProgramBasic
 (0x1004a820..0x1004e5c0, VertexProgramBasic.cpp, 1275/2687, part "basic") done 2026-10-27. U3b2 CGShader*
 (0x10009180..0x1000a940 with the VC8 map code) and GLSLShaderBase (0x1002faa0..0x10031350), ShaderLoaders.cpp,
-1323/2687, part "shaders", done 2026-10-27: U3 complete. Next U5. The test's
+1323/2687, part "shaders", done 2026-10-27: U3 complete. Next U5.
+U5 split (2026-10-27, by code size): U5a VertexType (+ registry; 29 fns, 3.3 KB), VertexBufferManager, StaticBuffer,
+RenderingCache(+Manager), the chunk hints (~5.5 KB in all); U5b GeometryChunk (73 fns, 23.7 KB, 0x10021a70..
+0x1002aa80; may split again); U5c GeometryChunkSingle/MultiStream, Generic*, GeometryChunkTemplate (~11.5 KB).
+U5a notes (read 2026-10-27, nothing written yet): VertexType 0x24 bytes on ReferenceCount: +8 VertexTypeID, +0xc
+stream count, +0x10 streams (0x10 each: +0 stride, +4 item capacity, +8 item count, +0xc items: an
+eh-vector-constructed array of 0x20-byte items {+0 VertexItemType, +4 PString name (copied by FUN_10056ef0),
++8 offset (-1: placed by ConfigureStream), +0xc element count, +0x10 DVertexItemDataType, +0x14 semantic, +0x18
+shared-with item type (-1), +0x1c bool}), +0x14 the API data (Display slots 0x3c add / 0x40 remove, through the
+static `display`), +0x18/+0x1c, +0x20 registered name (PString). Functions 0x100562b0..0x10056ef0 plus
+GetVertexSize 0x100106e0, GetItem / GetNamedItemData / GetVertexItemTypes / GetCompatibleVertexItemTypes
+0x10010700..0x10010940, Get/SetApiFlags 0x1000ae00 / 0x10021a60. Tables: per item type 0x14 bytes at
+0x100b8968 (default data type, semantic, a PString* name?, the default name PString at +0xc = 0x100b8974),
+element sizes 0x10062760 (0xc per data type; +4 a bool), the registry (FUN_100571f0 find by name node,
+FUN_10057110 insert, FUN_10056220 entry, FUN_10057180 clear, FUN_10054c10 for-each) in the original's statics.
+CompareVertex compares streams by FUN_10056310 (stride, counts, items field by field). The test's
 ResetLexStatics keeps 0xb80a0..0xb8113 (VertexProgramBasic's statics, set by the API module).
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,

@@ -99,7 +99,9 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        TextureCombiner; 50 exports, 1186/2687, `tests/diff_rs_u3.cpp`) done 2026-10-27, U3a2 (their managers and
        resources; 35 exports, 1221/2687) done 2026-10-27, U3b1 (VertexProgramBasic; 54 exports, 1275/2687) done
        2026-10-27, and U3b2 (CGShaderLoader/Technique/Constant, GLSLShaderBase; 48 exports, 1323/2687) done
-       2026-10-27. U3 is complete. Next: 8d, U5 (geometry).
+       2026-10-27. U3 is complete. Next: 8d, U5 (geometry), split into U5a (VertexType + registry,
+       VertexBufferManager, StaticBuffer, RenderingCache(+Manager), chunk hints), U5b (GeometryChunk), U5c (the
+       stream chunks and GeometryChunkTemplate); notes/RenderSystem.md. Next: U5a.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
