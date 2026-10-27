@@ -1975,6 +1975,42 @@ unit order in `notes/WaterSystem.md`.
   whatever window holds the foreground, not a regression.
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U3b2, the Cg loader and GLSLShaderBase (2026-10-27): 1323/2687 exports ours
+- `ShaderLoaders.cpp`, 48 exports. U3 is complete.
+- CGShaderLoader (0x20 bytes: vftable, the last error String +4, two MSVC8 `std::map<const char*, T*>` +8 / +0x14
+  for techniques and constants). The maps are written out with their VC8 layout ({allocator byte, head,
+  size}; nodes {left, parent, right, key, value, colour, isnil}, 0x18 bytes on the Jet heap, keys compared
+  with strcmp) and the Dinkumware algorithms the loader instantiates: insert with a hint (operator[]),
+  insert, the red-black fix-up and rotations, copy, clear and lower_bound/find.
+  - GetShader / GetShaderConstant find by name, else ask the API module's slot 4 / 5 (thiscall), keep the
+    object under a Jet-heap copy of the name, or set the error text.
+  - Release deletes every name and object in key order, then the nodes. The copy constructor and operator=
+    copy the trees and share the names and objects.
+  - The base slots return without popping their thiscall argument. Called through the original's
+    GetShader, they make it restore the wrong registers, so only loaders with real factories can use it.
+- CGShaderTechnique / CGShaderConstant: empty bases (every slot 0 / false; their deleting destructors are
+  slots 5 / 13).
+- GLSLShaderBase (0x2c bytes on ReferenceCount: name +8, the uniforms +0xc, the vertex attributes +0x18,
+  an unset int +0x24, several light modes +0x28). The constructor binds position, texture0uv, color0 and
+  normal.
+  - SetParameter / SetParameterArray find or make a record per name (sized by value type). On first use
+    they resolve it through the API's slot 8 for each light mode, then store a value only when it changed:
+    NaN always counts as changed, and arrays are stored as their pointer. Each store marks all light modes
+    dirty.
+  - The original copies some floats with x87 loads, which would quiet a signalling NaN; ours copies them as
+    they are (no SNaN reaches these).
+- Test `tests/diff_rs_u3.cpp` part "shaders" (200 scenarios, 0 mismatches; the whole test 1000). Stand-in
+  factories and uniform locations; both trees dumped node by node (links, colours, keys, values) after each
+  request, copy, assignment and Release. GLSL uniforms of every type with repeated and NaN values, attribute
+  rebinding, IsTextureUsed, IndexForLightMode.
+  - Mutations caught: 24 of 26 (the key order, rotations, leftmost/rightmost upkeep, root colour, hinted
+    insert positions, copy order and size, clear order, Release order, find, light-mode resolution, record
+    growth, dirty flags, change tests, transpose flags, attribute rebinding and defaults, light-mode index,
+    record sizes, the error copy). Both survivors give the same result as the original: an unhinted insert
+    lands where the hint puts it, and the attribute array's growth formula differs only for counts it
+    never reaches.
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

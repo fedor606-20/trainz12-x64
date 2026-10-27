@@ -838,4 +838,158 @@ protected:
 };
 JET_LAYOUT32(sizeof(VertexProgramBasic) == 0xb4);
 
+// ---- U3b2 (RenderSystem_7c/ShaderLoaders.cpp)
+
+class Matrix3;
+class Matrix4;
+
+// a technique / constant of the API module's Cg effects; this base answers 0 / false everywhere
+class CGShaderTechnique {
+public:
+    CGShaderTechnique();
+    CGShaderTechnique(const CGShaderTechnique& o);
+    CGShaderTechnique& operator=(const CGShaderTechnique& o);
+    virtual int __cdecl Slot0();  // 0..4: the API module's
+    virtual int __cdecl Slot1();
+    virtual int __cdecl Slot2();
+    virtual int __cdecl Slot3();
+    virtual int __cdecl Slot4();
+    JET_HEAP_OBJECT
+
+protected:
+    friend class CGShaderLoader;
+    virtual ~CGShaderTechnique();  // 5
+};
+
+class DisplayTexture;
+class CGShaderConstant {
+public:
+    CGShaderConstant();
+    CGShaderConstant(const CGShaderConstant& o);
+    CGShaderConstant& operator=(const CGShaderConstant& o);
+    virtual bool __cdecl Set1f(float x) const;  // 0..11 (all false here)
+    virtual bool __cdecl Set2f(float x, float y) const;
+    virtual bool __cdecl Set3f(float x, float y, float z) const;
+    virtual bool __cdecl Set4f(float x, float y, float z, float w) const;
+    virtual bool __cdecl SetArray1f(const float* v, int first, int count) const;
+    virtual bool __cdecl SetArray3f(const float* v, int first, int count) const;
+    virtual bool __cdecl SetArray4f(const float* v, int first, int count) const;
+    virtual bool __cdecl SetMatrix4x4(const float* const m) const;
+    virtual bool __cdecl SetMatrix4x4Array(const float* m, unsigned int first, unsigned int count) const;
+    virtual bool __cdecl SetMatrix4x4Index(const float* const m, unsigned int index) const;
+    virtual bool __cdecl SetMatrix4x4Transpose(const float* const m) const;
+    virtual bool __cdecl SetTexture(DisplayTexture* t) const;
+    virtual int __cdecl Slot12();
+    JET_HEAP_OBJECT
+
+protected:
+    friend class CGShaderLoader;
+    virtual ~CGShaderConstant();  // 13
+};
+
+// an MSVC8 std::map<const char*, T*> node (strcmp order) on the Jet heap: the API modules walk these inline
+struct ShaderMapNode {
+    ShaderMapNode* left;    // +0
+    ShaderMapNode* parent;  // +4
+    ShaderMapNode* right;   // +8
+    char* key;              // +0xc (owned by the loader)
+    void* value;            // +0x10
+    char color;             // +0x14 (0 red, 1 black)
+    char isNil;             // +0x15
+};
+JET_LAYOUT32(sizeof(ShaderMapNode) == 0x18);
+struct ShaderMap {
+    unsigned char allocator;  // +0 (the empty allocator object, never written)
+    ShaderMapNode* head;      // +4 (head->parent the root, ->left the first, ->right the last)
+    unsigned int size;        // +8
+};
+
+// The API module's Cg effect loader (0x20 bytes): techniques and constants by name, made by its slots 4 / 5 on
+// first use and kept with a copy of the name; the last failure's text
+class CGShaderLoader {
+public:
+    CGShaderLoader();
+    CGShaderLoader(const CGShaderLoader& o);
+    CGShaderLoader& operator=(const CGShaderLoader& o);
+    virtual ~CGShaderLoader();  // 0
+    virtual int __cdecl Slot1();
+    virtual int __cdecl Slot2();
+    virtual int __cdecl Slot3();
+    virtual CGShaderTechnique* CreateTechnique(const char* name);  // 4 (thiscall): 0 here
+    virtual CGShaderConstant* CreateConstant(const char* name);    // 5
+
+    CGShaderTechnique* __cdecl GetShader(const char* name);
+    CGShaderConstant* __cdecl GetShaderConstant(const char* name);
+    const String& __cdecl GetLastError() const;
+    void Release();  // every technique and constant with its name
+    JET_HEAP_OBJECT
+
+protected:
+    String lastError;     // +4
+    ShaderMap techniques;  // +8
+    ShaderMap constants;   // +0x14
+};
+JET_LAYOUT32(sizeof(CGShaderLoader) == 0x20);
+
+// The base of the API modules' GLSL shaders (0x2c bytes): its name, the uniforms set so far (each resolved once
+// per light mode through slot 8, then written only when the value changes) and the vertex attribute names
+class GLSLShaderBase : public ReferenceCount {
+public:
+    enum LightMode {};
+    // a uniform (0x24 bytes and its value): type 0 float .. 4 colour, 5 / 6 Matrix3 / Matrix4, 7..9 arrays
+    struct Parameter {
+        PString name;      // +0
+        int type;          // +4
+        int state;         // +8 (0 new, 1 not found, 2 found)
+        int count;         // +0xc
+        bool transpose;    // +0x10
+        int location[3];   // +0x14 by light mode
+        bool dirty[3];     // +0x20
+        float value[16];   // +0x24 (as long as its type needs; arrays: the pointer)
+    };
+    struct Attribute {  // 8
+        PString name;
+        VertexItemType type;
+    };
+
+    void __cdecl BindVertexAttribute(const PString& name, VertexItemType type);
+    void __cdecl SetParameter(const PString& name, float v);
+    void __cdecl SetParameter(const PString& name, const Vector2& v);
+    void __cdecl SetParameter(const PString& name, const Vector3& v);
+    void __cdecl SetParameter(const PString& name, const Vector4& v);
+    void __cdecl SetParameter(const PString& name, const Color& v);
+    void __cdecl SetParameter(const PString& name, const Matrix3& m, bool transpose);
+    void __cdecl SetParameter(const PString& name, const Matrix4& m, bool transpose);
+    void __cdecl SetParameterArray(const PString& name, const float* v, int count);
+    void __cdecl SetParameterArray(const PString& name, const Color* v, int count);
+    void __cdecl SetParameterArray(const PString& name, const Matrix4* m, int count, bool transpose);
+    bool __cdecl IsTextureUsed(LightMode mode, const PString& name) const;
+    const PString& __cdecl GetName() const;
+    JET_HEAP_OBJECT
+
+protected:
+    explicit GLSLShaderBase(bool lightModes);
+    ~GLSLShaderBase() override;
+
+    virtual int __cdecl Slot2();  // 2..7: the API module's
+    virtual int __cdecl Slot3();
+    virtual int __cdecl Slot4();
+    virtual int __cdecl Slot5();
+    virtual int __cdecl Slot6();
+    virtual int __cdecl Slot7();
+    virtual int __cdecl GetUniformLocation(int mode, const PString& name) const;  // 8: -1 when not there
+
+    int __cdecl IndexForLightMode(LightMode mode) const;  // the mode when there are several, else 0
+    Parameter* Resolve(const PString& name, unsigned int size, int type);
+
+    PString name;                                          // +8
+    unsigned int paramCount, paramCapacity;                // +0xc
+    Parameter** params;                                    // +0x14
+    unsigned int attributeCount, attributeCapacity;        // +0x18
+    Attribute* attributes;                                 // +0x20
+    int field24;                                           // +0x24 (left as it is)
+    bool lightModes;                                       // +0x28 three light modes, not one
+};
+JET_LAYOUT32(sizeof(GLSLShaderBase) == 0x2c);
+
 }  // namespace Jet

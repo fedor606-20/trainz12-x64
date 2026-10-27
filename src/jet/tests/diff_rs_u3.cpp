@@ -13,7 +13,9 @@
 //        [rounds]
 #include <windows.h>
 
+#include <algorithm>
 #include <cctype>
+#include <limits>
 #include <cstdarg>
 #include <cstdint>
 #include <cstdio>
@@ -70,6 +72,8 @@ static void Log(const char* fmt, ...)
     std::vsnprintf(buf, sizeof buf, fmt, ap);
     va_end(ap);
     if (cur >= 0) logText[cur] += buf;
+    static const bool echo = std::getenv("RS_U3_ECHO") != nullptr;  // (to find a hang)
+    if (echo) std::fputs(buf, stdout);
 }
 
 static std::string Name(const void* p)
@@ -1909,6 +1913,297 @@ static void RunBasic(int s, unsigned seed)
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+// U3b2: CGShaderLoader (its two MSVC8 maps dumped node by node) and GLSLShaderBase, with stand-in API slots
+
+#define CGL "CGShaderLoader@Jet@@"
+#define GLSL "GLSLShaderBase@Jet@@"
+
+struct ApiS {
+    void(__fastcall* loaderCtor)(void*, void*);
+    void(__fastcall* loaderCopy)(void*, void*, const void*);
+    void*(__fastcall* loaderAssign)(void*, void*, const void*);
+    void(__fastcall* release)(void*, void*);
+    void** loaderVft;
+    void*(__cdecl* getShader)(void*, const char*);
+    void*(__cdecl* getConstant)(void*, const char*);
+    const void*(__cdecl* lastError)(const void*);
+    void(__fastcall* techCtor)(void*, void*);
+    void(__fastcall* constCtor)(void*, void*);
+    void(__fastcall* glslCtor)(void*, void*, bool);
+    void** glslVft;
+    void(__cdecl* bind)(void*, const void*, int);
+    void(__cdecl* setF)(void*, const void*, float);
+    void(__cdecl* setV[4])(void*, const void*, const float*);  // Vector2, Vector3, Vector4, Color
+    void(__cdecl* setM3)(void*, const void*, const float*, bool);
+    void(__cdecl* setM4)(void*, const void*, const float*, bool);
+    void(__cdecl* setArrF)(void*, const void*, const float*, int);
+    void(__cdecl* setArrC)(void*, const void*, const float*, int);
+    void(__cdecl* setArrM)(void*, const void*, const float*, int, bool);
+    bool(__cdecl* isTextureUsed)(const void*, int, const void*);
+    int(__cdecl* indexForMode)(const void*, int);
+    const void*(__cdecl* getName)(const void*);
+} apiS[2];
+
+static void LoadApiS(int s)
+{
+    ApiS& a = apiS[s];
+    a.loaderCtor = As<decltype(a.loaderCtor)>(F("??0" CGL "QAE@XZ"));
+    a.loaderCopy = As<decltype(a.loaderCopy)>(F("??0" CGL "QAE@ABV01@@Z"));
+    a.loaderAssign = As<decltype(a.loaderAssign)>(F("??4" CGL "QAEAAV01@ABV01@@Z"));
+    a.release = As<decltype(a.release)>(F("?Release@" CGL "QAEXXZ"));
+    a.loaderVft = static_cast<void**>(F("??_7" CGL "6B@"));
+    a.getShader = As<decltype(a.getShader)>(F("?GetShader@" CGL "QAAPAVCGShaderTechnique@2@PBD@Z"));
+    a.getConstant = As<decltype(a.getConstant)>(F("?GetShaderConstant@" CGL "QAAPAVCGShaderConstant@2@PBD@Z"));
+    a.lastError = As<decltype(a.lastError)>(F("?GetLastError@" CGL "QBAABVString@2@XZ"));
+    a.techCtor = As<decltype(a.techCtor)>(F("??0CGShaderTechnique@Jet@@QAE@XZ"));
+    a.constCtor = As<decltype(a.constCtor)>(F("??0CGShaderConstant@Jet@@QAE@XZ"));
+    a.glslCtor = As<decltype(a.glslCtor)>(F("??0" GLSL "IAE@_N@Z"));
+    a.glslVft = static_cast<void**>(F("??_7" GLSL "6B@"));
+    a.bind = As<decltype(a.bind)>(F("?BindVertexAttribute@" GLSL "QAAXABVPString@2@W4VertexItemType@2@@Z"));
+    a.setF = As<decltype(a.setF)>(F("?SetParameter@" GLSL "QAAXABVPString@2@M@Z"));
+    const char* vec[4] = {"Vector2", "Vector3", "Vector4", "Color"};
+    for (int k = 0; k < 4; ++k)
+        a.setV[k] = As<void(__cdecl*)(void*, const void*, const float*)>(
+            F((std::string("?SetParameter@" GLSL "QAAXABVPString@2@ABV") + vec[k] + "@2@@Z").c_str()));
+    a.setM3 = As<decltype(a.setM3)>(F("?SetParameter@" GLSL "QAAXABVPString@2@ABVMatrix3@2@_N@Z"));
+    a.setM4 = As<decltype(a.setM4)>(F("?SetParameter@" GLSL "QAAXABVPString@2@ABVMatrix4@2@_N@Z"));
+    a.setArrF = As<decltype(a.setArrF)>(F("?SetParameterArray@" GLSL "QAAXABVPString@2@PBMH@Z"));
+    a.setArrC = As<decltype(a.setArrC)>(F("?SetParameterArray@" GLSL "QAAXABVPString@2@PBVColor@2@H@Z"));
+    a.setArrM = As<decltype(a.setArrM)>(F("?SetParameterArray@" GLSL "QAAXABVPString@2@PBVMatrix4@2@H_N@Z"));
+    a.isTextureUsed = As<decltype(a.isTextureUsed)>(F("?IsTextureUsed@" GLSL "QBA_NW4LightMode@12@ABVPString@2@@Z"));
+    a.indexForMode = As<decltype(a.indexForMode)>(F("?IndexForLightMode@" GLSL "IBAHW4LightMode@12@@Z"));
+    a.getName = As<decltype(a.getName)>(F("?GetName@" GLSL "QBAABVPString@2@XZ"));
+}
+
+static void* loaderVt[2][6];
+static void* techVt[2][6];
+static void* constVt[2][14];
+static void* glslVt[2][9];
+
+// the API's factories (slots 4 / 5, thiscall: as fastcall with the edx slot unused)
+static int madeObjects;
+static void* __fastcall MakeTechnique(void* self, void*, const char* name)
+{
+    const bool none = std::strchr(name, 'q') != nullptr;
+    Log("  create technique %s [%s]%s\n", Name(self).c_str(), name, none ? " -> none" : "");
+    if (none) return nullptr;
+    void* t = RealNew(4);
+    apiS[cur].techCtor(t, nullptr);
+    *static_cast<void**>(t) = techVt[cur];
+    names[cur][t] = "T" + std::to_string(madeObjects++);
+    return t;
+}
+static void* __fastcall MakeConstant(void* self, void*, const char* name)
+{
+    const bool none = std::strchr(name, 'z') != nullptr;
+    Log("  create constant %s [%s]%s\n", Name(self).c_str(), name, none ? " -> none" : "");
+    if (none) return nullptr;
+    void* c = RealNew(4);
+    apiS[cur].constCtor(c, nullptr);
+    *static_cast<void**>(c) = constVt[cur];
+    names[cur][c] = "K" + std::to_string(madeObjects++);
+    return c;
+}
+static int __cdecl Uniform(const void* self, int mode, const void* name)
+{
+    const std::string text = NodeText(*static_cast<void* const*>(name));
+    int h = 0;
+    for (char c : text) h = h * 31 + c;
+    const int loc = (h & 3) == 0 || ((h >> 2) + mode) % 3 == 0 ? -1 : (h & 4) ? 0 : (h & 0xff) + mode;
+    Log("  uniform %s mode %d %s -> %d\n", Name(self).c_str(), mode, text.c_str(), loc);
+    return loc;
+}
+
+static void DumpTree(const void* node, const void* head, int depth, std::string& out)
+{
+    if (node == head) return;
+    const auto* n = static_cast<const unsigned char*>(node);
+    auto ptr = [&](int off) { return *reinterpret_cast<void* const*>(n + off); };
+    if (n[0x15]) {
+        out += " nil?";
+        return;
+    }
+    char b[200];
+    std::snprintf(b, sizeof b, " (%s %s=%s c%d p%s", Name(node).c_str(), static_cast<const char*>(ptr(0xc)),
+                  Name(ptr(0x10)).c_str(), n[0x14], Name(ptr(4)).c_str());
+    out += b;
+    if (depth < 40) {
+        DumpTree(ptr(0), head, depth + 1, out);
+        out += " |";
+        DumpTree(ptr(8), head, depth + 1, out);
+    }
+    out += ")";
+}
+static void DumpMap(const char* tag, const unsigned char* m)
+{
+    const auto* head = *reinterpret_cast<const unsigned char* const*>(m + 4);
+    auto hp = [&](int off) { return *reinterpret_cast<void* const*>(head + off); };
+    std::string t;
+    DumpTree(hp(4), head, 0, t);
+    Log("    %s size %u head %s nil%d c%d first %s last %s:%s\n", tag, *reinterpret_cast<const unsigned*>(m + 8),
+        Name(head).c_str(), head[0x15], head[0x14], Name(hp(0)).c_str(), Name(hp(8)).c_str(), t.c_str());
+}
+static void DumpLoader(const char* tag, const void* l)
+{
+    const auto* b = static_cast<const unsigned char*>(l);
+    Log("  %s %s: error [%s]\n", tag, Name(l).c_str(), AnsiText(b + 4));
+    DumpMap("techniques", b + 8);
+    DumpMap("constants", b + 0x14);
+}
+
+static void DumpGlsl(const char* tag, const void* g)
+{
+    const auto* b = static_cast<const unsigned char*>(g);
+    auto u32 = [&](int off) { return *reinterpret_cast<const unsigned*>(b + off); };
+    auto ptr = [&](int off) { return *reinterpret_cast<void* const*>(b + off); };
+    Log("  %s %s: rc %u name %s f24 %08x modes %u attrs %u/%u:", tag, Name(g).c_str(), u32(4), NodeText(ptr(8)).c_str(),
+        u32(0x24), b[0x28], u32(0x18), u32(0x1c));
+    const auto* at = static_cast<const unsigned char*>(ptr(0x20));
+    for (unsigned i = 0; i < u32(0x18); ++i)
+        Log(" %s=%d", NodeText(*reinterpret_cast<void* const*>(at + 8 * i)).c_str(), *reinterpret_cast<const int*>(at + 8 * i + 4));
+    Log("\n    params %u/%u:", u32(0xc), u32(0x10));
+    for (unsigned i = 0; i < u32(0xc); ++i) {
+        const auto* p = static_cast<const unsigned char*>(static_cast<void* const*>(ptr(0x14))[i]);
+        auto pi = [&](int off) { return *reinterpret_cast<const int*>(p + off); };
+        const int type = pi(4), state = pi(8);
+        Log(" %s{%s t%d s%d n%d tr%u loc %d %d %d dirty %u%u%u", Name(p).c_str(),
+            NodeText(*reinterpret_cast<void* const*>(p)).c_str(), type, state, state == 2 ? pi(0xc) : -9,
+            state == 2 ? p[0x10] : 9, pi(0x14), pi(0x18), pi(0x1c), p[0x20], p[0x21], p[0x22]);
+        if (state == 2) {
+            static const int floats[10] = {1, 2, 3, 4, 4, 9, 16, 0, 0, 0};
+            if (type >= 7) Log(" -> %s", Name(*reinterpret_cast<void* const*>(p + 0x24)).c_str());
+            else if (type >= 0 && pi(0xc) == 1 && p[0x20]) Log(" %s", Bits(reinterpret_cast<const float*>(p + 0x24), floats[type]).c_str());
+        }
+        Log("}");
+    }
+    Log("\n");
+}
+
+static const char* kShaderNames[] = {"diffuse", "spec", "fx/q1", "bump", "a", "zz", "light", "shadow", "fog", "m",
+                                     "b2", "c3", "tex0", "tex1", "quad", "sky", "water", "glow", "ab", "ba"};
+
+static void RunShaders(int s, unsigned seed)
+{
+    std::mt19937 r(seed);
+    auto P = [&](int lo, int hi) { return lo + static_cast<int>(r() % static_cast<unsigned>(hi - lo + 1)); };
+    ApiS& a = apiS[s];
+    scenarioSeed = seed;
+    madeObjects = 0;
+    // the loader
+    void* l = TestNew(0x20, "Loader%d", 0);
+    a.loaderCtor(l, nullptr);
+    *static_cast<void**>(l) = loaderVt[s];
+    DumpLoader("new", l);
+    for (int step = 0; step < 30; ++step) {
+        const int op = P(0, 9);
+        const char* nm = kShaderNames[P(0, 19)];
+        Log("step %d op %d %s\n", step, op, nm);
+        switch (op) {
+        case 0:
+        case 1:
+        case 2: Log("op get shader %s -> %s\n", nm, Name(a.getShader(l, nm)).c_str()); break;
+        case 3:
+        case 4:
+        case 5: Log("op get constant %s -> %s\n", nm, Name(a.getConstant(l, nm)).c_str()); break;
+        case 6: {  // a copy, dumped and left (it shares the names and objects)
+            void* c = TestNew(0x20, "Copy%d", step);
+            if (P(0, 1)) {
+                a.loaderCopy(c, nullptr, l);
+            } else {
+                a.loaderCtor(c, nullptr);
+                // (the base's slot 4 returns without popping its thiscall argument: the original's GetShader
+                // then restores the wrong registers, so the copy gets the test's factories too)
+                *static_cast<void**>(c) = loaderVt[s];
+                for (int k = P(0, 3); k > 0; --k) a.getShader(c, kShaderNames[P(0, 19)]);
+                a.loaderAssign(c, nullptr, l);
+            }
+            Log("op copy\n");
+            DumpLoader("copy", c);
+            break;
+        }
+        case 7:
+            if (P(0, 3)) break;
+            Log("op release\n");
+            a.release(l, nullptr);
+            break;
+        default: Log("op error [%s]\n", AnsiText(a.lastError(l))); break;
+        }
+        DumpLoader("now", l);
+    }
+    Log("delete loader\n");
+    reinterpret_cast<void*(__fastcall*)(void*, void*, unsigned)>(loaderVt[s][0])(l, nullptr, 1);
+
+    // a GLSL shader
+    void* g = TestNew(0x2c, "Glsl%d", 0);
+    a.glslCtor(g, nullptr, P(0, 1) != 0);
+    *static_cast<void**>(g) = glslVt[s];
+    DumpGlsl("new", g);
+    static float arrays[2][3][64];
+    for (int k = 0; k < 3; ++k) {
+        char b[8];
+        std::snprintf(b, sizeof b, "Arr%d", k);
+        names[s][arrays[s][k]] = b;
+    }
+    float lastV[16] = {};
+    for (int step = 0; step < 40; ++step) {
+        const int op = P(0, 14);
+        void* name = NodeFor(kShaderNames[P(0, 19)]);
+        float v[16];
+        for (float& f : v) f = RandF(r);
+        if (P(0, 2) == 0) std::memcpy(v, lastV, sizeof v);  // the same value again
+        else if (P(0, 3) == 0) std::memcpy(v, lastV, 15 * sizeof(float)), v[P(0, 1) ? 8 : 15] = RandF(r);  // its end
+        if (P(0, 15) == 0) v[P(0, 3)] = std::numeric_limits<float>::quiet_NaN();
+        std::memcpy(lastV, v, sizeof v);
+        const bool tr = P(0, 1) != 0;
+        const int n = P(0, 5);
+        switch (op) {
+        case 0: a.setF(g, &name, v[0]); break;
+        case 1: case 2: case 3: case 4: a.setV[op - 1](g, &name, v); break;
+        case 5: a.setM3(g, &name, v, tr); break;
+        case 6: a.setM4(g, &name, v, tr); break;
+        case 7: a.setArrF(g, &name, arrays[s][P(0, 2)], n); break;
+        case 8: a.setArrC(g, &name, arrays[s][P(0, 2)], n); break;
+        case 9: a.setArrM(g, &name, arrays[s][P(0, 2)], n, tr); break;
+        case 10: {
+            static const int types[] = {1, 2, 4, 0xf, 3, 0x10, 0};
+            a.bind(g, &name, types[P(0, 6)]);
+            break;
+        }
+        case 11: Log("  texture used %d\n", a.isTextureUsed(g, P(0, 2), &name)); break;
+        case 12: Log("  mode index %d %d\n", a.indexForMode(g, P(0, 2)), a.indexForMode(g, P(3, 9))); break;
+        default: Log("  name %s\n", NodeText(*static_cast<void* const*>(a.getName(g))).c_str()); break;
+        }
+        Log("op %d %s\n", op, NodeText(name).c_str());
+        DumpGlsl("now", g);
+    }
+    {  // a matrix uniform set twice, the second time with only its last element changed
+        void* name = NodeFor(kShaderNames[P(0, 19)]);
+        float m[16];
+        for (float& f : m) f = RandF(r);
+        a.setM3(g, &name, m, false);
+        m[8] += 1.0f;
+        a.setM3(g, &name, m, true);
+        a.setM4(g, &name, m, false);
+        m[15] += 1.0f;
+        a.setM4(g, &name, m, true);
+        DumpGlsl("matrices", g);
+    }
+    Log("delete glsl\n");
+    reinterpret_cast<void*(__fastcall*)(void*, void*, unsigned)>(glslVt[s][1])(g, nullptr, 1);
+}
+
+static void MakeShaderVtables(int s)
+{
+    std::memcpy(loaderVt[s], apiS[s].loaderVft, sizeof loaderVt[s]);
+    loaderVt[s][4] = reinterpret_cast<void*>(&MakeTechnique);
+    loaderVt[s][5] = reinterpret_cast<void*>(&MakeConstant);
+    std::memcpy(techVt[s], Proc(mod[s], "??_7CGShaderTechnique@Jet@@6B@"), sizeof techVt[s]);
+    std::memcpy(constVt[s], Proc(mod[s], "??_7CGShaderConstant@Jet@@6B@"), sizeof constVt[s]);
+    std::memcpy(glslVt[s], apiS[s].glslVft, sizeof glslVt[s]);
+    glslVt[s][8] = reinterpret_cast<void*>(&Uniform);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
 
 static void Compare(const char* part, int round)
 {
@@ -2014,13 +2309,16 @@ int main(int argc, char** argv)
         LoadApiM(s);
         LoadApiB(s);
         MakeVpbVtables(s);
+        LoadApiS(s);
+        MakeShaderVtables(s);
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
     }
     struct {
         const char* name;
         void (*run)(int, unsigned);
-    } parts[] = {{"programs", RunPrograms}, {"combiners", RunCombiners}, {"managers", RunManagers}, {"basic", RunBasic}};
+    } parts[] = {{"programs", RunPrograms}, {"combiners", RunCombiners}, {"managers", RunManagers}, {"basic", RunBasic},
+                 {"shaders", RunShaders}};
     const char* only = std::getenv("RS_U3_ONLY");
     for (auto& p : parts) {
         if (only && !std::strstr((std::string(",") + only + ",").c_str(), (std::string(",") + p.name + ",").c_str()))
