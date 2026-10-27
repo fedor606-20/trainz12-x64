@@ -294,4 +294,282 @@ public:
 };
 JET_LAYOUT32(sizeof(TerrainMorphChunkHint) == 0x24);
 
+// ---- U5b (RenderSystem_7c/GeometryChunk.cpp)
+
+class Material;
+class DisplayLight;
+class Vector2;
+struct GeometryStreamType;
+
+// A shared, reference-counted array: one pointer to an Alloc block {references, count, two unused words, items}.
+// Passed by value, the callee lets go of its copy.
+template <class T>
+class AutoReferenceArray {
+public:
+    struct Block {
+        int refs;
+        unsigned int count;
+        int unused[2];
+        T data[1];
+    };
+    AutoReferenceArray() : block(nullptr) {}
+    AutoReferenceArray(const AutoReferenceArray& o) : block(o.block)
+    {
+        if (block) ++block->refs;
+    }
+    ~AutoReferenceArray() { Release(); }
+    AutoReferenceArray& operator=(const AutoReferenceArray&) = delete;
+
+    // a new block of `n` items (one reference)
+    static Block* Make(unsigned int n)
+    {
+        Block* const b = static_cast<Block*>(Alloc::New(n * sizeof(T) + 0x10));
+        b->count = 0;
+        b->refs = 1;
+        b->count += n;
+        return b;
+    }
+    // shares `b` (the inlined assignment: the old block goes first unless it is the same)
+    void Share(Block* b)
+    {
+        if (block == b) return;
+        Release();
+        block = b;
+        if (b) ++b->refs;
+    }
+    void Release()
+    {
+        if (block) {
+            --block->refs;
+            if (!block->refs) {
+                if (block) Alloc::Delete(block);
+                block = nullptr;
+            }
+        }
+    }
+    static void Drop(Block* b)  // a temporary's reference
+    {
+        if (!--b->refs) Alloc::Delete(b);
+    }
+    unsigned int Count() const { return block ? block->count : 0; }
+    T* Data() const { return block ? block->data : nullptr; }
+
+    Block* block;
+};
+
+// A geometry chunk, the base of the API modules' vertex/index buffers (0x4c bytes on ReferenceCount): the
+// primitive type and state flags, the counts, the shared index / face neighbour / face normal arrays, named float
+// properties, the bone matrices it is skinned by. Every slot answering 0 is pure (the module's _purecall answers
+// 0); the stream chunks (U5c) fill them. The interpolation and copy slots (61..70) are U5b2 and call the original
+// for now.
+class GeometryChunk : public ReferenceCount {
+public:
+    struct FaceNeighbors {
+        int face[3];
+    };
+    struct ChunkProperty {  // 8
+        PStringCache::Node* name;
+        float value;
+    };
+    struct PropertyChunk {  // 0x24: a FastDynamicArray<ChunkProperty, 3> chunk
+        PropertyChunk* next;
+        PropertyChunk* prev;
+        unsigned int count;
+        ChunkProperty data[3];
+    };
+    struct RegistrationData {  // 8
+        PString name;
+        GeometryChunk*(__cdecl* create)();
+        JET_HEAP_OBJECT
+    };
+    struct RegistrationDataOp {};
+    using FloatPtr = VertexItemPtr<float, VertexItemPtr<const float, VIPConstHelper>>;
+    using UDwordPtr = VertexItemPtr<unsigned long, VertexItemPtr<const unsigned long, VIPConstHelper>>;
+    using ConstUDwordPtr = VertexItemPtr<const unsigned long, VIPConstHelper>;
+    using ItemTypes = FastDynamicArray<VertexItemType, 13, Less<VertexItemType, VertexItemType>>;
+
+    GeometryChunk();
+    GeometryChunk(unsigned int vertices, unsigned int primitives, unsigned int indices, unsigned int faceNormals,
+                  unsigned int flags);
+
+    virtual int __cdecl Slot2() = 0;
+    virtual int __cdecl Slot3() = 0;
+    virtual bool __cdecl InitializeBuffers(Display* display, bool b) = 0;  // 4 (its body answers true)
+    virtual int __cdecl Slot5() = 0;
+    virtual void __cdecl DuplicateUnsharedArrays(Display* display);  // 6: every vertex array not shared
+    virtual int __cdecl Slot7() = 0;                                 // DuplicateVertexArray(display, i, j)
+    virtual void __cdecl DuplicateIndexArray(Display* display);
+    virtual void __cdecl ResizeVertexArray(Display* display, unsigned int n, int i, int j);  // 9: nothing
+    virtual void __cdecl ResizeIndexArray(Display* display, unsigned int n);
+    virtual void __cdecl AppendChunk(Display* display, const GeometryChunk& o);  // 11
+    virtual int __cdecl Slot12() = 0;
+    virtual int __cdecl Slot13() = 0;
+    virtual int __cdecl Slot14() = 0;
+    virtual int __cdecl Slot15() = 0;
+    virtual int __cdecl Slot16() = 0;
+    virtual int __cdecl Slot17() = 0;
+    virtual int __cdecl Slot18() = 0;
+    virtual int __cdecl Slot19() = 0;
+    virtual int __cdecl Slot20() = 0;
+    virtual int __cdecl Slot21() = 0;
+    virtual int __cdecl Slot22() = 0;
+    virtual int __cdecl Slot23() = 0;
+    virtual int __cdecl Slot24() = 0;
+    virtual int __cdecl Slot25() = 0;
+    virtual int __cdecl Slot26() = 0;
+    virtual int __cdecl Slot27() = 0;
+    virtual int __cdecl Slot28() = 0;
+    virtual void __cdecl SetIndexDataDynamic();        // 29
+    virtual bool __cdecl GetIndexDataDynamic() const;  // 30
+    virtual int __cdecl Slot31() = 0;
+    virtual int __cdecl Slot32() = 0;
+    virtual void __cdecl SetIndexDataDirty(bool on) const;  // 33
+    virtual bool __cdecl GetIndexDataDirty() const;         // 34
+    virtual int __cdecl Slot35() = 0;
+    virtual int __cdecl Slot36() = 0;
+    virtual int __cdecl Slot37() = 0;
+    virtual int __cdecl Slot38() = 0;
+    virtual int __cdecl Slot39() = 0;
+    virtual int __cdecl Slot40() = 0;
+    virtual int __cdecl Slot41() = 0;
+    virtual int __cdecl Slot42() = 0;
+    virtual int __cdecl Slot43() = 0;
+    virtual int __cdecl Slot44() = 0;
+    virtual int __cdecl Slot45() = 0;
+    virtual int __cdecl Slot46() = 0;
+    virtual int __cdecl Slot47() = 0;
+    virtual int __cdecl Slot48() = 0;
+    virtual int __cdecl Slot49() = 0;
+    virtual int __cdecl Slot50() = 0;
+    virtual int __cdecl Slot51() = 0;
+    virtual int __cdecl Slot52() = 0;
+    virtual int __cdecl Slot53() = 0;
+    virtual ConstUDwordPtr __cdecl GetUDwordArray(VertexItemType type, int index) const;  // 54/55: {4, null}
+    virtual UDwordPtr __cdecl GetUDwordArray(VertexItemType type, int index);
+    virtual void __cdecl UpdateLighting(Display* display, const DisplayLight* light, Material* material,
+                                        const Matrix4& a, const Matrix4& b);  // 56
+    virtual void __cdecl ResetToAmbient(Display* display, const Material* material, const Color& ambient);
+    virtual void __cdecl RenderDebug(Display* display) const;  // 58
+    virtual int __cdecl Slot59() = 0;
+    virtual int __cdecl Slot60() = 0;
+    // 61..70: InterpolateChunkData, the eight InterpolateAllChunkData, CopyChunkData (U5b2: the original's)
+    virtual void __cdecl Interpolate61(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
+                                       const Vector3&, const ItemTypes&, int);
+    virtual void __cdecl Interpolate62(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
+                                       const Vector3* const, unsigned int, unsigned int, const ItemTypes&, int);
+    virtual void __cdecl Interpolate63(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
+                                       const Vector3* const, const ItemTypes&, int);
+    virtual void __cdecl Interpolate64(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
+                                       const ItemTypes&, int);
+    virtual void __cdecl Interpolate65(const GeometryChunk*, unsigned int, unsigned int, const Vector2* const,
+                                       unsigned int, unsigned int, const ItemTypes&, int);
+    virtual void __cdecl Interpolate66(const GeometryChunk*, unsigned int, unsigned int, const Vector2* const,
+                                       const ItemTypes&, int);
+    virtual void __cdecl Interpolate67(const GeometryChunk*, unsigned int, unsigned int, const ItemTypes&, int);
+    virtual void __cdecl Interpolate68(const GeometryChunk*, unsigned int, const float* const, unsigned int,
+                                       unsigned int, const ItemTypes&, int);
+    virtual void __cdecl Interpolate69(const GeometryChunk*, unsigned int, const float* const, const ItemTypes&,
+                                       int);
+    virtual void __cdecl Copy70(const GeometryChunk*, unsigned int, unsigned int, unsigned int, const ItemTypes&,
+                                int);
+    virtual bool __cdecl GetLoadChunkDataType(const Array<Array<GeometryStreamType, 1>, 2>& formats,
+                                              unsigned int& index, bool& exact) const;  // 71
+    virtual bool __cdecl LoadChunkData(const Array<GeometryStreamType, 1>& streams, void** const data);  // 72
+
+    unsigned long __cdecl GetFlags() const;
+    void __cdecl SetFlags(unsigned long f);
+    bool __cdecl ContainsUnsharedData() const;
+    unsigned int __cdecl GetNumVertices() const;
+    void __cdecl SetNumVertices(unsigned int n);
+    unsigned int __cdecl GetMaxVertices() const;
+    void __cdecl SetMaxVertices(unsigned int n);
+    unsigned int __cdecl GetNumIndices() const;
+    void __cdecl SetNumIndices(unsigned int n);
+    unsigned int __cdecl GetMaxIndices() const;
+    unsigned int __cdecl GetNumPrimitives() const;
+    void __cdecl SetNumPrimitives(unsigned int n);
+    unsigned int __cdecl GetNumFaceNormals() const;
+    void __cdecl SetNumFaceNormals(unsigned int n);
+    unsigned int __cdecl GetNumFaceNeighbors() const;
+    float __cdecl GetOpacity() const;
+    void __cdecl SetOpacity(Display* display, float opacity);
+    float __cdecl GetSurfaceArea() const;
+    void __cdecl SetSurfaceArea(float a);
+    unsigned long __cdecl GetUserData() const;
+    void __cdecl SetUserData(unsigned long d);
+    ReferenceCount* __cdecl GetRefefencedUserData() const;  // (sic)
+    void __cdecl SetReferencedUserData(ReferenceCount* d);
+    unsigned short* __cdecl GetIndexArray();
+    const unsigned short* __cdecl GetIndexArray() const;
+    void __cdecl SetIndexArray(AutoReferenceArray<unsigned short> a);
+    Vector3* __cdecl GetFaceNormalArray();
+    const Vector3* __cdecl GetFaceNormalArray() const;
+    void __cdecl SetFaceNormalArray(AutoReferenceArray<Vector3> a);
+    FaceNeighbors* __cdecl GetFaceNeighborArray();
+    const FaceNeighbors* __cdecl GetFaceNeighborArray() const;
+    void __cdecl SetFaceNeighborArray(AutoReferenceArray<FaceNeighbors>& a);
+    void __cdecl DuplicateFaceNormalArray();
+    void __cdecl DuplicateFaceNeighborArray();
+    void __cdecl ResizeFaceNormalArray(unsigned int n);
+    void __cdecl ResizeFaceNeighborArray(unsigned int n);
+    bool __cdecl GetVertexIndex(int primitive, int vertex, unsigned int& index) const;
+    unsigned int __cdecl GetVertexIndex(int primitive, int vertex) const;
+    void __cdecl GetTriangleIndexes(int primitive, unsigned long& a, unsigned long& b, unsigned long& c) const;
+    bool __cdecl AddChunkProperty(const PString& name);  // 0.0, unless it exists
+    bool __cdecl SetChunkProperty(const PString& name, float value);
+    bool __cdecl GetChunkProperty(const PString& name, float& value) const;
+    bool __cdecl RemoveChunkProperty(const PString& name);
+    bool __cdecl ChunkPropertyExists(const PString& name) const;
+    int __cdecl AddInfluenceMatrix(int index);  // its slot, made when new
+    bool __cdecl AssignInfluenceMatrix(int index, const Matrix4* m);
+    void __cdecl ResetMatrixArray();
+    Array<VertexProgram::MatrixMap*, 128>& __cdecl GetInfluenceArray();
+    const Array<VertexProgram::MatrixMap*, 128>& __cdecl GetInfluenceArray() const;
+    void __cdecl SetVertexType(Display* display, VertexTypeID id, int stream) const;
+    void __cdecl RenderChunkColor(Display* display) const;  // nothing
+    void __cdecl RenderOutlines(Display* display) const;
+    void __cdecl RenderVertexNormals(Display* display) const;
+    void __cdecl RenderTriangleNormals(Display* display) const;
+    void __cdecl RenderAxes(Display* display) const;
+
+    static bool __cdecl RegisterName(const PString& name, GeometryChunk*(__cdecl* create)());
+    static GeometryChunk* __cdecl CreateRegisteredInstance(const PString& name);
+    static void __cdecl ReleaseRegistrationData();
+
+    JET_HEAP_OBJECT
+
+protected:
+    ~GeometryChunk() override;
+    void __cdecl InitInstance(GeometryChunk& to) const;  // shares the arrays, copies the counts and bones
+    void __cdecl SetConstFlags(unsigned long f) const;
+
+    // the chunk properties: FastDynamicArray<ChunkProperty, 3> (0x1002ada0 lets go of them)
+    struct Properties {
+        PropertyChunk* head = nullptr;
+        ~Properties();
+    };
+
+    Properties properties;                              // +8
+    Array<VertexProgram::MatrixMap*, 128> influences;   // +0xc
+    mutable unsigned long flags;                        // +0x18 (bits 0..4 primitive, 8 dynamic, 9 dirty, ...)
+    unsigned int numPrimitives;                         // +0x1c
+    unsigned int numIndices;                            // +0x20
+    unsigned int numVertices;                           // +0x24
+    unsigned int maxVertices;                           // +0x28
+    AutoReferenceArray<unsigned short> indexArray;      // +0x2c
+    AutoReferenceArray<FaceNeighbors> faceNeighbors;    // +0x30
+    AutoReferenceArray<Vector3> faceNormals;            // +0x34
+    unsigned int numFaceNormals;                        // +0x38
+    float opacity;                                      // +0x3c
+    float surfaceArea;                                  // +0x40
+    unsigned long userData;                             // +0x44
+    ReferenceCount* referencedUserData;                 // +0x48
+
+    static __declspec(dllimport) HashTable<unsigned int, RegistrationData*, RegistrationDataOp, 13> registrations;
+
+private:
+    const GeometryChunk& operator=(const GeometryChunk& o);  // 0x10038c50: nothing
+};
+JET_LAYOUT32(sizeof(GeometryChunk) == 0x4c);
+
 }  // namespace Jet

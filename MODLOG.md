@@ -2053,6 +2053,40 @@ unit order in `notes/WaterSystem.md`.
     always found in the stream GetItemStream picked).
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U5b1, GeometryChunk without the interpolation (2026-10-28): 1502/2687 exports ours
+- `GeometryChunk.cpp`, 82 exports. U5b was split: U5b1 (this step) and U5b2 (InterpolateChunkData,
+  InterpolateAllChunkData, GetAllChunkWeights, CopyChunkData: ~14 KB of float code). Until U5b2, slots 61..70 of
+  our vftable call the original's exports through GetProcAddress.
+- GeometryChunk (0x4c on ReferenceCount) is the base of the API modules' vertex and index buffers: primitive type
+  and state flags, counts, three shared reference-counted arrays (indices, face neighbours, face normals), named
+  float properties, bone matrices, opacity, surface area, user data. Layout and the 73 vftable slots in
+  notes/RenderSystem.md.
+- Every vftable slot of TS12 that "answers 0" is a pure virtual. The module's `_purecall` is `xor eax, eax; ret`,
+  so a call into a pure slot returns 0 instead of aborting. Our module defines the same `_purecall`. This is also
+  why base slot 4 answers 0 while the exported `GeometryChunk::InitializeBuffers` answers true (a pure virtual
+  with a body).
+- TS12 behaviour kept:
+  - Without an index array, the index lookups (GetVertexIndex, GetTriangleIndexes) read address 0x10: the code
+    tests `block + 0x10 != 0`.
+  - RenderOutlines advances two vertices per triangle while writing six, so only the last triangle keeps all its
+    edges, and the draw call reads unwritten stack after it.
+  - A fan triangle n is (0, n, n+1).
+  - Several floats go through the x87 stack (InitInstance, outline positions, GetChunkProperty, property removal),
+    which quiets a signalling NaN. Ours does the same explicitly.
+  - With two NaN operands, SSE `addss`/`mulss` return the first one, so operand order matters. Today's compiler
+    commutes even `_mm_add_ss`, so the vertex/triangle normal lines and ResetToAmbient use inline assembly.
+  - ReleaseRegistrationData frees the registry entries but leaves null slots in the buckets (any later lookup
+    faults in both modules). The registry stays the original's static.
+- Test `tests/diff_rs_u5.cpp` part "chunks" (300 scenarios per run, 1500 checked once, 0 mismatches; the whole
+  test 1200). Chunks are built with each side's constructors, then given a test vftable whose pure slots provide
+  vertex arrays, a vertex type built with that side's VertexType, static buffers and logging. Covered: index
+  lookups for every primitive type, properties, bones, the array set/duplicate/resize calls, InitInstance,
+  AppendChunk, the load format choice and loading, opacity, ambient and lighting, the debug drawing (lines compared
+  as far as written), the registry. A stand-in display has debug flags, state block and line drawing; there is
+  also a stand-in light and material.
+  - Mutations caught: 61 of 61. The test was strengthened along the way (the name reference counts, properties over several chunks, signalling NaNs passed as bits: a float returned by value goes through the x87 stack and comes back quiet, inexact sums for the addition order); one mutant writing past a block end shows as a heap fault.
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

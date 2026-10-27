@@ -408,8 +408,9 @@ public:
         int field14, field18;
         int lightType;   // +0x1c
     };
-    struct MatrixMap {
+    struct MatrixMap {          // 8, made by GeometryChunk::AddInfluenceMatrix
         const Matrix4* matrix;  // +0
+        int index;              // +4 the bone index
     };
 
     static bool __cdecl SupportedByPlatform(Display* display, float generation);  // generations 1..2, asked once

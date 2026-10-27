@@ -63,6 +63,31 @@ Begin), Enter, Leave). RenderingCacheManager 0x10: a ring through the caches' IL
 empty; display +4, dynamic sizes +8/+0xc, BufferStats 0x48 at +0x10, CriticalSection +0x6c). The internal
 NullVertexBufferManager (0x1001e5b0..) is made only by the Display and stays with U9. Display::CreateVertexTypeObject
 (0x10011f00, 38 KB) and Get/CloneBuiltInVertexType belong to U9.
+U5b split 2026-10-28: U5b1 GeometryChunk without the interpolation (GeometryChunk.cpp; 82 exports, 1502/2687; test
+diff_rs_u5 part "chunks") done 2026-10-28; U5b2 = InterpolateChunkData (2), InterpolateAllChunkData (8),
+GetAllChunkWeights, CopyChunkData (0x10026e70..0x1002a720, ~14 KB of float code); until then our vftable slots
+61..70 call the original's exports through GetProcAddress. GeometryChunk 0x4c on ReferenceCount: +8 properties
+(FastDynamicArray<{name node, float}, 3>, chunk 0x24), +0xc Array<VertexProgram::MatrixMap*,128> bones (MatrixMap
+{matrix, index} 8 bytes; growth to count+1 rounded up to 128), +0x18 flags (bits 0..4 primitive: 0 points, 1 line
+list, 2 line strip, 4 triangle list, 8 strip, 0x10 fan; 0x20 lit; 0x100 index dynamic; 0x200 index dirty; 0x1000
+unshared), +0x1c primitives, +0x20 indices, +0x24 vertices (the default constructor leaves it), +0x28 max vertices,
++0x2c/+0x30/+0x34 AutoReferenceArray blocks {refs, count, 2 unused, items} of indices (u16), face neighbours (0xc)
+and face normals (Vector3), +0x38 face normal count, +0x3c opacity (1.0), +0x40 surface area, +0x44 user data,
++0x48 referenced user data. 73 slots; every "answers 0" slot of the TS12 vftables is a pure virtual: the module's
+_purecall is `xor eax, eax; ret` (ours defines the same), which is why base slot 4 answers 0 while the exported
+GeometryChunk::InitializeBuffers answers true. Slot names from the stream chunks' vftables: 2/3 CreateInstance,
+4 InitializeBuffers, 5 LoadBuffers, 7 DuplicateVertexArray, 9 ResizeVertexArray, 12/13 GetVertexArray, 14
+RenderGeometry, 15 RenderPrimitives, 16/17 SetupMultipassRender, 19 BindVertexProgram, 20/21 RenderGeometryPass, 22
+CleanupMultipassRender, 23/24 stream / buffer counts (AppendChunk loops vertex types x streams), 25..32 vertex data
+dynamic/shared/dirty, 35..38 static vertex / index buffers, 39/40 AssignVertexType / SetVertexType, 41
+GetVertexType(i), 42 GetVertexTypeID, 43 GetVertexSize, 44 GetItemOffset, 45 GetItemStream, 46..53 GetFloatArray,
+54/55 GetUDwordArray, 59/60 Set/GetVertexProgram. TS12 quirks kept: without an index array the index lookups
+read address 0x10 (the test avoids it); RenderOutlines advances 2 vertices per triangle while writing 6 (only the
+last triangle is whole, the draw reads unwritten stack after it); a fan triangle n is (0, n, n+1); x87 copies quiet
+signalling NaNs (InitInstance, outlines, GetChunkProperty, property removal); SSE operand order decides which NaN
+comes out (kept with inline asm, the compiler commutes even intrinsics). The registry (HashTable of {name,
+creator}) stays the original's; ReleaseRegistrationData frees the entries but leaves null slots in the buckets (a
+later lookup faults in both).
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile

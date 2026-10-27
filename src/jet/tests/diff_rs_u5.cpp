@@ -404,10 +404,12 @@ static void LoadApi(int s)
 // the original's VertexType statics both sides use
 static void** displayStatic;
 static void (*origShutdown)();
+static void ClearChunkRegistry();
 static void FreshStatics()
 {
     origShutdown();
     *displayStatic = nullptr;
+    ClearChunkRegistry();
 }
 
 // ---- vertex types
@@ -1040,6 +1042,857 @@ static void RunMisc(int s, unsigned seed)
     }
 }
 
+// ---- geometry chunks (U5b1)
+
+#define GC "GeometryChunk@Jet@@"
+#define GC_FDA "ABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z"
+
+struct ApiC {
+    void*(__fastcall* ctor0)(void*, void*);
+    void*(__fastcall* ctor5)(void*, void*, unsigned, unsigned, unsigned, unsigned, unsigned);
+    void** vft;
+    void*(__fastcall* assign)(void*, void*, const void*);
+    void(__cdecl* initInstance)(const void*, void*);
+    bool(__cdecl* initBuffers)(void*, void*, bool);
+    unsigned long(__cdecl* getFlags)(const void*);
+    void(__cdecl* setFlags)(void*, unsigned long);
+    void(__cdecl* setConstFlags)(const void*, unsigned long);
+    bool(__cdecl* unshared)(const void*);
+    unsigned(__cdecl* getU[8])(const void*);  // vertices, max vertices, indices, max indices, primitives, face normals, face neighbours, user
+    void(__cdecl* setU[6])(void*, unsigned);  // vertices, max vertices, indices, primitives, face normals, user
+    float(__cdecl* getOpacity)(const void*);
+    float(__cdecl* getSurface)(const void*);
+    void(__cdecl* setSurface)(void*, float);
+    void*(__cdecl* getRefUser)(const void*);
+    void(__cdecl* setRefUser)(void*, void*);
+    void*(__cdecl* getIndexArray)(const void*);
+    void*(__cdecl* getFaceNormals)(const void*);
+    void*(__cdecl* getFaceNeighbors)(const void*);
+    void(__cdecl* setIndexArray)(void*, void*);
+    void(__cdecl* setFaceNormals)(void*, void*);
+    void(__cdecl* setFaceNeighbors)(void*, void**);
+    void(__cdecl* dupFaceNormals)(void*);
+    void(__cdecl* dupFaceNeighbors)(void*);
+    void(__cdecl* resizeFaceNormals)(void*, unsigned);
+    void(__cdecl* resizeFaceNeighbors)(void*, unsigned);
+    bool(__cdecl* vertexIndex3)(const void*, int, int, unsigned*);
+    unsigned(__cdecl* vertexIndex2)(const void*, int, int);
+    void(__cdecl* triangle)(const void*, int, unsigned long*, unsigned long*, unsigned long*);
+    bool(__cdecl* addProp)(void*, const void*);
+    bool(__cdecl* setProp)(void*, const void*, float);
+    bool(__cdecl* getProp)(const void*, const void*, float*);
+    bool(__cdecl* removeProp)(void*, const void*);
+    bool(__cdecl* propExists)(const void*, const void*);
+    int(__cdecl* addInfluence)(void*, int);
+    bool(__cdecl* assignInfluence)(void*, int, const void*);
+    void(__cdecl* resetMatrices)(void*);
+    void*(__cdecl* influenceArray)(const void*);
+    void(__cdecl* setVertexType)(const void*, void*, int, int);
+    void(__cdecl* setOpacity)(void*, void*, float);
+    void(__cdecl* renderColor)(const void*, void*);
+    void(__cdecl* renderOutlines)(const void*, void*);
+    void(__cdecl* renderVertexNormals)(const void*, void*);
+    void(__cdecl* renderTriangleNormals)(const void*, void*);
+    void(__cdecl* renderAxes)(const void*, void*);
+    bool(__cdecl* registerName)(const void*, void* (*)());
+    void*(__cdecl* createRegistered)(const void*);
+    void(__cdecl* releaseRegistrations)();
+    void*(__cdecl* udword)(const void*, void*, int, int);
+    void*(__cdecl* udwordConst)(const void*, void*, int, int);
+    // virtual slots called directly
+    void(__cdecl* dupUnshared)(void*, void*);
+    void(__cdecl* dupIndex)(void*, void*);
+    void(__cdecl* resizeIndex)(void*, void*, unsigned);
+    void(__cdecl* resizeVertex)(void*, void*, unsigned, int, int);
+    void(__cdecl* append)(void*, void*, const void*);
+    void(__cdecl* setIndexDynamic)(void*);
+    bool(__cdecl* getIndexDynamic)(const void*);
+    void(__cdecl* setIndexDirty)(const void*, bool);
+    bool(__cdecl* getIndexDirty)(const void*);
+    void(__cdecl* updateLighting)(void*, void*, const void*, void*, const void*, const void*);
+    void(__cdecl* resetToAmbient)(void*, void*, const void*, const void*);
+    void(__cdecl* renderDebug)(const void*, void*);
+    bool(__cdecl* loadType)(const void*, const void*, unsigned*, bool*);
+    bool(__cdecl* loadData)(void*, const void*, void**);
+};
+static ApiC apiC[2];
+
+static void LoadApiC(int s)
+{
+    ApiC& a = apiC[s];
+    HMODULE m = mod[s];
+#define F(name) Proc(m, name)
+#define A(field, name) a.field = As<decltype(a.field)>(F(name))
+    A(ctor0, "??0" GC "QAE@XZ");
+    A(ctor5, "??0" GC "QAE@IIIII@Z");
+    a.vft = static_cast<void**>(F("??_7" GC "6B@"));
+    A(assign, "??4" GC "AAEABV01@ABV01@@Z");
+    A(initInstance, "?InitInstance@" GC "IBAXAAV12@@Z");
+    A(initBuffers, "?InitializeBuffers@" GC "UAA_NPAVDisplay@2@_N@Z");
+    A(getFlags, "?GetFlags@" GC "QBAKXZ");
+    A(setFlags, "?SetFlags@" GC "QAAXK@Z");
+    A(setConstFlags, "?SetConstFlags@" GC "IBAXK@Z");
+    A(unshared, "?ContainsUnsharedData@" GC "QBA_NXZ");
+    const char* gets[8] = {"?GetNumVertices@" GC "QBAIXZ", "?GetMaxVertices@" GC "QBAIXZ", "?GetNumIndices@" GC "QBAIXZ",
+                           "?GetMaxIndices@" GC "QBAIXZ",  "?GetNumPrimitives@" GC "QBAIXZ", "?GetNumFaceNormals@" GC "QBAIXZ",
+                           "?GetNumFaceNeighbors@" GC "QBAIXZ", "?GetUserData@" GC "QBAKXZ"};
+    for (int k = 0; k < 8; ++k) a.getU[k] = As<unsigned(__cdecl*)(const void*)>(F(gets[k]));
+    const char* sets[6] = {"?SetNumVertices@" GC "QAAXI@Z", "?SetMaxVertices@" GC "QAAXI@Z", "?SetNumIndices@" GC "QAAXI@Z",
+                           "?SetNumPrimitives@" GC "QAAXI@Z", "?SetNumFaceNormals@" GC "QAAXI@Z", "?SetUserData@" GC "QAAXK@Z"};
+    for (int k = 0; k < 6; ++k) a.setU[k] = As<void(__cdecl*)(void*, unsigned)>(F(sets[k]));
+    A(getOpacity, "?GetOpacity@" GC "QBAMXZ");
+    A(getSurface, "?GetSurfaceArea@" GC "QBAMXZ");
+    A(setSurface, "?SetSurfaceArea@" GC "QAAXM@Z");
+    A(getRefUser, "?GetRefefencedUserData@" GC "QBAPAVReferenceCount@2@XZ");
+    A(setRefUser, "?SetReferencedUserData@" GC "QAAXPAVReferenceCount@2@@Z");
+    A(getIndexArray, "?GetIndexArray@" GC "QBAPBGXZ");
+    A(getFaceNormals, "?GetFaceNormalArray@" GC "QBAPBVVector3@2@XZ");
+    A(getFaceNeighbors, "?GetFaceNeighborArray@" GC "QBAPBUFaceNeighbors@12@XZ");
+    A(setIndexArray, "?SetIndexArray@" GC "QAAXV?$AutoReferenceArray@G@2@@Z");
+    A(setFaceNormals, "?SetFaceNormalArray@" GC "QAAXV?$AutoReferenceArray@VVector3@Jet@@@2@@Z");
+    A(setFaceNeighbors, "?SetFaceNeighborArray@" GC "QAAXAAV?$AutoReferenceArray@UFaceNeighbors@GeometryChunk@Jet@@@2@@Z");
+    A(dupFaceNormals, "?DuplicateFaceNormalArray@" GC "QAAXXZ");
+    A(dupFaceNeighbors, "?DuplicateFaceNeighborArray@" GC "QAAXXZ");
+    A(resizeFaceNormals, "?ResizeFaceNormalArray@" GC "QAAXI@Z");
+    A(resizeFaceNeighbors, "?ResizeFaceNeighborArray@" GC "QAAXI@Z");
+    A(vertexIndex3, "?GetVertexIndex@" GC "QBA_NHHAAI@Z");
+    A(vertexIndex2, "?GetVertexIndex@" GC "QBAIHH@Z");
+    A(triangle, "?GetTriangleIndexes@" GC "QBAXHAAK00@Z");
+    A(addProp, "?AddChunkProperty@" GC "QAA_NABVPString@2@@Z");
+    A(setProp, "?SetChunkProperty@" GC "QAA_NABVPString@2@M@Z");
+    A(getProp, "?GetChunkProperty@" GC "QBA_NABVPString@2@AAM@Z");
+    A(removeProp, "?RemoveChunkProperty@" GC "QAA_NABVPString@2@@Z");
+    A(propExists, "?ChunkPropertyExists@" GC "QBA_NABVPString@2@@Z");
+    A(addInfluence, "?AddInfluenceMatrix@" GC "QAAHH@Z");
+    A(assignInfluence, "?AssignInfluenceMatrix@" GC "QAA_NHPBVMatrix4@2@@Z");
+    A(resetMatrices, "?ResetMatrixArray@" GC "QAAXXZ");
+    A(influenceArray, "?GetInfluenceArray@" GC "QBAABV?$Array@PAUMatrixMap@VertexProgram@Jet@@$0IA@@2@XZ");
+    A(setVertexType, "?SetVertexType@" GC "QBAXPAVDisplay@2@W4VertexTypeID@2@H@Z");
+    A(setOpacity, "?SetOpacity@" GC "QAAXPAVDisplay@2@M@Z");
+    A(renderColor, "?RenderChunkColor@" GC "QBAXPAVDisplay@2@@Z");
+    A(renderOutlines, "?RenderOutlines@" GC "QBAXPAVDisplay@2@@Z");
+    A(renderVertexNormals, "?RenderVertexNormals@" GC "QBAXPAVDisplay@2@@Z");
+    A(renderTriangleNormals, "?RenderTriangleNormals@" GC "QBAXPAVDisplay@2@@Z");
+    A(renderAxes, "?RenderAxes@" GC "QBAXPAVDisplay@2@@Z");
+    A(registerName, "?RegisterName@" GC "SA_NABVPString@2@P6APAV12@XZ@Z");
+    A(createRegistered, "?CreateRegisteredInstance@" GC "SAPAV12@ABVPString@2@@Z");
+    A(releaseRegistrations, "?ReleaseRegistrationData@" GC "SAXXZ");
+    A(udword, "?GetUDwordArray@" GC "UAA?AV?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@W4VertexItemType@2@H@Z");
+    A(udwordConst, "?GetUDwordArray@" GC "UBA?AV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@2@W4VertexItemType@2@H@Z");
+    A(dupUnshared, "?DuplicateUnsharedArrays@" GC "UAAXPAVDisplay@2@@Z");
+    A(dupIndex, "?DuplicateIndexArray@" GC "UAAXPAVDisplay@2@@Z");
+    A(resizeIndex, "?ResizeIndexArray@" GC "UAAXPAVDisplay@2@I@Z");
+    A(resizeVertex, "?ResizeVertexArray@" GC "UAAXPAVDisplay@2@IHH@Z");
+    A(append, "?AppendChunk@" GC "UAAXPAVDisplay@2@ABV12@@Z");
+    A(setIndexDynamic, "?SetIndexDataDynamic@" GC "UAAXXZ");
+    A(getIndexDynamic, "?GetIndexDataDynamic@" GC "UBA_NXZ");
+    A(setIndexDirty, "?SetIndexDataDirty@" GC "UBAX_N@Z");
+    A(getIndexDirty, "?GetIndexDataDirty@" GC "UBA_NXZ");
+    A(updateLighting, "?UpdateLighting@" GC "UAAXPAVDisplay@2@PBVDisplayLight@2@PAVMaterial@2@ABVMatrix4@2@3@Z");
+    A(resetToAmbient, "?ResetToAmbient@" GC "UAAXPAVDisplay@2@PBVMaterial@2@ABVColor@2@@Z");
+    A(renderDebug, "?RenderDebug@" GC "UBAXPAVDisplay@2@@Z");
+    A(loadType, "?GetLoadChunkDataType@" GC "UBA_NABV?$Array@V?$Array@UGeometryStreamType@Jet@@$00@Jet@@$01@2@AAIAA_N@Z");
+    A(loadData, "?LoadChunkData@" GC "UAA_NABV?$Array@UGeometryStreamType@Jet@@$00@2@QAPAX@Z");
+#undef A
+#undef F
+}
+
+// the chunk registry (the original's static): emptied between sides, its bucket chunks freed outside the logs
+static void ClearChunkRegistry()
+{
+    struct Table {
+        void** buckets;
+        unsigned count, size;
+    }* t = static_cast<Table*>(Proc(mod[1], "?registrations@" GC "1V?$HashTable@IPAURegistrationData@" GC
+                                                "URegistrationDataOp@23@$0N@@2@A"));
+    for (unsigned k = 0; k < t->size; ++k) {
+        void** head = static_cast<void**>(t->buckets[k]);
+        if (!head) continue;
+        for (void** c = static_cast<void**>(head[0]); c != head;) {
+            void** n = static_cast<void**>(c[0]);
+            RealDelete(c);
+            c = n;
+        }
+        RealDelete(head);
+        t->buckets[k] = nullptr;
+    }
+    t->count = 0;
+}
+
+// the test's stand-ins for what the stream chunks provide: per chunk a vertex type and vertex arrays
+struct ChunkState {
+    void* vtype;            // the side's VertexType (slot 0xa4)
+    int buffers;            // slot 0x60 (slot 0x5c answers 1)
+    std::vector<unsigned char> arrays[3];
+    bool shared[3];
+    int staticIndex;        // slot 0x94
+    bool positions, normals, colors;  // slots 0xc0 / 0xc4 types 1 and 4, slot 0xdc type 2 (offsets 0, 12, 24)
+    unsigned posStride, norStride, colStride;
+};
+static std::map<const void*, ChunkState> chunkState[2];
+static void* chunkTestVt[2][73];
+
+static ChunkState& St(const void* c) { return chunkState[cur][c]; }
+static bool __cdecl CInitBuffers(void* self, void* d, bool b) { Log("  init buffers %s %s %d\n", Name(self).c_str(), Name(d).c_str(), b); return true; }
+static void __cdecl CDupVertex(void* self, void* d, int i, int j) { Log("  dup vertex %s %s %d %d\n", Name(self).c_str(), Name(d).c_str(), i, j); }
+static void __cdecl CResizeVertex(void* self, void* d, unsigned n, int i, int j)
+{
+    Log("  resize vertex %s %s %u %d %d\n", Name(self).c_str(), Name(d).c_str(), n, i, j);
+    ChunkState& st = St(self);
+    if (j >= 0 && j < 3) {
+        const unsigned stride = static_cast<const Stream*>(static_cast<const Type*>(st.vtype)->streams)[j].stride;
+        st.arrays[j].resize(static_cast<size_t>(n) * stride + 4, 0xab);
+    }
+}
+static void* __cdecl CVertexArray(void* self, int i, int j)
+{
+    ChunkState& st = St(self);
+    Log("  vertex array %s %d %d\n", Name(self).c_str(), i, j);
+    return j >= 0 && j < 3 ? st.arrays[j].data() : nullptr;
+}
+static int __cdecl COne(void*) { return 1; }
+static int __cdecl CBuffers(void* self) { return St(self).buffers; }
+static bool __cdecl CShared(void* self, int i, int j) { return St(self).shared[j % 3]; }
+static void __cdecl CVertexDirty(void* self, bool b, int i, int j) { Log("  vertex dirty %s %d %d %d\n", Name(self).c_str(), b, i, j); }
+static int __cdecl CStaticIndex(void* self, int i) { Log("  static index %s %d\n", Name(self).c_str(), i); return St(self).staticIndex; }
+static void __cdecl CSetStaticIndex(void* self, void* b, int i) { Log("  set static index %s %s %d\n", Name(self).c_str(), Name(b).c_str(), i); St(self).staticIndex = 0; }
+static void __cdecl CSetVertexType(void* self, void* t, int k) { Log("  set vertex type %s %s %d\n", Name(self).c_str(), Name(t).c_str(), k); }
+static void* __cdecl CGetVertexType(void* self, int i) { return St(self).vtype; }
+static int __cdecl CItemStream(void* self, int type, int k) { Log("  item stream %s %d %d\n", Name(self).c_str(), type, k); return 7; }
+static void* __cdecl CFloatArray(void* self, unsigned* out, int type, int k)
+{
+    ChunkState& st = St(self);
+    Log("  float array %s %d %d\n", Name(self).c_str(), type, k);
+    out[0] = type == 4 ? st.norStride : st.posStride;
+    unsigned char* const b = st.arrays[0].data();
+    out[1] = static_cast<unsigned>(reinterpret_cast<uintptr_t>(type == 1 && st.positions ? b : type == 4 && st.normals ? b + 12 : nullptr));
+    return out;
+}
+static void* __cdecl CUDwordArray(void* self, unsigned* out, int type, int k)
+{
+    ChunkState& st = St(self);
+    Log("  udword array %s %d %d\n", Name(self).c_str(), type, k);
+    out[0] = st.colStride;
+    out[1] = static_cast<unsigned>(reinterpret_cast<uintptr_t>(type == 2 && st.colors ? st.arrays[0].data() + 24 : nullptr));
+    return out;
+}
+static void MakeChunkVtable(int s)
+{
+    void** v = chunkTestVt[s];
+    for (int k = 0; k < 73; ++k) v[k] = apiC[s].vft[k];
+    v[4] = reinterpret_cast<void*>(&CInitBuffers);
+    v[7] = reinterpret_cast<void*>(&CDupVertex);
+    v[9] = reinterpret_cast<void*>(&CResizeVertex);
+    v[12] = v[13] = reinterpret_cast<void*>(&CVertexArray);
+    v[23] = reinterpret_cast<void*>(&COne);
+    v[24] = reinterpret_cast<void*>(&CBuffers);
+    v[28] = reinterpret_cast<void*>(&CShared);
+    v[31] = reinterpret_cast<void*>(&CVertexDirty);
+    v[37] = reinterpret_cast<void*>(&CStaticIndex);
+    v[38] = reinterpret_cast<void*>(&CSetStaticIndex);
+    v[40] = reinterpret_cast<void*>(&CSetVertexType);
+    v[41] = reinterpret_cast<void*>(&CGetVertexType);
+    v[45] = reinterpret_cast<void*>(&CItemStream);
+    v[48] = v[49] = reinterpret_cast<void*>(&CFloatArray);
+    v[55] = reinterpret_cast<void*>(&CUDwordArray);
+}
+
+// the stand-in display: slots 0xa8 / 0xac / 0x1f0 (debug state), 0xe0 (lines), 0x10c (vertex types)
+static void* chunkDisplayVt[0x80];
+static unsigned char chunkDisplay[0x100], chunkState54[0x100];
+static bool debugSaved;
+// how many vertices of each coming line draw are written (the outlines leave the rest of their buffer unwritten)
+static std::vector<unsigned> lineDefined;
+static bool __cdecl DGet(void* d) { Log("  display a8\n"); return debugSaved; }
+static void __cdecl DPut(void* d, int b) { Log("  display ac %d\n", b & 0xff); }
+static void __cdecl DState(void* d, int b) { Log("  display 1f0 %d\n", b & 0xff); }
+static void __cdecl DLines(void* d, int a, int b, int n, const void* v, int count)
+{
+    unsigned shown = static_cast<unsigned>(count);
+    if (!lineDefined.empty()) {
+        if (lineDefined.front() < shown) shown = lineDefined.front();
+        lineDefined.erase(lineDefined.begin());
+    }
+    if (shown > 0x40) shown = 0x40;
+    Log("  lines %d %d %d %d: %s\n", a, b, n, count, Hex(v, shown * 16).c_str());
+}
+static void* __cdecl DType(void* d, int id) { Log("  display type %d\n", id); return reinterpret_cast<void*>(static_cast<uintptr_t>(0x5000 + id)); }
+
+// the stand-in light (slot 1 lights the vertices) and material
+static void* lightTestVt[4];
+static const unsigned char* lightBase;  // the lit chunk's stream 0 (pointers are logged as offsets into it)
+static long Off(const void* p) { return p ? static_cast<long>(static_cast<const unsigned char*>(p) - lightBase) : -1; }
+static unsigned char lightObj[0x10], materialObj[0x80];
+static void __cdecl LLight(const void* l, void* d, unsigned n, unsigned ps, const void* p, unsigned ns, const void* nn,
+                           unsigned cs, const void* c, const void* a, const void* b, void* m)
+{
+    Log("  light %s %u %u %ld %u %ld %u %ld %s %s %s\n", Name(d).c_str(), n, ps, Off(p), ns, Off(nn), cs, Off(c),
+        Name(a).c_str(), Name(b).c_str(), Name(m).c_str());
+}
+
+struct Chunk {
+    void* vft;
+    int refs;
+    void* props;
+    unsigned infCount, infCap;
+    void** infData;
+    unsigned flags, prims, indices, vertices, maxVertices;
+    int* index;
+    int* neighbors;
+    int* normals;
+    unsigned numNormals;
+    float opacity, surface;
+    unsigned user;
+    void* refUser;
+};
+static_assert(sizeof(Chunk) == 0x4c, "chunk");
+
+static std::string BlockText(const int* b, unsigned each)
+{
+    if (!b) return "null";
+    char t[64];
+    std::snprintf(t, sizeof t, "%s refs %d count %d ", Name(b).c_str(), b[0], b[1]);
+    const unsigned n = static_cast<unsigned>(b[1]) * each;
+    return t + Hex(b + 4, n > 0x60 ? 0x60 : n);
+}
+static void DumpChunk(const char* tag, const void* p)
+{
+    const Chunk* c = static_cast<const Chunk*>(p);
+    std::string props;
+    if (c->props) {
+        void** h = static_cast<void**>(c->props);
+        void** k = h;
+        do {
+            const unsigned n = reinterpret_cast<unsigned*>(k)[2];
+            props += " [" + Name(k) + " " + std::to_string(n) + "]";
+            for (unsigned i = 0; i < n; ++i) {
+                const unsigned* e = reinterpret_cast<unsigned*>(k) + 3 + i * 2;
+                props += " " + NodeText(reinterpret_cast<void*>(static_cast<uintptr_t>(e[0]))) + "=" + Hex(e + 1, 4);
+            }
+            k = static_cast<void**>(k[0]);
+        } while (k != h);
+    }
+    std::string inf;
+    for (unsigned k = 0; k < c->infCount && c->infData; ++k) {
+        const unsigned* m = static_cast<const unsigned*>(c->infData[k]);
+        inf += " " + Name(m) + (m ? "{" + Name(reinterpret_cast<void*>(static_cast<uintptr_t>(m[0]))) + "," + std::to_string(m[1]) + "}" : "");
+    }
+    Log("  %s %s: vft %s refs %d flags %x prims %u indices %u vertices %u max %u normals %u opacity %s surface %s user %x ref %s\n"
+        "    props%s\n    influences %u/%u %s:%s\n    index %s\n    neighbors %s\n    normals %s\n",
+        tag, Name(p).c_str(), c->vft == apiC[cur].vft ? "own" : c->vft == chunkTestVt[cur] ? "test" : "other", c->refs,
+        c->flags, c->prims, c->indices, c->vertices, c->maxVertices, c->numNormals, Bits(c->opacity).c_str(),
+        Bits(c->surface).c_str(), c->user, Name(c->refUser).c_str(), props.c_str(), c->infCount, c->infCap,
+        Name(c->infData).c_str(), inf.c_str(), BlockText(c->index, 2).c_str(), BlockText(c->neighbors, 12).c_str(),
+        BlockText(c->normals, 12).c_str());
+}
+
+// a float's bits (a float returned by value would pass through the x87 stack and lose its signalling NaNs)
+static unsigned RandFloatBits(std::mt19937& r)
+{
+    float f;
+    switch (r() % 9) {
+    case 0: f = 0.f; break;
+    case 1: return 0x7fc00001u + (r() % 0x3fffff);  // a quiet NaN with its own payload
+    case 2: return 0x7f800001u + (r() % 0x3fffff);  // a signalling NaN (the x87 copies quiet it)
+    case 3: f = static_cast<float>(static_cast<int>(r() % 200001) - 100000) / 7.f; break;  // inexact sums
+    default: f = static_cast<float>(static_cast<int>(r() % 2001) - 1000) / 64.f; break;
+    }
+    unsigned u;
+    std::memcpy(&u, &f, 4);
+    return u;
+}
+#define RANDF(var)                                  \
+    float var;                                      \
+    {                                               \
+        const unsigned bits_ = RandFloatBits(r);    \
+        std::memcpy(&var, &bits_, 4);               \
+    }
+
+static int creatorCalls;
+static void* CreatorA() { Log("  creator A\n"); ++creatorCalls; return reinterpret_cast<void*>(0xa0a0); }
+static void* CreatorB() { Log("  creator B\n"); return reinterpret_cast<void*>(0xb0b0); }
+
+static void RunChunks(int s, unsigned seed)
+{
+    std::mt19937 r(seed);
+    const ApiC& a = apiC[s];
+    const Api& v = api[s];
+    chunkState[s].clear();
+    const std::vector<int> refsBefore = NameRefs(v);
+    const bool released = r() % 2 != 0;
+    std::vector<void*> chunks;
+    int made = 0, blocks = 0;
+    // a vertex type: positions, normals, a colour in stream 0; texture coordinates in stream 1
+    void* vt = TestNew(0x24, "VT%d", 0);
+    v.ctor(vt, nullptr, 3);
+    const int streams = 1 + static_cast<int>(r() % 2);
+    v.createStreams(vt, streams);
+    v.createItems(vt, 0, 3);
+    v.addItem(vt, 0, 1, -1, 0, 1, &nodes[0], -1, -1);
+    v.addItem(vt, 0, 4, -1, 0, 1, &nodes[1], -1, -1);
+    v.addItem(vt, 0, 2, -1, 0, 1, &nodes[4], -1, -1);
+    if (streams > 1) {
+        v.createItems(vt, 1, 1);
+        v.addItem(vt, 1, 15, -1, 0, 1, &nodes[2], -1, -1);
+    }
+    DumpType("vertex type", vt);
+    const unsigned stride0 = static_cast<const Type*>(vt)->streams[0].stride;
+    auto newBlock = [&](unsigned n, unsigned each) {
+        int* b = static_cast<int*>(TestNew(n * each + 0x10, "B%d", blocks++));
+        b[0] = 1;
+        b[1] = static_cast<int>(n);
+        for (unsigned k = 0; k < n * each; ++k) reinterpret_cast<unsigned char*>(b + 4)[k] = static_cast<unsigned char>(r());
+        return b;
+    };
+    auto release = [&](int* b) {  // the test's reference
+        if (b && --b[0] == 0) HookDelete(b);
+    };
+    auto setup = [&](void* c, unsigned verts) {
+        ChunkState& st = chunkState[s][c];
+        st.vtype = vt;
+        st.buffers = streams;
+        st.staticIndex = static_cast<int>(r() % 2);
+        for (int j = 0; j < 3; ++j) st.shared[j] = r() % 2;
+        const unsigned cap = verts + 8;
+        for (int j = 0; j < streams; ++j) {
+            const unsigned sd = static_cast<const Type*>(vt)->streams[j].stride;
+            st.arrays[j].resize(cap * sd + 4);
+            for (auto& b : st.arrays[j]) b = static_cast<unsigned char>(r());
+        }
+        st.posStride = stride0;
+        st.norStride = stride0;
+        st.colStride = stride0;
+        unsigned char* base = st.arrays[0].data();
+        for (unsigned k = 0; k < cap; ++k)
+            for (int f = 0; f < 6; ++f) {
+                RANDF(x)
+                std::memcpy(base + k * stride0 + f * 4, &x, 4);
+            }
+        st.positions = r() % 8 != 0;
+        st.normals = r() % 8 != 0;
+        st.colors = r() % 8 != 0;
+    };
+    auto make = [&]() {
+        void* c = TestNew(0x4c, "C%d", made++);
+        const unsigned prims = r() % 6, verts = 3 + r() % 8;
+        static const unsigned types[] = {0, 1, 2, 4, 8, 0x10, 3, 4, 4, 4, 4, 4};
+        const unsigned flags = types[r() % 12] | (r() % 2 ? 0x20 : 0) | (r() % 4 ? 0 : 0x1000);
+        if (r() % 3) {
+            Log("op new chunk %s %u %u\n", Name(c).c_str(), prims, verts);
+            a.ctor5(c, nullptr, verts, prims, r() % 3 ? prims * 3 + (r() % 2 ? 3 : 0) : 0, r() % 2 ? prims : 0, flags);
+        } else {
+            Log("op new chunk %s\n", Name(c).c_str());
+            a.ctor0(c, nullptr);
+            a.setU[0](c, verts);
+            a.setU[3](c, prims);
+            a.setFlags(c, flags);
+        }
+        DumpChunk("made", c);
+        *static_cast<void**>(c) = chunkTestVt[s];
+        setup(c, static_cast<const Chunk*>(c)->vertices);
+        // indices within the vertex count
+        Chunk* ch = static_cast<Chunk*>(c);
+        if (ch->index)
+            for (int k = 0; k < ch->index[1]; ++k)
+                reinterpret_cast<unsigned short*>(ch->index + 4)[k] = static_cast<unsigned short>(r() % ch->vertices);
+        chunks.push_back(c);
+        return c;
+    };
+    for (int k = 0, n = 1 + r() % 3; k < n; ++k) make();
+    // the display's debug state
+    *reinterpret_cast<void**>(chunkDisplay + 0x54) = chunkState54;
+    for (int step = 0, steps = 10 + r() % 30; step < steps; ++step) {
+        void* c = chunks[r() % chunks.size()];
+        void* c2 = chunks[r() % chunks.size()];
+        Chunk* ch = static_cast<Chunk*>(c);
+        void** nm = r() % 8 ? &nodes[r() % 3] : &nodes[r() % (kNames + 1)];
+        static void* had;
+        if (ch->props && r() % 2) {
+            const unsigned* first = static_cast<const unsigned*>(ch->props);
+            had = reinterpret_cast<void*>(static_cast<uintptr_t>(first[3 + 2 * (r() % first[2])]));
+            nm = &had;
+        }
+        switch (r() % 30) {
+        case 0:
+            make();
+            break;
+        case 1: {
+            const int p = static_cast<int>(r() % 8) - 1, vv = static_cast<int>(r() % 4) - (r() % 8 ? 0 : 3);
+            unsigned out = 0xeeee;
+            // (without an index array both sides read address 0x10)
+            if (!ch->index || ch->index[1] < static_cast<int>(ch->prims) * 3 + 3) break;
+            const bool ok = a.vertexIndex3(c, p, vv, &out);
+            Log("op vertex index %s %d %d: %d %u / %u\n", Name(c).c_str(), p, vv, ok, out,
+                p >= 0 && static_cast<unsigned>(p) < ch->prims && vv >= 0 && vv < 3 ? a.vertexIndex2(c, p, vv) : 0u);
+            std::string all;
+            for (unsigned q = 0; q < ch->prims; ++q)
+                for (int w = 0; w < 3; ++w) {
+                    unsigned o2 = 0xeeee;
+                    const bool k2 = a.vertexIndex3(c, static_cast<int>(q), w, &o2);
+                    all += " " + std::to_string(k2) + ":" + std::to_string(o2) + "/" +
+                           std::to_string(a.vertexIndex2(c, static_cast<int>(q), w));
+                }
+            Log("  all%s\n", all.c_str());
+            break;
+        }
+        case 2: {
+            if (!ch->prims) break;
+            const int p = static_cast<int>(r() % ch->prims);
+            unsigned long x = 1, y = 2, z = 3;
+            if (!ch->index || ch->index[1] < static_cast<int>(ch->prims) * 3 + 3) break;
+            a.triangle(c, p, &x, &y, &z);
+            Log("op triangle %s %d: %lu %lu %lu\n", Name(c).c_str(), p, x, y, z);
+            for (unsigned q = 0; q < ch->prims; ++q) {
+                a.triangle(c, static_cast<int>(q), &x, &y, &z);
+                Log("  %u: %lu %lu %lu\n", q, x, y, z);
+            }
+            break;
+        }
+        case 3:
+            Log("op add prop %s %s: %d\n", Name(c).c_str(), NodeText(*nm).c_str(), a.addProp(c, nm));
+            {
+                std::vector<int> added;
+                for (int k = r() % 8; k > 0; --k) {
+                    const int id = static_cast<int>(r() % kNames);
+                    void** n2 = &nodes[id];
+                    RANDF(x)
+                    Log("  add %s: %d %d\n", NodeText(*n2).c_str(), a.addProp(c, n2), a.setProp(c, n2, x));
+                    added.push_back(id);
+                }
+                if (r() % 2 && !added.empty())
+                    for (int k = r() % 7; k > 0; --k) {
+                        void** n2 = &nodes[r() % 4 ? added[r() % added.size()] : static_cast<int>(r() % kNames)];
+                    float x = 3.f;
+                    const bool g = a.getProp(c, n2, &x);
+                    Log("  get %s: %d %s; remove %d\n", NodeText(*n2).c_str(), g, Bits(x).c_str(), a.removeProp(c, n2));
+                    DumpChunk("removed", c);
+                    }
+            }
+            DumpChunk("props", c);
+            break;
+        case 4: {
+            RANDF(x)
+            Log("op set prop %s %s %s: %d\n", Name(c).c_str(), NodeText(*nm).c_str(), Bits(x).c_str(), a.setProp(c, nm, x));
+            break;
+        }
+        case 5: {
+            float x = 7.f;
+            const bool ok = a.getProp(c, nm, &x);
+            Log("op get prop %s %s: %d %s exists %d\n", Name(c).c_str(), NodeText(*nm).c_str(), ok, Bits(x).c_str(),
+                a.propExists(c, nm));
+            break;
+        }
+        case 6:
+            Log("op remove prop %s %s: %d\n", Name(c).c_str(), NodeText(*nm).c_str(), a.removeProp(c, nm));
+            DumpChunk("props", c);
+            break;
+        case 7: {
+            const int i = static_cast<int>(r() % 6);
+            Log("op add influence %s %d: %d\n", Name(c).c_str(), i, a.addInfluence(c, i));
+            const void* m = r() % 2 ? static_cast<const void*>(materialObj) : nullptr;
+            Log("  assign %d\n", a.assignInfluence(c, static_cast<int>(r() % 6), m));
+            Log("  array %s\n", Name(a.influenceArray(c)).c_str());
+            if (r() % 6 == 0) a.resetMatrices(c);
+            DumpChunk("influences", c);
+            break;
+        }
+        case 8: {
+            int* b = newBlock(r() % 12, 2);
+            for (int k = 0; k < b[1]; ++k) reinterpret_cast<unsigned short*>(b + 4)[k] = static_cast<unsigned short>(r() % ch->vertices);
+            ++b[0];  // the by-value copy
+            Log("op set index array %s %s\n", Name(c).c_str(), Name(b).c_str());
+            a.setIndexArray(c, r() % 6 ? b : (--b[0], nullptr));
+            release(b);
+            DumpChunk("index", c);
+            break;
+        }
+        case 9: {
+            int* b = r() % 6 ? newBlock(r() % 6, 12) : nullptr;
+            if (b) ++b[0];
+            Log("op set face normals %s %s\n", Name(c).c_str(), Name(b).c_str());
+            a.setFaceNormals(c, b);
+            release(b);
+            DumpChunk("normals", c);
+            break;
+        }
+        case 10: {
+            void* b = r() % 6 ? newBlock(r() % 6, 12) : nullptr;
+            Log("op set face neighbors %s %s\n", Name(c).c_str(), Name(b).c_str());
+            a.setFaceNeighbors(c, &b);
+            release(static_cast<int*>(b));
+            DumpChunk("neighbors", c);
+            break;
+        }
+        case 11:
+            Log("op duplicate %s\n", Name(c).c_str());
+            a.dupIndex(c, chunkDisplay);
+            if (ch->numNormals <= (ch->normals ? static_cast<unsigned>(ch->normals[1]) : 0u)) a.dupFaceNormals(c);
+            if (ch->neighbors && ch->prims <= static_cast<unsigned>(ch->neighbors[1])) a.dupFaceNeighbors(c);
+            a.dupUnshared(c, chunkDisplay);
+            DumpChunk("duplicated", c);
+            break;
+        case 12: {
+            const unsigned n = r() % 14;
+            Log("op resize %s %u\n", Name(c).c_str(), n);
+            switch (r() % 3) {
+            case 0: a.resizeIndex(c, chunkDisplay, n); break;
+            case 1:
+                if (ch->numNormals <= (ch->normals ? static_cast<unsigned>(ch->normals[1]) : 0u)) a.resizeFaceNormals(c, n);
+                break;
+            default: a.resizeFaceNeighbors(c, n); break;
+            }
+            a.resizeVertex(c, chunkDisplay, n, 0, 0);
+            DumpChunk("resized", c);
+            break;
+        }
+        case 13: {
+            if (c == c2) break;
+            void* to = TestNew(0x4c, "C%d", made++);
+            a.ctor0(to, nullptr);
+            *static_cast<void**>(to) = chunkTestVt[s];
+            setup(to, 4);
+            if (r() % 2) a.addInfluence(to, 9);
+            Log("op init instance %s -> %s\n", Name(c).c_str(), Name(to).c_str());
+            a.initInstance(c, to);
+            DumpChunk("instance", to);
+            chunks.push_back(to);
+            Log("  assign %s\n", Name(a.assign(to, nullptr, c)).c_str());
+            break;
+        }
+        case 14: {
+            Log("op flags %s\n", Name(c).c_str());
+            a.setIndexDynamic(c);
+            a.setIndexDirty(c, r() % 2);
+            Log("  %d %d %d flags %lx\n", a.getIndexDynamic(c), a.getIndexDirty(c), a.unshared(c), a.getFlags(c));
+            a.setConstFlags(c, a.getFlags(c) ^ (r() % 2 ? 0x1000 : 0));
+            std::string g;
+            for (int k = 0; k < 8; ++k) g += " " + std::to_string(a.getU[k](c));
+            Log("  counts%s opacity %s surface %s ref %s arrays %s %s %s\n", g.c_str(), Bits(a.getOpacity(c)).c_str(),
+                Bits(a.getSurface(c)).c_str(), Name(a.getRefUser(c)).c_str(), Name(a.getIndexArray(c)).c_str(),
+                Name(a.getFaceNormals(c)).c_str(), Name(a.getFaceNeighbors(c)).c_str());
+            break;
+        }
+        case 15: {
+            RANDF(x)
+            a.setSurface(c, x);
+            a.setU[5](c, r());
+            a.setU[1](c, r() % 20);
+            if (r() % 2) a.setU[2](c, r() % 20 < ch->indices ? ch->indices : 0);
+            if (r() % 3 == 0) a.setU[4](c, ch->normals ? static_cast<unsigned>(ch->normals[1]) : 0);
+            Log("op set counts %s\n", Name(c).c_str());
+            DumpChunk("counts", c);
+            break;
+        }
+        case 16: {
+            void* u = r() % 4 ? TestNew(8, "U%d", blocks++) : nullptr;
+            if (u) api[s].sbCtor(u, nullptr);
+            Log("op ref user %s %s\n", Name(c).c_str(), Name(u).c_str());
+            a.setRefUser(c, u);
+            if (u) ReleaseRef(u);
+            DumpChunk("ref user", c);
+            break;
+        }
+        case 17: {
+            RANDF(o)
+            Log("op opacity %s %s\n", Name(c).c_str(), Bits(o).c_str());
+            a.setOpacity(c, chunkDisplay, o);
+            Log("  colors %s\n", Hex(chunkState[s][c].arrays[0].data(), 0x60).c_str());
+            break;
+        }
+        case 18: {
+            Log("op ambient %s\n", Name(c).c_str());
+            float amb[4];
+            for (float& f : amb) {
+                const unsigned u = RandFloatBits(r);
+                std::memcpy(&f, &u, 4);
+            }
+            for (int k = 0; k < 0x80 / 4; ++k) {
+                const float f = static_cast<float>(static_cast<int>(r() % 100)) / 50.f;
+                std::memcpy(materialObj + k * 4, &f, 4);
+            }
+            a.resetToAmbient(c, chunkDisplay, materialObj, amb);
+            Log("  colors %s\n", Hex(chunkState[s][c].arrays[0].data(), 0x60).c_str());
+            break;
+        }
+        case 19: {
+            Log("op lighting %s\n", Name(c).c_str());
+            static unsigned char m1[64], m2[64];
+            fixedNames[m1] = "M1";
+            fixedNames[m2] = "M2";
+            lightBase = chunkState[s][c].arrays[0].data();
+            a.updateLighting(c, chunkDisplay, lightObj, materialObj, m1, m2);
+            break;
+        }
+        case 20:
+        case 21: {
+            chunkDisplay[0x71] = static_cast<unsigned char>(r() % 3 ? r() % 16 : 0);
+            if (r() % 2) chunkDisplay[0x71] |= 4;  // the triangle normals more often
+            chunkDisplay[0x78] = static_cast<unsigned char>(r() % 4 == 0);
+            chunkDisplay[0x79] = static_cast<unsigned char>(r() % 4 == 0);
+            chunkState54[0xa1] = static_cast<unsigned char>(r());
+            RANDF(len)
+            if (r() % 3 == 0) {
+                const unsigned u = 0x7fc00001u + r() % 0x3fffff;
+                std::memcpy(&len, &u, 4);
+            }
+            std::memcpy(chunkDisplay + 0x74, &len, 4);
+            debugSaved = r() % 2;
+            // the outlines read three indices per primitive, the triangle normals one face normal per primitive
+            if (ch->prims && (!ch->index || static_cast<unsigned>(ch->index[1]) < ch->prims * 3)) chunkDisplay[0x71] &= ~5;
+            else if (ch->prims) {  // every index inside the vertex array (both sides read whatever it points at)
+                const size_t have = chunkState[s][c].arrays[0].size() / stride0;
+                for (unsigned k = 0; k < ch->prims * 3; ++k)
+                    if (reinterpret_cast<const unsigned short*>(ch->index + 4)[k] >= have) chunkDisplay[0x71] &= ~5;
+            }
+            if (ch->numNormals > ch->prims || (ch->normals && static_cast<unsigned>(ch->normals[1]) < ch->numNormals))
+                chunkDisplay[0x71] &= ~4;
+            Log("op debug %s %02x %d %d state %02x\n", Name(c).c_str(), chunkDisplay[0x71], chunkDisplay[0x78],
+                chunkDisplay[0x79], chunkState54[0xa1]);
+            {
+                const ChunkState& st = chunkState[s][c];
+                const unsigned char f = chunkDisplay[0x71];
+                lineDefined.clear();
+                if (f & 0xf || chunkDisplay[0x78] || chunkDisplay[0x79]) {
+                    if (f & 1 && ch->flags & 4 && ch->prims && st.positions) lineDefined.push_back((ch->prims - 1) * 2 + 6);
+                    if (f & 2 && ch->vertices && st.positions && st.normals) lineDefined.push_back(ch->vertices * 2);
+                    if (f & 4 && ch->flags & 4 && ch->numNormals && ch->normals && st.positions)
+                        lineDefined.push_back(ch->numNormals * 2);
+                    if (f & 8) lineDefined.push_back(12);
+                }
+            }
+            a.renderDebug(c, chunkDisplay);
+            Log("  state %02x\n", chunkState54[0xa1]);
+            a.renderColor(c, chunkDisplay);
+            if (r() % 3 == 0) a.renderAxes(c, chunkDisplay);
+            break;
+        }
+        case 22:
+            Log("op set vertex type %s\n", Name(c).c_str());
+            a.setVertexType(c, chunkDisplay, static_cast<int>(r() % 40), static_cast<int>(r() % 3));
+            break;
+        case 23: {
+            if (c == c2) break;
+            // the other chunk's indices stay within its vertices; ours must hold the sum
+            Chunk* o = static_cast<Chunk*>(c2);
+            if (!o->index || o->index[1] < static_cast<int>(o->indices)) break;
+            if (o->normals ? static_cast<unsigned>(o->normals[1]) < o->numNormals : o->numNormals != 0) break;
+            if (ch->normals && static_cast<unsigned>(ch->normals[1]) < ch->numNormals) break;
+            if (!ch->normals && ch->numNormals) break;
+            ChunkState& so = chunkState[s][c2];
+            for (int j = 0; j < streams; ++j)
+                if (so.arrays[j].size() < static_cast<size_t>(o->vertices) * static_cast<const Type*>(vt)->streams[j].stride) goto skip;
+            Log("op append %s %s\n", Name(c).c_str(), Name(c2).c_str());
+            a.append(c, chunkDisplay, c2);
+            DumpChunk("appended", c);
+            Log("  vertices %s\n", Hex(chunkState[s][c].arrays[0].data(), 0x80).c_str());
+        skip:
+            break;
+        }
+        case 24: {
+            Log("op udword %s\n", Name(c).c_str());
+            unsigned out[2] = {9, 9}, out2[2] = {9, 9};
+            a.udword(c, out, 2, 0);
+            a.udwordConst(c, out2, 2, 0);
+            Log("  %u %u %u %u init %d\n", out[0], out[1], out2[0], out2[1], a.initBuffers(c, chunkDisplay, true));
+            break;
+        }
+        case 25: {
+            // formats: arrays of streams of items built from the vertex type, some changed
+            struct Item { void* name; unsigned dataType, count, offset; };
+            struct StreamT { unsigned stride, count, cap; Item* items; };
+            struct Fmt { unsigned count, cap; StreamT* data; };
+            const Type* t = static_cast<const Type*>(vt);
+            const unsigned nf = r() % 4;
+            std::vector<Fmt> fmts(nf);
+            std::vector<std::vector<StreamT>> sts(nf);
+            std::vector<std::vector<std::vector<Item>>> its(nf);
+            for (unsigned f = 0; f < nf; ++f) {
+                const unsigned ns = t->streamCount + (r() % 4 == 0 ? 1 : 0) - (r() % 4 == 0 && t->streamCount > 1 ? 1 : 0);
+                sts[f].resize(ns);
+                its[f].resize(ns);
+                for (unsigned j = 0; j < ns; ++j) {
+                    const Stream* ts = j < t->streamCount ? &t->streams[j] : nullptr;
+                    sts[f][j].stride = ts ? ts->stride + (r() % 5 == 0 ? 4 : 0) : 8;
+                    const unsigned ni = ts ? ts->count : 1;
+                    for (unsigned k = 0; k < ni; ++k) {
+                        Item it{ts ? ts->items[k].name : nodes[3], ts ? static_cast<unsigned>(ts->items[k].dataType) : 7,
+                                ts ? static_cast<unsigned>(ts->items[k].count) : 2,
+                                ts ? static_cast<unsigned>(ts->items[k].offset) : 0};
+                        switch (r() % 8) {
+                        case 0: it.dataType ^= 1; break;
+                        case 1: it.offset += 4; break;
+                        case 2: it.name = nodes[r() % kNames]; break;
+                        default: break;
+                        }
+                        if (r() % 6) its[f][j].push_back(it);
+                    }
+                    sts[f][j].count = static_cast<unsigned>(its[f][j].size());
+                    sts[f][j].cap = sts[f][j].count;
+                    sts[f][j].items = its[f][j].data();
+                }
+                fmts[f] = {ns, ns, sts[f].data()};
+            }
+            struct FmtList { unsigned count, cap; Fmt* data; } all{nf, nf, fmts.data()};
+            unsigned index = 77;
+            bool exact = true;
+            const bool ok = a.loadType(c, &all, &index, &exact);
+            Log("op load type %s %u: %d %u %d\n", Name(c).c_str(), nf, ok, index, exact);
+            if (nf && ok) {
+                const Fmt& f = fmts[index];
+                std::vector<std::vector<unsigned char>> data(f.count);
+                std::vector<void*> ptrs(f.count);
+                for (unsigned j = 0; j < f.count; ++j) {
+                    data[j].resize(static_cast<size_t>(f.data[j].stride) * (ch->vertices + 1) + 64);
+                    for (auto& b : data[j]) b = static_cast<unsigned char>(r());
+                    ptrs[j] = data[j].data();
+                }
+                ChunkState& st = chunkState[s][c];
+                bool fits = true;
+                for (int j = 0; j < streams; ++j)
+                    if (st.arrays[j].size() < static_cast<size_t>(ch->vertices) * t->streams[j].stride) fits = false;
+                if (fits) {
+                    Log("  load %d\n", a.loadData(c, &f, ptrs.data()));
+                    Log("  vertices %s\n", Hex(st.arrays[0].data(), 0x80).c_str());
+                }
+            }
+            break;
+        }
+        case 26: {
+            void** n2 = &nodes[r() % 4];
+            Log("op register %s: %d\n", NodeText(*n2).c_str(),
+                a.registerName(n2, r() % 2 ? &CreatorA : r() % 2 ? &CreatorB : nullptr));
+            break;
+        }
+        case 27: {
+            void** n2 = &nodes[r() % 4];
+            const void* got = a.createRegistered(n2);
+            Log("op create %s: %p\n", NodeText(*n2).c_str(), got);
+            break;
+        }
+        default:
+            DumpChunk("look", c);
+            break;
+        }
+    }
+    if (released) {
+        Log("op release registrations\n");
+        a.releaseRegistrations();
+    }
+    for (void* c : chunks) {
+        Log("op release %s\n", Name(c).c_str());
+        DumpChunk("last", c);
+        ReleaseRef(c);
+    }
+    ReleaseRef(vt);
+    // every name reference given back (registry entries kept only when not released)
+    if (released) {
+        const std::vector<int> refsAfter = NameRefs(v);
+        std::string refs;
+        for (size_t k = 0; k < refsAfter.size(); ++k) refs += " " + std::to_string(refsAfter[k] - refsBefore[k]);
+        Log("op name refs%s\n", refs.c_str());
+    }
+}
+
 // ---- running
 
 static void Compare(const char* part, int round)
@@ -1117,18 +1970,33 @@ int main(int argc, char** argv)
     As<void*(__fastcall*)(void*, void*)>(Proc(ks, "??0Options@Jet@@QAE@XZ"))(optionsObj, nullptr);
     As<void(__cdecl*)(void*, const char*)>(Proc(ks, "?ProcessRaw@Options@Jet@@QAAXPBD@Z"))(
         optionsObj, "-DynamicVertexBufferSize=123456 -DynamicIndexBufferSize=4321");
+    for (void*& p : chunkDisplayVt) p = reinterpret_cast<void*>(&DisplaySlot);
+    chunkDisplayVt[0xa8 / 4] = reinterpret_cast<void*>(&DGet);
+    chunkDisplayVt[0xac / 4] = reinterpret_cast<void*>(&DPut);
+    chunkDisplayVt[0x1f0 / 4] = reinterpret_cast<void*>(&DState);
+    chunkDisplayVt[0xe0 / 4] = reinterpret_cast<void*>(&DLines);
+    chunkDisplayVt[0x10c / 4] = reinterpret_cast<void*>(&DType);
+    *reinterpret_cast<void**>(chunkDisplay) = chunkDisplayVt;
+    fixedNames[chunkDisplay] = "CD";
+    for (void*& p : lightTestVt) p = reinterpret_cast<void*>(&DisplaySlot);
+    lightTestVt[1] = reinterpret_cast<void*>(&LLight);
+    *reinterpret_cast<void**>(lightObj) = lightTestVt;
+    fixedNames[lightObj] = "L";
+    fixedNames[materialObj] = "MAT";
     displayStatic = static_cast<void**>(Proc(mod[1], "?display@VertexType@Jet@@1PBVDisplay@2@B"));
     origShutdown = As<void (*)()>(Proc(mod[1], "?Shutdown@VertexType@Jet@@SAXXZ"));
     for (int s = 0; s < 2; ++s) {
         LoadApi(s);
         MakeCacheVtables(s);
+        LoadApiC(s);
+        MakeChunkVtable(s);
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
     }
     struct {
         const char* name;
         void (*run)(int, unsigned);
-    } parts[] = {{"types", RunTypes}, {"caches", RunCaches}, {"misc", RunMisc}};
+    } parts[] = {{"types", RunTypes}, {"caches", RunCaches}, {"misc", RunMisc}, {"chunks", RunChunks}};
     const char* only = std::getenv("RS_U5_ONLY");
     for (auto& p : parts) {
         if (only && !std::strstr((std::string(",") + only + ",").c_str(), (std::string(",") + p.name + ",").c_str()))
