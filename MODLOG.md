@@ -40,7 +40,8 @@ Tools: `D:\tools` (Ghidra), scripts: `trainz12-x64/tools/`
 
 ### Module replacement harness (confirmed in game 2026-10-18 23:25)
 - Source of replacements: `D:\trainz12-decomp\src\jet` (private), CMake + VS 2026 (MSVC 14.51), `-A Win32`,
-  static CRT. Build: `cmake -S D:\trainz12-decomp\src\jet -B D:\trainz12-decomp\build32 -G "Visual Studio 18 2026" -A Win32`.
+  shared CRT (/MD) since 2026-10-27 (static before; vcruntime140.dll + msvcp140.dll x86 sit next to the game).
+  Build: `cmake -S D:\trainz12-decomp\src\jet -B D:\trainz12-decomp\build32 -G "Visual Studio 18 2026" -A Win32`.
 - `tools/gen_def.py` makes the .def: every original export keeps name + ordinal; names in
   `<module>/implemented.txt` come from our code, the rest forward to `<module>_orig.dll`.
   link.exe (x86) rejects a .def forwarder for an undecorated C name (`JetGetPluginsKernel`): those go through
@@ -1922,6 +1923,19 @@ unit order in `notes/WaterSystem.md`.
     key separator, missing AddReference/ReleaseReference on programs, combiners and vertex types, Register's
     duplicate code, RestorePrograms' failure, the instance match without the defines, the copy/assign of the error
     type, the TC copy's combiner, SetParameters' program name, LoadTxt's last program).
+- In game: menu reached, JetLog identical to the baseline.
+
+### Shared CRT for all modules (2026-10-27)
+- Every module builds with /MD (`CMAKE_MSVC_RUNTIME_LIBRARY` MultiThreadedDLL unless a build passes its own):
+  one CRT heap and one set of CRT statics for all of our modules instead of one per DLL. All modules now import
+  VCRUNTIME140.dll, Kernel_7c and KernelStandard_7c also MSVCP140.dll; ucrtbase comes from Windows. The game bin
+  gets the x86 `vcruntime140.dll` and `msvcp140.dll` from the VS redist (14.51). InputWin32_7c.dll shrank to
+  29 KB, the size of the original. libjpeg-turbo (Bitmap::SaveJPG) is the vcpkg x86-windows-static-md build of
+  the same version (3.2.0).
+- All 48 diff tests rerun against the deployed /MD modules: 47 give 0 mismatches. diff_ks_window gives 2 per
+  full run, only the Window active bit 1 (WM_ACTIVATE) set on the original's side: the same scenarios pass when
+  replayed alone (`KSW_ONLY=<n>`) on the /MD and on the old static build, so it is an activation race with
+  whatever window holds the foreground, not a regression.
 - In game: menu reached, JetLog identical to the baseline.
 
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
