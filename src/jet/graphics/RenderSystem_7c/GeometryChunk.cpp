@@ -1,9 +1,9 @@
-// Unit U5b1 of RenderSystem_7c: GeometryChunk (0x10021a70..0x100222c0, 0x10024a90, 0x100254a0..0x10026e70,
-// 0x1002a720..0x1002abe0, with the property, bone and registry helpers). Behaviour follows the TS12 assembly
-// (addresses per function). The interpolation and copy slots (U5b2) still call the original's code; the registry
-// stays the original's static. Floats the original copies through the x87 stack are copied as it does (a
+// Units U5b1 and U5b2 of RenderSystem_7c: GeometryChunk (0x10021a70..0x100222c0, 0x10024a90, 0x100254a0..
+// 0x1002abe0, with the property, bone and registry helpers; U5b2 is the interpolation and copy). Behaviour follows
+// the TS12 assembly (addresses per function); the registry stays the original's static. Floats the original copies through the x87 stack are copied as it does (a
 // signalling NaN comes out quiet).
 #include <jet/Geometry.h>
+#include <jet/Math.h>
 #include <jet/RenderSystem.h>
 #include <jet/VCall.h>
 
@@ -1056,48 +1056,614 @@ void __cdecl GeometryChunk::ReleaseRegistrationData()
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// U5b2: the original's interpolation and copy
+// U5b2: interpolation and copy (0x10026e70..0x1002a720). The compiler unrolled the original's loops by four and
+// picked operand orders per unrolled step; with two NaN operands SSE returns the first one, so the orders are
+// kept per step (Add/Mul above). Lengths and the udword blends run on the x87 stack as in the original (at the
+// caller's precision control).
 
-#define GC_FWD(slot, export_name, params, args)                                \
-    void __cdecl GeometryChunk::slot params                                     \
-    {                                                                           \
-        static const auto fn = Orig<void(__cdecl*)(GeometryChunk*, ...)>(export_name); \
-        fn args;                                                                \
+namespace {
+
+using TypeChunk = GeometryChunk::ItemTypes::Chunk;
+using Item = VertexType::Item;
+
+float* At(const GeometryChunk::FloatPtr& p, unsigned int i)
+{
+    return reinterpret_cast<float*>(reinterpret_cast<char*>(p.data) + p.stride * i);
+}
+unsigned long* At(const GeometryChunk::UDwordPtr& p, unsigned int i)
+{
+    return reinterpret_cast<unsigned long*>(reinterpret_cast<char*>(p.data) + p.stride * i);
+}
+
+// the vertices the compiler's four-step loop covers (it is entered for a count of at least 4, signed)
+unsigned int Unrolled(unsigned int n) { return static_cast<int>(n) >= 4 ? (((n - 4) >> 2) + 1) * 4 : 0; }
+
+// every item type of the list, as the original walks it (an item is used before the chunk end is checked)
+template <class F>
+void ForEachType(const GeometryChunk::ItemTypes& types, F f)
+{
+    TypeChunk* const head = *reinterpret_cast<TypeChunk* const*>(&types);
+    TypeChunk* c = head;
+    const VertexItemType* it = head ? head->data : nullptr;
+    while (it) {
+        f(*it);
+        if (++it >= c->data + c->count) {
+            c = c->next;
+            if (c == head) break;
+            it = c->data;
+        }
     }
+}
 
-#define FDA_T "ABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z"
-GC_FWD(Interpolate61, "?InterpolateChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIABVVector3@2@" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, unsigned int d, const Vector3& e, const ItemTypes& f, int g),
-       (this, a, b, c, d, &e, &f, g))
-GC_FWD(Interpolate62, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIQBVVector3@2@II" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, unsigned int d, const Vector3* const e, unsigned int f,
-        unsigned int g, const ItemTypes& h, int i),
-       (this, a, b, c, d, e, f, g, &h, i))
-GC_FWD(Interpolate63, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIQBVVector3@2@" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, unsigned int d, const Vector3* const e,
-        const ItemTypes& f, int g),
-       (this, a, b, c, d, e, &f, g))
-GC_FWD(Interpolate64, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@III" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, unsigned int d, const ItemTypes& e, int f),
-       (this, a, b, c, d, &e, f))
-GC_FWD(Interpolate65, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIQBVVector2@2@II" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, const Vector2* const d, unsigned int e,
-        unsigned int f, const ItemTypes& g, int h),
-       (this, a, b, c, d, e, f, &g, h))
-GC_FWD(Interpolate66, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIQBVVector2@2@" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, const Vector2* const d, const ItemTypes& e, int f),
-       (this, a, b, c, d, &e, f))
-GC_FWD(Interpolate67, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@II" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, const ItemTypes& d, int e), (this, a, b, c, &d, e))
-GC_FWD(Interpolate68, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IQBMII" FDA_T,
-       (const GeometryChunk* a, unsigned int b, const float* const c, unsigned int d, unsigned int e,
-        const ItemTypes& f, int g),
-       (this, a, b, c, d, e, &f, g))
-GC_FWD(Interpolate69, "?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IQBM" FDA_T,
-       (const GeometryChunk* a, unsigned int b, const float* const c, const ItemTypes& d, int e),
-       (this, a, b, c, &d, e))
-GC_FWD(Copy70, "?CopyChunkData@GeometryChunk@Jet@@UAAXPBV12@III" FDA_T,
-       (const GeometryChunk* a, unsigned int b, unsigned int c, unsigned int d, const ItemTypes& e, int f),
-       (this, a, b, c, d, &e, f))
+// the element count of an item both chunks have with the same data type and count (1..4), else 0; the copy
+// also skips a missing item
+int Matching(const GeometryChunk* src, const VertexType* st, const GeometryChunk* dst, const VertexType* dt,
+             VertexItemType type, int& dataType, bool nullCheck)
+{
+    if (VCall<int>(src, 0xb0, type, 0) == -1) return 0;
+    if (VCall<int>(dst, 0xb0, type, 0) == -1) return 0;
+    const Item* const a = st->GetItem(type);
+    const Item* const b = dt->GetItem(type);
+    if (nullCheck && (!a || !b)) return 0;
+    if (a->dataType != b->dataType || a->count != b->count) return 0;
+    dataType = a->dataType;
+    return a->count >= 1 && a->count <= 4 ? a->count : 0;
+}
+
+const VertexType* TypeOf(const GeometryChunk* c, int stream) { return VCall<const VertexType*>(c, 0xa4, stream); }
+
+void SetDirty(GeometryChunk* c) { VCall<void>(c, 0x7c, 1, 0, -2); }  // slot 31
+
+// StdMath::s_sqrtLUT (KernelStandard's exported table, read inline like the original) and the 1/sqrt seed of s
+float Seed(float s)
+{
+    static const unsigned int* const lut = reinterpret_cast<const unsigned int*>(
+        GetProcAddress(GetModuleHandleA("KernelStandard_7c.dll"), "?s_sqrtLUT@StdMath@Jet@@0PAIA"));
+    unsigned int u;
+    std::memcpy(&u, &s, 4);
+    const unsigned int y = (((0x17cu - ((u >> 23) & 0xff)) << 22) & 0xff800000u) | lut[(u >> 15) & 0x1ff];
+    float f;
+    std::memcpy(&f, &y, 4);
+    return f;
+}
+
+const float kHalf = 0.5f;
+const double kThreeHalves = 1.5;
+const float kTwo32 = 4294967296.0f;
+
+struct X87Value {  // an x87 register as fstp tbyte stores it
+    unsigned char b[10];
+};
+
+// 0x1002b170: |v| with two Newton steps, left unrounded
+void Length(const float* v, X87Value& out)
+{
+    const float s = Add(Add(Mul(v[0], v[0]), Mul(v[1], v[1])), Mul(v[2], v[2]));
+    const float y = Seed(s);
+    unsigned char* const o = out.b;
+    __asm {
+        fld     s
+        fld     kHalf
+        fmul    st, st(1)
+        fld     y
+        fld     st(0)
+        fmul    st, st(1)
+        fmul    st, st(2)
+        fld     kThreeHalves
+        fld     st(0)
+        fsubrp  st(2), st
+        fxch    st(1)
+        fmulp   st(2), st
+        fld     st(1)
+        fmul    st, st(2)
+        fmulp   st(3), st
+        fsubrp  st(2), st
+        fmulp   st(1), st
+        fmulp   st(1), st
+        mov     eax, o
+        fstp    tbyte ptr [eax]
+    }
+}
+
+// |a| (rounded to float) / |b| (unrounded), rounded to float
+float LengthRatio(const float* a, const float* b)
+{
+    X87Value la, lb;
+    float l1, r;
+    Length(a, la);
+    __asm {
+        lea     eax, la
+        fld     tbyte ptr [eax]
+        fstp    l1
+    }
+    Length(b, lb);
+    __asm {
+        lea     eax, lb
+        fld     tbyte ptr [eax]
+        fdivr   l1
+        fstp    r
+    }
+    return r;
+}
+
+// 0x1002ae50: v scaled by its 1/length (two Newton steps)
+void Normalize(float* v)
+{
+    const float s = Add(Add(Mul(v[0], v[0]), Mul(v[1], v[1])), Mul(v[2], v[2]));
+    const float y = Seed(s);
+    float r;
+    __asm {
+        fld     s
+        fmul    kHalf
+        fld     y
+        fld     st(0)
+        fmul    st, st(1)
+        fmul    st, st(2)
+        fld     kThreeHalves
+        fld     st(0)
+        fsubrp  st(2), st
+        fxch    st(1)
+        fmulp   st(2), st
+        fld     st(1)
+        fmul    st, st(2)
+        fmulp   st(3), st
+        fsubrp  st(2), st
+        fmulp   st(1), st
+        fstp    r
+    }
+    v[0] = Mul(v[0], r);
+    v[1] = Mul(v[1], r);
+    v[2] = Mul(v[2], r);
+}
+
+// udwords through the x87 stack: the sum of u[i] (as unsigned) * w[i], truncated to 64 bits, the low half
+unsigned long UBlend(const unsigned long* u, const float* w, int n)
+{
+    unsigned short cw, cwt;
+    __int64 q;
+    __asm {
+        mov     esi, u
+        mov     edi, w
+        mov     ecx, n
+        fild    dword ptr [esi]
+        cmp     dword ptr [esi], 0
+        jge     ub_first
+        fadd    kTwo32
+    ub_first:
+        fmul    dword ptr [edi]
+        dec     ecx
+        jz      ub_done
+    ub_next:
+        add     esi, 4
+        add     edi, 4
+        fild    dword ptr [esi]
+        cmp     dword ptr [esi], 0
+        jge     ub_positive
+        fadd    kTwo32
+    ub_positive:
+        fmul    dword ptr [edi]
+        faddp   st(1), st
+        dec     ecx
+        jnz     ub_next
+    ub_done:
+        fnstcw  cw
+        movzx   eax, cw
+        or      eax, 0C00h
+        mov     cwt, ax
+        fldcw   cwt
+        fistp   q
+        fldcw   cw
+    }
+    return static_cast<unsigned long>(q);
+}
+
+float CopyX87(const float* s) { return X87(*s); }
+
+}  // namespace
+
+// 0x10026e70: t from where pos lies between src positions i0 and i1 (0 / 1 when it is one of them)
+void __cdecl GeometryChunk::InterpolateChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 unsigned int dst, const Vector3& pos, const ItemTypes& types,
+                                                 int stream)
+{
+    const VertexType* const st = TypeOf(src, stream);
+    const VertexType* const dt = TypeOf(this, stream);
+    const FloatPtr sp = ItemArray<FloatPtr>(src, 0xc0, 1, 0);
+    const float* const p0 = At(sp, i0);
+    const float* const q = &pos.x;
+    float t;
+    if (q[0] == p0[0] && q[1] == p0[1] && q[2] == p0[2]) {
+        t = 0.0f;
+    } else {
+        const float* const p1 = At(sp, i1);
+        if (q[0] == p1[0] && q[1] == p1[1] && q[2] == p1[2]) {
+            t = 1.0f;
+        } else {
+            const float a[3] = {q[0] - p0[0], q[1] - p0[1], q[2] - p0[2]};
+            const float b[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
+            t = LengthRatio(a, b);
+        }
+    }
+    ForEachType(types, [&](VertexItemType type) {
+        int dataType;
+        const int count = Matching(src, st, this, dt, type, dataType, false);
+        if (count == 1 && dataType == 8) {
+            const UDwordPtr s = ItemArray<UDwordPtr>(src, 0xd8, type, 0);
+            const UDwordPtr d = ItemArray<UDwordPtr>(this, 0xdc, type, 0);
+            const unsigned long a = *At(s, i0);
+            const unsigned long diff = *At(s, i1) - a;
+            *At(d, dst) = UBlend(&diff, &t, 1) + a;
+            return;
+        }
+        if (!count || dataType != 7) return;
+        static const unsigned int getters[5] = {0, 0xd0, 0xb8, 0xc0, 0xc8};
+        const FloatPtr s = ItemArray<FloatPtr>(src, getters[count], type, 0);
+        const FloatPtr d = ItemArray<FloatPtr>(this, getters[count] + 4, type, 0);
+        const float* const a = At(s, i0);
+        const float* const b = At(s, i1);
+        float r[4];
+        for (int c = 0; c < count; ++c) r[c] = Add(Mul(b[c] - a[c], t), a[c]);
+        float* const o = At(d, dst);
+        for (int c = 0; c < count; ++c) o[c] = r[c];  // (copied through x87 for 2..4: the sums are never signalling)
+    });
+    SetDirty(this);
+}
+
+// 0x100274c0: the weights of pos in the triangle (its normal the third input), then slot 62 for one vertex
+void __cdecl GeometryChunk::InterpolateChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 unsigned int i2, unsigned int dst, const Vector3& pos,
+                                                 const ItemTypes& types, int stream)
+{
+    const FloatPtr sp = ItemArray<FloatPtr>(src, 0xc0, 1, 0);
+    const float* const c = At(sp, i2);
+    const float* const b = At(sp, i1);
+    const float* const a = At(sp, i0);
+    const float e[3] = {b[0] - c[0], b[1] - c[1], b[2] - c[2]};
+    const float d[3] = {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
+    float n[3];
+    n[0] = Mul(d[1], e[2]) - Mul(d[2], e[1]);
+    n[2] = Mul(d[0], e[1]) - Mul(d[1], e[0]);
+    n[1] = Mul(d[2], e[0]) - Mul(d[0], e[2]);
+    if (Add(Add(Mul(n[2], n[2]), Mul(n[1], n[1])), Mul(n[0], n[0])) != 0.0f) {
+        Normalize(n);
+        const Vector3 w = GetBaryCentricWeights(*reinterpret_cast<const Vector3*>(a),
+                                                *reinterpret_cast<const Vector3*>(b),
+                                                *reinterpret_cast<const Vector3*>(c), pos,
+                                                *reinterpret_cast<const Vector3*>(n));
+        VCall<void>(this, 0xf8, src, i0, i1, i2, &w, dst, 1u, &types, stream);
+    }
+}
+
+// 0x10028d40
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                    unsigned int i2, const Vector3* const w, unsigned int first,
+                                                    unsigned int count, const ItemTypes& types, int stream)
+{
+    const VertexType* const st = TypeOf(src, stream);
+    const VertexType* const dt = TypeOf(this, stream);
+    const unsigned int unrolled = Unrolled(count);
+    ForEachType(types, [&](VertexItemType type) {
+        int dataType;
+        switch (Matching(src, st, this, dt, type, dataType, false)) {
+        case 1:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xd0, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xd4, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    const float r = Add(Add(Mul(*At(s, i0), w[k].x), Mul(*At(s, i1), w[k].y)), Mul(*At(s, i2), w[k].z));
+                    *At(d, first + k) = r;
+                }
+            } else if (dataType == 8) {
+                const UDwordPtr s = ItemArray<UDwordPtr>(src, 0xd8, type, 0);
+                const UDwordPtr d = ItemArray<UDwordPtr>(this, 0xdc, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    const unsigned long u[3] = {*At(s, i0), *At(s, i1), *At(s, i2)};
+                    *At(d, first + k) = UBlend(u, &w[k].x, 3);
+                }
+            }
+            break;
+        case 2:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xb8, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xbc, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    const float* const c = At(s, i2);
+                    const float c0 = c[0], c1 = c[1];
+                    const float* const b = At(s, i1);
+                    const float b0 = b[0], b1 = b[1];
+                    const float* const a = At(s, i0);
+                    const float a0 = a[0], a1 = a[1];
+                    const float x = Add(Add(Mul(a0, w[k].x), Mul(b0, w[k].y)), Mul(c0, w[k].z));
+                    const float y = Add(Add(Mul(a1, w[k].x), Mul(b1, w[k].y)), Mul(c1, w[k].z));
+                    float* const o = At(d, first + k);
+                    o[0] = x;
+                    o[1] = y;
+                }
+            }
+            break;
+        case 3:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xc0, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xc4, type, 0);
+                const float* const pa = At(s, i0);
+                const float* const pb = At(s, i1);
+                const float* const pc = At(s, i2);
+                const float a[3] = {pa[0], pa[1], pa[2]};  // read once, before the loop
+                const float b[3] = {pb[0], pb[1], pb[2]};
+                const float c[3] = {pc[0], pc[1], pc[2]};
+                for (unsigned int k = 0; k < count; ++k) {
+                    const float wx = w[k].x, wy = w[k].y, wz = w[k].z;
+                    float* const o = At(d, first + k);
+                    if (k < unrolled) {
+                        if ((k & 3) == 0) {
+                            for (int j = 0; j < 3; ++j) o[j] = Add(Add(Mul(wz, c[j]), Mul(wx, a[j])), Mul(wy, b[j]));
+                        } else {
+                            for (int j = 0; j < 3; ++j) o[j] = Add(Add(Mul(wz, c[j]), Mul(wy, b[j])), Mul(wx, a[j]));
+                        }
+                    } else {
+                        o[0] = Add(Add(Mul(wz, c[0]), Mul(wx, a[0])), Mul(wy, b[0]));
+                        o[1] = Add(Add(Mul(wz, c[1]), Mul(wx, a[1])), Mul(wy, b[1]));
+                        o[2] = Add(Add(Mul(wy, b[2]), Mul(wz, c[2])), Mul(wx, a[2]));
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xc8, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xcc, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    float* const o = At(d, first + k);
+                    float vc[4], vb[4], va[4];
+                    const float* const c = At(s, i2);
+                    for (int j = 0; j < 4; ++j) vc[j] = Mul(c[j], w[k].z);
+                    const float* const b = At(s, i1);
+                    for (int j = 0; j < 4; ++j) vb[j] = Mul(b[j], w[k].y);
+                    const float* const a = At(s, i0);
+                    for (int j = 0; j < 4; ++j) va[j] = Mul(a[j], w[k].x);
+                    float r[4];
+                    for (int j = 0; j < 4; ++j) r[j] = Add(vc[j], Add(vb[j], va[j]));
+                    for (int j = 0; j < 4; ++j) o[j] = r[j];
+                }
+            }
+            break;
+        }
+    });
+    SetDirty(this);
+}
+
+// 0x10028d00
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                    unsigned int i2, const Vector3* const w, const ItemTypes& types,
+                                                    int stream)
+{
+    VCall<void>(this, 0xf8, src, i0, i1, i2, w, 0u, numVertices, &types, stream);
+}
+
+// 0x10028c90: each vertex by its own position
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                    unsigned int i2, const ItemTypes& types, int stream)
+{
+    const unsigned int n = numVertices;
+    const FloatPtr dp = ItemArray<FloatPtr>(this, 0xc4, 1, 0);
+    for (unsigned int k = 0; k < n; ++k)
+        InterpolateChunkData(src, i0, i1, i2, k, *reinterpret_cast<const Vector3*>(At(dp, k)), types, stream);
+}
+
+// 0x10027fe0
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                    const Vector2* const w, unsigned int first, unsigned int count,
+                                                    const ItemTypes& types, int stream)
+{
+    const VertexType* const st = TypeOf(src, stream);
+    const VertexType* const dt = TypeOf(this, stream);
+    const unsigned int unrolled = Unrolled(count);
+    ForEachType(types, [&](VertexItemType type) {
+        int dataType;
+        switch (Matching(src, st, this, dt, type, dataType, false)) {
+        case 1:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xd0, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xd4, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    const float a = *At(s, i0), b = *At(s, i1);
+                    const float r = k < unrolled && (k & 3) == 1 ? Add(Mul(b, w[k].y), Mul(a, w[k].x))
+                                                                 : Add(Mul(a, w[k].x), Mul(b, w[k].y));
+                    *At(d, first + k) = r;
+                }
+            } else if (dataType == 8) {
+                const UDwordPtr s = ItemArray<UDwordPtr>(src, 0xd8, type, 0);
+                const UDwordPtr d = ItemArray<UDwordPtr>(this, 0xdc, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    const unsigned long u[2] = {*At(s, i0), *At(s, i1)};
+                    *At(d, first + k) = UBlend(u, &w[k].x, 2);
+                }
+            }
+            break;
+        case 2:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xb8, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xbc, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    const float* const b = At(s, i1);
+                    const float b0 = b[0], b1 = b[1];
+                    const float* const a = At(s, i0);
+                    const float a0 = a[0], a1 = a[1];
+                    const float x = Add(Mul(a0, w[k].x), Mul(b0, w[k].y));
+                    const float y = Add(Mul(a1, w[k].x), Mul(b1, w[k].y));
+                    float* const o = At(d, first + k);
+                    o[0] = x;
+                    o[1] = y;
+                }
+            }
+            break;
+        case 3:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xc0, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xc4, type, 0);
+                const float* const pa = At(s, i0);
+                const float* const pb = At(s, i1);
+                const float a[3] = {pa[0], pa[1], pa[2]};  // read once, before the loop
+                const float b[3] = {pb[0], pb[1], pb[2]};
+                for (unsigned int k = 0; k < count; ++k) {
+                    const float wx = w[k].x, wy = w[k].y;
+                    float* const o = At(d, first + k);
+                    if (k < unrolled && (k & 3) != 1) {
+                        for (int j = 0; j < 3; ++j) o[j] = Add(Mul(wy, b[j]), Mul(wx, a[j]));
+                    } else {
+                        for (int j = 0; j < 3; ++j) o[j] = Add(Mul(wx, a[j]), Mul(wy, b[j]));
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (dataType == 7) {
+                const FloatPtr s = ItemArray<FloatPtr>(src, 0xc8, type, 0);
+                const FloatPtr d = ItemArray<FloatPtr>(this, 0xcc, type, 0);
+                for (unsigned int k = 0; k < count; ++k) {
+                    float* const o = At(d, first + k);
+                    float vb[4], va[4];
+                    const float* const b = At(s, i1);
+                    for (int j = 0; j < 4; ++j) vb[j] = Mul(b[j], w[k].y);
+                    const float* const a = At(s, i0);
+                    for (int j = 0; j < 4; ++j) va[j] = Mul(a[j], w[k].x);
+                    float r[4];
+                    for (int j = 0; j < 4; ++j) r[j] = Add(vb[j], va[j]);
+                    for (int j = 0; j < 4; ++j) o[j] = r[j];
+                }
+            }
+            break;
+        }
+    });
+    SetDirty(this);
+}
+
+// 0x10027fa0
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                    const Vector2* const w, const ItemTypes& types, int stream)
+{
+    VCall<void>(this, 0x104, src, i0, i1, w, 0u, numVertices, &types, stream);
+}
+
+// 0x10027d40: the weights (1 - t, t) of each vertex position along src i0..i1, then slot 65
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                    const ItemTypes& types, int stream)
+{
+    const unsigned int n = numVertices;
+    const FloatPtr sp = ItemArray<FloatPtr>(src, 0xc0, 1, 0);
+    const FloatPtr dp = ItemArray<FloatPtr>(this, 0xc4, 1, 0);
+    const unsigned long long bytes = static_cast<unsigned long long>(n) * 8;
+    float* const w = static_cast<float*>(Alloc::New(bytes >> 32 ? 0xffffffffu : static_cast<unsigned int>(bytes)));
+    for (unsigned int k = 0; k < n; ++k) {
+        const float* const p0 = At(sp, i0);
+        const float* const q = At(dp, k);
+        float t;
+        if (q[0] == p0[0] && q[1] == p0[1] && q[2] == p0[2]) {
+            t = 0.0f;
+        } else {
+            const float* const p1 = At(sp, i1);
+            if (q[0] == p1[0] && q[1] == p1[1] && q[2] == p1[2]) {
+                t = 1.0f;
+            } else {
+                const float a[3] = {q[0] - p0[0], q[1] - p0[1], q[2] - p0[2]};
+                const float b[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
+                t = LengthRatio(a, b);
+            }
+        }
+        w[k * 2] = 1.0f - t;
+        w[k * 2 + 1] = t;
+    }
+    VCall<void>(this, 0x104, src, i0, i1, reinterpret_cast<const Vector2*>(w), 0u, n, &types, stream);
+    if (w) Alloc::Delete(w);
+}
+
+// 0x10027680
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i, const float* const w,
+                                                    unsigned int first, unsigned int count, const ItemTypes& types,
+                                                    int stream)
+{
+    const VertexType* const st = TypeOf(src, stream);
+    const VertexType* const dt = TypeOf(this, stream);
+    ForEachType(types, [&](VertexItemType type) {
+        int dataType;
+        const int n = Matching(src, st, this, dt, type, dataType, false);
+        if (n == 1 && dataType == 8) {
+            const UDwordPtr s = ItemArray<UDwordPtr>(src, 0xd8, type, 0);
+            const UDwordPtr d = ItemArray<UDwordPtr>(this, 0xdc, type, 0);
+            for (unsigned int k = 0; k < count; ++k) *At(d, first + k) = UBlend(At(s, i), &w[k], 1);
+            return;
+        }
+        if (!n || dataType != 7) return;
+        static const unsigned int getters[5] = {0, 0xd0, 0xb8, 0xc0, 0xc8};
+        const FloatPtr s = ItemArray<FloatPtr>(src, getters[n], type, 0);
+        const FloatPtr d = ItemArray<FloatPtr>(this, getters[n] + 4, type, 0);
+        for (unsigned int k = 0; k < count; ++k) {
+            const float* const a = At(s, i);
+            float r[4];
+            for (int j = 0; j < n; ++j) r[j] = Mul(a[j], w[k]);
+            float* const o = At(d, first + k);
+            for (int j = 0; j < n; ++j) o[j] = r[j];
+        }
+    });
+    SetDirty(this);
+}
+
+// 0x10027640
+void __cdecl GeometryChunk::InterpolateAllChunkData(const GeometryChunk* src, unsigned int i, const float* const w,
+                                                    const ItemTypes& types, int stream)
+{
+    VCall<void>(this, 0x110, src, i, w, 0u, numVertices, &types, stream);
+}
+
+// 0x10029fc0: the floats through the x87 stack (a signalling NaN comes out quiet)
+void __cdecl GeometryChunk::CopyChunkData(const GeometryChunk* src, unsigned int from, unsigned int to,
+                                          unsigned int count, const ItemTypes& types, int stream)
+{
+    const VertexType* const st = TypeOf(src, stream);
+    const VertexType* const dt = TypeOf(this, stream);
+    ForEachType(types, [&](VertexItemType type) {
+        int dataType;
+        const int n = Matching(src, st, this, dt, type, dataType, true);
+        if (n == 1 && dataType == 8) {
+            const UDwordPtr s = ItemArray<UDwordPtr>(src, 0xd8, type, 0);
+            const UDwordPtr d = ItemArray<UDwordPtr>(this, 0xdc, type, 0);
+            for (unsigned int k = 0; k < count; ++k) *At(d, to + k) = *At(s, from + k);
+            return;
+        }
+        if (!n || dataType != 7) return;
+        static const unsigned int getters[5] = {0, 0xd0, 0xb8, 0xc0, 0xc8};
+        const FloatPtr s = ItemArray<FloatPtr>(src, getters[n], type, 0);
+        const FloatPtr d = ItemArray<FloatPtr>(this, getters[n] + 4, type, 0);
+        for (unsigned int k = 0; k < count; ++k) {
+            const float* const a = At(s, from + k);
+            float* const o = At(d, to + k);
+            for (int j = 0; j < n; ++j) o[j] = CopyX87(a + j);
+        }
+    });
+    SetDirty(this);
+}
+
+// 0x10029e50
+void __cdecl GeometryChunk::GetAllChunkWeights(const Vector3& a, const Vector3& b, const Vector3& c,
+                                               Vector3* const out) const
+{
+    const unsigned int n = numVertices;
+    const FloatPtr pp = ItemArray<FloatPtr>(this, 0xc0, 1, 0);
+    const float e[3] = {b.x - c.x, b.y - c.y, b.z - c.z};
+    const float d[3] = {a.x - b.x, a.y - b.y, a.z - b.z};
+    float nv[3];
+    nv[1] = Mul(d[2], e[0]) - Mul(e[2], d[0]);
+    nv[2] = Mul(e[1], d[0]) - Mul(d[1], e[0]);
+    nv[0] = Mul(d[1], e[2]) - Mul(d[2], e[1]);
+    if (Add(Add(Mul(nv[2], nv[2]), Mul(nv[1], nv[1])), Mul(nv[0], nv[0])) == 0.0f) return;
+    Normalize(nv);
+    for (unsigned int k = 0; k < n; ++k) {
+        const Vector3 r = GetBaryCentricWeights(a, b, c, *reinterpret_cast<const Vector3*>(At(pp, k)),
+                                                *reinterpret_cast<const Vector3*>(nv));
+        out[k].x = CopyX87(&r.x);
+        out[k].y = CopyX87(&r.y);
+        out[k].z = CopyX87(&r.z);
+    }
+}
 
 }  // namespace Jet

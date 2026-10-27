@@ -65,8 +65,18 @@ NullVertexBufferManager (0x1001e5b0..) is made only by the Display and stays wit
 (0x10011f00, 38 KB) and Get/CloneBuiltInVertexType belong to U9.
 U5b split 2026-10-28: U5b1 GeometryChunk without the interpolation (GeometryChunk.cpp; 82 exports, 1502/2687; test
 diff_rs_u5 part "chunks") done 2026-10-28; U5b2 = InterpolateChunkData (2), InterpolateAllChunkData (8),
-GetAllChunkWeights, CopyChunkData (0x10026e70..0x1002a720, ~14 KB of float code); until then our vftable slots
-61..70 call the original's exports through GetProcAddress. GeometryChunk 0x4c on ReferenceCount: +8 properties
+GetAllChunkWeights, CopyChunkData (0x10026e70..0x1002a720, ~14 KB of float code; GeometryChunk.cpp, 1514/2687,
+diff_rs_u5 part "interp") done 2026-10-28. Slots 61 InterpolateChunkData(src, i0, i1, dst, pos), 62..64 from three
+src vertices (Vector3 weights with first/count, all vertices, by the vertex positions' barycentric weights through
+the non-virtual 4-index InterpolateChunkData), 65..67 from two (Vector2 weights, all, by the positions along the
+segment), 68/69 one vertex scaled by float weights, 70 CopyChunkData(src, from, to, count); each walks the item
+type list, needs the item in both chunks (slot 44 not -1) with equal data type and count (floats of 1..4, udwords
+of 1), then calls slot 31 (1, 0, -2). MSVC lays out overloaded virtual functions in reverse order of declaration:
+the header declares the 69..62 overloads backwards. The compiler unrolled the loops by four and picked a different
+operand order per unrolled step (and for the tail); kept per step for the two-NaN case. The three-vertex and
+two-vertex position cases read the source vertices once before the loop. Lengths are KernelStandard's LUT square
+root inlined on x87 (left unrounded for the divide), udword blends are x87 sums truncated through fistp qword.
+GeometryChunk 0x4c on ReferenceCount: +8 properties
 (FastDynamicArray<{name node, float}, 3>, chunk 0x24), +0xc Array<VertexProgram::MatrixMap*,128> bones (MatrixMap
 {matrix, index} 8 bytes; growth to count+1 rounded up to 128), +0x18 flags (bits 0..4 primitive: 0 points, 1 line
 list, 2 line strip, 4 triangle list, 8 strip, 0x10 fan; 0x20 lit; 0x100 index dynamic; 0x200 index dirty; 0x1000
@@ -78,7 +88,8 @@ _purecall is `xor eax, eax; ret` (ours defines the same), which is why base slot
 GeometryChunk::InitializeBuffers answers true. Slot names from the stream chunks' vftables: 2/3 CreateInstance,
 4 InitializeBuffers, 5 LoadBuffers, 7 DuplicateVertexArray, 9 ResizeVertexArray, 12/13 GetVertexArray, 14
 RenderGeometry, 15 RenderPrimitives, 16/17 SetupMultipassRender, 19 BindVertexProgram, 20/21 RenderGeometryPass, 22
-CleanupMultipassRender, 23/24 stream / buffer counts (AppendChunk loops vertex types x streams), 25..32 vertex data
+CleanupMultipassRender, 23/24 stream / buffer counts (U5b2 confirmed 41 GetVertexType(stream), 44 GetItemOffset,
+46..53 GetFloatArray for 2, 3, 4, 1 elements const/non-const, 31 SetVertexDataDirty) (AppendChunk loops vertex types x streams), 25..32 vertex data
 dynamic/shared/dirty, 35..38 static vertex / index buffers, 39/40 AssignVertexType / SetVertexType, 41
 GetVertexType(i), 42 GetVertexTypeID, 43 GetVertexSize, 44 GetItemOffset, 45 GetItemStream, 46..53 GetFloatArray,
 54/55 GetUDwordArray, 59/60 Set/GetVertexProgram. TS12 quirks kept: without an index array the index lookups

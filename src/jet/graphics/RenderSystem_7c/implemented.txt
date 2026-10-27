@@ -1445,8 +1445,7 @@
 ?SupportsUserHint@GeometryChunkCreateHint@Jet@@QBA_NK@Z
 ?Update@VertexBufferManager@Jet@@UAAXXZ
 
-# U5b1: GeometryChunk without the interpolation and copy (GeometryChunk.cpp); primitiveLookup and the registry stay
-# the original's
+# U5b1 + U5b2: GeometryChunk (GeometryChunk.cpp); primitiveLookup and the registry stay the original's
 ??0GeometryChunk@Jet@@QAE@IIIII@Z
 ??0GeometryChunk@Jet@@QAE@XZ
 ??1GeometryChunk@Jet@@MAE@XZ
@@ -1458,11 +1457,13 @@
 ?AssignInfluenceMatrix@GeometryChunk@Jet@@QAA_NHPBVMatrix4@2@@Z
 ?ChunkPropertyExists@GeometryChunk@Jet@@QBA_NABVPString@2@@Z
 ?ContainsUnsharedData@GeometryChunk@Jet@@QBA_NXZ
+?CopyChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
 ?CreateRegisteredInstance@GeometryChunk@Jet@@SAPAV12@ABVPString@2@@Z
 ?DuplicateFaceNeighborArray@GeometryChunk@Jet@@QAAXXZ
 ?DuplicateFaceNormalArray@GeometryChunk@Jet@@QAAXXZ
 ?DuplicateIndexArray@GeometryChunk@Jet@@UAAXPAVDisplay@2@@Z
 ?DuplicateUnsharedArrays@GeometryChunk@Jet@@UAAXPAVDisplay@2@@Z
+?GetAllChunkWeights@GeometryChunk@Jet@@QBAXABVVector3@2@00QAV32@@Z
 ?GetChunkProperty@GeometryChunk@Jet@@QBA_NABVPString@2@AAM@Z
 ?GetFaceNeighborArray@GeometryChunk@Jet@@QAAPAUFaceNeighbors@12@XZ
 ?GetFaceNeighborArray@GeometryChunk@Jet@@QBAPBUFaceNeighbors@12@XZ
@@ -1494,6 +1495,16 @@
 ?GetVertexIndex@GeometryChunk@Jet@@QBA_NHHAAI@Z
 ?InitInstance@GeometryChunk@Jet@@IBAXAAV12@@Z
 ?InitializeBuffers@GeometryChunk@Jet@@UAA_NPAVDisplay@2@_N@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIQBVVector3@2@ABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIQBVVector3@2@IIABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIQBVVector2@2@ABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IIQBVVector2@2@IIABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IQBMABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateAllChunkData@GeometryChunk@Jet@@UAAXPBV12@IQBMIIABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateChunkData@GeometryChunk@Jet@@QAAXPBV12@IIIIABVVector3@2@ABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
+?InterpolateChunkData@GeometryChunk@Jet@@UAAXPBV12@IIIABVVector3@2@ABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z
 ?LoadChunkData@GeometryChunk@Jet@@UAA_NABV?$Array@UGeometryStreamType@Jet@@$00@2@QAPAX@Z
 ?RegisterName@GeometryChunk@Jet@@SA_NABVPString@2@P6APAV12@XZ@Z
 ?ReleaseRegistrationData@GeometryChunk@Jet@@SAXXZ

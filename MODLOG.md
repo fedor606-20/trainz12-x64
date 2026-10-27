@@ -2087,6 +2087,35 @@ unit order in `notes/WaterSystem.md`.
   - Mutations caught: 61 of 61. The test was strengthened along the way (the name reference counts, properties over several chunks, signalling NaNs passed as bits: a float returned by value goes through the x87 stack and comes back quiet, inexact sums for the addition order); one mutant writing past a block end shows as a heap fault.
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U5b2, GeometryChunk interpolation and copy (2026-10-28): 1514/2687 exports ours
+- `GeometryChunk.cpp`, 12 exports: InterpolateChunkData (the virtual one between two vertices at a position, and
+  the non-virtual one in a triangle), the eight InterpolateAllChunkData, GetAllChunkWeights, CopyChunkData. The
+  GetProcAddress forwards of vftable slots 61..70 are gone. Slot meanings in notes/RenderSystem.md.
+- Each one walks the list of item types and handles an item only when both chunks have it (slot 44 not -1) with
+  the same data type and element count: floats of 1..4 elements, udwords of 1. Then it calls slot 31 (1, 0, -2).
+- MSVC lays out overloaded virtual functions in reverse order of declaration. The first build had slots 62..69
+  in the wrong order (the test crashed on the first call); the header now declares those overloads backwards.
+- Float details kept from the TS12 assembly:
+  - The compiler unrolled the loops by four and chose a different operand order for some unrolled steps and for
+    the tail (for instance the two-vertex float case adds `b*wy + a*wx` on the second step of each four, `a*wx +
+    b*wy` elsewhere). With two NaN operands SSE returns the first one, so the order is kept per step.
+  - The three-vertex and two-vertex position cases read the source vertices once before the loop, so a
+    destination that overlaps the source sees the old values.
+  - Lengths are KernelStandard's table square root, inlined on the x87 stack and left unrounded for the divide.
+    The udword blends are x87 sums of `u * w` (u read as unsigned), truncated through `fistp qword`. Both run
+    as inline assembly, so they follow the caller's precision control as the original does.
+  - CopyChunkData and GetAllChunkWeights copy floats through the x87 stack, which quiets a signalling NaN.
+- Test `tests/diff_rs_u5.cpp` part "interp" (2000 scenarios, 0 mismatches; the whole test 1500 at 300 rounds per
+  part, 0 mismatches). Chunks get a test vftable: a made-up vertex type, one array per item type behind slots 46..55,
+  logged slots 41, 44 and 31. The real slots 61..70 call each other through it. Item layouts differ a little
+  between the chunks; some type lists span two FastDynamicArray chunks; the source and the destination are
+  sometimes the same chunk; positions sometimes equal the endpoints (the 0 / 1 shortcuts) or make a degenerate
+  triangle. Weights and data include NaNs with their own payloads, signalling NaNs and inexact values.
+  - Mutations caught: 45 of 47. The two survivors change the operand order of a product inside the triangle
+    normal. Only the normal's NaN payload depends on it, and GetBaryCentricWeights does not pass that payload
+    on.
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

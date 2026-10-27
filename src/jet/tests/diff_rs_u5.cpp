@@ -1,5 +1,6 @@
-// Differential test of RenderSystem_7c unit U5a: VertexType and its registry (VertexType.cpp), RenderingCache and
-// RenderingCacheManager, VertexBufferManager, StaticBuffer and the chunk hints (RenderCaches.cpp), ours against
+// Differential test of RenderSystem_7c unit U5: VertexType and its registry (VertexType.cpp), RenderingCache and
+// RenderingCacheManager, VertexBufferManager, StaticBuffer and the chunk hints (RenderCaches.cpp), GeometryChunk
+// (GeometryChunk.cpp: part "chunks", and part "interp" for the interpolation and copy), ours against
 // RenderSystem_7c_orig.dll in one process.
 //
 // As in diff_rs_u3: both modules' imports of Jet::Alloc::New / Delete are hooked (blocks filled with 0xcd and
@@ -1893,6 +1894,318 @@ static void RunChunks(int s, unsigned seed)
     }
 }
 
+// ---- part "interp" (U5b2): InterpolateChunkData, InterpolateAllChunkData, CopyChunkData, GetAllChunkWeights
+//
+// Chunks get a test vftable: slot 41 hands out a made-up vertex type (one stream of items with a count and a data
+// type), slot 44 answers whether the chunk has an item, slots 46..55 hand out one array per item type, slot 31
+// logs. The interpolation slots themselves (61..70) stay the side's own, so their calls into each other go through
+// the real code. Every array of the written chunk is dumped after each call.
+
+struct InterpArray {
+    int type;
+    unsigned stride;
+    bool present;  // slot 44 answers 0 (else -1)
+    std::vector<unsigned char> data;
+};
+struct InterpState {
+    Type* vtype;
+    std::vector<InterpArray> arrays;
+};
+static std::map<const void*, InterpState> interpState[2];
+static void* interpTestVt[2][73];
+
+static InterpArray* FindArray(const void* c, int type)
+{
+    for (auto& a : interpState[cur][c].arrays)
+        if (a.type == type) return &a;
+    return nullptr;
+}
+static void* __cdecl IVertexType(void* self, int stream)
+{
+    Log("  vertex type %s %d\n", Name(self).c_str(), stream);
+    return interpState[cur][self].vtype;
+}
+static int __cdecl IItemOffset(void* self, int type, int k)
+{
+    const InterpArray* a = FindArray(self, type);
+    Log("  item offset %s %d %d\n", Name(self).c_str(), type, k);
+    return a && a->present ? 0 : -1;
+}
+template <int Slot>
+static void* __cdecl IArray(void* self, unsigned* out, int type, int k)
+{
+    const InterpArray* a = FindArray(self, type);
+    Log("  array %d %s %d %d\n", Slot, Name(self).c_str(), type, k);
+    out[0] = a ? a->stride : 0;
+    out[1] = a ? static_cast<unsigned>(reinterpret_cast<uintptr_t>(a->data.data())) : 0;
+    return out;
+}
+static void __cdecl IDirty(void* self, int b, int i, int j) { Log("  vertex dirty %s %d %d %d\n", Name(self).c_str(), b, i, j); }
+static void MakeInterpVtable(int s)
+{
+    void** v = interpTestVt[s];
+    for (int k = 0; k < 73; ++k) v[k] = apiC[s].vft[k];
+    v[31] = reinterpret_cast<void*>(&IDirty);
+    v[41] = reinterpret_cast<void*>(&IVertexType);
+    v[44] = reinterpret_cast<void*>(&IItemOffset);
+    v[46] = reinterpret_cast<void*>(&IArray<46>);
+    v[47] = reinterpret_cast<void*>(&IArray<47>);
+    v[48] = reinterpret_cast<void*>(&IArray<48>);
+    v[49] = reinterpret_cast<void*>(&IArray<49>);
+    v[50] = reinterpret_cast<void*>(&IArray<50>);
+    v[51] = reinterpret_cast<void*>(&IArray<51>);
+    v[52] = reinterpret_cast<void*>(&IArray<52>);
+    v[53] = reinterpret_cast<void*>(&IArray<53>);
+    v[54] = reinterpret_cast<void*>(&IArray<54>);
+    v[55] = reinterpret_cast<void*>(&IArray<55>);
+}
+
+struct ItemSpec {
+    int type, count, dataType;
+    bool inType, present;
+};
+
+static void RunInterp(int s, unsigned seed)
+{
+    std::mt19937 r(seed);
+    const ApiC& a = apiC[s];
+    interpState[s].clear();
+    using F61 = void(__cdecl*)(void*, const void*, unsigned, unsigned, unsigned, const float*, const void*, int);
+    using F62 = void(__cdecl*)(void*, const void*, unsigned, unsigned, unsigned, const float*, unsigned, unsigned, const void*, int);
+    using F63 = void(__cdecl*)(void*, const void*, unsigned, unsigned, unsigned, const float*, const void*, int);
+    using F64 = void(__cdecl*)(void*, const void*, unsigned, unsigned, unsigned, const void*, int);
+    using F65 = void(__cdecl*)(void*, const void*, unsigned, unsigned, const float*, unsigned, unsigned, const void*, int);
+    using F66 = void(__cdecl*)(void*, const void*, unsigned, unsigned, const float*, const void*, int);
+    using F67 = void(__cdecl*)(void*, const void*, unsigned, unsigned, const void*, int);
+    using F68 = void(__cdecl*)(void*, const void*, unsigned, const float*, unsigned, unsigned, const void*, int);
+    using F69 = void(__cdecl*)(void*, const void*, unsigned, const float*, const void*, int);
+    using F70 = void(__cdecl*)(void*, const void*, unsigned, unsigned, unsigned, const void*, int);
+    using FTri = void(__cdecl*)(void*, const void*, unsigned, unsigned, unsigned, unsigned, const float*, const void*, int);
+    using FWeights = void(__cdecl*)(const void*, const float*, const float*, const float*, float*);
+    static FTri tri[2];
+    static FWeights weights[2];
+    if (!tri[s]) {
+        tri[s] = As<FTri>(Proc(mod[s], "?InterpolateChunkData@GeometryChunk@Jet@@QAAXPBV12@IIIIABVVector3@2@ABV?$FastDynamicArray@W4VertexItemType@Jet@@$0N@U?$Less@W4VertexItemType@Jet@@W412@@2@@2@H@Z"));
+        weights[s] = As<FWeights>(Proc(mod[s], "?GetAllChunkWeights@GeometryChunk@Jet@@QBAXABVVector3@2@00QAV32@@Z"));
+    }
+
+    // the item layout: positions (type 1, 3 floats) always, then a few others; the second chunk's differs a little
+    static const int kTypes[] = {2, 3, 4, 5, 6, 7, 15};
+    std::vector<ItemSpec> spec{{1, 3, 7, true, true}};
+    for (int t : kTypes) {
+        if (r() % 3 == 0) continue;
+        static const int counts[] = {1, 1, 2, 3, 4, 4, 0, 5};
+        const int count = counts[r() % 8];
+        const int dataType = count == 1 && r() % 2 ? 8 : r() % 8 ? 7 : 3;
+        spec.push_back({t, count, dataType, true, r() % 8 != 0});
+    }
+    const bool copyOps = r() % 4 == 0;  // copies may also meet an item the vertex type lacks
+    const unsigned cap = 6 + r() % 10;
+    std::vector<void*> chunks;
+    auto make = [&](int k, const std::vector<ItemSpec>& items) {
+        void* c = TestNew(0x4c, "C%d", k);
+        a.ctor0(c, nullptr);
+        static_cast<Chunk*>(c)->vertices = 1 + r() % cap;
+        *static_cast<void**>(c) = interpTestVt[s];
+        InterpState& st = interpState[s][c];
+        st.vtype = new Type{};
+        st.vtype->streamCount = 1;
+        st.vtype->streams = new Stream{};
+        Item* list = new Item[items.size()]{};
+        unsigned n = 0;
+        for (const ItemSpec& i : items) {
+            if (i.inType) {
+                list[n].type = i.type;
+                list[n].count = i.count;
+                list[n].dataType = i.dataType;
+                ++n;
+            }
+            InterpArray ar;
+            ar.type = i.type;
+            ar.present = i.present;
+            ar.stride = static_cast<unsigned>(i.count > 0 ? i.count : 1) * 4 + (r() % 3) * 4;
+            ar.data.resize(ar.stride * (cap + 2));
+            for (size_t b = 0; b + 4 <= ar.data.size(); b += 4) {
+                unsigned u = i.dataType == 8 ? static_cast<unsigned>(r()) : RandFloatBits(r);
+                if (i.dataType == 8 && r() % 4 == 0) u = static_cast<unsigned>(r() % 100);
+                std::memcpy(&ar.data[b], &u, 4);
+            }
+            st.arrays.push_back(std::move(ar));
+        }
+        st.vtype->streams->count = n;
+        st.vtype->streams->capacity = n;
+        st.vtype->streams->items = list;
+        chunks.push_back(c);
+        return c;
+    };
+    void* c0 = make(0, spec);
+    std::vector<ItemSpec> spec2 = spec;
+    for (size_t k = 1; k < spec2.size(); ++k) {
+        switch (r() % 10) {
+        case 0: spec2[k].count = 1 + r() % 4; break;
+        case 1: spec2[k].dataType = spec2[k].dataType == 7 ? 8 : 7; break;
+        case 2: spec2[k].present = false; break;
+        case 3: if (copyOps) spec2[k].inType = false; break;
+        }
+    }
+    void* c1 = make(1, spec2);
+    // a few positions of the second chunk on those of the first (the 0 / 1 shortcuts)
+    {
+        InterpArray* p0 = &interpState[s][c0].arrays[0];
+        InterpArray* p1 = &interpState[s][c1].arrays[0];
+        for (unsigned k = 0; k < cap; ++k)
+            if (r() % 3 == 0) std::memcpy(&p1->data[k * p1->stride], &p0->data[(r() % cap) * p0->stride], 12);
+        // and some plain ones, so lengths and weights are finite
+        for (InterpArray* p : {p0, p1})
+            for (unsigned k = 0; k < cap; ++k)
+                if (r() % 2)
+                    for (int j = 0; j < 3; ++j) {
+                        const float f = static_cast<float>(static_cast<int>(r() % 2001) - 1000) / 16.f;
+                        std::memcpy(&p->data[k * p->stride + j * 4], &f, 4);
+                    }
+    }
+    auto dump = [&](void* c) {
+        for (const InterpArray& ar : interpState[s][c].arrays)
+            Log("  %s type %d: %s\n", Name(c).c_str(), ar.type, Hex(ar.data.data(), static_cast<unsigned>(ar.data.size())).c_str());
+    };
+    // the item type list: a FastDynamicArray<VertexItemType, 13> of one or two chunks (or none)
+    struct TypeChunk {
+        TypeChunk *next, *prev;
+        unsigned count;
+        int data[13];
+    };
+    TypeChunk tc[2]{};
+    void* typeList = nullptr;
+    auto makeTypes = [&]() {
+        typeList = nullptr;
+        const int n = r() % 8 == 0 ? 0 : 1 + static_cast<int>(r() % 16);
+        if (!n) return;
+        std::string text;
+        for (int k = 0; k < n; ++k) {
+            const int t = r() % 6 == 0 ? 9 : r() % 3 == 0 ? 1 : kTypes[r() % 7];
+            TypeChunk& c = tc[k / 13];
+            c.data[c.count++] = t;
+            text += " " + std::to_string(t);
+        }
+        if (n > 13) {
+            tc[0].next = tc[0].prev = &tc[1];
+            tc[1].next = tc[1].prev = &tc[0];
+        } else {
+            tc[0].next = tc[0].prev = &tc[0];
+        }
+        typeList = &tc[0];
+        Log("  types%s\n", text.c_str());
+    };
+    auto randBits = [&](unsigned n) {
+        std::vector<float> v(n);
+        for (auto& f : v) {
+            const unsigned u = RandFloatBits(r);
+            std::memcpy(&f, &u, 4);
+        }
+        return v;
+    };
+    const int steps = 3 + r() % 6;
+    for (int step = 0; step < steps; ++step) {
+        tc[0] = tc[1] = TypeChunk{};
+        makeTypes();
+        const void* types = &typeList;
+        void* dst = r() % 2 ? c1 : c0;
+        const void* src = r() % 6 == 0 ? dst : dst == c1 ? c0 : c1;
+        const unsigned i0 = r() % cap, i1 = r() % cap, i2 = r() % 5 == 0 ? i0 : r() % cap;
+        const unsigned dn = static_cast<const Chunk*>(dst)->vertices;
+        const unsigned first = r() % cap;
+        const unsigned count = r() % 5 == 0 ? 0 : r() % (cap - first + 1);
+        const int stream = static_cast<int>(r() % 3);
+        const int op = copyOps ? 11 : static_cast<int>(r() % 12);  // with items missing from a type only copies
+        Log("op %d %s <- %s %u %u %u first %u count %u n %u stream %d\n", op, Name(dst).c_str(), Name(src).c_str(), i0,
+            i1, i2, first, count, dn, stream);
+        switch (op) {
+        case 0: {
+            std::vector<float> pos = randBits(3);
+            const InterpArray& sp = interpState[s][const_cast<void*>(src)].arrays[0];
+            if (r() % 3 == 0) std::memcpy(pos.data(), &sp.data[(r() % 2 ? i0 : i1) * sp.stride], 12);
+            As<F61>(a.vft[61])(dst, src, i0, i1, first, pos.data(), types, stream);
+            break;
+        }
+        case 1: {
+            const std::vector<float> w = randBits(count * 3 + 3);
+            As<F62>(a.vft[62])(dst, src, i0, i1, i2, w.data(), first, count, types, stream);
+            break;
+        }
+        case 2: {
+            const std::vector<float> w = randBits(dn * 3);
+            As<F63>(a.vft[63])(dst, src, i0, i1, i2, w.data(), types, stream);
+            break;
+        }
+        case 3:
+            As<F64>(a.vft[64])(dst, src, i0, i1, i2, types, stream);
+            break;
+        case 4: {
+            const std::vector<float> w = randBits(count * 2 + 2);
+            As<F65>(a.vft[65])(dst, src, i0, i1, w.data(), first, count, types, stream);
+            break;
+        }
+        case 5: {
+            const std::vector<float> w = randBits(dn * 2);
+            As<F66>(a.vft[66])(dst, src, i0, i1, w.data(), types, stream);
+            break;
+        }
+        case 6:
+            As<F67>(a.vft[67])(dst, src, i0, i1, types, stream);
+            break;
+        case 7: {
+            const std::vector<float> w = randBits(count + 1);
+            As<F68>(a.vft[68])(dst, src, i0, w.data(), first, count, types, stream);
+            break;
+        }
+        case 8: {
+            const std::vector<float> w = randBits(dn);
+            As<F69>(a.vft[69])(dst, src, i0, w.data(), types, stream);
+            break;
+        }
+        case 9: {
+            std::vector<float> pos = randBits(3);
+            if (r() % 2) {
+                const InterpArray& sp = interpState[s][const_cast<void*>(src)].arrays[0];
+                for (int j = 0; j < 3; ++j) {
+                    float x, y;
+                    std::memcpy(&x, &sp.data[i0 * sp.stride + j * 4], 4);
+                    std::memcpy(&y, &sp.data[i1 * sp.stride + j * 4], 4);
+                    pos[j] = (x + y) * 0.5f;
+                }
+            }
+            tri[s](dst, src, i0, i1, i2, first, pos.data(), types, stream);
+            break;
+        }
+        case 10: {
+            const InterpArray& sp = interpState[s][const_cast<void*>(src)].arrays[0];
+            std::vector<float> out(dn * 3 + 3);
+            std::memset(out.data(), 0xcd, out.size() * 4);
+            weights[s](dst, reinterpret_cast<const float*>(&sp.data[i0 * sp.stride]),
+                       reinterpret_cast<const float*>(&sp.data[i1 * sp.stride]),
+                       reinterpret_cast<const float*>(&sp.data[i2 * sp.stride]), out.data());
+            Log("  weights %s\n", Hex(out.data(), static_cast<unsigned>(out.size() * 4)).c_str());
+            break;
+        }
+        default: {  // 11: copy
+            const unsigned from = r() % cap;
+            const unsigned n = r() % (cap - (from > first ? from : first) + 1);
+            As<F70>(a.vft[70])(dst, src, from, first, n, types, stream);
+            break;
+        }
+        }
+        dump(dst);
+    }
+    for (void* c : chunks) {
+        InterpState& st = interpState[s][c];
+        delete[] st.vtype->streams->items;
+        delete st.vtype->streams;
+        delete st.vtype;
+        Log("op release %s\n", Name(c).c_str());
+        ReleaseRef(c);
+    }
+}
+
 // ---- running
 
 static void Compare(const char* part, int round)
@@ -1990,13 +2303,14 @@ int main(int argc, char** argv)
         MakeCacheVtables(s);
         LoadApiC(s);
         MakeChunkVtable(s);
+        MakeInterpVtable(s);
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
     }
     struct {
         const char* name;
         void (*run)(int, unsigned);
-    } parts[] = {{"types", RunTypes}, {"caches", RunCaches}, {"misc", RunMisc}, {"chunks", RunChunks}};
+    } parts[] = {{"types", RunTypes}, {"caches", RunCaches}, {"misc", RunMisc}, {"chunks", RunChunks}, {"interp", RunInterp}};
     const char* only = std::getenv("RS_U5_ONLY");
     for (auto& p : parts) {
         if (only && !std::strstr((std::string(",") + only + ",").c_str(), (std::string(",") + p.name + ",").c_str()))

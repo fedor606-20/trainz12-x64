@@ -360,8 +360,7 @@ public:
 // A geometry chunk, the base of the API modules' vertex/index buffers (0x4c bytes on ReferenceCount): the
 // primitive type and state flags, the counts, the shared index / face neighbour / face normal arrays, named float
 // properties, the bone matrices it is skinned by. Every slot answering 0 is pure (the module's _purecall answers
-// 0); the stream chunks (U5c) fill them. The interpolation and copy slots (61..70) are U5b2 and call the original
-// for now.
+// 0); the stream chunks (U5c) fill them.
 class GeometryChunk : public ReferenceCount {
 public:
     struct FaceNeighbors {
@@ -452,26 +451,40 @@ public:
     virtual void __cdecl RenderDebug(Display* display) const;  // 58
     virtual int __cdecl Slot59() = 0;
     virtual int __cdecl Slot60() = 0;
-    // 61..70: InterpolateChunkData, the eight InterpolateAllChunkData, CopyChunkData (U5b2: the original's)
-    virtual void __cdecl Interpolate61(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
-                                       const Vector3&, const ItemTypes&, int);
-    virtual void __cdecl Interpolate62(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
-                                       const Vector3* const, unsigned int, unsigned int, const ItemTypes&, int);
-    virtual void __cdecl Interpolate63(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
-                                       const Vector3* const, const ItemTypes&, int);
-    virtual void __cdecl Interpolate64(const GeometryChunk*, unsigned int, unsigned int, unsigned int,
-                                       const ItemTypes&, int);
-    virtual void __cdecl Interpolate65(const GeometryChunk*, unsigned int, unsigned int, const Vector2* const,
-                                       unsigned int, unsigned int, const ItemTypes&, int);
-    virtual void __cdecl Interpolate66(const GeometryChunk*, unsigned int, unsigned int, const Vector2* const,
-                                       const ItemTypes&, int);
-    virtual void __cdecl Interpolate67(const GeometryChunk*, unsigned int, unsigned int, const ItemTypes&, int);
-    virtual void __cdecl Interpolate68(const GeometryChunk*, unsigned int, const float* const, unsigned int,
-                                       unsigned int, const ItemTypes&, int);
-    virtual void __cdecl Interpolate69(const GeometryChunk*, unsigned int, const float* const, const ItemTypes&,
-                                       int);
-    virtual void __cdecl Copy70(const GeometryChunk*, unsigned int, unsigned int, unsigned int, const ItemTypes&,
-                                int);
+    // 61..70: the items of `types` in vertex type `stream` of `src` into this chunk's vertices (every one with
+    // the same data type and count on both sides: floats of 1..4 elements, udwords of 1), then this chunk's slot
+    // 31 (vertex data dirty). 61: vertex `dst` between src vertices i0 and i1 at position `pos`.
+    virtual void __cdecl InterpolateChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                              unsigned int dst, const Vector3& pos, const ItemTypes& types,
+                                              int stream);
+    // 62..69 (MSVC lays out overloaded virtuals in reverse order of declaration, hence 69 first). 68/69: one src
+    // vertex scaled by w[k]
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i, const float* const w,
+                                                 const ItemTypes& types, int stream);
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i, const float* const w,
+                                                 unsigned int first, unsigned int count, const ItemTypes& types,
+                                                 int stream);
+    // 65..67: from two src vertices (67: by the weights of the vertex positions along the segment)
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 const ItemTypes& types, int stream);
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 const Vector2* const w, const ItemTypes& types, int stream);
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 const Vector2* const w, unsigned int first, unsigned int count,
+                                                 const ItemTypes& types, int stream);
+    // 62..64: from three src vertices: 62 vertices first..first+count-1 weighted by w[k], 63 all vertices, 64 all
+    // vertices by the weights of their positions in the triangle
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 unsigned int i2, const ItemTypes& types, int stream);
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 unsigned int i2, const Vector3* const w, const ItemTypes& types,
+                                                 int stream);
+    virtual void __cdecl InterpolateAllChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1,
+                                                 unsigned int i2, const Vector3* const w, unsigned int first,
+                                                 unsigned int count, const ItemTypes& types, int stream);
+    // 70: src vertices from.. to this chunk's to..
+    virtual void __cdecl CopyChunkData(const GeometryChunk* src, unsigned int from, unsigned int to,
+                                       unsigned int count, const ItemTypes& types, int stream);
     virtual bool __cdecl GetLoadChunkDataType(const Array<Array<GeometryStreamType, 1>, 2>& formats,
                                               unsigned int& index, bool& exact) const;  // 71
     virtual bool __cdecl LoadChunkData(const Array<GeometryStreamType, 1>& streams, void** const data);  // 72
@@ -515,6 +528,11 @@ public:
     bool __cdecl GetVertexIndex(int primitive, int vertex, unsigned int& index) const;
     unsigned int __cdecl GetVertexIndex(int primitive, int vertex) const;
     void __cdecl GetTriangleIndexes(int primitive, unsigned long& a, unsigned long& b, unsigned long& c) const;
+    // vertex `dst` from src triangle (i0, i1, i2) by the weights of `pos` in it (nothing for a degenerate one)
+    void __cdecl InterpolateChunkData(const GeometryChunk* src, unsigned int i0, unsigned int i1, unsigned int i2,
+                                      unsigned int dst, const Vector3& pos, const ItemTypes& types, int stream);
+    // the weights of every vertex position in triangle (a, b, c) (nothing written for a degenerate one)
+    void __cdecl GetAllChunkWeights(const Vector3& a, const Vector3& b, const Vector3& c, Vector3* const out) const;
     bool __cdecl AddChunkProperty(const PString& name);  // 0.0, unless it exists
     bool __cdecl SetChunkProperty(const PString& name, float value);
     bool __cdecl GetChunkProperty(const PString& name, float& value) const;
