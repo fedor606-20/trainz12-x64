@@ -7,6 +7,7 @@
 #include "GfxParse.h"
 
 #include <jet/GfxLanguage.h>
+#include <jet/Geometry.h>
 #include <jet/VCall.h>
 
 #include <cstdio>
@@ -26,13 +27,6 @@
 #include "gfxvp_nxt.h"
 
 namespace Jet {
-
-// still the original's (unit U5): only what the run needs
-class VertexType {
-public:
-    __declspec(dllimport) static VertexType* __cdecl GetVertexType(const PString& name);
-    __declspec(dllimport) VertexType(const VertexType& o);
-};
 
 namespace {
 

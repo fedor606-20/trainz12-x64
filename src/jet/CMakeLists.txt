@@ -211,6 +211,8 @@ add_executable(diff_rs_u2b tests/diff_rs_u2b.cpp)
 # RenderSystem U3a: VertexProgram and TextureCombiner, their managers and resources (stand-in Display, lights,
 # API slots and resource database)
 add_executable(diff_rs_u3 tests/diff_rs_u3.cpp)
+# RenderSystem U5a: VertexType and its registry, rendering caches, buffer manager base, chunk hints
+add_executable(diff_rs_u5 tests/diff_rs_u5.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)

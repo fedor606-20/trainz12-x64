@@ -2011,6 +2011,48 @@ unit order in `notes/WaterSystem.md`.
     never reaches.
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U5a, vertex types, rendering caches, buffer manager base, chunk hints (2026-10-28): 1420/2687 exports ours
+- `VertexType.cpp`, `RenderCaches.cpp`, `include/jet/Geometry.h`: 97 exports. U5 was split into U5a (this step),
+  U5b (GeometryChunk) and U5c (the stream chunks and GeometryChunkTemplate).
+- VertexType (0x24 bytes on ReferenceCount): the id, the streams (stride, item capacity, item count, items) and
+  the 0x20-byte items (type, name, offset, element count, data type, semantic, shared-with type, flag), the API
+  data with the display's add/remove slots (0x3c / 0x40), API flags, user data, the registered name.
+  - AddItem takes the item type's defaults for a count of -1, data type 0, semantic 1 and an empty name; the flag's
+    default (-1) comes from the data type. ConfigureStream places the items once the stream is full: offsets
+    one after another (a given offset stays), shared items on the item they share, whose type it then lowers
+    by 15; the stride is the furthest end.
+  - CompareVertex compares every item slot up to the capacity, filled or not, and leaves names out; a shared
+    item's flag is never set, so it compares whatever the heap held.
+  - The item-type defaults (39 entries made at module start) and the element sizes (9 data types) are our own
+    copies. The statics `display`, `nextFreeId` and the registry (a 97-bucket HashTable of {type, name} keyed by
+    the name's node) stay the original's until U9, since the original's Display builds the types.
+  - The temporary VertexType declaration in VertexProgramParser.cpp (which imported GetVertexType and the copy
+    constructor from the original) is gone; the parser uses ours.
+- RenderingCache (0x28: vfptr, list node +4, vbptr +0xc, name, priority, host, two flags, virtual ReferenceCount
+  +0x20; slots SetHost, Activate, Reset, Begin, End, Flush = End then Begin, Enter, Leave) and
+  RenderingCacheManager (a ring through the caches' nodes with the manager as its head, by rising priority; a
+  cache goes before the first one not below it). Begin keeps a geometry-only flag that End, Enter and Leave also
+  honour; End activates every cache before ending any. Today's compiler gives the same layout and vbtable
+  without a vtordisp.
+- VertexBufferManager (0x78, 23 slots: 14 answer 0, 6 do nothing), the dynamic buffer sizes from the options
+  "DynamicVertexBufferSize" / "DynamicIndexBufferSize", GetBufferStats copied under its critical section.
+  StaticBuffer (8 bytes on ReferenceCount). GeometryChunkCreateHint and its Standard/Database/TerrainMorph
+  variants (system bits 1/3/5; a 4-bit field at +0x10 is cleared, the rest of its byte kept). The internal
+  NullVertexBufferManager stays with the Display (U9).
+- Test `tests/diff_rs_u5.cpp` (parts types, caches, misc; 900 scenarios, 0 mismatches). Heap hooked on both
+  sides; types built from random item lists with defaults, explicit offsets, shared items and partly filled
+  streams; copies, copies with one field changed, comparisons, queries, registration and lookups, Shutdown,
+  API data through a stand-in display, and the name reference counts at the end. Caches with logging slots in
+  two managers: adds, removes, priority changes, Begin/End/Enter/Leave, assignment, destruction through the
+  manager, the vbase destructor and the last reference. Buffer manager slots and stats, StaticBuffer, every
+  hint constructor, assignment and Supports test.
+  - Mutations caught: 39 of 40 (defaults tables, block sizes, item destruction, copies, comparisons, API data
+    calls, AddItem defaults, sharing, placement and stride, queries, registry results and references, cache
+    flags, Flush order, priority order, removal count, reset on destruction, geometry filter, buffer manager
+    fields and slots, hint bits). The survivor changes a branch that cannot be reached (the shared item is
+    always found in the stream GetItemStream picked).
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

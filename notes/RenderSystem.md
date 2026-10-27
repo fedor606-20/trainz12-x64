@@ -43,19 +43,26 @@ tests/diff_rs_u3.cpp part "managers" 0 mismatches, 22/22 mutants caught (MODLOG)
 U5 split (2026-10-27, by code size): U5a VertexType (+ registry; 29 fns, 3.3 KB), VertexBufferManager, StaticBuffer,
 RenderingCache(+Manager), the chunk hints (~5.5 KB in all); U5b GeometryChunk (73 fns, 23.7 KB, 0x10021a70..
 0x1002aa80; may split again); U5c GeometryChunkSingle/MultiStream, Generic*, GeometryChunkTemplate (~11.5 KB).
-U5a notes (read 2026-10-27, nothing written yet): VertexType 0x24 bytes on ReferenceCount: +8 VertexTypeID, +0xc
-stream count, +0x10 streams (0x10 each: +0 stride, +4 item capacity, +8 item count, +0xc items: an
-eh-vector-constructed array of 0x20-byte items {+0 VertexItemType, +4 PString name (copied by FUN_10056ef0),
-+8 offset (-1: placed by ConfigureStream), +0xc element count, +0x10 DVertexItemDataType, +0x14 semantic, +0x18
-shared-with item type (-1), +0x1c bool}), +0x14 the API data (Display slots 0x3c add / 0x40 remove, through the
-static `display`), +0x18/+0x1c, +0x20 registered name (PString). Functions 0x100562b0..0x10056ef0 plus
-GetVertexSize 0x100106e0, GetItem / GetNamedItemData / GetVertexItemTypes / GetCompatibleVertexItemTypes
-0x10010700..0x10010940, Get/SetApiFlags 0x1000ae00 / 0x10021a60. Tables: per item type 0x14 bytes at
-0x100b8968 (default data type, semantic, a PString* name?, the default name PString at +0xc = 0x100b8974),
-element sizes 0x10062760 (0xc per data type; +4 a bool), the registry (FUN_100571f0 find by name node,
-FUN_10057110 insert, FUN_10056220 entry, FUN_10057180 clear, FUN_10054c10 for-each) in the original's statics.
-CompareVertex compares streams by FUN_10056310 (stride, counts, items field by field). The test's
-ResetLexStatics keeps 0xb80a0..0xb8113 (VertexProgramBasic's statics, set by the API module).
+U5a done 2026-10-28 (VertexType.cpp, RenderCaches.cpp, include/jet/Geometry.h; 97 exports, 1420/2687; test
+tests/diff_rs_u5.cpp). VertexType 0x24 bytes on ReferenceCount: +8 VertexTypeID, +0xc stream count, +0x10 streams
+(0x10 each: +0 stride, +4 item capacity, +8 item count, +0xc items: an eh-vector-constructed array of 0x20-byte
+items {+0 VertexItemType, +4 PString name, +8 offset (-1: placed by ConfigureStream), +0xc element count, +0x10
+DVertexItemDataType, +0x14 semantic, +0x18 shared-with item type (-1; ConfigureStream lowers it by 15 once
+placed), +0x1c BoolEnum flag (never set for shared items)}), +0x14 the API data (Display slots 0x3c add / 0x40
+remove, through the static `display`), +0x18 API flags, +0x1c user data, +0x20 registered name. Item-type
+defaults 0x100b8968 (39 x 0x14: count, data type, semantic, name PString, the type) and element sizes 0x10062760
+(9 x 0xc: size, BoolEnum default, the type) are our own copies; the statics `display`, `nextFreeId` and
+`registrations` (HashTable<unsigned, RegistrationData*, ...,13>, 97 FDA buckets keyed by the name node;
+RegistrationData {type (referenced), name}) stay the original's. CompareVertex compares every item slot up to the
+capacity (filled or not), names excluded. AddItem's defaults: count -1, data type 0, semantic 1, empty name.
+RenderingCache 0x28 (vfptr, IListNode +4, vbptr +0xc, name +0x10, priority +0x14, host +0x18, rendersGeometry
++0x1c, enabled +0x1d, virtual ReferenceCount +0x20; slots SetHost, Activate, Reset, Begin, End, Flush (End then
+Begin), Enter, Leave). RenderingCacheManager 0x10: a ring through the caches' IListNode with the manager as head
+(cache = node - 4), sorted by rising priority (inserted before the first not below), count +8, geometry-only flag
++0xc (set by Begin; End runs Activate on all, then End). VertexBufferManager 0x78 (23 slots, 14 answering 0, 6
+empty; display +4, dynamic sizes +8/+0xc, BufferStats 0x48 at +0x10, CriticalSection +0x6c). The internal
+NullVertexBufferManager (0x1001e5b0..) is made only by the Display and stays with U9. Display::CreateVertexTypeObject
+(0x10011f00, 38 KB) and Get/CloneBuiltInVertexType belong to U9.
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile
