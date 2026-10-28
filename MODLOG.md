@@ -2167,6 +2167,52 @@ unit order in `notes/WaterSystem.md`.
 - The other RenderSystem diff tests (u1, u2, u2b, u3, u4) still give 0 mismatches.
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U6 inventory and U6a, the binary .texture resource (2026-10-28): 1776/2687 exports ours
+- U6 (textures, 382 exports in 11 classes) is split into U6a (TextureResource + BinaryTextureResourceExport),
+  U6b (AsciiTextureResource), U6c (Texture, TextureRes, DisplayTexture(+Null)) and U6d (TextureManager,
+  SharedTextureCollection); sizes, address runs, outside importers and who writes each static in
+  notes/RenderSystem.md. BitmapTextureResource(+Type) has no exports and is made only through resource types the
+  RenderKernel side registers, so it moves to U9.
+- U6a: `TextureResource.cpp`, 118 exports (the 13 TextureResource defaults stay the original's statics, as do the
+  TextureManager limits the loader reads). Layouts, the 45 vftable slots and the file format in
+  notes/RenderSystem.md ("U6a analysis").
+- The .texture file is JIRF ('MMTF'): an INFO block of 0x60 bytes and one MMAP block per mip level, smallest
+  first, each holding every face (optionally compressed as a whole through a Compress plugin named in the INFO
+  block). The loader upgrades INFO versions 0x102..0x107 to 0x108, filling in what older versions lack; the
+  install's files are all 0x108, uncompressed.
+- Three ABI details met on the way:
+  - New virtual functions take their vftable slot where their *name* first appears in the class. Declaring the
+    override `Load(const char*)` (a base slot) before the new `Load(DisplayTexture*)` put the new one at slot 18
+    instead of 28; the override is now declared after it.
+  - TS12's `Size` has constructors (Jet SDK 2DTypes.h), so even its static functions return it through a hidden
+    pointer, while ours is a plain struct returned in edx:eax. Member functions use a hidden pointer either way.
+    The two exported static `GetMipSizeAtReverseLevel` overloads are exported as wrappers with the hidden pointer
+    (aliases in implemented.txt); a test caught it.
+  - GetAverageColor copies the colour through the x87 stack (a signalling NaN comes out quiet); ours does the same.
+- TS12 behaviour kept: an INFO block of version 0x103 comes out marked 0x105; Load(char*) keeps only the smallest
+  TextureManager::MIN_STREAMING_TEXTURE_MIP_COUNT levels; Load(DisplayTexture*) halves the size until it fits
+  MAX_STREAMING_TEXTURE_SIZE squared and skips that many levels; BinaryTextureResourceExport never sets the info,
+  so the base GetAverageColor (called by Save) reads through a null pointer unless something gave it one; its
+  GetMip ignores the level and face; a short write in SaveMipMap leaves the compressor referenced; SaveMipMap's
+  failure path frees a name node it may never have made (stack garbage in TS12; ours frees nothing there).
+- Test `tests/diff_rs_u6.cpp` (500 scenarios, 0 mismatches): 400 real .texture files of the install read by both
+  sides through the instance loader (the levels kept by the streaming limit), the static loader with random level
+  ranges, LoadMipLevels and Load(DisplayTexture*) into a stand-in API texture, every getter, the mips as bitmaps,
+  UnloadDataOnly, copies; Save written to files compared byte for byte and read back; BinaryTextureResourceExport
+  over bitmaps of every format with random settings, saved through a stand-in Display that converts (or fails to)
+  to compressed formats. Not covered: the compressed paths (no Compress plugin is registered in the test process;
+  a named compression makes both sides' Save fail the same way).
+  - Mutations caught: 54 of 58 (scratchpad mut_u6a.py). Two survivors are equivalent (a square size takes either
+    branch of GetMipSizeAtReverseLevel alike; a one-level file clamps the first level to 0 anyway), one needs a
+    texture of height 0 to be saved, one needs exactly two levels over the streaming size limit. The first run left
+    16 survivors; the test then gained saved files loaded back as resources (cube maps of depth 6, hint and alpha
+    hints, two-level textures), real files rewritten as INFO versions 0x102..0x107 and with a foreign block,
+    unloaded resources' format getters, the defaults through each side's own accessors, 8-character compression
+    names. Two test artefacts were found on the way: KernelStandard's scaled 24-bit bitmaps leave their row padding
+    unwritten, and a bitmap over an empty stored block claims bytes past it (the test hashes only the block's).
+- The whole RenderSystem diff suite (u1, u2, u2b, u3, u4, u5, u6) gives 0 mismatches.
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

@@ -141,6 +141,32 @@ U6 split, in this order (resource readers first: they are the add-on contract an
 - U6d: TextureManager, SharedTextureCollection: ~15 KB, 61 exports. Test: streaming decisions against stand-in
   textures and memory figures; the generated textures compared bit for bit (inline asm where SSE operand order
   decides NaNs, as in U5b2).
+U6a analysis (2026-10-28). BitmapTextureResource(+Type) moves to U9: no exports, made only through the resource
+types registered by FUN_1003ad10/1003afe0/1003b0d0 (RenderKernel side). U6a = TextureResource (+TextureInfo) and
+BinaryTextureResourceExport (131 exports; the 13 TextureResource default statics stay the original's).
+TextureResource 0x64 on Resource 0x5c: +0x5c TextureInfo* (null until loaded), +0x60 bool "data unloaded" (set by
+UnloadDataOnly; Lock reloads through slot 10 when set). Vftable 45 slots: 0..17 Resource's (0 Lock is
+TextureResource's: Resource::Lock then reload; 7 GetMustResetWhenFinished = 0x100015d0; 8 dtor; 10 Load(char*);
+14 Unload; 15 CalculateSize = 100; 16 CalculateDataSize = sum of 4 + block sizes), 18 IsAvailable (status == 6),
+19 GetNormalMapHint, 20 GetAlphaHint, 21 GetAverageColor, 22 GetDimension, 23 GetDepth, 24 GetSize, 25
+GetAnisotropyFilterLevel, 26 GetFileCompression(char[8]), 27 GetFileCompressionRatio (5), 28 Load(DisplayTexture*),
+29 CreateInstance(PString, TextureManager*) (a 0x60 TextureRes), 30 Save(char*, Display*), 31 GetFormatId (slot
+32), 32 GetImageFormatId (+0x10, else DISPLAYFORMATID_DEFAULT), 33 GetDisplayFormatId (picks a compressed default
+10/11/12/0x19..0x1c by the alpha hint), 34 GetHint, 35/36 WrapS/T, 37..39 Min/Mag/MipFilter, 40 GetNumMipLevels,
+41 GetAutoMipHint, 42 GetMipLock (0x100015d0), 43 GetMip(mip, face, Size) (a Bitmap over the stored block), 44
+GetMipUnlock (0x100015d0). BinaryTextureResourceExport overrides 8, 19..27, 32..41, 43.
+TextureInfo 0x68: +0 version (0x108), +4 dimension, +8 mip levels, +0xc depth (faces), +0x10 image format id,
++0x14/+0x18 size, +0x1c hint, +0x20/+0x24 wrap S/T, +0x28 unused, +0x2c/+0x30/+0x34 min/mag/mip filter, +0x38
+alpha hint, +0x3c anisotropy, +0x40 auto mip, +0x44 char[8] file compression, +0x4c normal map hint, +0x50 average
+Color, +0x60 mip levels on disk, +0x64 the blocks (levels x depth pointers to {size, bytes}). 0x10047010 frees the
+blocks, 0x10047070 finds the first and last stored level (from the smallest).
+The .texture file is JIRF: header type 'MMTF' (0x46544d4d), an 'INFO' block (0x4f464e49, 0x60 bytes, versions
+0x102..0x108 upgraded to 0x108 on read: older ones lack anisotropy / auto mip / compression / normal hint / colour)
+and one 'MMAP' block (0x50414d4d) per level from the smallest, each the faces' pixels (or, with a compression name,
+{uncompressed size, compressed bytes} through Compress::CreateInstance and SharedScratchPad). The static Load
+(0x10047380) reads it, skipping the levels outside [first, last] requested (TextureManager streaming); Load(char*)
+reorders the levels largest first. Save writes INFO then the levels smallest first (SaveMipMap recurses); a
+compressed display format (10/11/12/0x19..0x1c) different from the image format goes through Display slot 0x148.
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile

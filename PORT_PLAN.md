@@ -111,7 +111,9 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        exports and moves to U7 with NullMaterial, its only user. U6 (textures) inventoried and split 2026-10-28
        (notes/RenderSystem.md): U6a TextureResource + Bitmap* + BinaryTextureResourceExport (the binary .texture
        reader/writer, 131 exports), U6b AsciiTextureResource (.texture.txt, 53), U6c Texture, TextureRes,
-       DisplayTexture(+Null) (137), U6d TextureManager + SharedTextureCollection (61). Next: U6a.
+       DisplayTexture(+Null) (137), U6d TextureManager + SharedTextureCollection (61). U6a (TextureResource +
+       BinaryTextureResourceExport, 118 exports, 1776/2687, `tests/diff_rs_u6.cpp` on the install's .texture files)
+       done 2026-10-28; BitmapTextureResource moves to U9. Next: U6b (AsciiTextureResource, `.texture.txt`).
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
