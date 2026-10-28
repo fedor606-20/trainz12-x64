@@ -108,7 +108,10 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        GetAllChunkWeights / CopyChunkData; 12 exports, 1514/2687) done 2026-10-28. U5c (the stream chunks
        GeometryChunkSingle/MultiStream, the Generic* chunks and GenericReferenceArray; 144 exports, 1658/2687,
        `tests/diff_rs_u5.cpp` part "streams") done 2026-10-28: U5 is complete. GeometryChunkTemplate has no
-       exports and moves to U7 with NullMaterial, its only user. Next: U6 (textures): inventory and split first.
+       exports and moves to U7 with NullMaterial, its only user. U6 (textures) inventoried and split 2026-10-28
+       (notes/RenderSystem.md): U6a TextureResource + Bitmap* + BinaryTextureResourceExport (the binary .texture
+       reader/writer, 131 exports), U6b AsciiTextureResource (.texture.txt, 53), U6c Texture, TextureRes,
+       DisplayTexture(+Null) (137), U6d TextureManager + SharedTextureCollection (61). Next: U6a.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX

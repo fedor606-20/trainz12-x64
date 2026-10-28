@@ -106,6 +106,41 @@ pass, 0xfc pass setup, 0x100 pass cleanup, 0x104/0x108 make vertex/index buffer;
 (0x20 upload vertices, 0x2c upload indices, 0x40 catch up unless the byte +0x213 is set).
 GeometryChunkTemplate<PackedVertexPNT, GeometryChunkSingleStream> (0x10037bb0..0x10038340, no exports) is made only
 by NullMaterial::CreateGeometryChunk (0x10037a30): it goes to U7.
+U6 inventory (2026-10-28): 382 exports, ~50 KB of named code in 11 classes, none ours yet. By class (exports /
+functions / bytes): TextureResource 89/84/8655 (0x10001030.., 0x10046ff0..0x10048ee8; on KernelResource's
+Resource; the binary .texture reader, 0x100470d0.. holds four loaders of 2.9 KB), BitmapTextureResource 0/20/1761
+and BitmapTextureResourceType 0/2/673 (internal: a texture resource from a bitmap, 0x10008360..0x100090a8,
+0x1003b7c0), BinaryTextureResourceExport 42/35/1532 (the .texture writer, 0x10007cc0..0x10008360),
+AsciiTextureResource 53/50/12839 (.texture.txt; TextureResource + ResourceObserver; 0x10001610.., 0x10004ed0..
+0x10007b58, the parser is 7.6 KB in 20 functions), Texture 37/27/2077 (0x10004aa0.., 0x1003f4f0..), TextureRes
+34/31/2964 (Texture + ResourceObserver: a texture made from a TextureResource; 0x1003fd50.., 0x10046640..),
+DisplayTexture 34/20/1385 and DisplayTextureNull 32/20/3631 (the API texture base and the null one, 0x10004730..,
+0x1001dfd0.., 0x1001f420..0x10020418), TextureManager 45/37/6194 (streaming, 0x100413c0..0x10042cf6; made by
+RenderKernel::Init), SharedTextureCollection 16/13/8596 (the generated built-in textures, 0x1003bec0..0x1003e05b;
+GenerateNormalCubeMapTexture alone is 3.4 KB of float code). Unnamed helpers sit between the runs (0x10007a40..,
+0x10008950.., 0x1003e060.., 0x1003ffe0.., 0x10042d30.., 0x100462d0..): attribute them per step.
+Other modules import 100 of these names (trainz.exe 82, TrainzUtil 44, Render3DFoundation 38, ContentManager 24,
+WaterSystem 21, the two API modules 8 / 7): Texture's Activate/Bind/..., AsciiTextureResource's size calls, the
+TextureResource defaults MAG/MIN/MIP_FILTER_DEFAULT, WRAP_S/T_DEFAULT, ANISOTROPY_DEFAULT(_TOKEN_VALUE) (data
+imports), DisplayTexture::CheckInitialized and the stats.
+Statics: the TextureResource defaults are written by their static setters and by TextureManager::Init (from the
+options), AsciiTextureResource::noPath by RenderKernel::Init (U9), DisplayTextureNull::bound / numObjects by
+DisplayTextureNull's constructor and destructor, Texture::uniqueTexId by Texture's constructors,
+SharedTextureCollection::textureArray / textureNameArray by a static initializer (0x100617f0). As in U3/U5 they
+all stay the original's (dllimport) until U9.
+Real inputs: .texture.txt in UserData/editing (add-ons being edited), binary .texture in UserData/local/hash-*, and
+Data.ja / Base.ja.
+U6 split, in this order (resource readers first: they are the add-on contract and test offline on real files):
+- U6a: TextureResource (+TextureInfo, the default setters), BitmapTextureResource(+Type),
+  BinaryTextureResourceExport: ~13.5 KB, 131 exports. Test: real .texture files read on both sides, fields and
+  pixel data compared; the export written by both and compared byte for byte.
+- U6b: AsciiTextureResource: ~12.8 KB, 53 exports. Test: every .texture.txt of the install (and mutated copies)
+  parsed on both sides, the resulting TextureResource compared.
+- U6c: Texture, TextureRes, DisplayTexture, DisplayTextureNull: ~11 KB, 137 exports. Test: stand-in Display
+  logging the API calls, TextureRes made from the U6a/U6b resources.
+- U6d: TextureManager, SharedTextureCollection: ~15 KB, 61 exports. Test: streaming decisions against stand-in
+  textures and memory figures; the generated textures compared bit for bit (inline asm where SSE operand order
+  decides NaNs, as in U5b2).
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile
