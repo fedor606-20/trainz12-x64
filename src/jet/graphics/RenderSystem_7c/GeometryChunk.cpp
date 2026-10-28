@@ -115,6 +115,9 @@ F Orig(const char* name)
 
 }  // namespace
 
+// shared with the multi stream chunks (GeometryStreams.cpp)
+void AppendMatrixMap(Array<VertexProgram::MatrixMap*, 128>& a, VertexProgram::MatrixMap* m) { AppendMap(a, m); }
+
 // ---------------------------------------------------------------------------------------------------------------
 // construction
 

@@ -105,8 +105,10 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        RenderingCache(+Manager), VertexBufferManager, StaticBuffer, the chunk hints; 97 exports, 1420/2687,
        `tests/diff_rs_u5.cpp`) done 2026-10-28. U5b split: U5b1 (GeometryChunk without the interpolation; 82
        exports, 1502/2687) done 2026-10-28, U5b2 (InterpolateChunkData / InterpolateAllChunkData /
-       GetAllChunkWeights / CopyChunkData; 12 exports, 1514/2687) done 2026-10-28. Next: U5c (the stream chunks
-       GeometryChunkSingle/MultiStream, the Generic* chunks, GeometryChunkTemplate).
+       GetAllChunkWeights / CopyChunkData; 12 exports, 1514/2687) done 2026-10-28. U5c (the stream chunks
+       GeometryChunkSingle/MultiStream, the Generic* chunks and GenericReferenceArray; 144 exports, 1658/2687,
+       `tests/diff_rs_u5.cpp` part "streams") done 2026-10-28: U5 is complete. GeometryChunkTemplate has no
+       exports and moves to U7 with NullMaterial, its only user. Next: U6 (textures): inventory and split first.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX

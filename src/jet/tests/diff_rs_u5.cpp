@@ -2206,6 +2206,794 @@ static void RunInterp(int s, unsigned seed)
     }
 }
 
+// ---- part "streams" (U5c): the stream chunks, the in-memory chunks and GenericReferenceArray
+//
+// The chunks are made with each side's constructors and driven through their own vftables (and the non-virtual
+// exports); a stand-in display (draw slots 0xec..0x108, its vertex buffer manager at +0x20c, the +0x213 byte), a
+// stand-in vertex program (with its ReferenceCount behind a vbtable, as VertexProgram has it) and real
+// StaticBuffers / VertexTypes of the side take what they hand out. The stand-ins answer from a script RNG reset
+// per side, so equal call sequences get equal answers.
+
+#define SS "GeometryChunkSingleStream@Jet@@"
+#define MS "GeometryChunkMultiStream@Jet@@"
+#define GSS "GenericGeometryChunkSingleStream@Jet@@"
+#define GMS "GenericGeometryChunkMultiStream@Jet@@"
+#define GRA "GenericReferenceArray@Jet@@"
+
+struct ApiS {
+    void*(__fastcall* sCtor0)(void*, void*);
+    void*(__fastcall* sCtor5)(void*, void*, unsigned, unsigned, unsigned, unsigned, unsigned);
+    void*(__fastcall* mCtor1)(void*, void*, int);
+    void*(__fastcall* mCtor6)(void*, void*, unsigned, unsigned, unsigned, unsigned, int, unsigned);
+    void*(__fastcall* gsCtor0)(void*, void*);
+    void*(__fastcall* gsCtor6)(void*, void*, void*, unsigned, unsigned, unsigned, unsigned, unsigned);
+    void*(__fastcall* gmCtor1)(void*, void*, int);
+    void*(__fastcall* gmCtor6)(void*, void*, void*, unsigned, unsigned, unsigned, unsigned, unsigned);
+    void(__cdecl* sInit)(const void*, void*);
+    void(__cdecl* mInit)(const void*, void*);
+    void(__cdecl* gsInit)(const void*, void*);
+    void(__cdecl* gmInit)(const void*, void*);
+    void(__cdecl* gsCreate)(void*, void*, int);
+    void(__cdecl* gmCreate)(void*, void*, int);
+    bool(__cdecl* sSetup)(const void*, void*, void*, const void*, const void*, unsigned);
+    bool(__cdecl* mSetup)(const void*, void*, void*, const void*, const void*, unsigned);
+    unsigned long(__cdecl* getStreamFlags)(const void*, int);
+    void(__cdecl* setStreamFlags)(void*, int, unsigned long);
+    void(__cdecl* setConstStreamFlags)(const void*, int, unsigned long);
+    void*(__fastcall* sbCtor)(void*, void*);
+    // GenericReferenceArray
+    void*(__fastcall* gCtor0)(void*, void*);
+    void*(__fastcall* gCtor2)(void*, void*, unsigned, unsigned);
+    void*(__fastcall* gCopy)(void*, void*, const void*);
+    void(__fastcall* gDtor)(void*, void*);
+    void(__cdecl* gAssign)(void*, const void*);
+    void(__cdecl* gCreate)(void*, unsigned, unsigned);
+    void(__cdecl* gAddRef)(const void*);
+    bool(__cdecl* gRelease)(const void*);
+    int(__cdecl* gRefs)(const void*);
+    void(__cdecl* gAdd)(void*);
+    void(__cdecl* gAllocate)(void*, unsigned);
+    void(__cdecl* gRemove)(void*);
+    void(__cdecl* gRemoveAll)(void*);
+    unsigned(__cdecl* gCount)(const void*);
+    void(__cdecl* gDup)(void*);
+    void(__cdecl* gDupTo)(const void*, void*);
+    void*(__cdecl* gAt)(void*, unsigned);
+    const void*(__cdecl* gAtConst)(const void*, unsigned);
+    bool(__cdecl* gBool)(const void*);
+    void*(__cdecl* gPtr)(const void*);
+    unsigned char*(__cdecl* gByte)(void*, unsigned);
+    const unsigned char*(__cdecl* gByteConst)(const void*, unsigned);
+};
+static ApiS apiS[2];
+
+static void LoadApiS(int s)
+{
+    ApiS& a = apiS[s];
+    HMODULE m = mod[s];
+#define F(name) Proc(m, name)
+#define A(field, name) a.field = As<decltype(a.field)>(F(name))
+    A(sCtor0, "??0" SS "QAE@XZ");
+    A(sCtor5, "??0" SS "QAE@IIIII@Z");
+    A(mCtor1, "??0" MS "QAE@H@Z");
+    A(mCtor6, "??0" MS "QAE@IIIIHI@Z");
+    A(gsCtor0, "??0" GSS "IAE@XZ");
+    A(gsCtor6, "??0" GSS "QAE@PAVVertexType@1@IIIII@Z");
+    A(gmCtor1, "??0" GMS "IAE@H@Z");
+    A(gmCtor6, "??0" GMS "QAE@PAVVertexType@1@IIIII@Z");
+    A(sInit, "?InitInstance@" SS "IBAXAAV12@@Z");
+    A(mInit, "?InitInstance@" MS "IBAXAAV12@@Z");
+    A(gsInit, "?InitInstance@" GSS "IBAXAAV12@@Z");
+    A(gmInit, "?InitInstance@" GMS "IBAXAAV12@@Z");
+    A(gsCreate, "?CreateVertexArray@" GSS "IAAXPAVVertexType@2@H@Z");
+    A(gmCreate, "?CreateVertexArray@" GMS "IAAXPAVVertexType@2@H@Z");
+    A(sSetup, "?SetupMultipassRenderInternal@" SS "IBA_NPAVDisplay@2@PAVViewPort@2@PBVVertexProgram@2@PBGI@Z");
+    A(mSetup, "?SetupMultipassRenderInternal@" MS "IBA_NPAVDisplay@2@PAVViewPort@2@PBVVertexProgram@2@PBGI@Z");
+    A(getStreamFlags, "?GetStreamFlags@" MS "QBAKH@Z");
+    A(setStreamFlags, "?SetStreamFlags@" MS "QAAXHK@Z");
+    A(setConstStreamFlags, "?SetConstStreamFlags@" MS "IBAXHK@Z");
+    A(sbCtor, "??0StaticBuffer@Jet@@QAE@XZ");
+    A(gCtor0, "??0" GRA "QAE@XZ");
+    A(gCtor2, "??0" GRA "QAE@II@Z");
+    A(gCopy, "??0" GRA "QAE@ABV01@@Z");
+    A(gDtor, "??1" GRA "QAE@XZ");
+    A(gAssign, "??4" GRA "QAAXABV01@@Z");
+    A(gCreate, "?Create@" GRA "QAAXII@Z");
+    A(gAddRef, "?AddReference@" GRA "QBAXXZ");
+    A(gRelease, "?ReleaseReference@" GRA "QBA_NXZ");
+    A(gRefs, "?GetReferenceCount@" GRA "QBAHXZ");
+    A(gAdd, "?Add@" GRA "QAAXXZ");
+    A(gAllocate, "?Allocate@" GRA "QAAXI@Z");
+    A(gRemove, "?Remove@" GRA "QAAXXZ");
+    A(gRemoveAll, "?RemoveAll@" GRA "QAAXXZ");
+    A(gCount, "?Count@" GRA "QBAIXZ");
+    A(gDup, "?Duplicate@" GRA "QAAXXZ");
+    A(gDupTo, "?Duplicate@" GRA "QBAXAAV12@@Z");
+    A(gAt, "??A" GRA "QAAPAXI@Z");
+    A(gAtConst, "??A" GRA "QBAPBXI@Z");
+    A(gBool, "??B" GRA "QBA_NXZ");
+    A(gPtr, "??B" GRA "QBAPAXXZ");
+    A(gByte, "?GetByteOffset@" GRA "QAAPAEI@Z");
+    A(gByteConst, "?GetByteOffset@" GRA "QBAPBEI@Z");
+#undef A
+#undef F
+}
+
+// a virtual slot of a chunk, called through the chunk's own vftable
+template <class R, class... T>
+static R SC(const void* c, int slot, T... args)
+{
+    using Fn = R(__cdecl*)(const void*, T...);
+    return (*static_cast<Fn* const*>(c))[slot](c, args...);
+}
+
+static std::mt19937 standRng;     // the stand-ins' answers
+static int streamsShown;          // stream entries a draw call is handed
+static int buffersMade;           // StaticBuffers made by the stand-in display
+static unsigned char streamDisplay[0x220], bufferManager[0x10], programObj[0x20];
+static void* streamDisplayVt[0x50];
+static void* bufferManagerVt[0x20];
+static void* programVt[0x20];
+static void* programRcVt[4];
+static int programVbtable[2] = {-4, 4};
+
+static std::string Entries(const void* e)
+{
+    std::string t;
+    const auto* p = static_cast<const unsigned*>(e);
+    for (int k = 0; k < streamsShown; ++k) {
+        char b[16];
+        std::snprintf(b, sizeof b, "%02x", p[k * 3 + 2] & 0xff);
+        t += " {" + Name(reinterpret_cast<void*>(static_cast<uintptr_t>(p[k * 3]))) + "," +
+             Name(reinterpret_cast<void*>(static_cast<uintptr_t>(p[k * 3 + 1]))) + "," + b + "}";
+    }
+    return t;
+}
+static void __cdecl SDrawStatic(void* d, const void* h, int prim, unsigned prims, const void* v, unsigned verts,
+                                const void* idx, unsigned count, const void* vb, unsigned long vd, const void* ib,
+                                unsigned long id)
+{
+    Log("  draw static %s %d %u %s %u %s %u %s %lx %s %lx\n", Name(h).c_str(), prim, prims, Name(v).c_str(), verts,
+        Name(idx).c_str(), count, Name(vb).c_str(), vd, Name(ib).c_str(), id);
+}
+static void __cdecl SDrawDynamic(void* d, const void* h, int prim, unsigned prims, const void* v, unsigned verts,
+                                 const void* idx, unsigned count)
+{
+    Log("  draw dynamic %s %d %u %s %u %s %u\n", Name(h).c_str(), prim, prims, Name(v).c_str(), verts,
+        Name(idx).c_str(), count);
+}
+static void __cdecl SDrawStreams(void* d, const void* h, int prim, unsigned prims, const void* e, unsigned verts,
+                                 const void* idx, const void* ib, unsigned count, unsigned long dirty)
+{
+    Log("  draw streams %s %d %u%s %u %s %s %u %lx\n", Name(h).c_str(), prim, prims, Entries(e).c_str(), verts,
+        Name(idx).c_str(), Name(ib).c_str(), count, dirty & 0xff);
+}
+static void __cdecl SPass(void* d, int prim, int count) { Log("  draw pass %d %d\n", prim, count); }
+static bool __cdecl SSetup(void* d, const void* h, const void* e, unsigned verts, const void* ib, const void* idx,
+                           unsigned count, unsigned long dirty)
+{
+    const bool ok = standRng() % 4 != 0;
+    Log("  setup passes %s%s %u %s %s %u %lx: %d\n", Name(h).c_str(), Entries(e).c_str(), verts, Name(ib).c_str(),
+        Name(idx).c_str(), count, dirty, ok);
+    return ok;
+}
+static void __cdecl SCleanup(void* d) { Log("  cleanup passes\n"); }
+static void* MakeBuffer()
+{
+    if (standRng() % 6 == 0) return nullptr;
+    void* b = TestNew(8, "SB%d", buffersMade++);
+    apiS[cur].sbCtor(b, nullptr);
+    return b;
+}
+static void* __cdecl SVertexBuffer(void* d, unsigned verts, unsigned stride)
+{
+    void* b = MakeBuffer();
+    Log("  vertex buffer %u %u: %s\n", verts, stride, Name(b).c_str());
+    return b;
+}
+static void* __cdecl SIndexBuffer(void* d, unsigned count, int k)
+{
+    void* b = MakeBuffer();
+    Log("  index buffer %u %d: %s\n", count, k, Name(b).c_str());
+    return b;
+}
+static bool __cdecl MUpload(void* m, const void* vt, const void* b, const void* v, unsigned n, int one, void* out,
+                            int zero)
+{
+    const bool ok = standRng() % 5 != 0;
+    Log("  upload vertices %s %s %s %u %d %d: %d\n", Name(vt).c_str(), Name(b).c_str(), Name(v).c_str(), n, one,
+        zero, ok);
+    return ok;
+}
+static int __cdecl MUploadIndex(void* m, const void* b, const void* idx, unsigned n, int one, void* out)
+{
+    const int r = standRng() % 5 ? 0 : -1;
+    Log("  upload indices %s %s %u %d: %d\n", Name(b).c_str(), Name(idx).c_str(), n, one, r);
+    return r;
+}
+static void __cdecl MSync(void* m) { Log("  sync buffers\n"); }
+static void __cdecl PUnbind(void* p) { Log("  program unbind\n"); }
+static void __cdecl PSlot3c(void* p, int k) { Log("  program 3c %d\n", k); }
+static void __cdecl PBones(void* p, const void* bones) { Log("  program bones %s\n", Name(bones).c_str()); }
+static const void* __cdecl PHandle(void* p) { return reinterpret_cast<void*>(0x4848); }
+static int ProgramRefs() { return reinterpret_cast<const int*>(programObj + 8)[1]; }
+
+enum Kind { kS, kM, kGS, kGM };
+static const char* kKindNames[] = {"single", "multi", "generic single", "generic multi"};
+struct SChunk {
+    void* p;
+    Kind kind;
+};
+
+static std::string GraText(const void* blockPtr)
+{
+    const int* b = static_cast<const int*>(blockPtr);
+    if (!b) return "null";
+    char t[96];
+    std::snprintf(t, sizeof t, "%s refs %d count %u size %u cap %u ", Name(b).c_str(), b[0],
+                  static_cast<unsigned>(b[1]), static_cast<unsigned>(b[2]), static_cast<unsigned>(b[3]));
+    unsigned n = static_cast<unsigned>(b[1]) * static_cast<unsigned>(b[2]);
+    const auto it = blockSize[cur].find(b);
+    if (it != blockSize[cur].end() && n > it->second - 0x10) n = it->second - 0x10;
+    return t + Hex(b + 4, n > 0x40 ? 0x40 : n);
+}
+static unsigned BlockBytes(const void* p)
+{
+    const auto it = blockSize[cur].find(p);
+    return it == blockSize[cur].end() ? 0 : it->second;
+}
+static void DumpStream(const char* tag, const SChunk& c)
+{
+    DumpChunk(tag, c.p);
+    const unsigned* w = static_cast<const unsigned*>(c.p);
+    auto P = [&](int off) { return reinterpret_cast<void*>(static_cast<uintptr_t>(w[off / 4])); };
+    const Type* vt = static_cast<const Type*>(P(0x54));
+    Log("    %s: ib %s vt %s(%d) vp %s(%d)\n", kKindNames[c.kind], Name(P(0x50)).c_str(), Name(vt).c_str(),
+        vt ? vt->refs : 0, Name(P(0x58)).c_str(), ProgramRefs());
+    if (c.kind == kS || c.kind == kGS) {
+        const int* sb = static_cast<const int*>(P(0x4c));
+        Log("    vb %s(%d)\n", Name(sb).c_str(), sb ? sb[1] : 0);
+        if (c.kind == kGS) {
+            Log("    vertices %s\n", GraText(P(0x5c)).c_str());
+            const int* t = static_cast<const int*>(P(0x60));
+            std::string o;
+            for (int k = 0; t && k < 39; ++k) o += " " + std::to_string(t[3 + k]);
+            Log("    table %s refs %d stride %d:%s\n", Name(t).c_str(), t ? t[1] : 0, t ? t[2] : 0, o.c_str());
+        }
+        return;
+    }
+    const int n = static_cast<int>(w[0x5c / 4]);
+    const unsigned* st = static_cast<const unsigned*>(P(0x4c));
+    std::string e;
+    const unsigned have = BlockBytes(st) / 8;
+    for (unsigned k = 0; st && k < static_cast<unsigned>(n) && k < have && k < 8; ++k) {
+        char b[16];
+        std::snprintf(b, sizeof b, "%lx", static_cast<unsigned long>(st[k * 2 + 1]));
+        const int* sb = reinterpret_cast<const int*>(static_cast<uintptr_t>(st[k * 2]));
+        e += " {" + Name(sb) + "(" + std::to_string(sb ? sb[1] : 0) + ")," + b + "}";
+    }
+    Log("    streams %d %s:%s\n", n, Name(st).c_str(), e.c_str());
+    if (c.kind != kGM) return;
+    const int* a = static_cast<const int*>(P(0x60));
+    if (a) {
+        Log("    arrays %s refs %d count %u\n", Name(a).c_str(), a[0], static_cast<unsigned>(a[1]));
+        for (unsigned k = 0; k < static_cast<unsigned>(a[1]) && k < 4; ++k)
+            Log("      %u: %s\n", k, GraText(reinterpret_cast<void*>(static_cast<uintptr_t>(a[4 + k]))).c_str());
+    } else {
+        Log("    arrays null\n");
+    }
+    const int* t = static_cast<const int*>(P(0x64));
+    if (t) {
+        const unsigned* strides = reinterpret_cast<const unsigned*>(static_cast<uintptr_t>(t[2]));
+        std::string o;
+        for (unsigned k = 0; strides && k < BlockBytes(strides) / 4 && k < 4; ++k) o += " " + std::to_string(strides[k]);
+        o += " |";
+        for (int k = 0; k < 39; ++k) o += " " + std::to_string(t[4 + 2 * k]) + ":" + std::to_string(t[5 + 2 * k]);
+        Log("    table %s refs %d size %d strides %s:%s\n", Name(t).c_str(), t[1], t[3], Name(strides).c_str(), o.c_str());
+    } else {
+        Log("    table null\n");
+    }
+}
+
+static void RunStreams(int s, unsigned seed)
+{
+    std::mt19937 r(seed);
+    standRng.seed(seed ^ 0x5c5c);
+    buffersMade = 0;
+    const ApiS& a = apiS[s];
+    const Api& v = api[s];
+    reinterpret_cast<int*>(programObj + 8)[1] = 1000;
+    int made = 0, sbs = 0;
+
+    // the vertex types: 1..3 streams (positions, normals, colour; texture coordinates; a tangent)
+    std::vector<void*> types;
+    for (int k = 0, n = 1 + static_cast<int>(r() % 2); k < n; ++k) {
+        void* vt = TestNew(0x24, "VT%d", k);
+        v.ctor(vt, nullptr, 3 + k);
+        const int streams = 1 + static_cast<int>(r() % 3);
+        v.createStreams(vt, streams);
+        v.createItems(vt, 0, 3);
+        v.addItem(vt, 0, 1, -1, 0, 1, &nodes[0], -1, -1);
+        v.addItem(vt, 0, r() % 2 ? 4 : 5, -1, 0, 1, &nodes[1], -1, -1);
+        v.addItem(vt, 0, 2, -1, 0, 1, &nodes[4], -1, -1);
+        if (streams > 1) {
+            v.createItems(vt, 1, 1);
+            v.addItem(vt, 1, 15, -1, 0, 1, &nodes[2], -1, -1);
+        }
+        if (streams > 2) {
+            v.createItems(vt, 2, 2);
+            v.addItem(vt, 2, 23, -1, 0, 1, &nodes[3], -1, -1);
+            v.addItem(vt, 2, 9, -1, 0, 1, &nodes[5], -1, -1);
+        }
+        DumpType("vertex type", vt);
+        types.push_back(vt);
+    }
+    auto streamsOf = [](const void* vt) { return static_cast<int>(static_cast<const Type*>(vt)->streamCount); };
+
+    std::vector<SChunk> chunks;
+    auto word = [](const void* c, int off) { return static_cast<const unsigned*>(c)[off / 4]; };
+    auto ptr = [&](const void* c, int off) { return reinterpret_cast<void*>(static_cast<uintptr_t>(word(c, off))); };
+    // flags whose value is at least 3 (GenericGeometryChunkMultiStream makes that many stream records)
+    auto randFlags = [&]() {
+        static const unsigned f[] = {4, 8, 0x10, 0x24, 0x104, 0x28, 0x1004, 0x10004, 0x10104, 0x14, 0x30, 0x3};
+        return f[r() % 12];
+    };
+    auto add = [&](void* c, Kind k) {
+        chunks.push_back({c, k});
+        DumpStream("made", chunks.back());
+        return c;
+    };
+    auto make = [&](Kind k) -> void* {
+        const unsigned prims = r() % 5, verts = r() % 9, idx = r() % 3 ? prims * 3 : 0, fn = r() % 2 ? prims : 0;
+        const unsigned flags = randFlags();
+        void* vt = r() % 6 ? types[r() % types.size()] : nullptr;
+        switch (k) {
+        case kS: {
+            void* c = TestNew(0x5c, "C%d", made++);
+            if (r() % 2) {
+                Log("op new single %s\n", Name(c).c_str());
+                a.sCtor0(c, nullptr);
+            } else {
+                Log("op new single %s %u %u %u %u %x\n", Name(c).c_str(), verts, prims, idx, fn, flags);
+                a.sCtor5(c, nullptr, verts, prims, idx, fn, flags);
+            }
+            return add(c, k);
+        }
+        case kM: {
+            void* c = TestNew(0x60, "C%d", made++);
+            const int n = 1 + static_cast<int>(r() % 3);
+            if (r() % 2) {
+                Log("op new multi %s %d\n", Name(c).c_str(), n);
+                a.mCtor1(c, nullptr, n);
+            } else {
+                Log("op new multi %s %u %u %u %u %d %x\n", Name(c).c_str(), verts, prims, idx, fn, n, flags);
+                a.mCtor6(c, nullptr, verts, prims, idx, fn, n, flags);
+            }
+            return add(c, k);
+        }
+        case kGS: {
+            void* c = TestNew(0x64, "C%d", made++);
+            Log("op new generic single %s %s %u %u %u %u %x\n", Name(c).c_str(), Name(vt).c_str(), verts, prims, idx,
+                fn, flags);
+            a.gsCtor6(c, nullptr, vt, verts, prims, idx, fn, flags);
+            return add(c, k);
+        }
+        default: {
+            void* c = TestNew(0x68, "C%d", made++);
+            if (!vt) vt = types[0];
+            Log("op new generic multi %s %s %u %u %u %u %x\n", Name(c).c_str(), Name(vt).c_str(), verts, prims, idx,
+                fn, flags);
+            a.gmCtor6(c, nullptr, vt, verts, prims, idx, fn, flags);
+            return add(c, k);
+        }
+        }
+    };
+    for (int k = 0, n = 2 + r() % 3; k < n; ++k) make(static_cast<Kind>(r() % 4));
+    for (int k = 0; k < 2; ++k) make(r() % 2 ? kGS : kGM);
+    std::vector<void*> testBuffers;
+    auto testBuffer = [&]() -> void* {
+        if (r() % 5 == 0) return nullptr;
+        void* b = TestNew(8, "TB%d", sbs++);
+        a.sbCtor(b, nullptr);
+        testBuffers.push_back(b);
+        return b;
+    };
+    static unsigned short testIndices[64];
+    fixedNames[testIndices] = "IDX";
+    fixedNames[programObj] = "VP";
+    fixedNames[reinterpret_cast<void*>(0x4848)] = "VPH";
+
+    // what a chunk's slots may touch safely
+    auto numStreams = [&](const SChunk& c) { return c.kind == kS || c.kind == kGS ? 1 : static_cast<int>(word(c.p, 0x5c)); };
+    auto streamRecords = [&](const SChunk& c) {
+        return c.kind == kS || c.kind == kGS ? 1 : static_cast<int>(BlockBytes(ptr(c.p, 0x4c)) / 8);
+    };
+    auto arraysOk = [&](const SChunk& c) {  // a generic multi chunk with an array per stream
+        if (c.kind != kGM) return c.kind == kGS;
+        const int* ar = static_cast<const int*>(ptr(c.p, 0x60));
+        return ar && static_cast<int>(ar[1]) >= numStreams(c) && streamRecords(c) >= numStreams(c);
+    };
+    auto hasType = [&](const SChunk& c) { return ptr(c.p, 0x54) != nullptr; };
+    auto hasTable = [&](const SChunk& c) {
+        return c.kind == kGS ? ptr(c.p, 0x60) != nullptr : c.kind == kGM && ptr(c.p, 0x64) != nullptr;
+    };
+    auto display = [&]() {
+        streamDisplay[0x213] = static_cast<unsigned char>(r() % 3 == 0);
+        return static_cast<void*>(streamDisplay);
+    };
+    auto program = [&]() -> void* { return r() % 3 ? programObj : nullptr; };
+    // the index / vertex state bits flipped and the vertex count lowered below the maximum, before a draw
+    auto stir = [&](const SChunk& c) {
+        if (r() % 2) return;
+        static const unsigned bits[] = {0x100, 0x200, 0x10000, 0x20000, 0x40000};
+        unsigned* w = static_cast<unsigned*>(c.p);
+        for (unsigned b : bits)
+            if (r() % 3 == 0) w[0x18 / 4] ^= b;
+        if (w[0x28 / 4] && r() % 2) w[0x24 / 4] = static_cast<unsigned>(r() % w[0x28 / 4]);
+        Log("  stirred %x %u\n", w[0x18 / 4], w[0x24 / 4]);
+    };
+
+    for (int step = 0, steps = 20 + r() % 40; step < steps; ++step) {
+        SChunk& c = chunks[r() % chunks.size()];
+        const int n = numStreams(c);
+        const bool render = c.kind == kGS || (c.kind == kGM && arraysOk(c));
+        const int stream = n > 0 ? static_cast<int>(r() % n) : 0;
+        streamsShown = c.kind == kGM ? n : 1;
+        switch (r() % 26) {
+        case 0:
+            make(static_cast<Kind>(r() % 4));
+            break;
+        case 1: {  // CreateInstance (slots 3 / 2)
+            if (c.kind != kGS && c.kind != kGM) break;
+            if (c.kind == kGM && !hasType(c)) break;
+            void* to;
+            if (r() % 2) {
+                Log("op create instance %s\n", Name(c.p).c_str());
+                to = SC<void*>(c.p, 3);
+            } else {
+                const unsigned prims = r() % 5, verts = r() % 9;
+                Log("op create instance %s %u %u\n", Name(c.p).c_str(), verts, prims);
+                to = SC<void*>(c.p, 2, verts, prims, prims * 3, 0u);
+            }
+            add(to, c.kind);
+            break;
+        }
+        case 2: {  // InitializeBuffers / LoadBuffers
+            if (!render || (c.kind == kGM && !hasType(c))) break;
+            stir(c);
+            if (r() % 3) {
+                const bool up = r() % 2 != 0;
+                Log("op initialize buffers %s %d: %d\n", Name(c.p).c_str(), up, SC<bool>(c.p, 4, display(), up));
+            } else {
+                Log("op load buffers %s: %d\n", Name(c.p).c_str(), SC<bool>(c.p, 5, display()));
+            }
+            DumpStream("buffers", c);
+            break;
+        }
+        case 3: {  // DuplicateVertexArray / DuplicateUnsharedArrays
+            if (!render) break;
+            const int j = c.kind == kGM && r() % 2 ? -2 : stream;
+            if (r() % 3) {
+                Log("op duplicate vertices %s %d\n", Name(c.p).c_str(), j);
+                SC<void>(c.p, 7, display(), static_cast<int>(r() % 2), j);
+            } else {
+                Log("op duplicate unshared %s\n", Name(c.p).c_str());
+                SC<void>(c.p, 6, display());
+            }
+            DumpStream("duplicated", c);
+            break;
+        }
+        case 4: {  // ResizeVertexArray
+            if (c.kind != kGS && c.kind != kGM) break;
+            if (c.kind == kGS && !hasType(c) && !ptr(c.p, 0x5c)) break;
+            const unsigned nv = r() % 12;
+            Log("op resize vertices %s %u\n", Name(c.p).c_str(), nv);
+            if (c.kind == kGS && !hasType(c)) break;  // (GetVertexSize reads the type)
+            if (c.kind == kGS) {  // the kept vertices are copied from the array as it is (both sides read past it)
+                const unsigned max = word(c.p, 0x28), keep = nv < max ? nv : max;
+                const unsigned* vb = static_cast<const unsigned*>(ptr(c.p, 0x5c));
+                const unsigned stride = static_cast<const Type*>(ptr(c.p, 0x54))->streams[0].stride;
+                if (keep && (!vb || vb[1] < keep || vb[2] != stride)) break;
+            }
+            SC<void>(c.p, 9, display(), nv, 0, 0);
+            DumpStream("resized", c);
+            break;
+        }
+        case 5:  // GetVertexArray
+            if (!render) break;
+            Log("op vertex array %s %d: %s %s\n", Name(c.p).c_str(), stream, Name(SC<void*>(c.p, 12, 0, stream)).c_str(),
+                Name(SC<void*>(c.p, 13, 0, stream)).c_str());
+            break;
+        case 6: {  // RenderGeometry
+            if (!render) break;
+            void* p = program();
+            const bool bones = r() % 2 != 0;
+            stir(c);
+            Log("op render %s %s %d %d\n", Name(c.p).c_str(), Name(p).c_str(), bones, stream);
+            SC<void>(c.p, 14, display(), viewObj, p, bones, stream);
+            DumpStream("rendered", c);
+            break;
+        }
+        case 7: {  // RenderPrimitives
+            if (!render) break;
+            void* p = program();
+            const bool bones = r() % 2 != 0;
+            const unsigned count = r() % 30, prims = r() % 10;
+            const int prim = static_cast<int>(r() % 7);
+            stir(c);
+            Log("op render primitives %s %s %u %u %d %d %d\n", Name(c.p).c_str(), Name(p).c_str(), count, prims, prim,
+                bones, stream);
+            SC<void>(c.p, 15, display(), viewObj, p, count, testIndices, prims, prim, bones, stream);
+            DumpStream("rendered", c);
+            break;
+        }
+        case 8: {  // SetupMultipassRender (slots 16 / 17, the internal export)
+            if (!render) break;
+            void* p = program();
+            stir(c);
+            const bool own = r() % 2 != 0;
+            const unsigned short* idx = own ? nullptr : testIndices;
+            const unsigned count = own ? 0 : r() % 30;
+            bool ok;
+            switch (r() % 3) {
+            case 0: ok = SC<bool>(c.p, 16, display(), viewObj, idx, count); break;
+            case 1: ok = SC<bool>(c.p, 17, display(), viewObj, p, idx, count); break;
+            default:
+                ok = (c.kind == kGS ? a.sSetup : a.mSetup)(c.p, display(), viewObj, p, idx, count);
+                break;
+            }
+            Log("op setup passes %s %s %d: %d\n", Name(c.p).c_str(), Name(p).c_str(), own, ok);
+            DumpStream("setup", c);
+            break;
+        }
+        case 9: {  // BindVertexProgram, RenderGeometryPass, CleanupMultipassRender, the pass/stream counts
+            void* p = program();
+            void* old = program();
+            const bool bones = r() % 2 != 0;
+            Log("op passes %s %s %s %d: passes %d streams %d\n", Name(c.p).c_str(), Name(old).c_str(), Name(p).c_str(),
+                bones, SC<int>(c.p, 23), SC<int>(c.p, 24));
+            SC<void>(c.p, 19, old, p, bones);
+            SC<void>(c.p, 18, 1, bones);
+            SC<void>(c.p, 21, display(), viewObj, 0);
+            SC<void>(c.p, 20, display(), viewObj, static_cast<int>(r() % 40), static_cast<int>(r() % 7), 2);
+            SC<void>(c.p, 22, display(), p);
+            break;
+        }
+        case 10: case 11: {  // the vertex data state bits
+            int j = stream;
+            const int pick = static_cast<int>(r() % 3);
+            if (r() % 3 == 0) j = -2;
+            if (pick == 1 && r() % 4 == 0) j = -3;
+            if ((c.kind == kM || c.kind == kGM) && streamRecords(c) < n) break;
+            const bool on = r() % 2 != 0;
+            Log("op vertex state %s %d %d %d\n", Name(c.p).c_str(), pick, j, on);
+            switch (pick) {
+            case 0: SC<void>(c.p, 25, 0, j, on); break;
+            case 1: SC<void>(c.p, 27, 0, j, on); break;
+            default: SC<void>(c.p, 31, on, 0, j); break;
+            }
+            std::string g;
+            for (int k = 0; k < n && k < 4; ++k)
+                g += " " + std::to_string(SC<bool>(c.p, 26, 0, k)) + std::to_string(SC<bool>(c.p, 28, 0, k)) +
+                     std::to_string(SC<bool>(c.p, 32, 0, k));
+            Log("  state%s\n", g.c_str());
+            DumpStream("state", c);
+            break;
+        }
+        case 12: {  // static buffers
+            if ((c.kind == kM || c.kind == kGM) && streamRecords(c) <= stream) break;
+            void* b = testBuffer();
+            if (r() % 2) {
+                Log("op static vertex buffer %s %s %d\n", Name(c.p).c_str(), Name(b).c_str(), stream);
+                SC<void>(c.p, 36, b, 0, stream);
+            } else {
+                Log("op static index buffer %s %s\n", Name(c.p).c_str(), Name(b).c_str());
+                SC<void>(c.p, 38, b, 0);
+            }
+            Log("  %s %s\n", Name(SC<void*>(c.p, 35, 0, stream)).c_str(), Name(SC<void*>(c.p, 37, 0)).c_str());
+            DumpStream("buffers", c);
+            break;
+        }
+        case 13: {  // vertex type
+            void* vt = types[r() % types.size()];
+            if (r() % 3 == 0) {
+                if (c.kind == kGM) break;  // (its arrays follow the type's streams)
+                Log("op set vertex type %s %s\n", Name(c.p).c_str(), Name(vt).c_str());
+                SC<void>(c.p, 40, vt, 0);
+            }
+            Log("op vertex type %s: %s", Name(c.p).c_str(), Name(SC<void*>(c.p, 41, 0)).c_str());
+            if (c.kind == kGS || c.kind == kGM) {
+                Log(" assigned %s", Name(SC<void*>(c.p, 39, display())).c_str());
+                if (hasType(c)) Log(" id %d", SC<int>(c.p, 42, 0));
+                if (c.kind == kGS ? hasType(c) : hasTable(c)) Log(" size %d", SC<int>(c.p, 43, 0));
+            }
+            if (c.kind == kS || c.kind == kGS) Log(" stream %d", SC<int>(c.p, 45, RandType(r), 0));
+            Log("\n");
+            DumpStream("typed", c);
+            break;
+        }
+        case 14: {  // item offsets and the item views
+            if (!hasTable(c) || (c.kind == kGM && !arraysOk(c))) break;
+            if (c.kind == kGM) {  // every item's stream must have an array (the table may be an older type's)
+                const int* tb = static_cast<const int*>(ptr(c.p, 0x64));
+                const int count = static_cast<const int*>(ptr(c.p, 0x60))[1];
+                bool fits = true;
+                for (int k = 0; k < 39; ++k)
+                    if (tb[5 + 2 * k] >= 0 && tb[4 + 2 * k] >= count) fits = false;
+                if (!fits) break;
+            }
+            std::string t;
+            for (int k = 0; k < 4; ++k) {
+                const int type = RandType(r);
+                t += " " + std::to_string(type) + ":" + std::to_string(SC<int>(c.p, 44, type, 0));
+                if (c.kind == kGM) t += "/" + std::to_string(SC<int>(c.p, 45, type, 0));
+                // (the views are shown as offsets into their stream's block: past a short block they point at
+                // whatever the heap has there)
+                unsigned base = word(c.p, 0x5c);
+                if (c.kind == kGM) {
+                    const int* tb = static_cast<const int*>(ptr(c.p, 0x64));
+                    const int st = tb[4 + 2 * type];
+                    base = st >= 0 ? static_cast<const unsigned*>(ptr(c.p, 0x60))[4 + st] : 0;
+                }
+                for (int slot = 46; slot < 56; ++slot) {
+                    unsigned out[2] = {0xeeee, 0xeeee};
+                    SC<void*>(c.p, slot, out, type, 0);
+                    t += " " + std::to_string(out[0]) + "@" + (out[1] ? std::to_string(out[1] - base) : "null");
+                }
+            }
+            Log("op items %s:%s\n", Name(c.p).c_str(), t.c_str());
+            break;
+        }
+        case 15: {  // vertex program
+            void* p = program();
+            Log("op set program %s %s\n", Name(c.p).c_str(), Name(p).c_str());
+            SC<void>(c.p, 59, p, 0);
+            Log("  %s\n", Name(SC<void*>(c.p, 60, 0)).c_str());
+            DumpStream("program", c);
+            break;
+        }
+        case 16: {  // stream flags
+            if (c.kind != kM && c.kind != kGM) break;
+            if (streamRecords(c) <= stream) break;
+            const unsigned long f = r() % 8;
+            Log("op stream flags %s %d %lx: %lx", Name(c.p).c_str(), stream, f, a.getStreamFlags(c.p, stream));
+            (r() % 2 ? a.setStreamFlags : reinterpret_cast<void(__cdecl*)(void*, int, unsigned long)>(a.setConstStreamFlags))(
+                c.p, stream, f);
+            Log(" %lx\n", a.getStreamFlags(c.p, stream));
+            break;
+        }
+        case 17: {  // InitInstance into a fresh chunk of the kind
+            void* to = nullptr;
+            switch (c.kind) {
+            case kS:
+                to = TestNew(0x5c, "C%d", made++);
+                a.sCtor0(to, nullptr);
+                break;
+            case kM:
+                if (streamRecords(c) < n) break;
+                to = TestNew(0x60, "C%d", made++);
+                a.mCtor1(to, nullptr, n);
+                break;
+            case kGS:
+                to = TestNew(0x64, "C%d", made++);
+                a.gsCtor0(to, nullptr);
+                break;
+            default:
+                if (streamRecords(c) < n) break;
+                to = TestNew(0x68, "C%d", made++);
+                a.gmCtor1(to, nullptr, n);
+                break;
+            }
+            if (!to) break;
+            if (r() % 2) SC<void>(to, 59, programObj, 0);
+            for (int k = r() % 3; k > 0; --k) apiC[s].addInfluence(c.p, static_cast<int>(r() % 6));
+            Log("op init instance %s -> %s\n", Name(c.p).c_str(), Name(to).c_str());
+            const bool base = r() % 3 == 0;
+            switch (c.kind) {
+            case kS: a.sInit(c.p, to); break;
+            case kM: a.mInit(c.p, to); break;
+            case kGS: (base ? a.sInit : a.gsInit)(c.p, to); break;
+            default: (base ? a.mInit : a.gmInit)(c.p, to); break;
+            }
+            add(to, c.kind);
+            break;
+        }
+        case 18: {  // CreateVertexArray again
+            if (c.kind != kGS && c.kind != kGM) break;
+            void* vt = types[r() % types.size()];
+            if (c.kind == kGM && streamRecords(c) < streamsOf(vt)) break;
+            if (c.kind == kGM && hasTable(c)) {  // the kept table has strides for its own type's streams only
+                const int* tb = static_cast<const int*>(ptr(c.p, 0x64));
+                if (static_cast<int>(BlockBytes(reinterpret_cast<void*>(static_cast<uintptr_t>(tb[2]))) / 4) < streamsOf(vt))
+                    break;
+            }
+            const int nv = static_cast<int>(r() % 9);
+            Log("op create vertex array %s %s %d\n", Name(c.p).c_str(), Name(vt).c_str(), nv);
+            (c.kind == kGS ? a.gsCreate : a.gmCreate)(c.p, vt, nv);
+            DumpStream("created", c);
+            break;
+        }
+        case 19:  // let a chunk go
+            if (chunks.size() < 3) break;
+            Log("op release %s\n", Name(c.p).c_str());
+            ReleaseRef(c.p);
+            chunks.erase(chunks.begin() + (&c - chunks.data()));
+            break;
+        case 20: {  // one more reference, let go again
+            AddRef(c.p);
+            Log("op reference %s\n", Name(c.p).c_str());
+            ReleaseRef(c.p);
+            break;
+        }
+        default: {  // GenericReferenceArray
+            unsigned char g[3][4];
+            Log("op reference array\n");
+            const unsigned cap = r() % 6, size = 1 + r() % 8;
+            a.gCtor2(g[0], nullptr, cap, size);
+            a.gCtor0(g[1], nullptr);
+            unsigned count = 0;
+            auto dump = [&](const char* tag) {
+                for (int k = 0; k < 2; ++k)
+                    Log("  %s %d: %s bool %d ptr %s count %u\n", tag, k, GraText(*reinterpret_cast<void**>(g[k])).c_str(),
+                        a.gBool(g[k]), Name(a.gPtr(g[k])).c_str(), a.gCount(g[k]));
+            };
+            for (int k = 0, m = 3 + r() % 10; k < m; ++k) {
+                void* blk = *reinterpret_cast<void**>(g[0]);
+                switch (r() % 12) {
+                case 0: if (count < cap) { a.gAdd(g[0]); ++count; } break;
+                case 1: { const unsigned x = r() % 3; if (count + x <= cap) { a.gAllocate(g[0], x); count += x; } break; }
+                case 2: a.gRemove(g[0]); if (count) --count; break;
+                case 3: a.gRemoveAll(g[0]); count = 0; break;
+                case 4: a.gAddRef(g[0]); Log("  refs %d release %d\n", a.gRefs(g[0]), a.gRelease(g[0])); break;
+                case 5: a.gAssign(g[1], g[0]); break;
+                case 6: a.gDup(g[r() % 2]); break;
+                case 7: a.gDupTo(g[0], g[1]); break;
+                case 8:
+                    if (blk && cap) {
+                        const unsigned i = r() % cap;
+                        std::memset(a.gAt(g[0], i), static_cast<int>(r() & 0xff), size);
+                        Log("  at %u %s %s byte %s %s\n", i, Name(a.gAt(g[0], i)).c_str(), Name(a.gAtConst(g[0], i)).c_str(),
+                            Name(a.gByte(g[0], i)).c_str(), Name(a.gByteConst(g[0], i)).c_str());
+                    }
+                    break;
+                case 9: { const unsigned c2 = r() % 5, s2 = 1 + r() % 4; a.gCreate(g[1], c2, s2); break; }
+                case 10:
+                    a.gCopy(g[2], nullptr, g[r() % 2]);
+                    Log("  copy %s\n", GraText(*reinterpret_cast<void**>(g[2])).c_str());
+                    a.gDtor(g[2], nullptr);
+                    break;
+                default:
+                    // (a release that leaves the block to others keeps the pointer: the test drops it, as the
+                    // original's callers overwrite it)
+                    if (!a.gRelease(g[1])) *reinterpret_cast<void**>(g[1]) = nullptr;
+                    Log("  released\n");
+                    break;
+                }
+                dump("array");
+            }
+            a.gDtor(g[0], nullptr);
+            a.gDtor(g[1], nullptr);
+            break;
+        }
+        }
+    }
+    // let everything go: the chunks, the test's buffers, the types
+    for (const SChunk& c : chunks) {
+        DumpStream("final", c);
+        Log("op release %s\n", Name(c.p).c_str());
+        ReleaseRef(c.p);
+    }
+    for (void* b : testBuffers) {
+        Log("  test buffer %s refs %d\n", Name(b).c_str(), static_cast<int*>(b)[1]);
+        ReleaseRef(b);
+    }
+    for (void* vt : types) {
+        DumpType("type left", vt);
+        ReleaseRef(vt);
+    }
+    Log("program refs %d\n", ProgramRefs());
+}
+
 // ---- running
 
 static void Compare(const char* part, int round)
@@ -2296,6 +3084,33 @@ int main(int argc, char** argv)
     *reinterpret_cast<void**>(lightObj) = lightTestVt;
     fixedNames[lightObj] = "L";
     fixedNames[materialObj] = "MAT";
+    for (void*& p : streamDisplayVt) p = reinterpret_cast<void*>(&DisplaySlot);
+    streamDisplayVt[0xec / 4] = reinterpret_cast<void*>(&SDrawStatic);
+    streamDisplayVt[0xf0 / 4] = reinterpret_cast<void*>(&SDrawDynamic);
+    streamDisplayVt[0xf4 / 4] = reinterpret_cast<void*>(&SDrawStreams);
+    streamDisplayVt[0xf8 / 4] = reinterpret_cast<void*>(&SPass);
+    streamDisplayVt[0xfc / 4] = reinterpret_cast<void*>(&SSetup);
+    streamDisplayVt[0x100 / 4] = reinterpret_cast<void*>(&SCleanup);
+    streamDisplayVt[0x104 / 4] = reinterpret_cast<void*>(&SVertexBuffer);
+    streamDisplayVt[0x108 / 4] = reinterpret_cast<void*>(&SIndexBuffer);
+    *reinterpret_cast<void**>(streamDisplay) = streamDisplayVt;
+    *reinterpret_cast<void**>(streamDisplay + 0x20c) = bufferManager;
+    for (void*& p : bufferManagerVt) p = reinterpret_cast<void*>(&DisplaySlot);
+    bufferManagerVt[0x20 / 4] = reinterpret_cast<void*>(&MUpload);
+    bufferManagerVt[0x2c / 4] = reinterpret_cast<void*>(&MUploadIndex);
+    bufferManagerVt[0x40 / 4] = reinterpret_cast<void*>(&MSync);
+    *reinterpret_cast<void**>(bufferManager) = bufferManagerVt;
+    for (void*& p : programVt) p = reinterpret_cast<void*>(&DisplaySlot);
+    programVt[0x18 / 4] = reinterpret_cast<void*>(&PUnbind);
+    programVt[0x3c / 4] = reinterpret_cast<void*>(&PSlot3c);
+    programVt[0x48 / 4] = reinterpret_cast<void*>(&PBones);
+    programVt[0x74 / 4] = reinterpret_cast<void*>(&PHandle);
+    for (void*& p : programRcVt) p = reinterpret_cast<void*>(&DisplaySlot);
+    *reinterpret_cast<void**>(programObj) = programVt;
+    *reinterpret_cast<void**>(programObj + 4) = programVbtable;
+    *reinterpret_cast<void**>(programObj + 8) = programRcVt;
+    fixedNames[streamDisplay] = "SD";
+    fixedNames[bufferManager] = "BM";
     displayStatic = static_cast<void**>(Proc(mod[1], "?display@VertexType@Jet@@1PBVDisplay@2@B"));
     origShutdown = As<void (*)()>(Proc(mod[1], "?Shutdown@VertexType@Jet@@SAXXZ"));
     for (int s = 0; s < 2; ++s) {
@@ -2304,13 +3119,15 @@ int main(int argc, char** argv)
         LoadApiC(s);
         MakeChunkVtable(s);
         MakeInterpVtable(s);
+        LoadApiS(s);
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
     }
     struct {
         const char* name;
         void (*run)(int, unsigned);
-    } parts[] = {{"types", RunTypes}, {"caches", RunCaches}, {"misc", RunMisc}, {"chunks", RunChunks}, {"interp", RunInterp}};
+    } parts[] = {{"types", RunTypes}, {"caches", RunCaches}, {"misc", RunMisc}, {"chunks", RunChunks}, {"interp", RunInterp},
+                 {"streams", RunStreams}};
     const char* only = std::getenv("RS_U5_ONLY");
     for (auto& p : parts) {
         if (only && !std::strstr((std::string(",") + only + ",").c_str(), (std::string(",") + p.name + ",").c_str()))

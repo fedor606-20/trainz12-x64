@@ -299,7 +299,9 @@ JET_LAYOUT32(sizeof(TerrainMorphChunkHint) == 0x24);
 class Material;
 class DisplayLight;
 class Vector2;
+class Vector4;
 struct GeometryStreamType;
+enum DPrimitive {};  // the API primitive (GeometryChunk::primitiveLookup maps the chunk's primitive bits to it)
 
 // A shared, reference-counted array: one pointer to an Alloc block {references, count, two unused words, items}.
 // Passed by value, the callee lets go of its copy.
@@ -383,74 +385,93 @@ public:
     };
     struct RegistrationDataOp {};
     using FloatPtr = VertexItemPtr<float, VertexItemPtr<const float, VIPConstHelper>>;
+    using ConstFloatPtr = VertexItemPtr<const float, VIPConstHelper>;
     using UDwordPtr = VertexItemPtr<unsigned long, VertexItemPtr<const unsigned long, VIPConstHelper>>;
     using ConstUDwordPtr = VertexItemPtr<const unsigned long, VIPConstHelper>;
+    using Vector2Ptr = VertexItemPtr<Vector2, VertexItemPtr<const Vector2, VIPConstHelper>>;
+    using ConstVector2Ptr = VertexItemPtr<const Vector2, VIPConstHelper>;
+    using Vector3Ptr = VertexItemPtr<Vector3, VertexItemPtr<const Vector3, VIPConstHelper>>;
+    using ConstVector3Ptr = VertexItemPtr<const Vector3, VIPConstHelper>;
+    using Vector4Ptr = VertexItemPtr<Vector4, VertexItemPtr<const Vector4, VIPConstHelper>>;
+    using ConstVector4Ptr = VertexItemPtr<const Vector4, VIPConstHelper>;
     using ItemTypes = FastDynamicArray<VertexItemType, 13, Less<VertexItemType, VertexItemType>>;
 
     GeometryChunk();
     GeometryChunk(unsigned int vertices, unsigned int primitives, unsigned int indices, unsigned int faceNormals,
                   unsigned int flags);
 
-    virtual int __cdecl Slot2() = 0;
-    virtual int __cdecl Slot3() = 0;
-    virtual bool __cdecl InitializeBuffers(Display* display, bool b) = 0;  // 4 (its body answers true)
-    virtual int __cdecl Slot5() = 0;
+    // 2/3 (MSVC lays out overloaded virtuals in reverse order of declaration: 2 is the second one here)
+    virtual GeometryChunk* __cdecl CreateInstance() const = 0;
+    virtual GeometryChunk* __cdecl CreateInstance(unsigned int vertices, unsigned int primitives,
+                                                  unsigned int indices, unsigned int faceNormals) const = 0;
+    virtual bool __cdecl InitializeBuffers(Display* display, bool upload) = 0;  // 4 (its body answers true)
+    virtual bool __cdecl LoadBuffers(Display* display) = 0;                     // 5
     virtual void __cdecl DuplicateUnsharedArrays(Display* display);  // 6: every vertex array not shared
-    virtual int __cdecl Slot7() = 0;                                 // DuplicateVertexArray(display, i, j)
+    virtual void __cdecl DuplicateVertexArray(Display* display, int i, int stream) = 0;  // 7
     virtual void __cdecl DuplicateIndexArray(Display* display);
     virtual void __cdecl ResizeVertexArray(Display* display, unsigned int n, int i, int j);  // 9: nothing
     virtual void __cdecl ResizeIndexArray(Display* display, unsigned int n);
     virtual void __cdecl AppendChunk(Display* display, const GeometryChunk& o);  // 11
-    virtual int __cdecl Slot12() = 0;
-    virtual int __cdecl Slot13() = 0;
-    virtual int __cdecl Slot14() = 0;
-    virtual int __cdecl Slot15() = 0;
-    virtual int __cdecl Slot16() = 0;
-    virtual int __cdecl Slot17() = 0;
-    virtual int __cdecl Slot18() = 0;
-    virtual int __cdecl Slot19() = 0;
-    virtual int __cdecl Slot20() = 0;
-    virtual int __cdecl Slot21() = 0;
-    virtual int __cdecl Slot22() = 0;
-    virtual int __cdecl Slot23() = 0;
-    virtual int __cdecl Slot24() = 0;
-    virtual int __cdecl Slot25() = 0;
-    virtual int __cdecl Slot26() = 0;
-    virtual int __cdecl Slot27() = 0;
-    virtual int __cdecl Slot28() = 0;
+    virtual void* __cdecl GetVertexArray(int i, int stream) = 0;              // 13
+    virtual const void* __cdecl GetVertexArray(int i, int stream) const = 0;  // 12
+    virtual void __cdecl RenderGeometry(Display* display, ViewPort* view, const VertexProgram* program, bool bones,
+                                        int stream) const = 0;  // 14
+    virtual void __cdecl RenderPrimitives(Display* display, ViewPort* view, const VertexProgram* program,
+                                          unsigned int numIndices, const unsigned short* indices,
+                                          unsigned int numPrimitives, DPrimitive primitive, bool bones,
+                                          int stream) const = 0;  // 15
+    virtual bool __cdecl SetupMultipassRender(Display* display, ViewPort* view, const VertexProgram* program,
+                                              const unsigned short* indices, unsigned int numIndices) const = 0;
+    virtual bool __cdecl SetupMultipassRender(Display* display, ViewPort* view, const unsigned short* indices,
+                                              unsigned int numIndices) const = 0;  // 16 (17 the one above)
+    virtual void __cdecl BindVertexProgram(const VertexProgram* old, const VertexProgram* program,
+                                           bool bones) const = 0;  // 19
+    virtual void __cdecl BindVertexProgram(int pass, bool bones) const = 0;  // 18
+    virtual void __cdecl RenderGeometryPass(Display* display, ViewPort* view, int pass) const = 0;  // 21
+    virtual void __cdecl RenderGeometryPass(Display* display, ViewPort* view, int count, DPrimitive primitive,
+                                            int pass) const = 0;  // 20
+    virtual void __cdecl CleanupMultipassRender(Display* display, const VertexProgram* program) const = 0;  // 22
+    virtual int __cdecl GetNumPasses() const = 0;   // 23
+    virtual int __cdecl GetNumStreams() const = 0;  // 24
+    virtual void __cdecl SetVertexDataDynamic(int i, int stream, bool on) = 0;  // 25
+    virtual bool __cdecl GetVertexDataDynamic(int i, int stream) const = 0;
+    virtual void __cdecl SetVertexDataShared(int i, int stream, bool on) = 0;
+    virtual bool __cdecl GetVertexDataShared(int i, int stream) const = 0;  // 28
     virtual void __cdecl SetIndexDataDynamic();        // 29
     virtual bool __cdecl GetIndexDataDynamic() const;  // 30
-    virtual int __cdecl Slot31() = 0;
-    virtual int __cdecl Slot32() = 0;
+    virtual void __cdecl SetVertexDataDirty(bool on, int i, int stream) const = 0;  // 31
+    virtual bool __cdecl GetVertexDataDirty(int i, int stream) const = 0;
     virtual void __cdecl SetIndexDataDirty(bool on) const;  // 33
     virtual bool __cdecl GetIndexDataDirty() const;         // 34
-    virtual int __cdecl Slot35() = 0;
-    virtual int __cdecl Slot36() = 0;
-    virtual int __cdecl Slot37() = 0;
-    virtual int __cdecl Slot38() = 0;
-    virtual int __cdecl Slot39() = 0;
-    virtual int __cdecl Slot40() = 0;
-    virtual int __cdecl Slot41() = 0;
-    virtual int __cdecl Slot42() = 0;
-    virtual int __cdecl Slot43() = 0;
-    virtual int __cdecl Slot44() = 0;
-    virtual int __cdecl Slot45() = 0;
-    virtual int __cdecl Slot46() = 0;
-    virtual int __cdecl Slot47() = 0;
-    virtual int __cdecl Slot48() = 0;
-    virtual int __cdecl Slot49() = 0;
-    virtual int __cdecl Slot50() = 0;
-    virtual int __cdecl Slot51() = 0;
-    virtual int __cdecl Slot52() = 0;
-    virtual int __cdecl Slot53() = 0;
-    virtual ConstUDwordPtr __cdecl GetUDwordArray(VertexItemType type, int index) const;  // 54/55: {4, null}
+    virtual const StaticBuffer* __cdecl GetStaticVertexBuffer(int i, int stream) const = 0;  // 35
+    virtual void __cdecl SetStaticVertexBuffer(const StaticBuffer* b, int i, int stream) const = 0;
+    virtual const StaticBuffer* __cdecl GetStaticIndexBuffer(int i) const = 0;
+    virtual void __cdecl SetStaticIndexBuffer(const StaticBuffer* b, int i) const = 0;  // 38
+    virtual const VertexType* __cdecl AssignVertexType(Display* display) const = 0;      // 39
+    virtual void __cdecl SetVertexType(VertexType* type, int stream) const = 0;
+    virtual const VertexType& __cdecl GetVertexType(int stream) const = 0;
+    virtual VertexTypeID __cdecl GetVertexTypeID(int stream) const = 0;
+    virtual int __cdecl GetVertexSize(int stream) const = 0;
+    virtual int __cdecl GetItemOffset(VertexItemType type, int stream) const = 0;
+    virtual int __cdecl GetItemStream(VertexItemType type, int stream) const = 0;  // 45
+    // 46..55 by pairs, each the const one first: Vector2, Vector3, Vector4, float, udword (the base udword
+    // views are {4, null})
+    virtual Vector2Ptr __cdecl GetVector2Array(VertexItemType type, int stream) = 0;
+    virtual ConstVector2Ptr __cdecl GetVector2Array(VertexItemType type, int stream) const = 0;
+    virtual Vector3Ptr __cdecl GetVector3Array(VertexItemType type, int stream) = 0;
+    virtual ConstVector3Ptr __cdecl GetVector3Array(VertexItemType type, int stream) const = 0;
+    virtual Vector4Ptr __cdecl GetVector4Array(VertexItemType type, int stream) = 0;
+    virtual ConstVector4Ptr __cdecl GetVector4Array(VertexItemType type, int stream) const = 0;
+    virtual FloatPtr __cdecl GetFloatArray(VertexItemType type, int stream) = 0;
+    virtual ConstFloatPtr __cdecl GetFloatArray(VertexItemType type, int stream) const = 0;
     virtual UDwordPtr __cdecl GetUDwordArray(VertexItemType type, int index);
+    virtual ConstUDwordPtr __cdecl GetUDwordArray(VertexItemType type, int index) const;
     virtual void __cdecl UpdateLighting(Display* display, const DisplayLight* light, Material* material,
                                         const Matrix4& a, const Matrix4& b);  // 56
     virtual void __cdecl ResetToAmbient(Display* display, const Material* material, const Color& ambient);
     virtual void __cdecl RenderDebug(Display* display) const;  // 58
-    virtual int __cdecl Slot59() = 0;
-    virtual int __cdecl Slot60() = 0;
+    virtual void __cdecl SetVertexProgram(VertexProgram* program, int stream) = 0;     // 59
+    virtual const VertexProgram* __cdecl GetVertexProgram(int stream) const = 0;       // 60
     // 61..70: the items of `types` in vertex type `stream` of `src` into this chunk's vertices (every one with
     // the same data type and count on both sides: floats of 1..4 elements, udwords of 1), then this chunk's slot
     // 31 (vertex data dirty). 61: vertex `dst` between src vertices i0 and i1 at position `pos`.
@@ -585,9 +606,292 @@ protected:
 
     static __declspec(dllimport) HashTable<unsigned int, RegistrationData*, RegistrationDataOp, 13> registrations;
 
+public:
+    static __declspec(dllimport) const DPrimitive primitiveLookup[];  // by the primitive bits (flags & 0x1f)
+
 private:
     const GeometryChunk& operator=(const GeometryChunk& o);  // 0x10038c50: nothing
 };
 JET_LAYOUT32(sizeof(GeometryChunk) == 0x4c);
+
+// A reference-counted block of equal-sized items behind one pointer: {references, count, item size, capacity,
+// items}. Copies share the block; Duplicate makes it this array's own.
+class GenericReferenceArray {
+public:
+    struct Block {
+        int refs;
+        unsigned int count;
+        unsigned int itemSize;
+        unsigned int capacity;
+        unsigned char data[1];
+    };
+
+    GenericReferenceArray();
+    GenericReferenceArray(unsigned int capacity, unsigned int itemSize);
+    GenericReferenceArray(const GenericReferenceArray& o);
+    ~GenericReferenceArray();
+    void __cdecl operator=(const GenericReferenceArray& o);
+
+    void __cdecl Create(unsigned int capacity, unsigned int itemSize);  // a new block (the old one let go)
+    void __cdecl AddReference() const;
+    bool __cdecl ReleaseReference() const;  // true when the block went
+    int __cdecl GetReferenceCount() const;
+    void __cdecl Add();
+    void __cdecl Allocate(unsigned int n);
+    void __cdecl Remove();
+    void __cdecl RemoveAll();
+    unsigned int __cdecl Count() const;
+    void __cdecl Duplicate(GenericReferenceArray& to) const;
+    void __cdecl Duplicate();
+    void* __cdecl operator[](unsigned int i);
+    const void* __cdecl operator[](unsigned int i) const;
+    __cdecl operator bool() const;
+    __cdecl operator void*() const;  // the items, null when empty
+    unsigned char* __cdecl GetByteOffset(unsigned int offset);
+    const unsigned char* __cdecl GetByteOffset(unsigned int offset) const;
+
+    mutable Block* block;
+};
+JET_LAYOUT32(sizeof(GenericReferenceArray) == 4);
+
+// The chunk of an API module that keeps every vertex item in one stream (0x5c): the static buffers, the vertex
+// type and the vertex program. The vertex state bits live in the chunk flags (0x10000 dynamic, 0x20000 dirty,
+// 0x40000 unshared).
+class GeometryChunkSingleStream : public GeometryChunk {
+public:
+    GeometryChunkSingleStream();
+    GeometryChunkSingleStream(unsigned int vertices, unsigned int primitives, unsigned int indices,
+                              unsigned int faceNormals, unsigned int flags);
+
+    void __cdecl RenderGeometry(Display* display, ViewPort* view, const VertexProgram* program, bool bones,
+                                int stream) const override;
+    void __cdecl RenderPrimitives(Display* display, ViewPort* view, const VertexProgram* program,
+                                  unsigned int numIndices, const unsigned short* indices, unsigned int numPrimitives,
+                                  DPrimitive primitive, bool bones, int stream) const override;
+    bool __cdecl SetupMultipassRender(Display* display, ViewPort* view, const VertexProgram* program,
+                                      const unsigned short* indices, unsigned int numIndices) const override;
+    bool __cdecl SetupMultipassRender(Display* display, ViewPort* view, const unsigned short* indices,
+                                      unsigned int numIndices) const override;
+    void __cdecl BindVertexProgram(const VertexProgram* old, const VertexProgram* program,
+                                   bool bones) const override;
+    void __cdecl BindVertexProgram(int pass, bool bones) const override;  // nothing
+    void __cdecl RenderGeometryPass(Display* display, ViewPort* view, int pass) const override;
+    void __cdecl RenderGeometryPass(Display* display, ViewPort* view, int count, DPrimitive primitive,
+                                    int pass) const override;
+    void __cdecl CleanupMultipassRender(Display* display, const VertexProgram* program) const override;
+    int __cdecl GetNumPasses() const override;   // 1
+    int __cdecl GetNumStreams() const override;  // 1
+    void __cdecl SetVertexDataDynamic(int i, int stream, bool on) override;
+    bool __cdecl GetVertexDataDynamic(int i, int stream) const override;
+    void __cdecl SetVertexDataShared(int i, int stream, bool on) override;
+    bool __cdecl GetVertexDataShared(int i, int stream) const override;
+    void __cdecl SetVertexDataDirty(bool on, int i, int stream) const override;
+    bool __cdecl GetVertexDataDirty(int i, int stream) const override;
+    const StaticBuffer* __cdecl GetStaticVertexBuffer(int i, int stream) const override;
+    void __cdecl SetStaticVertexBuffer(const StaticBuffer* b, int i, int stream) const override;
+    const StaticBuffer* __cdecl GetStaticIndexBuffer(int i) const override;
+    void __cdecl SetStaticIndexBuffer(const StaticBuffer* b, int i) const override;
+    void __cdecl SetVertexType(VertexType* type, int stream) const override;
+    const VertexType& __cdecl GetVertexType(int stream) const override;
+    int __cdecl GetItemStream(VertexItemType type, int stream) const override;  // 0
+    void __cdecl SetVertexProgram(VertexProgram* program, int stream) override;
+    const VertexProgram* __cdecl GetVertexProgram(int stream) const override;
+
+protected:
+    ~GeometryChunkSingleStream() override;
+    void __cdecl InitInstance(GeometryChunkSingleStream& to) const;
+    bool __cdecl SetupMultipassRenderInternal(Display* display, ViewPort* view, const VertexProgram* program,
+                                              const unsigned short* indices, unsigned int numIndices) const;
+
+    mutable const StaticBuffer* vertexBuffer;  // +0x4c
+    mutable const StaticBuffer* indexBuffer;   // +0x50
+    mutable VertexType* vertexType;            // +0x54
+    VertexProgram* program;                    // +0x58
+};
+JET_LAYOUT32(sizeof(GeometryChunkSingleStream) == 0x5c);
+
+// The chunk of an API module that keeps its vertex items in several streams (0x60): a static buffer and state
+// bits per stream (1 dynamic, 2 dirty, 4 unshared).
+class GeometryChunkMultiStream : public GeometryChunk {
+public:
+    struct StreamState {  // 8
+        const StaticBuffer* buffer;
+        unsigned long flags;
+    };
+
+    explicit GeometryChunkMultiStream(int streams);
+    GeometryChunkMultiStream(unsigned int vertices, unsigned int primitives, unsigned int indices,
+                             unsigned int faceNormals, int streams, unsigned int flags);
+
+    void __cdecl RenderGeometry(Display* display, ViewPort* view, const VertexProgram* program, bool bones,
+                                int stream) const override;
+    void __cdecl RenderPrimitives(Display* display, ViewPort* view, const VertexProgram* program,
+                                  unsigned int numIndices, const unsigned short* indices, unsigned int numPrimitives,
+                                  DPrimitive primitive, bool bones, int stream) const override;
+    bool __cdecl SetupMultipassRender(Display* display, ViewPort* view, const VertexProgram* program,
+                                      const unsigned short* indices, unsigned int numIndices) const override;
+    bool __cdecl SetupMultipassRender(Display* display, ViewPort* view, const unsigned short* indices,
+                                      unsigned int numIndices) const override;
+    void __cdecl BindVertexProgram(const VertexProgram* old, const VertexProgram* program,
+                                   bool bones) const override;
+    void __cdecl BindVertexProgram(int pass, bool bones) const override;  // nothing
+    void __cdecl RenderGeometryPass(Display* display, ViewPort* view, int pass) const override;
+    void __cdecl RenderGeometryPass(Display* display, ViewPort* view, int count, DPrimitive primitive,
+                                    int pass) const override;
+    void __cdecl CleanupMultipassRender(Display* display, const VertexProgram* program) const override;
+    int __cdecl GetNumPasses() const override;   // 1
+    int __cdecl GetNumStreams() const override;
+    void __cdecl SetVertexDataDynamic(int i, int stream, bool on) override;  // stream -2: every one
+    bool __cdecl GetVertexDataDynamic(int i, int stream) const override;
+    void __cdecl SetVertexDataShared(int i, int stream, bool on) override;  // -2 every one, -3 none
+    bool __cdecl GetVertexDataShared(int i, int stream) const override;
+    void __cdecl SetVertexDataDirty(bool on, int i, int stream) const override;  // -2 every one
+    bool __cdecl GetVertexDataDirty(int i, int stream) const override;
+    const StaticBuffer* __cdecl GetStaticVertexBuffer(int i, int stream) const override;
+    void __cdecl SetStaticVertexBuffer(const StaticBuffer* b, int i, int stream) const override;
+    const StaticBuffer* __cdecl GetStaticIndexBuffer(int i) const override;
+    void __cdecl SetStaticIndexBuffer(const StaticBuffer* b, int i) const override;
+    void __cdecl SetVertexType(VertexType* type, int stream) const override;
+    const VertexType& __cdecl GetVertexType(int stream) const override;
+    void __cdecl SetVertexProgram(VertexProgram* program, int stream) override;
+    const VertexProgram* __cdecl GetVertexProgram(int stream) const override;
+
+    unsigned long __cdecl GetStreamFlags(int stream) const;
+    void __cdecl SetStreamFlags(int stream, unsigned long f);
+
+protected:
+    ~GeometryChunkMultiStream() override;
+    void __cdecl InitInstance(GeometryChunkMultiStream& to) const;  // the bones go across a second time
+    void __cdecl SetConstStreamFlags(int stream, unsigned long f) const;
+    bool __cdecl SetupMultipassRenderInternal(Display* display, ViewPort* view, const VertexProgram* program,
+                                              const unsigned short* indices, unsigned int numIndices) const;
+
+    StreamState* streams;                     // +0x4c (numStreams of them)
+    mutable const StaticBuffer* indexBuffer;  // +0x50
+    mutable VertexType* vertexType;           // +0x54
+    VertexProgram* program;                   // +0x58
+    int numStreams;                           // +0x5c
+};
+JET_LAYOUT32(sizeof(GeometryChunkMultiStream) == 0x60);
+
+// A single stream chunk with its vertices in memory (0x64): a GenericReferenceArray of vertices of the vertex
+// type's stride and the item offsets of the vertex type (a shared ItemOffsetTable).
+class GenericGeometryChunkSingleStream : public GeometryChunkSingleStream {
+public:
+    // 0xa8: the stride, then the offset of every item type (-1: not there)
+    class ItemOffsetTable : public ReferenceCount {
+    public:
+        explicit ItemOffsetTable(unsigned int s) : stride(s)
+        {
+            for (int& o : offsets) o = -1;
+        }
+        JET_HEAP_OBJECT
+
+        unsigned int stride;  // +8
+        int offsets[39];      // +0xc
+    };
+
+    GenericGeometryChunkSingleStream(VertexType* type, unsigned int vertices, unsigned int primitives,
+                                     unsigned int indices, unsigned int faceNormals, unsigned int flags);
+
+    GeometryChunk* __cdecl CreateInstance() const override;
+    GeometryChunk* __cdecl CreateInstance(unsigned int vertices, unsigned int primitives, unsigned int indices,
+                                          unsigned int faceNormals) const override;
+    bool __cdecl InitializeBuffers(Display* display, bool upload) override;
+    bool __cdecl LoadBuffers(Display* display) override;
+    void __cdecl DuplicateVertexArray(Display* display, int i, int stream) override;
+    void __cdecl ResizeVertexArray(Display* display, unsigned int n, int i, int j) override;
+    void* __cdecl GetVertexArray(int i, int stream) override;
+    const void* __cdecl GetVertexArray(int i, int stream) const override;
+    const VertexType* __cdecl AssignVertexType(Display* display) const override;
+    VertexTypeID __cdecl GetVertexTypeID(int stream) const override;
+    int __cdecl GetVertexSize(int stream) const override;
+    int __cdecl GetItemOffset(VertexItemType type, int stream) const override;
+    Vector2Ptr __cdecl GetVector2Array(VertexItemType type, int stream) override;
+    ConstVector2Ptr __cdecl GetVector2Array(VertexItemType type, int stream) const override;
+    Vector3Ptr __cdecl GetVector3Array(VertexItemType type, int stream) override;
+    ConstVector3Ptr __cdecl GetVector3Array(VertexItemType type, int stream) const override;
+    Vector4Ptr __cdecl GetVector4Array(VertexItemType type, int stream) override;
+    ConstVector4Ptr __cdecl GetVector4Array(VertexItemType type, int stream) const override;
+    FloatPtr __cdecl GetFloatArray(VertexItemType type, int stream) override;
+    ConstFloatPtr __cdecl GetFloatArray(VertexItemType type, int stream) const override;
+    UDwordPtr __cdecl GetUDwordArray(VertexItemType type, int stream) override;
+    ConstUDwordPtr __cdecl GetUDwordArray(VertexItemType type, int stream) const override;
+
+protected:
+    GenericGeometryChunkSingleStream();
+    ~GenericGeometryChunkSingleStream() override;
+    void __cdecl InitInstance(GenericGeometryChunkSingleStream& to) const;
+    void __cdecl CreateVertexArray(VertexType* type, int vertices);
+
+    GenericReferenceArray vertices;  // +0x5c
+    ItemOffsetTable* offsetTable;    // +0x60
+};
+JET_LAYOUT32(sizeof(GenericGeometryChunkSingleStream) == 0x64);
+
+// A multi stream chunk with its vertices in memory (0x68): one GenericReferenceArray per stream in a shared block
+// and the stream and offset of every item type (a shared ItemOffsetTable).
+class GenericGeometryChunkMultiStream : public GeometryChunkMultiStream {
+public:
+    // 0x148: the stride per stream, the vertex size over every stream, then {stream, offset} per item type
+    class ItemOffsetTable : public ReferenceCount {
+    public:
+        struct Entry {
+            int stream;
+            int offset;
+        };
+        explicit ItemOffsetTable(unsigned int streamCount);
+        ~ItemOffsetTable() override;
+        JET_HEAP_OBJECT
+
+        unsigned int* strides;  // +8 (an Alloc block)
+        unsigned int size;      // +0xc
+        Entry entries[39];      // +0x10
+    };
+    // the arrays of the streams: {references, count, two words left as the heap had them, the arrays}
+    struct Arrays {
+        int refs;
+        unsigned int count;
+        int unused[2];
+        GenericReferenceArray data[1];
+    };
+
+    GenericGeometryChunkMultiStream(VertexType* type, unsigned int vertices, unsigned int primitives,
+                                    unsigned int indices, unsigned int faceNormals, unsigned int flags);
+
+    GeometryChunk* __cdecl CreateInstance() const override;
+    GeometryChunk* __cdecl CreateInstance(unsigned int vertices, unsigned int primitives, unsigned int indices,
+                                          unsigned int faceNormals) const override;
+    bool __cdecl InitializeBuffers(Display* display, bool upload) override;
+    bool __cdecl LoadBuffers(Display* display) override;
+    void __cdecl DuplicateVertexArray(Display* display, int i, int stream) override;  // stream -2: every one
+    void* __cdecl GetVertexArray(int i, int stream) override;
+    const void* __cdecl GetVertexArray(int i, int stream) const override;
+    const VertexType* __cdecl AssignVertexType(Display* display) const override;
+    VertexTypeID __cdecl GetVertexTypeID(int stream) const override;
+    int __cdecl GetVertexSize(int stream) const override;
+    int __cdecl GetItemOffset(VertexItemType type, int stream) const override;
+    int __cdecl GetItemStream(VertexItemType type, int stream) const override;
+    Vector2Ptr __cdecl GetVector2Array(VertexItemType type, int stream) override;
+    ConstVector2Ptr __cdecl GetVector2Array(VertexItemType type, int stream) const override;
+    Vector3Ptr __cdecl GetVector3Array(VertexItemType type, int stream) override;
+    ConstVector3Ptr __cdecl GetVector3Array(VertexItemType type, int stream) const override;
+    Vector4Ptr __cdecl GetVector4Array(VertexItemType type, int stream) override;
+    ConstVector4Ptr __cdecl GetVector4Array(VertexItemType type, int stream) const override;
+    FloatPtr __cdecl GetFloatArray(VertexItemType type, int stream) override;
+    ConstFloatPtr __cdecl GetFloatArray(VertexItemType type, int stream) const override;
+    UDwordPtr __cdecl GetUDwordArray(VertexItemType type, int stream) override;
+    ConstUDwordPtr __cdecl GetUDwordArray(VertexItemType type, int stream) const override;
+
+protected:
+    explicit GenericGeometryChunkMultiStream(int streams);
+    ~GenericGeometryChunkMultiStream() override;
+    void __cdecl InitInstance(GenericGeometryChunkMultiStream& to) const;
+    void __cdecl CreateVertexArray(VertexType* type, int vertices);
+
+    Arrays* arrays;                // +0x60
+    ItemOffsetTable* offsetTable;  // +0x64
+};
+JET_LAYOUT32(sizeof(GenericGeometryChunkMultiStream) == 0x68);
 
 }  // namespace Jet

@@ -65,18 +65,8 @@ NullVertexBufferManager (0x1001e5b0..) is made only by the Display and stays wit
 (0x10011f00, 38 KB) and Get/CloneBuiltInVertexType belong to U9.
 U5b split 2026-10-28: U5b1 GeometryChunk without the interpolation (GeometryChunk.cpp; 82 exports, 1502/2687; test
 diff_rs_u5 part "chunks") done 2026-10-28; U5b2 = InterpolateChunkData (2), InterpolateAllChunkData (8),
-GetAllChunkWeights, CopyChunkData (0x10026e70..0x1002a720, ~14 KB of float code; GeometryChunk.cpp, 1514/2687,
-diff_rs_u5 part "interp") done 2026-10-28. Slots 61 InterpolateChunkData(src, i0, i1, dst, pos), 62..64 from three
-src vertices (Vector3 weights with first/count, all vertices, by the vertex positions' barycentric weights through
-the non-virtual 4-index InterpolateChunkData), 65..67 from two (Vector2 weights, all, by the positions along the
-segment), 68/69 one vertex scaled by float weights, 70 CopyChunkData(src, from, to, count); each walks the item
-type list, needs the item in both chunks (slot 44 not -1) with equal data type and count (floats of 1..4, udwords
-of 1), then calls slot 31 (1, 0, -2). MSVC lays out overloaded virtual functions in reverse order of declaration:
-the header declares the 69..62 overloads backwards. The compiler unrolled the loops by four and picked a different
-operand order per unrolled step (and for the tail); kept per step for the two-NaN case. The three-vertex and
-two-vertex position cases read the source vertices once before the loop. Lengths are KernelStandard's LUT square
-root inlined on x87 (left unrounded for the divide), udword blends are x87 sums truncated through fistp qword.
-GeometryChunk 0x4c on ReferenceCount: +8 properties
+GetAllChunkWeights, CopyChunkData (0x10026e70..0x1002a720, ~14 KB of float code); until then our vftable slots
+61..70 call the original's exports through GetProcAddress. GeometryChunk 0x4c on ReferenceCount: +8 properties
 (FastDynamicArray<{name node, float}, 3>, chunk 0x24), +0xc Array<VertexProgram::MatrixMap*,128> bones (MatrixMap
 {matrix, index} 8 bytes; growth to count+1 rounded up to 128), +0x18 flags (bits 0..4 primitive: 0 points, 1 line
 list, 2 line strip, 4 triangle list, 8 strip, 0x10 fan; 0x20 lit; 0x100 index dynamic; 0x200 index dirty; 0x1000
@@ -88,8 +78,7 @@ _purecall is `xor eax, eax; ret` (ours defines the same), which is why base slot
 GeometryChunk::InitializeBuffers answers true. Slot names from the stream chunks' vftables: 2/3 CreateInstance,
 4 InitializeBuffers, 5 LoadBuffers, 7 DuplicateVertexArray, 9 ResizeVertexArray, 12/13 GetVertexArray, 14
 RenderGeometry, 15 RenderPrimitives, 16/17 SetupMultipassRender, 19 BindVertexProgram, 20/21 RenderGeometryPass, 22
-CleanupMultipassRender, 23/24 stream / buffer counts (U5b2 confirmed 41 GetVertexType(stream), 44 GetItemOffset,
-46..53 GetFloatArray for 2, 3, 4, 1 elements const/non-const, 31 SetVertexDataDirty) (AppendChunk loops vertex types x streams), 25..32 vertex data
+CleanupMultipassRender, 23/24 stream / buffer counts (AppendChunk loops vertex types x streams), 25..32 vertex data
 dynamic/shared/dirty, 35..38 static vertex / index buffers, 39/40 AssignVertexType / SetVertexType, 41
 GetVertexType(i), 42 GetVertexTypeID, 43 GetVertexSize, 44 GetItemOffset, 45 GetItemStream, 46..53 GetFloatArray,
 54/55 GetUDwordArray, 59/60 Set/GetVertexProgram. TS12 quirks kept: without an index array the index lookups
@@ -99,6 +88,24 @@ signalling NaNs (InitInstance, outlines, GetChunkProperty, property removal); SS
 comes out (kept with inline asm, the compiler commutes even intrinsics). The registry (HashTable of {name,
 creator}) stays the original's; ReleaseRegistrationData frees the entries but leaves null slots in the buckets (a
 later lookup faults in both).
+U5c done 2026-10-28 (GeometryStreams.cpp; 144 exports, 1658/2687; diff_rs_u5 part "streams"): U5 complete.
+GeometryChunkSingleStream 0x5c (+0x4c vertex StaticBuffer, +0x50 index StaticBuffer, +0x54 VertexType, +0x58
+VertexProgram behind its vbtable; vertex state in the chunk flags 0x10000 dynamic / 0x20000 dirty / 0x40000
+unshared), GeometryChunkMultiStream 0x60 (+0x4c {buffer, bits 1 dynamic 2 dirty 4 unshared} per stream, +0x5c
+stream count), GenericGeometryChunkSingleStream 0x64 (+0x5c GenericReferenceArray of vertices, +0x60
+ItemOffsetTable 0xa8 {RC, stride, 39 offsets}), GenericGeometryChunkMultiStream 0x68 (+0x60 block {refs, count, 2
+unused, GenericReferenceArray per stream}, +0x64 ItemOffsetTable 0x148 {RC, strides block, total size, 39 {stream,
+offset}}). GenericReferenceArray (moved here from U8) is one pointer to {refs, count, item size, capacity, items}.
+Base slot names now in include/jet/Geometry.h (2/3 CreateInstance, 5 LoadBuffers, 7 DuplicateVertexArray, 12/13
+GetVertexArray, 14 RenderGeometry, 15 RenderPrimitives, 16/17 SetupMultipassRender, 18/19 BindVertexProgram,
+20/21 RenderGeometryPass, 22 CleanupMultipassRender, 23 GetNumPasses, 24 GetNumStreams, 25..28 and 31/32 the
+vertex state, 35..38 static buffers, 39 AssignVertexType, 40/41 Set/GetVertexType, 42 GetVertexTypeID, 43
+GetVertexSize, 44 GetItemOffset, 45 GetItemStream, 46..55 Vector2/3/4/float/udword views (const first), 59/60
+Set/GetVertexProgram). Display slots used: 0xec static draw, 0xf0 dynamic draw, 0xf4 multi stream draw, 0xf8
+pass, 0xfc pass setup, 0x100 pass cleanup, 0x104/0x108 make vertex/index buffer; +0x20c the vertex buffer manager
+(0x20 upload vertices, 0x2c upload indices, 0x40 catch up unless the byte +0x213 is set).
+GeometryChunkTemplate<PackedVertexPNT, GeometryChunkSingleStream> (0x10037bb0..0x10038340, no exports) is made only
+by NullMaterial::CreateGeometryChunk (0x10037a30): it goes to U7.
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile
@@ -137,7 +144,7 @@ Grouping by exported class; code size by Ghidra namespace (the unnamed `Global` 
 | U5 geometry | VertexType (+ its registry, moved from U1), GeometryChunk, Single/MultiStream, Generic*, GeometryChunkTemplate, RenderingCache(+Manager), VertexBufferManager, StaticBuffer, chunk hints | 268 | 193 | 35 KB |
 | U6 textures | Texture, TextureRes, TextureResource, AsciiTextureResource (`.texture.txt`), BitmapTextureResource(+Type), BinaryTextureResourceExport, SharedTextureCollection, TextureManager (streaming), DisplayTexture, DisplayTextureNull | 380 | 113 | 47 KB |
 | U7 materials | Material, NullMaterial, MaterialConfig/Spec, MaterialManager, MaterialResource, MaterialFileSupport, MaterialPlugin | 171 | 97 | 16 KB |
-| U8 layers and scene | Layer, LayerGroup, LayerManager, ClearLayer, Overlay, SceneGraph, SystemResource*, GenericReferenceArray | 144 | 35 | 9 KB |
+| U8 layers and scene | Layer, LayerGroup, LayerManager, ClearLayer, Overlay, SceneGraph, SystemResource* (GenericReferenceArray went to U5c) | 144 | 35 | 9 KB |
 | U9 foundation | Display (57 KB), DisplaySelector, DisplaySaveBuffer, NonRenderContext, SharedContext, ApiDataBase, RenderKernel, ResourceType, free functions, `JetGetPluginsRenderSystem` | 257 | 139 | 64 KB |
 | (small) | VideoMode/VideoFormat, chunk hints, ModifierItem, Tex2/3Pair... folded into the unit of their owner | 115 | 15 | 1 KB |
 

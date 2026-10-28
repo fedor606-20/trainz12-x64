@@ -2116,6 +2116,57 @@ unit order in `notes/WaterSystem.md`.
     on.
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U5c, the stream chunks and GenericReferenceArray (2026-10-28): 1658/2687 exports ours
+- `GeometryStreams.cpp`, 144 exports: GeometryChunkSingleStream, GeometryChunkMultiStream,
+  GenericGeometryChunkSingleStream, GenericGeometryChunkMultiStream (122) and GenericReferenceArray (22, moved
+  here from U8: the Generic chunks keep their vertices in it, and its code sits next to theirs). U5 is complete.
+- GeometryChunkTemplate<PackedVertexPNT, GeometryChunkSingleStream> has no exports. Only
+  NullMaterial::CreateGeometryChunk makes it, so it moves to U7 with NullMaterial.
+- The base GeometryChunk now declares its pure slots by name (CreateInstance, LoadBuffers, the render and pass
+  calls, the vertex state bits, static buffers, vertex type, item views, vertex program). Overload pairs are
+  declared backwards (MSVC reverses them); our five vftables match TS12 slot by slot (scratchpad vtcmp.py
+  compares the export names behind every slot).
+- Layouts: SingleStream 0x5c (+0x4c static vertex buffer, +0x50 static index buffer, +0x54 vertex type, +0x58
+  vertex program; the vertex state lives in the chunk flags: 0x10000 dynamic, 0x20000 dirty, 0x40000 unshared).
+  MultiStream 0x60 (+0x4c an array of {static buffer, state bits 1 dynamic / 2 dirty / 4 unshared} per stream,
+  +0x5c stream count). The Generic chunks add the vertex memory (+0x5c one GenericReferenceArray, or +0x60 a
+  shared block of one per stream) and a shared ItemOffsetTable (+0x60 / +0x64: the stride, or the strides and
+  total size, and the offset, or stream and offset, of each of the 39 item types).
+- The draw calls go to the Display: slot 0xf0 (dynamic vertices and indices), 0xec (static buffers), 0xf4 (multi
+  stream: an on-stack array of {data, buffer, dirty} per stream), 0xf8 (one pass), 0xfc (set up the passes),
+  0x100 (clean up), 0x104 / 0x108 (make a vertex / index buffer); uploads go through the display's vertex buffer
+  manager (+0x20c, slots 0x20 and 0x2c). Before a multi stream draw the manager gets slot 0x40 unless the display's
+  byte +0x213 is set. Without a vertex program the "program" handed to the display is the vertex type.
+- TS12 behaviour kept:
+  - GenericGeometryChunkMultiStream's constructor passes its flags argument as the stream count of the base and 4
+    as the flags. So CreateInstance makes a stream record array as long as the chunk flags, and every Generic
+    multi stream chunk has flags 4.
+  - Its CreateInstance(vertices, ...) builds the copy with the vertex type (arrays and an offset table), then
+    replaces the table and builds the arrays again; the first ones are leaked.
+  - The multi stream RenderPrimitives draws the chunk's own primitive type and count, not the ones it is given.
+  - GeometryChunkMultiStream::InitInstance copies the bones a second time after GeometryChunk::InitInstance.
+  - SetVertexDataDynamic(false) sets the dynamic bit as well as the unshared bits.
+  - SetVertexType lets the old type go before taking the new one.
+  - The "dirty" bools handed to the display are `flags >> n & 0xffffff01`: the bit with everything above it.
+  - Freeing a multi stream array block that is still shared leaves the pointer in place (its callers overwrite it).
+- Test `tests/diff_rs_u5.cpp` part "streams" (1000 scenarios, 0 mismatches). The four classes are made with each
+  side's constructors and driven through their own vftables and the non-virtual exports (InitInstance,
+  CreateVertexArray, SetupMultipassRenderInternal, the stream flags), with real VertexTypes (1..3 streams) and
+  StaticBuffers of the side. A stand-in display logs the draw calls and makes buffers, a stand-in buffer manager
+  logs the uploads, a stand-in vertex program has its ReferenceCount behind a vbtable as VertexProgram does; their
+  answers come from a script RNG reset per side. GenericReferenceArray gets its own random sequences. Inputs that
+  would make both modules read or write past a block are avoided (a resize that copies from a short array, a
+  multi stream chunk with fewer stream records than streams); item views are logged as offsets into their stream's
+  block, because past a short block they point at whatever the heap has there.
+  - Mutations caught: 50 of 51. The survivor hands the vertex type of stream 0 instead of the given stream when
+    there is no program; the vertex type getter of these classes ignores the stream, so it is equivalent. The test
+    was strengthened along the way: the index/vertex state bits are flipped and the vertex count lowered before
+    draws (the static/dynamic branches and the max/num vertex choice), bones are added before InitInstance.
+  - The first mutation run gave false survivors: the incremental build sometimes kept the previous DLL after the
+    source was rewritten. The harness now moves the source's mtime into the future and checks the DLL changed.
+- The other RenderSystem diff tests (u1, u2, u2b, u3, u4) still give 0 mismatches.
+- In game: menu reached, JetLog identical to the baseline.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is
