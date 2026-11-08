@@ -115,8 +115,9 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        BinaryTextureResourceExport, 118 exports, 1776/2687, `tests/diff_rs_u6.cpp` on the install's .texture files)
        done 2026-10-28; BitmapTextureResource moves to U9. U6b (AsciiTextureResource, the `.texture.txt` resource
        over bitmap resources; 52 exports, 1828/2687, `tests/diff_rs_u6b.cpp` on the install's and generated
-       .texture.txt files with stand-in bitmap resources) done 2026-11-08. Next: U6c (Texture, TextureRes,
-       DisplayTexture, DisplayTextureNull).
+       .texture.txt files with stand-in bitmap resources) done 2026-11-08. U6c split: U6c1 (DisplayTexture +
+       DisplayTextureNull, the API texture layer; 60 exports, 1888/2687, `tests/diff_rs_u6c.cpp`) done
+       2026-11-08. Next: U6c2 (Texture, TextureRes).
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX

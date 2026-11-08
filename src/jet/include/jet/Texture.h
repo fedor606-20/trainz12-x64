@@ -260,6 +260,162 @@ JET_LAYOUT32(sizeof(BinaryTextureResourceExport) == 0xa8);
 class BitmapResource;
 class ConfigData;
 
+// U6c1: the API texture base (0x38) every renderer's texture derives from (RenderOpenGL / RenderDirectX9 inline
+// its fields), and the null renderer's one (0x70). Slot order and layouts follow TS12 (addresses in
+// RenderSystem_7c/DisplayTexture.cpp). The pure slots answer 0 through the module's _purecall, as in TS12.
+class DisplayTexture {
+public:
+    struct DisplayTextureStats;
+    struct DisplayTextureFrameStats;
+
+    DisplayTexture(const DisplayTexture& o);
+    DisplayTexture& operator=(const DisplayTexture& o);
+    virtual ~DisplayTexture();  // 0
+
+    virtual bool __cdecl Create(const Size& size, const DisplayFormat& format, TextureDimension dimension,
+                                unsigned int mips, TextureAutoMip autoMip, unsigned int depth, float anisotropy,
+                                TextureHint hint, TextureFilter minFilter, TextureFilter magFilter,
+                                TextureFilter mipFilter, TextureWrap wrapS, TextureWrap wrapT,
+                                const RenderTextureConstruct& construct) = 0;  // 1
+    virtual void __cdecl Destroy() = 0;                                         // 2
+    virtual bool __cdecl Load(unsigned int level, DisplayFormat& format, const Bitmap& bitmap,
+                              unsigned int face) = 0;                           // 3
+    virtual bool __cdecl SubLoad(unsigned int level, const Rect& area, DisplayFormat& format, const Bitmap& bitmap,
+                                 unsigned int face) = 0;                        // 4
+    virtual bool __cdecl SubloadFromFrame(unsigned int level, const Point& at, const Rect& area,
+                                          unsigned int face);                   // 5: true
+    virtual bool __cdecl CreateRenderContext();                                 // 6: true
+    // (overloaded virtuals take their slots in reverse declaration order: 7 is the long Bind, 8 this one)
+    virtual bool __cdecl Bind(unsigned int unit) const = 0;
+    virtual bool __cdecl Bind(unsigned int unit, bool keep, float anisotropy, TextureWrap wrapS, TextureWrap wrapT,
+                              TextureFilter minFilter, TextureFilter magFilter, TextureFilter mipFilter) = 0;
+    virtual void __cdecl CopyMipToMip(DisplayTexture* from, int fromLevel, DisplayTexture* to, int toLevel) = 0;  // 9
+    virtual DisplayTexture* __cdecl CreateInstance() const = 0;                 // 10
+    virtual Bitmap* __thiscall GetBitmap(unsigned int level, unsigned int face, DisplayFormat& format,
+                                         DFormatId as) const = 0;               // 11
+    virtual bool __cdecl GetDataLost() const;                                   // 12
+    virtual DFormatId __cdecl GetJetFormat() const = 0;                         // 13
+    virtual void __cdecl CopySamplerAttributesFrom(DisplayTexture* from) = 0;  // 14
+    virtual void __cdecl RefreshFromChangedSettings();                         // 15: nothing
+    virtual void* __cdecl GetAPITexture() const;                               // 16: null
+
+    bool __cdecl SubLoad(const Bitmap& bitmap, const Rect& area, DisplayFormat& format, unsigned int face);
+    Display* __cdecl GetDisplay() const;
+    const Size& __cdecl GetSize() const;
+    TextureDimension __cdecl GetDimension() const;
+    unsigned int __cdecl GetDepthLevels() const;
+    unsigned int __cdecl GetNumMipLevels() const;
+    unsigned int __cdecl GetMemorySize() const;
+    void __cdecl SetActiveRenderLevel(unsigned int level);
+    unsigned int __cdecl GetActiveRenderLevel() const;
+    TextureTarget __cdecl GetRenderTargetType() const;
+    void __cdecl SetDataLost(bool lost);
+    bool __cdecl GetCanMip() const;
+    bool __cdecl GetAutoMip() const;
+    TextureAutoMip __cdecl GetAutoMipHint() const;
+    float __cdecl GetAnisotropy() const;
+    static int __cdecl GetNumMipLevels(const Size& size);
+    static Size __cdecl GetMipLevelSize(const Size& size, unsigned int level);  // (exported with a hidden pointer)
+    static const DisplayTextureStats& __cdecl GetTextureStats();
+    static void __cdecl EndFrameStats();
+
+    JET_HEAP_OBJECT
+
+protected:
+    explicit DisplayTexture(Display* display);
+    bool __cdecl CheckInitialized(const char* what) const;
+    void __cdecl InitInstance(DisplayTexture& to) const;
+    void __cdecl LogInitFailure(const char* what) const;
+
+    static __declspec(dllimport) DisplayTextureStats textureStats;
+    static __declspec(dllimport) DisplayTextureFrameStats frameStats;
+
+    int state;                         // +0x04 1 when made (CheckInitialized)
+    unsigned int memorySize;           // +0x08
+    Display* display;                  // +0x0c
+    Size size;                         // +0x10
+    TextureDimension dimension;        // +0x18
+    unsigned int depthLevels;          // +0x1c
+    unsigned int mipLevels;            // +0x20
+    float requestedAnisotropy;         // +0x24
+    float anisotropy;                  // +0x28
+    unsigned char flags;               // +0x2c bit 0 compressed, 1 can mip, 2 data lost (the rest is not written)
+    unsigned char pad2d[3];
+    char autoMip;                     // +0x30 a TextureAutoMip
+    RenderTextureConstruct* construct; // +0x34 a render target's
+};
+JET_LAYOUT32(sizeof(DisplayTexture) == 0x38);
+
+class DisplayNull;
+class NULLFormat;
+class OPENGL_INTERFACE_CLASS;
+struct PBufferContext;
+
+class DisplayTextureNull : public DisplayTexture {
+public:
+    explicit DisplayTextureNull(Display* display);
+    DisplayTextureNull(const DisplayTextureNull& o);
+    DisplayTextureNull& operator=(const DisplayTextureNull& o);
+    ~DisplayTextureNull() override;
+
+    bool __cdecl Create(const Size& size, const DisplayFormat& format, TextureDimension dimension, unsigned int mips,
+                        TextureAutoMip autoMip, unsigned int depth, float anisotropy, TextureHint hint,
+                        TextureFilter minFilter, TextureFilter magFilter, TextureFilter mipFilter, TextureWrap wrapS,
+                        TextureWrap wrapT, const RenderTextureConstruct& construct) override;
+    void __cdecl Destroy() override;
+    bool __cdecl Load(unsigned int level, DisplayFormat& format, const Bitmap& bitmap, unsigned int face) override;
+    bool __cdecl SubLoad(unsigned int level, const Rect& area, DisplayFormat& format, const Bitmap& bitmap,
+                         unsigned int face) override;
+    bool __cdecl SubloadFromFrame(unsigned int level, const Point& at, const Rect& area, unsigned int face) override;
+    bool __cdecl CreateRenderContext() override;
+    bool __cdecl Bind(unsigned int unit) const override;
+    bool __cdecl Bind(unsigned int unit, bool keep, float anisotropy, TextureWrap wrapS, TextureWrap wrapT,
+                      TextureFilter minFilter, TextureFilter magFilter, TextureFilter mipFilter) override;
+    void __cdecl CopyMipToMip(DisplayTexture* from, int fromLevel, DisplayTexture* to, int toLevel) override;
+    DisplayTexture* __cdecl CreateInstance() const override;
+    Bitmap* __thiscall GetBitmap(unsigned int level, unsigned int face, DisplayFormat& format,
+                                 DFormatId as) const override;
+    bool __cdecl GetDataLost() const override;
+    DFormatId __cdecl GetJetFormat() const override;
+    void __cdecl CopySamplerAttributesFrom(DisplayTexture* from) override;
+
+    PBufferContext* __cdecl GetRenderContext() const;
+
+protected:
+    DisplayNull* __cdecl GetDisplay() const;
+    OPENGL_INTERFACE_CLASS* __cdecl GetWinInterface() const;
+    Bitmap* __cdecl GetTextureBitmap(int level, unsigned int face, DisplayFormat& format, DFormatId as) const;
+    NULLFormat* __cdecl CheckFormat(DisplayFormat& format, void*& data, int& pitch, int& a, int& b, int width,
+                                    int height);
+    void __cdecl BindTexture(unsigned int unit) const;
+    void __cdecl UnbindRenderTexture(unsigned int unit) const;
+    void __cdecl InitInstance(DisplayTextureNull& to) const;
+    void __cdecl SetBasicState() const;
+
+    // the null display's statics stay the original's until the Display unit (U9)
+    static __declspec(dllimport) bool anisotropySupport;
+    static __declspec(dllimport) bool canAutoMip;
+    static __declspec(dllimport) unsigned int numObjects;
+    static __declspec(dllimport) const DisplayTextureNull** bound;  // 1000 texture units
+
+    int unused38;                  // +0x38 -1
+    int renderContext;             // +0x3c
+    unsigned int firstLevel;       // +0x40 the smallest level loaded, -1 none
+    TextureFilter minFilter;       // +0x44
+    TextureFilter magFilter;       // +0x48
+    TextureWrap wrapS;             // +0x4c
+    TextureWrap wrapT;             // +0x50
+    int unused54;                  // +0x54 (never written)
+    int unused58;                  // +0x58
+    int formatId;                  // +0x5c
+    mutable bool dirty;            // +0x60
+    mutable bool bound61;          // +0x61
+    mutable int bindCount;         // +0x64 units holding it
+    bool flag68;                   // +0x68 cleared for a depth format
+    Bitmap* image;                 // +0x6c the level 0 pixels kept
+};
+JET_LAYOUT32(sizeof(DisplayTextureNull) == 0x70);
+
 }  // namespace Jet
 
 struct EnumCheck;  // {const char* name; int value} (global, as TS12 mangles it)

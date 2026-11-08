@@ -2246,6 +2246,34 @@ unit order in `notes/WaterSystem.md`.
 - diff_rs_u5, diff_rs_u6 and diff_kr_system still give 0 mismatches. In game: menu reached, JetLog identical to the
   baseline.
 
+### RenderSystem_7c U6c1, the API texture layer (2026-11-08): 1888/2687 exports ours
+- U6c is split: U6c1 DisplayTexture + DisplayTextureNull (`DisplayTexture.cpp`, 60 exports with the ctors and
+  vftables), U6c2 Texture + TextureRes (they lean on the TextureManager, U6d).
+- DisplayTexture (0x38) is the base every renderer's texture derives from (RenderOpenGL and RenderDirectX9 inline
+  its fields); DisplayTextureNull (0x70) is the null renderer's, keeping the level-0 bitmap it was loaded with and
+  the 1000 texture units. Layouts and the 17 vftable slots in notes/RenderSystem.md ("U6c1 done"). The statics
+  (units, counts, stats) and the null display's format table (0x100b8228, filled by DisplayNull) stay the
+  original's until the Display unit (U9); so does Jet::Convert, which CheckFormat calls.
+- TS12 behaviour kept: Create refuses only volume textures and follows an unsupported format's link without a
+  check; Load passes its level to CheckFormat as two outputs and goes on with whatever Convert wrote there;
+  CreateInstance loads the kept bitmap with a format whose id and bits are 0 (the null Load then divides by zero)
+  and frees it once per level and face, leaving the pointer; the non-virtual SubLoad walks the levels through
+  Bitmap::Scale, which answers null for 24/16-bit or non-power-of-two sizes, and the next SubLoad reads it. The
+  test keeps away from the inputs that fault in both modules. Anisotropy copies go through the x87 stack as in
+  TS12 (inline asm).
+- Test `tests/diff_rs_u6c.cpp` (1000 scenarios, 0 mismatches): a stand-in Display (caps query, maximum anisotropy,
+  CreateTexture making a null texture of the same side, SetTexture), the format table filled per scenario
+  (supported, compressed, converted formats), Create, Load (with and without a bitmap), both SubLoads,
+  SubloadFromFrame, both Binds and the units, GetBitmap, CreateInstance, CopySamplerAttributesFrom, InitInstance,
+  copies, every getter and the statics. Test artefacts found on the way: Convert keeps one static scratch buffer
+  for both sides (its allocations are not logged), and KernelStandard leaves a copied bitmap's row padding
+  uninitialised (not hashed).
+  - Mutations caught: 33 of 42 (scratchpad mut_u6c.py); the survivors are equivalent (the anisotropy token is 0,
+    a construct without a target is never kept, the unit count in the destructor is always exact, Convert writes
+    nothing into the level) or need rare combinations (a cube face past 5 within the depth, a negative frame level
+    with automatic mips, a second level's y offset at the bottom edge).
+- diff_rs_u6 and diff_rs_u6b still give 0 mismatches. In game: menu reached, JetLog identical to the baseline.
+
 ### Borderless window mode (2026-10-28, not in TS12)
 - Our KernelStandard `Window.cpp` adds a `Borderless` option: `-borderless` on the command line, or in the game
   folder's `trainzoptions.txt` (read by Window::Open itself, since trainz.exe merges that file only after the window

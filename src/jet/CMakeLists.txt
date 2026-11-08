@@ -217,6 +217,8 @@ add_executable(diff_rs_u5 tests/diff_rs_u5.cpp)
 add_executable(diff_rs_u6 tests/diff_rs_u6.cpp)
 # RenderSystem U6b: AsciiTextureResource on the install's and generated .texture.txt files (stand-in bitmaps)
 add_executable(diff_rs_u6b tests/diff_rs_u6b.cpp)
+# RenderSystem U6c1: DisplayTexture and DisplayTextureNull (stand-in Display, the null format table filled)
+add_executable(diff_rs_u6c tests/diff_rs_u6c.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)

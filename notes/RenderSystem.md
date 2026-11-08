@@ -189,6 +189,29 @@ inline x87). IsAllLoaded's pending counter 0x100b8c74 is write-only (ours is pri
 GetNumMipLevels(Size) (U6c) is reproduced locally. Test: tests/diff_rs_u6b.cpp (402 real files + 160 generated of
 both formats, stand-in BitmapResources with a copy of KernelResources' vftable for the RTTI; the pixels of a new
 bitmap are compared only where written: KernelStandard allocates them uninitialised).
+U6c split (2026-11-08): U6c1 DisplayTexture + DisplayTextureNull (the API texture layer, 60 exports with the
+ctors and vftables), U6c2 Texture + TextureRes (63; they lean on TextureManager, U6d).
+U6c1 done (2026-11-08, DisplayTexture.cpp, 1888/2687). DisplayTexture 0x38: +4 state (CheckInitialized: == 1), +8
+memory size, +0xc Display*, +0x10 Size, +0x18 dimension, +0x1c depth levels, +0x20 mip levels, +0x24 requested
+and +0x28 effective anisotropy, +0x2c bits (0 compressed, 1 can mip, 2 data lost; the other bits are never
+written, copies keep the destination's), +0x30 auto mip hint (char), +0x34 RenderTextureConstruct* of a render
+target (copies share it, InitInstance copies it). Vftable 17: 0 dtor, 1 Create, 2 Destroy, 3 Load, 4 SubLoad,
+5 SubloadFromFrame (true), 6 CreateRenderContext (true), 7 Bind(unit, keep, aniso, wraps, filters), 8 Bind(unit),
+9 CopyMipToMip, 10 CreateInstance, 11 GetBitmap (__thiscall), 12 GetDataLost, 13 GetJetFormat, 14
+CopySamplerAttributesFrom, 15 RefreshFromChangedSettings (nothing), 16 GetAPITexture (null); the rest pure
+(answering 0). DisplayTextureNull 0x70: +0x38 -1, +0x3c render context, +0x40 the smallest level loaded (-1 none),
++0x44/+0x48 min/mag filter, +0x4c/+0x50 wrap S/T, +0x54 never written, +0x58, +0x5c format id, +0x60 dirty, +0x61,
++0x64 units holding it, +0x68 cleared for a depth format, +0x6c the level-0 bitmap kept by Load. The first one asks
+Display slot 0x1c (5) for automatic mips and makes the 1000 texture units `bound`; Display slots 0x28 (maximum
+anisotropy), 0x98 (CreateTexture) and 0xa0 (SetTexture). The null display's format table at 0x100b8228 (29
+entries x 36: flags bit 0 supported, bit 1 compressed, +0x10 bits per 4x4 block, +0x14 the format it converts to,
++0x18 that DisplayFormat) is filled by DisplayNull (U9): read by address. CheckFormat converts through the
+original's Jet::Convert, whose scratch buffer is static. TS12 faults kept: Create follows an unsupported format's
+link without a null check; CreateInstance loads the kept bitmap with a DisplayFormat whose id and bits are 0 and
+the null Load divides the pitch by bits / 8 (it also frees the bitmap per level and face and leaves the pointer);
+SubLoad(bitmap, area, ...) walks the levels through Bitmap::Scale, which answers null for 24/16-bit or non-power-of-
+two sizes and the null SubLoad then reads it. Load hands CheckFormat its level twice as an output and carries on
+with what Convert wrote there. Test: tests/diff_rs_u6c.cpp (stand-in Display, the table filled per scenario).
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile
