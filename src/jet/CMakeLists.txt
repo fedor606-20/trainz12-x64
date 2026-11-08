@@ -96,7 +96,8 @@ target_link_libraries(Render2DCore_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib" 
 target_link_libraries(InputWin32_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib")
 # RenderSystem_7c: replaced unit by unit (notes/RenderSystem.md); its module state stays the original's until U9
 target_compile_definitions(RenderSystem_7c PRIVATE JET_RS_BUILD)
-target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.lib" "${IMPLIB}/KernelResource_7c.lib")
+target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.lib" "${IMPLIB}/KernelResource_7c.lib"
+                      "${IMPLIB}/KernelResources_7c.lib")
 # WaterSystem_7c: replaced unit by unit (notes/WaterSystem.md); its module state stays the original's until U10
 target_compile_definitions(WaterSystem_7c PRIVATE JET_WS_BUILD)
 # the map lets the diff tests find the parsers' internal entry points (RsTest*)
@@ -221,6 +222,9 @@ add_executable(diff_rs_u6b tests/diff_rs_u6b.cpp)
 add_executable(diff_rs_u6c tests/diff_rs_u6c.cpp)
 # RenderSystem U6c2: Texture (stand-in TextureManager, null API textures)
 add_executable(diff_rs_u6c2 tests/diff_rs_u6c2.cpp)
+# RenderSystem U6d1a: TextureManager containers and lifetime (stand-in textures, kernel, database; the streaming
+# half and the substitute generator jump to loggers)
+add_executable(diff_rs_u6d tests/diff_rs_u6d.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)

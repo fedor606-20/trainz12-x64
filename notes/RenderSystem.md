@@ -226,7 +226,7 @@ when it is the new one), 21 GetDisplayTexture, 22 GetTextureManagerInfo (null). 
 "%08x%%name" from uniqueTexId (an instance's own 8-digit prefix replaced). The update flag goes through
 TextureManager::SetTextureUpdate (0x10041a50, U6d: an std::set of textures at manager+0x18). Test:
 tests/diff_rs_u6c2.cpp (stand-in manager; SetTextureUpdate patched with a jump to a logger; null API textures).
-U6d analysis (2026-11-09, in progress). Split: U6d1 TextureManager + TextureRes (the streaming core, ~9 KB), U6d2
+U6d analysis (2026-11-09). Split: U6d1 TextureManager + TextureRes (the streaming core, ~9 KB), U6d2
 SharedTextureCollection (the generated built-in textures, 8.6 KB of float code). U6d1 may split again: U6d1a the
 manager's containers and lifetime (ctor/dtor, Add, RemoveTexture, Find, Begin, Activate, End, SetTextureUpdate,
 RegisterStreamableTexture, the static setters, memory getters, Create, GetSubstituteTexture, Init), U6d1b the
@@ -266,6 +266,25 @@ PString 0x100b8734 (= textureNameArray[2]), else a Texture over GenerateSubstitu
 cached there. So the substitute path needs SharedTextureCollection (U6d2) or its statics by address.
 GetTotalTextureMemory: the hash table walked (0x100430d0 first, 0x10054880 next), slot 8 GetMemorySize >> 10
 summed.
+U6d1a done (2026-11-09, TextureManager.cpp, 21 exports with the ctor/dtor/vftable, 1945/2687): the containers and
+lifetime. The class moved into include/jet/Texture.h (0xd8, members at their TS12 offsets, so the implicit member
+destructors run in the original's order: lists, +0xac, the TextureInfo, +0x34, the active array, the update list,
+the table's buckets). TextureRes is declared as Texture + ResourceObserver (still the original's code, dllimport
+ctor) so that RemoveTexture's dynamic_cast works by RTTI name on the original's objects. Still the original's,
+called through its exports (U6d1b): Update (Begin's tail), UpSizeTexture (Activate), CleanupAsyncTextureLoad (dtor,
+__thiscall), RemovedAsyncTextureLoad / RemovedTextureDownSize (RemoveTexture by the request's state +0x14: 2 / 1).
+Read by address: the 16 format names (0x100b8780, {PString*, DFormatId}), the default format's name
+(0x100351d0()+8), the substitute cache and name (SharedTextureCollection textureArray[2] / textureNameArray[2] =
+"AuranJetTexture:SubstituteLoadTexture"); GenerateSubstituteLoadTexture by export. Quirks kept: SetTextureUpdate(on)
+appends again when already listed; Create keys the table by "dbname:name" (Ins ':' then the database's name at 0)
+but asks the database for the bare "-tex" name; GetSubstituteTexture finding nothing on the first Find but something
+on the second answers null; a texture Find finds is cached and gets two references; RemoveTexture unlinks a
+TextureRes's request node without a null check on GetTextureManagerInfo. RenderSystem now links KernelResources_7c
+(BitmapResource::SetMaxSizeTextureStreaming, its one import). Test: tests/diff_rs_u6d.cpp (stand-in textures over
+copies of the original's Texture / TextureRes vftables for the RTTI, kernel + OS + options from a random command
+line, database and resource; the original's streaming functions and the generator jump to loggers; Resource
+SetScrambleKey / ReleaseReference hooked in both import tables). diff_rs_u6c2 now jumps both modules'
+SetTextureUpdate to its logger. 53/55 mutants (scratchpad mut_u6d1a.py; 2 equivalent).
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile

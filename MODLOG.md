@@ -2289,6 +2289,27 @@ unit order in `notes/WaterSystem.md`.
   (scratchpad mut_u6c2.py; a name with "%%" before position 8 was added to catch the last one).
 - diff_rs_u6, u6b, u6c still give 0 mismatches. In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U6d1a, TextureManager containers and lifetime (2026-11-09): 1945/2687 exports ours
+- `TextureManager.cpp`, 21 exports (ctor, dtor, vftable, the 11 slots' code, SetTextureUpdate,
+  GetSubstituteTexture, the memory getters, the three static setters). The manager keeps its textures in a
+  97-bucket hash table keyed by the name's PString node, a list of textures needing a per-frame Update, the frame's
+  active textures with their memory in KB, and two rings of streaming requests. Layout in notes/RenderSystem.md
+  ("U6d analysis", "U6d1a done").
+- The streaming half stays the original's until U6d1b and is called through its exports: Update (end of Begin),
+  UpSizeTexture (Activate, streaming on), CleanupAsyncTextureLoad (destructor), RemovedAsyncTextureLoad /
+  RemovedTextureDownSize (RemoveTexture). The statics (streaming limits, skip levels, the TextureResource defaults
+  Init writes), the format-name table and SharedTextureCollection's substitute texture slot stay the original's.
+- TS12 behaviour kept: SetTextureUpdate(on) appends a texture again if it is already listed; Create looks the
+  table up by "database:name" but asks the database for the bare name ("-tex" appended unless .texture/.movie);
+  the substitute texture found by name is cached and handed out with two references, and a second Find that finds
+  it answers null; DefaultTextureFilter wins over DefaultMin/Mip/MagFilter; DefaultAutoMip is read only when the
+  display answers query 5.
+- Test `tests/diff_rs_u6d.cpp` (500 scenarios, 0 mismatches): stand-in textures over copies of the original's
+  Texture / TextureRes vftables (their RTTI makes RemoveTexture's dynamic_cast behave), a stand-in RenderKernel
+  with Display and OS options from a random command line, a stand-in database and resource; the original's
+  streaming functions and GenerateSubstituteLoadTexture jump to loggers. Mutations caught: 53 of 55 (scratchpad mut_u6d1a.py); the two left are equivalent (m == MIN is clamped to MIN either way; the second Find of the substitute name cannot differ from the first with a fixed table). The lists' destructor mutant survived at first: the test now dumps the request nodes after the manager is gone.
+- diff_rs_u6c2 now jumps both modules' SetTextureUpdate to its logger (ours is real now). All eleven diff_rs_* tests give 0 mismatches. In game: menu reached, JetLog identical to the baseline.
+
 ### Borderless window mode (2026-10-28, not in TS12)
 - Our KernelStandard `Window.cpp` adds a `Borderless` option: `-borderless` on the command line, or in the game
   folder's `trainzoptions.txt` (read by Window::Open itself, since trainz.exe merges that file only after the window

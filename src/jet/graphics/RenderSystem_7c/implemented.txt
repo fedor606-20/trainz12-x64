@@ -1958,3 +1958,25 @@
 ?SetRequiresUpdate@Texture@Jet@@IAAX_N@Z
 ?SetResourcePriority@Texture@Jet@@UBAXM@Z
 ?Update@Texture@Jet@@UAAXM@Z
+# U6d1a: TextureManager containers and lifetime (TextureManager.cpp); the streaming half (Update, UpSize, queues) stays the original's until U6d1b
+??0TextureManager@Jet@@QAE@XZ
+??1TextureManager@Jet@@UAE@XZ
+?Activate@TextureManager@Jet@@UAAXPAVTexture@2@H@Z
+?Add@TextureManager@Jet@@UAAXPAVTexture@2@@Z
+?Begin@TextureManager@Jet@@UAAXXZ
+?Create@TextureManager@Jet@@UAAPAVTexture@2@PBVResourceDatabase@2@ABVPString@2@ABVString@2@@Z
+?End@TextureManager@Jet@@UAAXM@Z
+?Find@TextureManager@Jet@@UAAPAVTexture@2@ABVPString@2@@Z
+?GetActiveFrame@TextureManager@Jet@@IBAIXZ
+?GetActiveTextureMemory@TextureManager@Jet@@QBAKXZ
+?GetRenderKernel@TextureManager@Jet@@QAAPAVRenderKernel@2@XZ
+?GetSubstituteTexture@TextureManager@Jet@@IAAPAVTexture@2@XZ
+?GetTotalTextureMemory@TextureManager@Jet@@QBAKXZ
+?Init@TextureManager@Jet@@UAA_NPAVRenderKernel@2@@Z
+?RegisterStreamableTexture@TextureManager@Jet@@UAAXPAVTextureRes@2@@Z
+?RemoveTexture@TextureManager@Jet@@UAAXPAVTexture@2@@Z
+?SetEnableTextureStreaming@TextureManager@Jet@@SAX_N@Z
+?SetMaxSizeTextureStreaming@TextureManager@Jet@@SAXH@Z
+?SetMinSizeTextureStreaming@TextureManager@Jet@@SAXH@Z
+?SetTextureUpdate@TextureManager@Jet@@IAAXPAVTexture@2@_N@Z
+??_7TextureManager@Jet@@6B@

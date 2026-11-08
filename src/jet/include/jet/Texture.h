@@ -5,6 +5,9 @@
 #pragma once
 
 #include <jet/Bitmap.h>
+#include <jet/DynamicArray.h>
+#include <jet/FastDynamicArray.h>
+#include <jet/GfxLanguage.h>
 #include <jet/RenderTypes.h>
 #include <jet/Resource.h>
 #include <jet/SmallTypes.h>
@@ -26,16 +29,7 @@ enum TextureAutoMip {};
 enum NormalMapHint {};
 enum ModifyMap {};         // 0 none, 1 flip green
 
-// What the streaming manager decides about texture sizes (U6d; its statics stay the original's until then)
-class TextureManager {
-public:
-    static __declspec(dllimport) int MIN_STREAMING_TEXTURE_MIP_COUNT;
-    static __declspec(dllimport) int MAX_STREAMING_TEXTURE_SIZE;
-
-protected:
-    friend class Texture;
-    __declspec(dllimport) void __cdecl SetTextureUpdate(Texture* texture, bool on);
-};
+class TextureManager;
 
 class DisplayFormat;
 class TextureManagerInfo;
@@ -84,6 +78,8 @@ public:
     JET_HEAP_OBJECT
 
 protected:
+    friend class TextureManager;
+
     PString __cdecl GenerateUniqueName(const PString& name) const;
     TextureManager* __cdecl GetTextureManager() const;
     void __cdecl InitInstance(Texture& to) const;
@@ -102,15 +98,23 @@ protected:
 };
 JET_LAYOUT32(sizeof(Texture) == 0x34);
 
-// The texture a TextureResource makes (U6c; its constructor stays the original's until then)
-class TextureRes {
+// The texture a TextureResource makes (0x60; its code stays the original's until U6d1b). Only what the
+// TextureManager reads: the streaming request (+0x4c, its state at +0x14: 1 down size, 2 async load) and the mip
+// levels on disk (+0x50).
+class TextureRes : public Texture, public ResourceObserver {
 public:
     __declspec(dllimport) TextureRes(const PString& name, TextureManager* manager, const TextureResource* resource);
-    JET_HEAP_OBJECT
 
 private:
-    unsigned char body[0x60];
+    __declspec(dllimport) void __cdecl OnLoad(const Resource* resource) const override;
+
+    friend class TextureManager;
+    unsigned char body38[0x14];
+    void* asyncInfo;          // +0x4c
+    int mipLevelsOnDisk;      // +0x50
+    unsigned char body54[0xc];
 };
+JET_LAYOUT32(sizeof(TextureRes) == 0x60);
 
 class TextureResource : public Resource {
 public:
@@ -239,7 +243,8 @@ private:
                             Display* display) const;
     static const Bitmap* __cdecl GetMip(unsigned int level, unsigned int face, const Size& size, TextureInfo* info);
 
-    // the defaults stay the original's until the TextureManager (U6d) and the RenderKernel (U9) move
+    // the defaults stay the original's until the RenderKernel (U9) moves; the TextureManager sets them in Init
+    friend class TextureManager;
     static __declspec(dllimport) TextureWrap WRAP_S_DEFAULT;
     static __declspec(dllimport) TextureWrap WRAP_T_DEFAULT;
     static __declspec(dllimport) TextureFilter MIN_FILTER_DEFAULT;
@@ -595,5 +600,97 @@ protected:
     mutable unsigned int lockedMips;              // +0xd4
 };
 JET_LAYOUT32(sizeof(AsciiTextureResource) == 0xd8);
+
+
+// ---- U6d1a (RenderSystem_7c/TextureManager.cpp)
+
+class RenderKernel;
+class ResourceDatabase;
+
+// Hands out the named Textures (ReferenceCount + 0xd0): a hash table by name, the textures needing an update each
+// frame, the frame's active textures with their memory, and the streaming queues (U6d1b; their code stays the
+// original's until then). TS12 layout and slot order (vftable 0x10072338).
+class TextureManager : public ReferenceCount {
+public:
+    TextureManager();
+    ~TextureManager() override;  // 1 (0 is ReferenceCount::DeleteThis)
+
+    virtual bool __cdecl Init(RenderKernel* kernel);                                                   // 2
+    virtual Texture* __cdecl Create(const ResourceDatabase* db, const PString& name, const String& key);  // 3
+    virtual void __cdecl Add(Texture* texture);                                                        // 4
+    virtual void __cdecl RegisterStreamableTexture(TextureRes* texture);                               // 5
+    virtual void __cdecl RemoveTexture(Texture* texture);                                              // 6
+    virtual Texture* __cdecl Find(const PString& name);                                                // 7
+    virtual void __cdecl Begin();                                                                      // 8
+    virtual void __cdecl Activate(Texture* texture, int mips);                                         // 9
+    virtual void __cdecl End(float time);                                                              // 10
+
+    unsigned long __cdecl GetTotalTextureMemory() const;
+    unsigned long __cdecl GetActiveTextureMemory() const;
+    RenderKernel* __cdecl GetRenderKernel();
+    void __cdecl UpSizeTexture(const TextureRes* texture, int size);  // U6d1b: the original's
+
+    static void __cdecl SetMinSizeTextureStreaming(int size);
+    static void __cdecl SetMaxSizeTextureStreaming(int size);
+    static void __cdecl SetEnableTextureStreaming(bool on);
+
+    // the original's until the RenderKernel (U9) moves
+    static __declspec(dllimport) int MIN_STREAMING_TEXTURE_MIP_COUNT;
+    static __declspec(dllimport) int MAX_STREAMING_TEXTURE_MIP_COUNT;
+    static __declspec(dllimport) int MIN_STREAMING_TEXTURE_SIZE;
+    static __declspec(dllimport) int MAX_STREAMING_TEXTURE_SIZE;
+    static __declspec(dllimport) bool TEXTURE_STREAMING_ENABLED;
+
+    JET_HEAP_OBJECT
+
+protected:
+    friend class Texture;
+
+    void __cdecl SetTextureUpdate(Texture* texture, bool on);
+    Texture* __cdecl GetSubstituteTexture();
+    unsigned int __cdecl GetActiveFrame() const;
+    // U6d1b: the original's
+    void __cdecl Update();
+    bool __cdecl RemovedAsyncTextureLoad(const TextureRes* texture);
+    bool __cdecl RemovedTextureDownSize(const TextureRes* texture);
+    void CleanupAsyncTextureLoad();  // __thiscall
+
+    static __declspec(dllimport) unsigned int globalSkipLevels;
+    static __declspec(dllimport) unsigned int globalSkipThreshold;
+
+    struct TextureHash {};
+    // the hash table by name node (0x10042d80 init, 0x10035db0 clear, its buckets freed last)
+    struct Textures : HashTable<PString, Texture*, TextureHash, 13> {
+        Textures() { Init(); }
+        ~Textures() { Destroy(); }
+    };
+    // an intrusive ring of streaming requests (0x10042d00 / 0x10042d30); a node's `owner` is its list's head
+    struct ListHead {
+        ListHead();
+        ~ListHead();
+        ListHead* owner;
+        ListHead* prev;
+        ListHead* next;
+        int unused;
+    };
+
+    Textures textures;                                   // +0x08
+    RenderKernel* kernel;                                // +0x14
+    FastDynamicArray<Texture*, 13> updates;              // +0x18 their slot 16 Update runs in End
+    Array<Texture*, 256> active;                         // +0x1c this frame's (0x10043130 grows by 256)
+    unsigned int frame;                                  // +0x28
+    unsigned long activeMemory;                          // +0x2c KB
+    bool useSubstitute;                                  // +0x30
+    FastDynamicArray<void*, 13> queue34;                 // +0x34 (U6d1b)
+    int field38;                                         // +0x38
+    TextureResource::TextureInfo info;                   // +0x3c (U6d1b)
+    int fieldA4;                                         // +0xa4
+    int fieldA8;                                         // +0xa8
+    FastDynamicArray<void*, 13> queueAC;                 // +0xac (U6d1b)
+    ListHead lists[2];                                   // +0xb0
+    int listIndex;                                       // +0xd0 the list RegisterStreamableTexture links into
+    int fieldD4;                                         // +0xd4 1
+};
+JET_LAYOUT32(sizeof(TextureManager) == 0xd8);
 
 }  // namespace Jet

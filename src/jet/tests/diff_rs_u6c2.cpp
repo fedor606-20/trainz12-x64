@@ -3,8 +3,8 @@
 //
 // As in diff_rs_u6c: both modules' Jet::Alloc imports are hooked and logged, each scenario runs the same random
 // script on both sides and the logs must be equal. A stand-in TextureManager logs its slots (4 add, 6 remove,
-// 9 activate; DeleteThis) and carries the current frame at +0x28; the original's TextureManager::SetTextureUpdate
-// (U6d, called by both sides) gets a jump to a logging stand-in. The API textures are DisplayTextureNull objects
+// 9 activate; DeleteThis) and carries the current frame at +0x28; both modules' TextureManager::SetTextureUpdate
+// get a jump to a logging stand-in. The API textures are DisplayTextureNull objects
 // of the side under test on a stand-in Display (the null format table filled with supported formats). The
 // original's uniqueTexId is the same at the start of each side.
 //
@@ -518,7 +518,9 @@ int main(int argc, char** argv)
     formatCtor = As<decltype(formatCtor)>(Proc(mod[1], "??0DisplayFormat@Jet@@QAE@W4DFormatId@1@@Z"));
     rtcCtor = As<decltype(rtcCtor)>(Proc(mod[1], "??0RenderTextureConstruct@Jet@@QAE@W4TextureTarget@1@_N11PBVSharedContext@1@@Z"));
     rtcDtor = As<decltype(rtcDtor)>(Proc(mod[1], "??1RenderTextureConstruct@Jet@@QAE@XZ"));
-    PatchJump(Proc(mod[1], "?SetTextureUpdate@TextureManager@Jet@@IAAXPAVTexture@2@_N@Z"), reinterpret_cast<void*>(&SetTextureUpdate));
+    // (ours is real since U6d1a: both sides get the jump)
+    for (int s = 0; s < 2; ++s)
+        PatchJump(Proc(mod[s], "?SetTextureUpdate@TextureManager@Jet@@IAAXPAVTexture@2@_N@Z"), reinterpret_cast<void*>(&SetTextureUpdate));
     // the null format table: every format supported as it is
     unsigned char* table = reinterpret_cast<unsigned char*>(mod[1]) + 0xb8228;
     for (int id = 0; id < 29; ++id) {
