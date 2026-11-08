@@ -143,6 +143,9 @@ To try a module in game, rename the original (for example `KernelStandard_7c.dll
 and put ours next to it. To run a test, pass it that directory: `diff_ks_bitmap_draw.exe "<game>\bin"`.
 Keep a backup of the original files.
 
+Extra, not in the original game: with our `KernelStandard_7c.dll`, start the game windowed with `-borderless`
+(or put `-borderless` into `trainzoptions.txt`) to get a borderless window that covers the whole monitor.
+
 ## 🤝 How to help
 
 Pick the next step in `PORT_PLAN.md`, read the notes for its module, and follow the existing pattern: rewrite a

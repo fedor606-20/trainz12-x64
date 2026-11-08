@@ -2213,6 +2213,13 @@ unit order in `notes/WaterSystem.md`.
 - The whole RenderSystem diff suite (u1, u2, u2b, u3, u4, u5, u6) gives 0 mismatches.
 - In game: menu reached, JetLog identical to the baseline.
 
+### Borderless window mode (2026-10-28, not in TS12)
+- Our KernelStandard `Window.cpp` adds a `Borderless` option: `-borderless` on the command line, or in the game
+  folder's `trainzoptions.txt` (read by Window::Open itself, since trainz.exe merges that file only after the window
+  opens). A top-level windowed host then opens as a `WS_POPUP` covering the whole monitor it would open on, the
+  game's own MoveWindow placement is ignored, and the process is made DPI-aware so the window has real pixels under
+  Windows scaling. The game lays its menu out again at the full size. Checked in game (main menu) 2026-10-28.
+
 ### Prior art: open source around Trainz and Jet (searched 2026-10-21)
 
 - No open engine, decompilation or leaked source of Auran Jet or trainz.exe was found. The only reference is

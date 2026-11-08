@@ -6,6 +6,7 @@
 
 #include <windows.h>
 
+#include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <new>
@@ -133,8 +134,39 @@ const char kClass[] = "JET";  // the class name and the default title (0x10055cd
 Window* creating;             // 0x100add4c: WindowProc's object until the window's extra bytes hold it
 int hookGeneration;           // 0x100add50: a hook added or cleared ends WindowProc's walk
 
+// not in TS12: the "Borderless" option (e.g. -borderless in trainzoptions.txt) makes a top-level windowed host a
+// popup without a frame covering its monitor
+bool borderless;
+
 // styles of a host window: windowed (with a caption, or a child of the parent) or full screen (a popup)
-DWORD WindowedStyle(HWND parent) { return parent ? 0x44000000 : 0x00c80000; }
+DWORD WindowedStyle(HWND parent) { return parent ? 0x44000000 : borderless ? WS_POPUP : 0x00c80000; }
+
+// trainz.exe merges trainzoptions.txt (in the game folder, the working directory) only after the window opens
+bool BorderlessInOptionsFile()
+{
+    char text[4096] = {};
+    const HANDLE f = CreateFileA("trainzoptions.txt", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                                 OPEN_EXISTING, 0, nullptr);
+    if (f == INVALID_HANDLE_VALUE) return false;
+    DWORD n = 0;
+    ReadFile(f, text, sizeof text - 1, &n, nullptr);
+    CloseHandle(f);
+    for (DWORD i = 0; i < n; ++i) text[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(text[i])));
+    return std::strstr(text, "-borderless") != nullptr;
+}
+
+// a borderless window covers the whole monitor it would open on (the game's resolution is stretched to it)
+void BorderlessPlace(int& x, int& y, int& w, int& h)
+{
+    POINT pt = {x == CW_USEDEFAULT ? 0 : x, x == CW_USEDEFAULT ? 0 : y};
+    MONITORINFO mi = {sizeof mi};
+    if (!GetMonitorInfoA(MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY), &mi)) return;
+    const RECT& m = mi.rcMonitor;
+    x = m.left;
+    y = m.top;
+    w = m.right - m.left;
+    h = m.bottom - m.top;
+}
 DWORD FullscreenStyle(HWND parent) { return parent ? 0xc1000000 : 0x81000000; }
 
 #if defined(_WIN64)
@@ -216,6 +248,7 @@ bool __cdecl Window::Open(const char* text, const Options* options)  // 0x100420
     SetTitle(text);
     if (options) {
         if (options->Get("HideWindow")) flags &= ~2;
+        borderless = options->Get("Borderless");
         bool showFps;
         options->Get("ShowFPS", showFps, false);
         if (showFps) {
@@ -225,6 +258,8 @@ bool __cdecl Window::Open(const char* text, const Options* options)  // 0x100420
             fps = 0.0f;
         }
     }
+    if (!borderless) borderless = BorderlessInOptionsFile();
+    if (borderless) SetProcessDPIAware();  // real pixels, so the window matches the monitor under Windows scaling
     return true;
 }
 
@@ -255,6 +290,7 @@ bool __cdecl Window::CreateWindowedHost(int x, int y, int w, int h, void* param)
         AdjustWindowRectEx(&rc, style, FALSE, 0);
         width = rc.right - rc.left;
         height = rc.bottom - rc.top;
+        if (borderless && w != CW_USEDEFAULT) BorderlessPlace(x, y, width, height);
     }
     creating = this;
     handle = CreateWindowExA(0, kClass, title, style, x, y, width, height, parent, nullptr,
@@ -332,7 +368,9 @@ bool __cdecl Window::Move(const Rect& r, bool repaint)  // 0x10042630
     const DWORD style = GetWindowLongA(handle, GWL_STYLE);
     RECT rc = {0, 0, r.w, r.h};
     AdjustWindowRectEx(&rc, style, FALSE, 0);
-    return MoveWindow(handle, r.x, r.y, rc.right - rc.left, rc.bottom - rc.top, repaint) != 0;
+    int x = r.x, y = r.y, w = rc.right - rc.left, h = rc.bottom - rc.top;
+    if (borderless && !parent && !(flags & 4)) BorderlessPlace(x, y, w, h);  // the game's own placement is ignored
+    return MoveWindow(handle, x, y, w, h, repaint) != 0;
 }
 
 bool __cdecl Window::Resize(const Size& s, bool repaint)  // 0x100426b0
