@@ -352,7 +352,7 @@ void Resource::Inactive() const
 void Resource::AddObserver(const ResourceObserver* o) const
 {
     if (observersNotified) {
-        o->OnResourceLoaded(this);
+        o->OnLoad(this);
         return;
     }
     observers.Add(o);
@@ -420,7 +420,7 @@ void Resource::OnLoadNotify() const
                     item = &chunk->data[chunk->count - 1];
                 }
             }
-            o->OnResourceLoaded(this);
+            o->OnLoad(this);
         }
     }
     observersNotified = true;

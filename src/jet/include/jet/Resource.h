@@ -24,7 +24,8 @@ class String;
 // told when a resource has loaded (Resource::OnLoadNotify, or at once by AddObserver when it already has)
 class ResourceObserver {
 public:
-    virtual void __cdecl OnResourceLoaded(const Resource* resource) const = 0;
+    virtual void __cdecl OnLoad(const Resource* resource) const = 0;  // 0
+    virtual ~ResourceObserver() {}                                    // 1 (AsciiTextureResource's thunk, U6b)
 };
 
 class Resource {
@@ -120,6 +121,7 @@ private:
     friend class ResourceBinInstant;
     friend class ResourceLoader;
     friend class ResourceTypeBase;
+    friend class AsciiTextureResource;  // RenderSystem U6b reads the sub-resources' status and flags inline
 
     virtual const Resource* __cdecl GetRedirection() const;  // 17
 

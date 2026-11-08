@@ -24,6 +24,7 @@ enum TextureFilter {};     // 2: the default (TextureResource's *_FILTER_DEFAULT
 enum TextureAlpha {};      // 1 none, 2 one bit, else full
 enum TextureAutoMip {};
 enum NormalMapHint {};
+enum ModifyMap {};         // 0 none, 1 flip green
 
 // What the streaming manager decides about texture sizes (U6d; its statics stay the original's until then)
 class TextureManager {
@@ -255,5 +256,119 @@ private:
     AnsiString compression;    // +0xa4
 };
 JET_LAYOUT32(sizeof(BinaryTextureResourceExport) == 0xa8);
+
+class BitmapResource;
+class ConfigData;
+
+}  // namespace Jet
+
+struct EnumCheck;  // {const char* name; int value} (global, as TS12 mangles it)
+
+namespace Jet {
+
+// U6b: a texture made of bitmap resources, described by a .texture.txt (ConfigData "Texture { primary ...
+// alpha ... }", or the obsolete "key=value" lines). The bitmaps are other resources of the same database: the
+// texture watches them (ResourceObserver) and builds its mip 0 images from them under GetMipLock (0xd8).
+class AsciiTextureResource : public TextureResource, public ResourceObserver {
+public:
+    AsciiTextureResource(const AsciiTextureResource& o);
+    AsciiTextureResource& operator=(const AsciiTextureResource& o);
+    AsciiTextureResource(const PString& name, const ResourceDatabase* owner);
+
+protected:
+    Result __cdecl Lock() const override;  // 0
+
+public:
+    bool __cdecl LoadAll() const override;                   // 2
+    Result __cdecl IsAllLoaded() const override;             // 3
+    bool __cdecl GetMustResetWhenFinished() const override;  // 7: false
+    ~AsciiTextureResource() override;                        // 8
+
+protected:
+    Result __cdecl LoadTxt(const char* name) override;  // 11
+    Result __cdecl LoadComplete() override;             // 12
+    void __cdecl OnLoadNotify() const override;         // 13
+    unsigned int __cdecl CalculateSize() const override;      // 15: 0xd8
+    unsigned int __cdecl CalculateDataSize() const override;  // 16: 0
+
+public:
+    bool __cdecl IsAvailable() const override;                // 18
+    NormalMapHint __cdecl GetNormalMapHint() const override;  // 19
+    TextureAlpha __cdecl GetAlphaHint() const override;
+    Color __cdecl GetAverageColor() const override;
+    TextureDimension __cdecl GetDimension() const override;
+    unsigned int __cdecl GetDepth() const override;
+    Size __cdecl GetSize() const override;                    // 24
+    float __cdecl GetAnisotropyFilterLevel() const override;
+    void __cdecl GetFileCompression(char* const out) const override;
+    bool __cdecl Save(const char* path, Display* display) const override;  // 30
+    DFormatId __cdecl GetImageFormatId() const override;      // 32
+    DFormatId __cdecl GetDisplayFormatId() const override;
+    TextureHint __cdecl GetHint() const override;             // 34
+    TextureWrap __cdecl GetWrapS() const override;
+    TextureWrap __cdecl GetWrapT() const override;
+    TextureFilter __cdecl GetMinFilter() const override;
+    TextureFilter __cdecl GetMagFilter() const override;
+    TextureFilter __cdecl GetMipFilter() const override;
+    unsigned int __cdecl GetNumMipLevels() const override;    // 40
+    TextureAutoMip __cdecl GetAutoMipHint() const override;
+
+protected:
+    bool __cdecl GetMipLock() const override;  // 42
+    const Bitmap* __cdecl GetMip(unsigned int level, unsigned int face, const Size& size) const override;
+    bool __cdecl GetMipUnlock() const override;  // 44
+
+public:
+    virtual ModifyMap __cdecl GetModifyMap() const;  // 45
+    virtual bool __cdecl UseMipMaps() const;         // 46
+
+protected:
+    virtual bool __cdecl LoadConfigData(const ConfigData& config);    // 47
+    virtual const Bitmap* __cdecl GetImage(unsigned int face) const;  // 48
+    void __cdecl OnLoad(const Resource* resource) const override;     // the observer's 0
+
+public:
+    static void __cdecl SetUsePath(bool on);
+
+protected:
+    bool __cdecl AllValidBitmapsAvailable() const;
+    bool __cdecl ParseObsoleteTxtFormat(const char* name, ConfigData& config);
+    bool __cdecl LoadTextureOptions(const ConfigData& config);
+    bool __cdecl LookUpEnum(String& text, const EnumCheck* table, unsigned int count, int& value);
+    const Bitmap* __cdecl GetBitmapImage(const Bitmap* image, const Bitmap* alpha) const;
+    void __cdecl UpdateAlphaHint() const;
+    void __cdecl UpdateAlphaHintStrict() const;
+    void __cdecl UpdateAverageColor() const;
+    void CopyFields(const AsciiTextureResource& o);  // (inlined by the original)
+
+    // written by RenderKernel::Init (U9): stays the original's until then
+    static __declspec(dllimport) bool noPath;
+
+    // flat {count, capacity, items} arrays growing in steps of 6 (0x10007a40 / 0x10007af0 / copy 0x10007a70)
+    mutable Array<const BitmapResource*, 6> primary;  // +0x68 one per face
+    mutable Array<const BitmapResource*, 6> alpha;    // +0x74 none, or one per face
+    mutable Array<Bitmap*, 6> images;                 // +0x80 the combined images while GetMipLock holds them
+    char wrapS, wrapT;                            // +0x8c
+    char minFilter, magFilter, mipFilter;         // +0x8e
+    mutable char alphaHint;                       // +0x91 -1 until worked out from the bitmaps
+    char hint;                                    // +0x92
+    char compression;                             // +0x93 none, dxt1, dxt3, dxt5, atc, atce, atci, (7 unset), etc1 9
+    char autoMip;                                 // +0x94
+    char pad95[3];                                // (never written, nor copied)
+    bool useMipMaps;                              // +0x98
+    char pad99[3];
+    char dimension;                               // +0x9c two, cube, volume, one
+    char pad9d[3];
+    unsigned int depth;                         // +0xa0
+    float anisotropy;                             // +0xa4
+    char fileCompression[8];                      // +0xa8
+    NormalMapHint normalMapHint;                  // +0xb0
+    ModifyMap modifyMap;                          // +0xb4
+    mutable Color averageColor;                   // +0xb8 zero until worked out from the bitmaps
+    mutable bool locked;                          // +0xc8 GetMipLock's figures below are valid
+    mutable Size lockedSize;                      // +0xcc
+    mutable unsigned int lockedMips;              // +0xd4
+};
+JET_LAYOUT32(sizeof(AsciiTextureResource) == 0xd8);
 
 }  // namespace Jet

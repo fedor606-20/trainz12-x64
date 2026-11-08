@@ -167,6 +167,28 @@ and one 'MMAP' block (0x50414d4d) per level from the smallest, each the faces' p
 (0x10047380) reads it, skipping the levels outside [first, last] requested (TextureManager streaming); Load(char*)
 reorders the levels largest first. Save writes INFO then the levels smallest first (SaveMipMap recurses); a
 compressed display format (10/11/12/0x19..0x1c) different from the image format goes through Display slot 0x148.
+U6b done (2026-11-08): AsciiTextureResource (AsciiTextureResource.cpp, 52 exports; noPath stays the original's,
+written by SetUsePath on both sides). 0xd8 = TextureResource + ResourceObserver (+0x64; TS12's observer has a
+virtual destructor at slot 1, ours now too, and its slot 0 is `OnLoad`) + three flat {count, capacity, items}
+arrays growing by 6 (Jet::Array<T*,6>): +0x68 primary BitmapResources (one per face), +0x74 alpha ones (none or
+one per face), +0x80 the merged images while GetMipLock holds them; bytes +0x8c wrap S/T, +0x8e min/mag/mip filter,
++0x91 alpha hint (-1 until worked out), +0x92 hint, +0x93 compression (none dxt1 dxt3 dxt5 atc atce atci, 7 unset,
+etc1 9), +0x94 auto mip, +0x98 use mips, +0x9c dimension (two cube volume one), +0xa0 depth, +0xa4 anisotropy,
++0xa8 char[8] file compression, +0xb0 normal map hint, +0xb4 modify map, +0xb8 average Color, +0xc8 "locked" with
++0xcc size and +0xd4 mips cached under GetMipLock. New slots 45 GetModifyMap, 46 UseMipMaps, 47 LoadConfigData,
+48 GetImage. The key PStrings are statics 0x100b8134..0x100b8170 (initializer 0x1005dbd0); the enum tables
+0x1006eab0..0x1006eb98. LoadTxt reads the obsolete "key=value" text first (ParseObsoleteTxtFormat: lines into
+config("Texture"); a line starting with "version" means the ConfigData format, parsed by ConfigParser, items end
+with ';'). Every .texture.txt of the install (19 091, UserData/local and original) is the obsolete kind. The bitmaps
+are `dynamic_cast<BitmapResource*>(db->Get(ConvertResourceName(name), 0))` (relative to the load name; noPath
+drops a leading slash first). Quirks kept: IsAllLoaded reads the primary's notified flag for the alpha one and
+dereferences primary[0] of an empty list (both modules fault: tests avoid it); Save's failed lock rolls back by
+the wrong index and goes on; GetImage reads the alpha list at `face` while face <= its count and its merge loops
+test the format for the first row; GetMip ignores the level; UpdateAverageColor sums in x87 doubles (ours in
+inline x87). IsAllLoaded's pending counter 0x100b8c74 is write-only (ours is private). DisplayTexture's static
+GetNumMipLevels(Size) (U6c) is reproduced locally. Test: tests/diff_rs_u6b.cpp (402 real files + 160 generated of
+both formats, stand-in BitmapResources with a copy of KernelResources' vftable for the RTTI; the pixels of a new
+bitmap are compared only where written: KernelStandard allocates them uninitialised).
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile

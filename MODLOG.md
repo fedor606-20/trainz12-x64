@@ -2213,6 +2213,39 @@ unit order in `notes/WaterSystem.md`.
 - The whole RenderSystem diff suite (u1, u2, u2b, u3, u4, u5, u6) gives 0 mismatches.
 - In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U6b, the .texture.txt resource (2026-11-08): 1828/2687 exports ours
+- `AsciiTextureResource.cpp`, 52 exports (the `noPath` static stays the original's; RenderKernel writes it, U9).
+  AsciiTextureResource (0xd8) is a TextureResource and a ResourceObserver: a texture made of bitmap resources of the
+  same database, one primary bitmap per face plus optional alpha bitmaps, merged into ARGB images under GetMipLock.
+  Layout, the four new vftable slots and the key/enum tables in notes/RenderSystem.md ("U6b done").
+- Two formats: the obsolete "Key=Value" lines (every one of the install's 19 091 .texture.txt files) and, when the
+  file starts with a "version" line, ConfigData text read by ConfigParser ("Texture { Primary = "a.tga"; ... }",
+  items end with ';'). Keys: Primary, Alpha, Dimension (two/cube/volume/one), Compression (none, dxt1, dxt3, dxt5,
+  atc, atce, atci, etc1), Hint, NormalMapHint, ModifyMap, AlphaHint, Anisotropy (1/2/4/8/16), AutoMip, Min/Mag/
+  MipFilter (MipFilter "none" turns mips off), Tile (s/t). Bitmap names are relative to the .texture.txt.
+- TS12's ResourceObserver has a virtual destructor in slot 1 and calls slot 0 OnLoad: our header now says so (the
+  observer vftable of AsciiTextureResource holds both).
+- TS12 behaviour kept: Save's failed bitmap lock rolls back by the wrong index and carries on; IsAllLoaded reads
+  the primary bitmap's "observers notified" flag for the alpha one and reads primary[0] of an empty list; after a
+  failed load the primary and alpha lists can differ in length and GetMipLock / GetImage then read the alpha list
+  past its end (both modules fault: the test keeps away from those inputs); GetImage's merge loops test the pixel
+  format instead of the width on their first row; the average colour is summed in x87 doubles (ours in inline x87,
+  so it matches whatever the FPU precision).
+- Test `tests/diff_rs_u6b.cpp` (1000 scenarios, 0 mismatches): 402 real .texture.txt files and 240 generated ones
+  of both formats (damaged lines, every key and value, cube maps, a "version" key in mid-line), loaded through a
+  stand-in database whose bitmap resources are BitmapResource-shaped objects with a copy of KernelResources'
+  vftable (so the dynamic_cast still sees a BitmapResource) and logging Lock/Unlock/observer slots; their bitmaps
+  are the images next to the file or made up (32-bit with every kind of alpha, 24-bit, 565). Load, LoadComplete,
+  the observer calls, every getter, the mip lock and GetMip, GetImage, the alpha and colour updates, Save (file
+  compared byte for byte), copies. A test artefact found on the way: KernelStandard hands out new bitmaps with
+  uninitialised pixels, so the test compares only pixels that were written.
+  - Mutations caught: 38 of 44 (scratchpad mut_u6b.py). Five survivors are equivalent or unreachable (volume
+    textures always have depth 1; a lone Alpha line is rejected later either way; the leading-slash cut is undone
+    by ConvertResourceName; the bitmap lists never hold null; GetMip's width check repeats what Bitmap::Scale
+    refuses), one needs a cube map whose first alpha bitmap is fully opaque when UpdateAlphaHintStrict runs.
+- diff_rs_u5, diff_rs_u6 and diff_kr_system still give 0 mismatches. In game: menu reached, JetLog identical to the
+  baseline.
+
 ### Borderless window mode (2026-10-28, not in TS12)
 - Our KernelStandard `Window.cpp` adds a `Borderless` option: `-borderless` on the command line, or in the game
   folder's `trainzoptions.txt` (read by Window::Open itself, since trainz.exe merges that file only after the window
