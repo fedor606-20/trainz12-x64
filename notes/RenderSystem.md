@@ -212,6 +212,20 @@ the null Load divides the pitch by bits / 8 (it also frees the bitmap per level 
 SubLoad(bitmap, area, ...) walks the levels through Bitmap::Scale, which answers null for 24/16-bit or non-power-of-
 two sizes and the null SubLoad then reads it. Load hands CheckFormat its level twice as an output and carries on
 with what Convert wrote there. Test: tests/diff_rs_u6c.cpp (stand-in Display, the table filled per scenario).
+U6c2 done (2026-11-09, TextureObject.cpp, 36 exports, 1924/2687): Texture only. TextureRes moves to U6d: its
+ForceTextureLoad / ChangeMipCount / Test* / async loading work inside the TextureManager's lists (a 0x1c block at
++0x5c with list code 0x1000ddd0 / 0x10042d30, the manager's display at +0x14 and its slot 0x9c), so it is tested
+with a real manager. Texture 0x34 on ReferenceCount (vptr, refs): +8 0, +0xc bit 0 "requires an update", +0x10
+PString name, +0x14 active frame, +0x18 owned DisplayTexture*, +0x1c TextureAlpha (-1), +0x20 average Color, +0x30
+TextureManager* (referenced; slots 4 add, 6 remove, 9 activate; +0x28 its current frame). Vftable 23: 0
+ReferenceCount::DeleteThis, 1 dtor, 2 CreateInstance, 3 IsAvailable, 4 IsLoadFailure (false), 5 SetName, 6
+GetResourceName, 7 GetResource (null), 8 GetMemorySize, 9 GetAlphaHint, 10 GetAverageColor, 11 GetDimension (3
+without an API texture), 12 GetDepth, 13 GetSize, 14 GetAbsoluteSize (slot 13), 15 Activate, 16 Update, 17 Bind, 18
+SetResourcePriority, 19 DynamicSubload (DisplayTexture::SubLoad), 20 SetDisplayTexture (frees the old one, also
+when it is the new one), 21 GetDisplayTexture, 22 GetTextureManagerInfo (null). Instances are named
+"%08x%%name" from uniqueTexId (an instance's own 8-digit prefix replaced). The update flag goes through
+TextureManager::SetTextureUpdate (0x10041a50, U6d: an std::set of textures at manager+0x18). Test:
+tests/diff_rs_u6c2.cpp (stand-in manager; SetTextureUpdate patched with a jump to a logger; null API textures).
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile

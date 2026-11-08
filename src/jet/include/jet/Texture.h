@@ -31,7 +31,76 @@ class TextureManager {
 public:
     static __declspec(dllimport) int MIN_STREAMING_TEXTURE_MIP_COUNT;
     static __declspec(dllimport) int MAX_STREAMING_TEXTURE_SIZE;
+
+protected:
+    friend class Texture;
+    __declspec(dllimport) void __cdecl SetTextureUpdate(Texture* texture, bool on);
 };
+
+class DisplayFormat;
+class TextureManagerInfo;
+
+// U6c2: a named texture of the TextureManager (ReferenceCount + 0x2c): it registers with the manager (its slots 4
+// add, 6 remove, 9 activate; +0x28 the current frame) and wraps the API texture. TS12 layout and slot order.
+class Texture : public ReferenceCount {
+public:
+    Texture(const PString& name, TextureManager* manager);
+    Texture(const PString& name, TextureManager* manager, DisplayTexture* texture, TextureAlpha alpha);
+
+protected:
+    ~Texture() override;  // 1 (0 is ReferenceCount::DeleteThis)
+
+public:
+    virtual Texture* __cdecl CreateInstance() const;                 // 2
+    virtual bool __cdecl IsAvailable() const;                        // 3
+    virtual bool __cdecl IsLoadFailure() const;                      // 4: false
+    virtual void __cdecl SetName(PString& name);                     // 5
+    virtual const PString& __cdecl GetResourceName() const;          // 6: the name
+    virtual const TextureResource* __cdecl GetResource() const;      // 7: null
+    virtual unsigned long __cdecl GetMemorySize() const;             // 8
+    virtual TextureAlpha __cdecl GetAlphaHint() const;               // 9
+    virtual Color __cdecl GetAverageColor() const;                   // 10
+    virtual TextureDimension __cdecl GetDimension() const;           // 11
+    virtual unsigned int __cdecl GetDepth() const;                   // 12
+    virtual Size __cdecl GetSize() const;                            // 13
+    virtual Size __cdecl GetAbsoluteSize() const;                    // 14
+    virtual void __cdecl Activate(int how);                          // 15
+    virtual void __cdecl Update(float time);                         // 16: nothing
+    virtual void __cdecl Bind(unsigned int unit) const;              // 17
+    virtual void __cdecl SetResourcePriority(float priority) const;  // 18: nothing
+    virtual bool __cdecl DynamicSubload(int x, int y, const Bitmap& bitmap, DisplayFormat& format);  // 19
+    virtual void __cdecl SetDisplayTexture(DisplayTexture* texture);  // 20
+    virtual DisplayTexture* __cdecl GetDisplayTexture() const;        // 21
+    virtual TextureManagerInfo* __cdecl GetTextureManagerInfo();      // 22: null
+
+    const PString& __cdecl GetName() const;
+    PString __cdecl GetNonUniqueName() const;
+    bool __cdecl GetActive() const;
+    unsigned int __cdecl GetActiveFrame() const;
+    void __cdecl SetActiveFrame(unsigned int frame);
+    bool __cdecl GetRequiresUpdate() const;
+    void SetAlphaHint(TextureAlpha alpha);  // __thiscall
+
+    JET_HEAP_OBJECT
+
+protected:
+    PString __cdecl GenerateUniqueName(const PString& name) const;
+    TextureManager* __cdecl GetTextureManager() const;
+    void __cdecl InitInstance(Texture& to) const;
+    void __cdecl SetRequiresUpdate(bool on);
+
+    static __declspec(dllimport) unsigned long uniqueTexId;  // stays the original's (U6d)
+
+    int unused08;              // +0x08
+    unsigned char flags;       // +0x0c bit 0 requires an update (the rest is not written)
+    PString name;              // +0x10 "%08x%%name" for an instance
+    unsigned int activeFrame;  // +0x14
+    DisplayTexture* texture;   // +0x18 owned
+    TextureAlpha alpha;        // +0x1c -1 unknown
+    Color averageColor;        // +0x20
+    TextureManager* manager;   // +0x30 holds a reference
+};
+JET_LAYOUT32(sizeof(Texture) == 0x34);
 
 // The texture a TextureResource makes (U6c; its constructor stays the original's until then)
 class TextureRes {

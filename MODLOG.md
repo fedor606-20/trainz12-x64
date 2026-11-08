@@ -2274,6 +2274,21 @@ unit order in `notes/WaterSystem.md`.
     with automatic mips, a second level's y offset at the bottom edge).
 - diff_rs_u6 and diff_rs_u6b still give 0 mismatches. In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U6c2, Texture (2026-11-09): 1924/2687 exports ours
+- `TextureObject.cpp`, 36 exports (uniqueTexId stays the original's). Texture is a ReferenceCount registered with
+  the TextureManager under its name and owning its API texture (DisplayTexture). TextureRes, planned for U6c,
+  moves to U6d: its loading paths work inside the TextureManager's own lists, so it is tested against a real
+  manager. Layout and the 23 vftable slots in notes/RenderSystem.md ("U6c2 done").
+- TS12 behaviour kept: SetDisplayTexture frees the old API texture even when it is handed the same one; an
+  instance gets the name "%08x%%name" from the next uniqueTexId (an instance's own 8-digit prefix is replaced);
+  colours are copied through the x87 stack. The update flag goes through the original's
+  TextureManager::SetTextureUpdate.
+- Test `tests/diff_rs_u6c2.cpp` (1000 scenarios, 0 mismatches): a stand-in TextureManager logging add / remove /
+  activate and its reference count, the original's SetTextureUpdate patched with a jump to a logger (both sides
+  reach it), DisplayTextureNull objects of the side under test as the API textures. Mutations caught: 21 of 21
+  (scratchpad mut_u6c2.py; a name with "%%" before position 8 was added to catch the last one).
+- diff_rs_u6, u6b, u6c still give 0 mismatches. In game: menu reached, JetLog identical to the baseline.
+
 ### Borderless window mode (2026-10-28, not in TS12)
 - Our KernelStandard `Window.cpp` adds a `Borderless` option: `-borderless` on the command line, or in the game
   folder's `trainzoptions.txt` (read by Window::Open itself, since trainz.exe merges that file only after the window
