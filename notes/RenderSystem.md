@@ -226,6 +226,46 @@ when it is the new one), 21 GetDisplayTexture, 22 GetTextureManagerInfo (null). 
 "%08x%%name" from uniqueTexId (an instance's own 8-digit prefix replaced). The update flag goes through
 TextureManager::SetTextureUpdate (0x10041a50, U6d: an std::set of textures at manager+0x18). Test:
 tests/diff_rs_u6c2.cpp (stand-in manager; SetTextureUpdate patched with a jump to a logger; null API textures).
+U6d analysis (2026-11-09, in progress). Split: U6d1 TextureManager + TextureRes (the streaming core, ~9 KB), U6d2
+SharedTextureCollection (the generated built-in textures, 8.6 KB of float code). U6d1 may split again: U6d1a the
+manager's containers and lifetime (ctor/dtor, Add, RemoveTexture, Find, Begin, Activate, End, SetTextureUpdate,
+RegisterStreamableTexture, the static setters, memory getters, Create, GetSubstituteTexture, Init), U6d1b the
+streaming (AddAsyncTextureLoad, RemovedAsyncTextureLoad, Update, AppendMips, CleanupAsyncTextureLoad, Up/DownSize,
+the Test* and Check* functions) with TextureRes.
+TextureManager 0xd8 on ReferenceCount (vftable 0x10072338, 11 slots: 0 DeleteThis, 1 dtor, 2 Init(RenderKernel*),
+3 Create(db, name, key), 4 Add, 5 RegisterStreamableTexture, 6 RemoveTexture, 7 Find(PString), 8 Begin, 9
+Activate(texture, mips), 10 End(float)). +8 HashTable<PString, Texture*> (the U3 template: 97 FDA buckets,
+0x10042d80 init, 0x10042ed0 find, 0x10042e60 insert, 0x10035cf0 erase, 0x10035db0 destroy) keyed by the texture's
+name node; +0x18 FastDynamicArray<Texture*> of the textures needing an update (SetTextureUpdate: find 0x10042ff0,
+remove 0x1000d5b0, add 0x1000d530; End calls slot 0x40 Update(float) of each); +0x1c Array<Texture*> of the frame's
+active textures {count +0x1c, capacity +0x20, data +0x24} (Begin: count 0, active memory 0, ++frame, Update();
+Activate: appended once per frame, memory += GetMemorySize >> 10, then with streaming on the TextureRes's wanted
+mip count clamped to MIN/MAX_STREAMING_TEXTURE_MIP_COUNT and UpSizeTexture(1 << (mips - 1))); +0x28 the frame,
++0x2c the active memory (KB), +0x30 byte, +0x34 an FDA, +0x38, +0x3c an embedded TextureInfo (0x68), +0xa0..+0xa8,
++0xac an FDA, +0xb0 two 0x10-byte list heads (vector ctor 0x10042d00 / dtor 0x10042d20, chosen by +0xd0; a
+TextureRes's async-info node is linked into list [+0xd0] by RegisterStreamableTexture), +0xd0 index, +0xd4 1.
+Create: names without a ".texture"/".movie" extension get "-tex" appended (0x100411a0), the database name is
+prefixed with ':' (PStringCache::Ins), the hash table is asked first (a found texture gets a reference); else
+db->Get(name) (slot 1), SetScrambleKey(key), resource slot 0x74 CreateInstance(name, manager) and, failing that or
+without a resource, GetSubstituteTexture (a Texture over SharedTextureCollection::GenerateSubstituteLoadTexture,
+named by the static PString 0x100b8734). Init reads the RenderKernel's OS options GlobalTextureResolution
+(globalSkipLevels), TextureResThreshold (globalSkipThreshold), DefaultTextureFormat, DefaultAnisotropy,
+DefaultTextureFilter ("none"/"trilinear"/...), DefaultAutoMip, DefaultMin/Mip/MagFilter, UseSubstituteTexture.
+Init details (0x10041db0): manager+0x14 = the RenderKernel (its OS at +0x8c, Display at +0x7c); the two skip
+options are unsigned Gets defaulting to the statics; DefaultTextureFormat is a PString Get defaulting to the
+PString at (0x100351d0())+8, matched case-insensitively against a 16-entry {PString, DFormatId} table at
+0x100b8780 (sets DISPLAYFORMATID_DEFAULT); DefaultAnisotropy (default ANISOTROPY_DEFAULT) is clamped to Display
+slot 0x28 and kept if >= 1; DefaultTextureFilter: "none" -> min/mip/mag 0, "trilinear" -> 1/1/1, else
+(bilinear) 1/0/1 (mip 0), then, if Display slot 0x1c(5) answers, DefaultAutoMip from {name, value} x4 at
+0x1006b110 (else AUTO_MIP_DEFAULT 0); without DefaultTextureFilter, DefaultMin/Mip/MagFilter each from the 2 names
+at 0x100b1bec (the Mag match jumps into the "none" block's MAG store, then on to the auto-mip part);
+UseSubstituteTexture into +0x30 (bool). Always true once the OS has options.
+GetSubstituteTexture (0x100421a0): only with +0x30; the cached texture at 0x100b8708 (=
+SharedTextureCollection::textureArray[2], an AutoReference) with a reference, else Find (slot 7) of the name
+PString 0x100b8734 (= textureNameArray[2]), else a Texture over GenerateSubstituteLoadTexture(display, 0, 0)
+cached there. So the substitute path needs SharedTextureCollection (U6d2) or its statics by address.
+GetTotalTextureMemory: the hash table walked (0x100430d0 first, 0x10054880 next), slot 8 GetMemorySize >> 10
+summed.
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile

@@ -118,8 +118,9 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        .texture.txt files with stand-in bitmap resources) done 2026-11-08. U6c split: U6c1 (DisplayTexture +
        DisplayTextureNull, the API texture layer; 60 exports, 1888/2687, `tests/diff_rs_u6c.cpp`) done
        2026-11-08. U6c2 (Texture; 36 exports, 1924/2687, `tests/diff_rs_u6c2.cpp`) done 2026-11-09; TextureRes
-       moves to U6d, whose TextureManager lists it works in. Next: U6d (TextureManager, SharedTextureCollection,
-       TextureRes).
+       moves to U6d, whose TextureManager lists it works in. U6d analysis started 2026-11-09 (notes/RenderSystem.md
+       "U6d analysis"): split into U6d1 TextureManager + TextureRes (possibly U6d1a containers/lifetime, U6d1b
+       streaming) and U6d2 SharedTextureCollection. Next: U6d1a.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
