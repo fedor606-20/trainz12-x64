@@ -21,6 +21,12 @@
 namespace Jet {
 void __cdecl RsMatSetName(void* p, const PString* decorated, const PString* plain);
 
+}  // namespace Jet
+
+// MaterialStatics.cpp: increments the counter in the original DLL and follows it in our data export
+extern "C" unsigned long RsMatNextUniqueId();
+
+namespace Jet {
 namespace {
 
 template <class T>
@@ -85,12 +91,6 @@ unsigned char* OrigBase()
 }
 
 // the original's statics that stay shared until U9
-unsigned long& UniqueMatId()
-{
-    static unsigned long* const p = reinterpret_cast<unsigned long*>(
-        GetProcAddress(reinterpret_cast<HMODULE>(OrigBase()), "?uniqueMatId@Material@Jet@@0KA"));
-    return *p;
-}
 const PString& DecoratedTypeToken()
 {
     static const PString* const p = reinterpret_cast<const PString*>(
@@ -253,7 +253,7 @@ void __cdecl RsMatInitInstance(void* self, void* dest)
 {
     PString& sourceName = Field<PString>(self, 0x24);
     PString& destName = Field<PString>(dest, 0x24);
-    const unsigned long id = UniqueMatId()++;
+    const unsigned long id = RsMatNextUniqueId();
     const int marker = sourceName.node ? PString::Cache()->Find(sourceName.node, reinterpret_cast<const unsigned char*>("%%"), 8) : -1;
     if (marker == 8) {
         Assign(destName, sourceName);

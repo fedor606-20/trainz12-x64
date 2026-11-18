@@ -11,6 +11,13 @@
 // through a hooked LookupPluginType import so both sides see the same types. Config trees are made through
 // KernelStandard's ConfigData, once per side over the same shared cache nodes.
 //
+// Kinds 10..19 add the Material lifetime/factory/data surface: PluginFactoryBase<VMaterial> and MaterialPlugin
+// copy/3-arg construction, assignment and destruction, Material and NullMaterial construction with their
+// vptr/vbptr/virtual-base and manager traffic, both static Material::CreateInstance overloads (the UId overload
+// goes through a second LookupPluginType hook), Material::operator<, NullMaterial::CreateInstance/operator==,
+// and the exported vtable/statics mirrors. Code pointers are normalized to self/orig labels and generated
+// unique-ID node text is suppressed, so only replay-stable facts are compared.
+//
 // usage: diff_rs_u7.exe <bin dir> [rounds]
 //   env RS_U7_ECHO (echo the log), RS_U7_DUMP=<prefix> (each mismatch's logs: <prefix>.<n>.ours.txt / .orig.txt),
 //   RS_U7_ONLY=<scenario> (run only that scenario kind)
@@ -60,7 +67,10 @@ static void Log(const char* fmt, ...)
     va_end(ap);
     if (cur >= 0) logText[cur] += buf;
     static const bool echo = std::getenv("RS_U7_ECHO") != nullptr;
-    if (echo) std::fputs(buf, stdout);
+    if (echo) {
+        std::fputs(buf, stdout);
+        std::fflush(stdout);
+    }
 }
 
 // the node texts are shared (one cache), so they compare directly
@@ -68,6 +78,45 @@ static std::string Text(const void* node)
 {
     if (!node) return "null";
     return std::string("'") + (static_cast<const char*>(node) + 0x18) + "'";
+}
+
+// a UId is 16 raw bytes; log them without interpreting generated text
+static std::string HexUid(const void* uid)
+{
+    char hex[33];
+    const auto* b = static_cast<const unsigned char*>(uid);
+    for (unsigned i = 0; i < 16; ++i) std::snprintf(hex + 2 * i, 3, "%02x", b[i]);
+    return hex;
+}
+
+// interned nodes come from one shared cache, so a node address is stable across the two sides; track them
+// (and the Alloc::New traffic) so raw pointer fields can be dumped as equal labels on both sides
+static unsigned nodeMade[2], nodeKilled[2];
+static void* nodeList[2][4096];
+static unsigned nodeCount[2];
+// the lifetime/factory scenarios only compare normalized field bytes and node counts: the DLL's generated
+// unique-ID nodes contain a shared counter whose text necessarily differs between the two sequential passes
+static bool quietNodes;
+// case 18 compares exported data objects: a copied vftable slot may legally point into either module
+static bool dataMode;
+
+static void TrackNode(void* n)
+{
+    if (cur < 0 || !n) return;
+    ++nodeMade[cur];
+    for (unsigned i = 0; i < nodeCount[cur]; ++i)
+        if (nodeList[cur][i] == n) return;
+    if (nodeCount[cur] < 4096) nodeList[cur][nodeCount[cur]++] = n;
+}
+static const char* NodeLabel(const void* p, int s)
+{
+    if (!p) return "null";
+    for (unsigned i = 0; i < nodeCount[s]; ++i) {
+        const auto* n = static_cast<const unsigned char*>(nodeList[s][i]);
+        if (p == n) return "node";
+        if (p == n + 0x18) return "text";
+    }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -120,7 +169,13 @@ static void __cdecl HookDelete(void* p)
 static void* __cdecl HookCreateNode(void* self, const unsigned char* text)
 {
     void* n = RealCreateNode(self, text);
-    if (cur >= 0) Log("  node %s -> %s\n", text ? reinterpret_cast<const char*>(text) : "null", Text(n).c_str());
+    TrackNode(n);
+    if (cur >= 0) {
+        if (quietNodes)
+            Log("  node\n");
+        else
+            Log("  node %s -> %s\n", text ? reinterpret_cast<const char*>(text) : "null", Text(n).c_str());
+    }
     return n;
 }
 // the (text, length) overload: the original inlines its literal keys through this one, ours through the 1-arg
@@ -128,15 +183,26 @@ static void* __cdecl HookCreateNode(void* self, const unsigned char* text)
 static void* __cdecl HookCreateNodeLen(void* self, const unsigned char* text, unsigned length)
 {
     void* n = RealCreateNodeLen(self, text, length);
+    TrackNode(n);
     if (cur >= 0) {
-        const std::string s(text ? reinterpret_cast<const char*>(text) : "", text ? length : 0);
-        Log("  node %s -> %s\n", text ? s.c_str() : "null", Text(n).c_str());
+        if (quietNodes)
+            Log("  node\n");
+        else {
+            const std::string s(text ? reinterpret_cast<const char*>(text) : "", text ? length : 0);
+            Log("  node %s -> %s\n", text ? s.c_str() : "null", Text(n).c_str());
+        }
     }
     return n;
 }
 static void __cdecl HookDestroyNode(void* self, void* node)
 {
-    if (cur >= 0) Log("  unnode %s\n", Text(node).c_str());
+    if (cur >= 0) {
+        ++nodeKilled[cur];
+        if (quietNodes)
+            Log("  unnode\n");
+        else
+            Log("  unnode %s\n", Text(node).c_str());
+    }
     RealDestroyNode(self, node);
 }
 
@@ -163,13 +229,44 @@ static void PatchImport(HMODULE m, const char* name, void* fn)
     }
 }
 
+// the value an import slot had before it was patched (so a hook can delegate outside the scripted scenarios)
+static void* ImportFunction(HMODULE m, const char* name)
+{
+    auto* base = reinterpret_cast<unsigned char*>(m);
+    auto* dos = reinterpret_cast<IMAGE_DOS_HEADER*>(base);
+    auto* nt = reinterpret_cast<IMAGE_NT_HEADERS*>(base + dos->e_lfanew);
+    auto* dir = &nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+    for (auto* d = reinterpret_cast<IMAGE_IMPORT_DESCRIPTOR*>(base + dir->VirtualAddress); d->Name; ++d) {
+        auto* thunk = reinterpret_cast<IMAGE_THUNK_DATA*>(base + d->FirstThunk);
+        auto* orig = reinterpret_cast<IMAGE_THUNK_DATA*>(
+            base + (d->OriginalFirstThunk ? d->OriginalFirstThunk : d->FirstThunk));
+        for (; orig->u1.AddressOfData; ++thunk, ++orig) {
+            if (IMAGE_SNAP_BY_ORDINAL(orig->u1.Ordinal)) continue;
+            auto* iname = reinterpret_cast<IMAGE_IMPORT_BY_NAME*>(base + orig->u1.AddressOfData);
+            if (std::strcmp(reinterpret_cast<const char*>(iname->Name), name) == 0)
+                return reinterpret_cast<void*>(thunk->u1.Function);
+        }
+    }
+    return nullptr;
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // PString helpers (its constructors are not exported; the cache makes the nodes)
 
 static void* MakePString(const char* text)
 {
     void* p = RealNew(4);
-    *static_cast<void**>(p) = RealCreateNode(*cache, reinterpret_cast<const unsigned char*>(text));
+    void* n = RealCreateNode(*cache, reinterpret_cast<const unsigned char*>(text));
+    TrackNode(n);
+    *static_cast<void**>(p) = n;
+    return p;
+}
+// a UId whose first bytes spell a scripted plugin tag (the hook below maps it back to that Plugin blob)
+static void* MakeUid(const char* tag)
+{
+    void* p = RealNew(16);
+    std::memset(p, 0, 16);
+    std::strncpy(static_cast<char*>(p), tag, 15);
     return p;
 }
 static void FreePString(void* p)
@@ -177,6 +274,12 @@ static void FreePString(void* p)
     if (*static_cast<void**>(p)) RealDestroyNode(*cache, *static_cast<void**>(p));
     RealDelete(p);
 }
+// the shared cache's accounting (PStringCache::Node::refs at +0x10, PStringCache::liveRefs at +4)
+static int NodeRefs(const void* node)
+{
+    return node ? *reinterpret_cast<const int*>(static_cast<const unsigned char*>(node) + 0x10) : 0;
+}
+static int CacheLiveRefs() { return *reinterpret_cast<const int*>(static_cast<const unsigned char*>(*cache) + 4); }
 
 // ---------------------------------------------------------------------------------------------------------------
 // stand-ins
@@ -191,7 +294,7 @@ struct MaterialBlob {
     unsigned char body[0x9c];  // +0x08 ...
 };
 static MaterialBlob materialPool[16];
-static void* materialVtable[0x4c / 4];
+static void* materialVtable[0x60 / 4];  // slot 0x54 (the operator< key) is exercised by a later scenario
 static void* materialVbtable[2];
 static void* materialRefVtable[2];
 static unsigned materialUsed;
@@ -232,7 +335,7 @@ static void InitMaterial(void* memory, const char* tag)
 {
     auto* blob = static_cast<MaterialBlob*>(memory);
     std::memset(blob, 0, sizeof(MaterialBlob));
-    for (unsigned i = 0; i < 0x4c / 4; ++i) materialVtable[i] = reinterpret_cast<void*>(&MatGetTexture);
+    for (unsigned i = 0; i < 0x60 / 4; ++i) materialVtable[i] = reinterpret_cast<void*>(&MatGetTexture);
     materialVtable[0x20 / 4] = reinterpret_cast<void*>(&MatGetTexture);
     materialVtable[0x24 / 4] = reinterpret_cast<void*>(&MatSetTextureRef);
     materialVtable[0x28 / 4] = reinterpret_cast<void*>(&MatSetTextureName);
@@ -253,6 +356,29 @@ static void* NextMaterial(const char* tag)
     void* m = &materialPool[materialUsed < 16 ? materialUsed++ : 15];
     InitMaterial(m, tag);
     return m;
+}
+
+// Material::operator< calls a virtual slot at 0x54 that hands out a key. The stand-in keeps the wrapper
+// at +0x20 (outside the fields the other scenarios touch) and answers both the pointer-return and the
+// sret-return shapes, so the call is harmless whichever the two modules use.
+static void* keyedVtable[0x60 / 4];
+static void* __cdecl MatLessKey(void* self)
+{
+    void* key = *reinterpret_cast<void**>(static_cast<unsigned char*>(self) + 0x20);
+    Log("  key\n");
+    return key;
+}
+static void SetupKeyed(void* obj, void* key)
+{
+    auto* b = static_cast<unsigned char*>(obj);
+    std::memset(b, 0, 0xc0);
+    std::memcpy(keyedVtable, materialVtable, sizeof keyedVtable);
+    keyedVtable[0x54 / 4] = reinterpret_cast<void*>(&MatLessKey);
+    *reinterpret_cast<void**>(b) = keyedVtable;
+    *reinterpret_cast<void**>(b + 4) = materialVbtable;
+    *reinterpret_cast<void**>(b + 8) = materialRefVtable;
+    *reinterpret_cast<int*>(b + 0xc) = 1;
+    *reinterpret_cast<void**>(b + 0x20) = key;
 }
 
 // the plugin walk is scripted: the type name maps to a plugin blob (the vfptr outside the object, as a real
@@ -315,6 +441,45 @@ static int* __cdecl HookLookup(int* sret, void** out, const void* uid, const voi
     return sret;
 }
 
+// the UId-only overload of LookupPluginType: used by Material::CreateInstance(const UId&, ...). Outside the
+// scripted factory scenarios the original import is called unchanged, so kinds 0..9 keep their behaviour.
+static bool uidHookEnabled;
+using LookupUidFn = int* (__cdecl*)(int*, void**, const void*);
+static LookupUidFn RealLookupUid;
+
+static bool UidTag(const void* uid, const char* tag)
+{
+    const auto* b = static_cast<const unsigned char*>(uid);
+    const std::size_t n = std::strlen(tag);
+    if (n >= 16) return false;
+    for (std::size_t i = 0; i < n; ++i)
+        if (b[i] != static_cast<unsigned char>(tag[i])) return false;
+    for (std::size_t i = n; i < 16; ++i)
+        if (b[i] != 0) return false;
+    return true;
+}
+static int* __cdecl HookLookupUid(int* sret, void** out, const void* uid)
+{
+    if (!uidHookEnabled) {
+        if (RealLookupUid) return RealLookupUid(sret, out, uid);
+        *out = nullptr;
+        *sret = 3;
+        return sret;
+    }
+    Log("  lookupUid %s\n", HexUid(uid).c_str());
+    for (Plugin* p : plugins) {
+        if (UidTag(uid, p->tag)) {
+            *out = p;
+            Log("  %s.addref\n", p->tag);
+            *sret = 0;
+            return sret;
+        }
+    }
+    *out = nullptr;
+    *sret = 3;
+    return sret;
+}
+
 // the manager stand-in (GetMaterial and CreateNewMaterial go through its Create slot)
 static void* managerObj;
 static void* managerVtable[8];
@@ -328,6 +493,8 @@ static void* __cdecl ManagerCreate(void* self, int* result, void** out, const vo
     *result = managerCode;
     return result;
 }
+// Material's dtor unregisters itself from its manager through slot 0x14
+static void __cdecl ManagerRemove(void* self, void* material) { Log("  mgr.remove %s\n", Name(material)); }
 
 static unsigned char textureManagerObj[0x20];
 static unsigned char kernelObj[0x100];
@@ -547,6 +714,40 @@ struct Api {
     void* (__cdecl* createChunk)(void*, unsigned, unsigned, unsigned, unsigned, int, void*);
     void (__cdecl* setLighting)(void*, void*, const void*, const void*, const void*, const void*, const void*, float,
                                 int);
+    // U7 lifetime/factory exports. The ctors/dtors/assign are called as fastcall (ECX=self, EDX=dummy,
+    // stack args); the comparison, the two static factories and the two virtual NullMaterial methods are
+    // plain cdecl helpers with everything on the stack. A hidden virtual-base flag ends the ctor arg lists.
+    void* (__fastcall* pfbCopy)(void*, void*, const void*);
+    void* (__fastcall* pfbCtor3)(void*, void*, const void*, const void*, const void*);
+    void (__fastcall* pfbDtor)(void*, void*);
+    void* (__fastcall* pfbAssign)(void*, void*, const void*);
+    void* (__fastcall* mpCopy)(void*, void*, const void*);
+    void* (__fastcall* mpCtor3)(void*, void*, const void*, const void*);
+    void* (__fastcall* matCtor)(void*, void*, void*, void*);
+    void (__fastcall* matDtor)(void*, void*);
+    void (__fastcall* matVbaseDtor)(void*, void*);
+    bool (__cdecl* matLess)(const void*, const void*);
+    void* (__cdecl* matCreateUid)(const void*, void*);
+    void* (__cdecl* matCreateName)(const void*, void*);
+    void* (__fastcall* nullCtor)(void*, void*, const void*, void*);
+    void (__fastcall* nullDtor)(void*, void*);
+    void (__fastcall* nullVbaseDtor)(void*, void*);
+    void* (__cdecl* nullCreate)(void*);
+    bool (__cdecl* nullEqual)(const void*, const void*);
+    // data exports (vftables/vbtables/statics; read as addresses, never called through)
+    void* matVftable;
+    void* nullVftable;
+    void* mpVftable;
+    void* pfbVftable;
+    void* matVbtable;
+    void* nullVbtable;
+    void* uniqueMatId;
+    void* matResults;
+    void* mgrResults;
+    void* decoratedToken;
+    void* stringNotFound;
+    void* pluginGroupName;
+    void* pluginGroupUid;
 };
 static Api api[2];
 
@@ -595,6 +796,38 @@ static void LoadApi(int s)
     a.setLighting = As<decltype(a.setLighting)>(Proc(m,
         "?SetLightingState@Material@Jet@@QBAXPAVDisplay@2@PBVMatrix4@2@PBVGeometryChunk@2@PBVVertexProgram@2@PBV?$"
         "FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@1M_N@Z"));
+    // the new lifetime/factory exports
+    a.pfbCopy = As<decltype(a.pfbCopy)>(Proc(m, "??0?$PluginFactoryBase@VMaterial@Jet@@@Jet@@QAE@ABV01@@Z"));
+    a.pfbCtor3 = As<decltype(a.pfbCtor3)>(Proc(m, "??0?$PluginFactoryBase@VMaterial@Jet@@@Jet@@QAE@ABVPString@1@ABVUId@1@1@Z"));
+    a.pfbDtor = As<decltype(a.pfbDtor)>(Proc(m, "??1?$PluginFactoryBase@VMaterial@Jet@@@Jet@@UAE@XZ"));
+    a.pfbAssign = As<decltype(a.pfbAssign)>(Proc(m, "??4?$PluginFactoryBase@VMaterial@Jet@@@Jet@@QAEAAV01@ABV01@@Z"));
+    a.mpCopy = As<decltype(a.mpCopy)>(Proc(m, "??0MaterialPlugin@Jet@@QAE@ABV01@@Z"));
+    a.mpCtor3 = As<decltype(a.mpCtor3)>(Proc(m, "??0MaterialPlugin@Jet@@QAE@ABVPString@1@ABVUId@1@@Z"));
+    a.matCtor = As<decltype(a.matCtor)>(Proc(m, "??0Material@Jet@@QAE@PAVMaterialManager@1@@Z"));
+    a.matDtor = As<decltype(a.matDtor)>(Proc(m, "??1Material@Jet@@MAE@XZ"));
+    a.matVbaseDtor = As<decltype(a.matVbaseDtor)>(Proc(m, "??_DMaterial@Jet@@IAEXXZ"));
+    a.matLess = As<decltype(a.matLess)>(Proc(m, "??MMaterial@Jet@@QBA_NABV01@@Z"));
+    a.matCreateUid = As<decltype(a.matCreateUid)>(Proc(m, "?CreateInstance@Material@Jet@@SAPAV12@ABVUId@2@PAVMaterialManager@2@@Z"));
+    a.matCreateName = As<decltype(a.matCreateName)>(Proc(m, "?CreateInstance@Material@Jet@@SAPAV12@ABVPString@2@PAVMaterialManager@2@@Z"));
+    a.nullCtor = As<decltype(a.nullCtor)>(Proc(m, "??0NullMaterial@Jet@@QAE@ABVPString@1@@Z"));
+    a.nullDtor = As<decltype(a.nullDtor)>(Proc(m, "??1NullMaterial@Jet@@UAE@XZ"));
+    a.nullVbaseDtor = As<decltype(a.nullVbaseDtor)>(Proc(m, "??_DNullMaterial@Jet@@QAEXXZ"));
+    a.nullCreate = As<decltype(a.nullCreate)>(Proc(m, "?CreateInstance@NullMaterial@Jet@@UBAPAVMaterial@2@XZ"));
+    a.nullEqual = As<decltype(a.nullEqual)>(Proc(m, "??8NullMaterial@Jet@@UBA_NABVMaterial@1@@Z"));
+    // the data mirrors
+    a.matVftable = Proc(m, "??_7Material@Jet@@6B01@@");
+    a.nullVftable = Proc(m, "??_7NullMaterial@Jet@@6BMaterial@1@@");
+    a.mpVftable = Proc(m, "??_7MaterialPlugin@Jet@@6B@");
+    a.pfbVftable = Proc(m, "??_7?$PluginFactoryBase@VMaterial@Jet@@@Jet@@6B@");
+    a.matVbtable = Proc(m, "??_8Material@Jet@@7B@");
+    a.nullVbtable = Proc(m, "??_8NullMaterial@Jet@@7B@");
+    a.uniqueMatId = Proc(m, "?uniqueMatId@Material@Jet@@0KA");
+    a.matResults = Proc(m, "?results@Material@Jet@@2QBUResultTable@2@B");
+    a.mgrResults = Proc(m, "?results@MaterialManager@Jet@@2QBUResultTable@2@B");
+    a.decoratedToken = Proc(m, "?DecoratedTypeToken@Material@Jet@@2VPString@2@A");
+    a.stringNotFound = Proc(m, "?STRING_NOT_FOUND@Material@Jet@@2VPString@2@A");
+    a.pluginGroupName = Proc(m, "?PluginGroupName@MaterialPlugin@Jet@@2VPString@2@A");
+    a.pluginGroupUid = Proc(m, "?PluginGroupUID@MaterialPlugin@Jet@@2VUId@2@A");
 }
 
 // the config building (KernelStandard, shared by both sides). The ctor/dtor are __thiscall; operator() is the
@@ -719,6 +952,72 @@ static void DumpResource(std::string& out, const void* res, int s, const char* t
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+// normalized dumps for the lifetime/data scenarios. Each side's vptrs point at that side's table (a different
+// image base), so code pointers become self/orig labels; shared nodes and Alloc::New blocks keep their labels.
+
+static unsigned ImageSize(HMODULE m)
+{
+    auto* base = reinterpret_cast<unsigned char*>(m);
+    auto* dos = reinterpret_cast<IMAGE_DOS_HEADER*>(base);
+    auto* nt = reinterpret_cast<IMAGE_NT_HEADERS*>(base + dos->e_lfanew);
+    return nt->OptionalHeader.SizeOfImage;
+}
+static bool InImage(const void* p, HMODULE m)
+{
+    const auto* b = reinterpret_cast<const unsigned char*>(m);
+    const void* const lo = b;
+    const void* const hi = b + ImageSize(m);
+    return b && p >= lo && p < hi;
+}
+static std::string Label(const void* p, int s)
+{
+    char buf[32];
+    if (!p) return "0";
+    auto f = fixedNames.find(p);
+    if (f != fixedNames.end()) return f->second;
+    for (unsigned i = 0; i < nameCount[s]; ++i)
+        if (names[s][i] == p) {
+            std::snprintf(buf, sizeof buf, "A%u", i);
+            return buf;
+        }
+    if (const char* n = NodeLabel(p, s)) return n;
+    if (dataMode && (InImage(p, mod[0]) || InImage(p, mod[1]) || InImage(p, ks))) return "code";
+    if (InImage(p, mod[s])) return "self";
+    if (InImage(p, mod[1 - s])) return "orig";
+    if (InImage(p, ks)) return "ks";
+    std::snprintf(buf, sizeof buf, "%08x", static_cast<unsigned>(reinterpret_cast<ULONG_PTR>(p)));
+    return buf;
+}
+static void DumpFields(const void* obj, unsigned from, unsigned to, int s, const char* tag)
+{
+    if (!obj) {
+        Log("  %s null\n", tag);
+        return;
+    }
+    const auto* b = static_cast<const unsigned char*>(obj);
+    Log("  %s", tag);
+    for (unsigned i = from; i <= to; i += 4) Log(" %x:%s", i, Label(*reinterpret_cast<void* const*>(b + i), s).c_str());
+    Log("\n");
+}
+static void DumpVtable(const void* vt, int s, const char* tag, unsigned slots)
+{
+    if (!vt) {
+        Log("  %s null\n", tag);
+        return;
+    }
+    Log("  %s", tag);
+    const auto* words = static_cast<const void* const*>(vt);
+    for (unsigned i = 0; i < slots; ++i) Log(" %s", Label(words[i], s).c_str());
+    Log("\n");
+}
+static void* Scratch(unsigned size)
+{
+    void* p = RealNew(size);
+    std::memset(p, 0xcc, size);
+    return p;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
 // scenarios (each fills the log on the current side)
 
 static void* configRoot;
@@ -826,10 +1125,10 @@ static void RunScenarioCase(int s, std::mt19937& r, unsigned kind);
 
 static void RunScenario(int s, std::mt19937& r)
 {
-    const unsigned kind = r() % 10;
-    if (std::getenv("RS_U7_TRACE")) std::fprintf(stderr, "side %d kind %u\n", s, kind);
-    if (const char* only = std::getenv("RS_U7_ONLY")) return RunScenarioCase(s, r, static_cast<unsigned>(std::atoi(only)));
-    return RunScenarioCase(s, r, kind);
+    unsigned kind = r() % 20;
+    if (const char* only = std::getenv("RS_U7_ONLY")) kind = static_cast<unsigned>(std::atoi(only));
+    quietNodes = kind >= 10;
+    RunScenarioCase(s, r, kind);
 }
 static void RunScenarioCase(int s, std::mt19937& r, unsigned kind)
 {
@@ -1127,9 +1426,6 @@ static void RunScenarioCase(int s, std::mt19937& r, unsigned kind)
             hint = hintBuf;
         }
         Log("  chunk %u %u %u %u type=%d hint=%d size=%x\n", v, p, i, f, type, hintKind, hintSize);
-        if (std::getenv("RS_U7_TRACE"))
-            std::fprintf(stderr, "  chunk %u %u %u %u type=%d hint=%d size=%x buf=%d up=%d\n", v, p, i, f, type,
-                         hintKind, hintSize, displayNoBuffer ? 1 : 0, managerUploadCode);
         void* chunk = api[s].createChunk(nullptr, v, p, i, f, type, hint);
         DumpChunk(logText[cur], chunk, s, "made");
         if (!chunk) break;
@@ -1173,6 +1469,288 @@ static void RunScenarioCase(int s, std::mt19937& r, unsigned kind)
         DumpChunk(logText[cur], copy2, s, "copy2");
         if (copy2) As<void(__fastcall*)(void*, void*, unsigned)>(vt[1])(copy2, nullptr, 1);
         As<void(__fastcall*)(void*, void*, unsigned)>(vt[1])(chunk, nullptr, 1);
+        break;
+    }
+    case 10: {  // PluginFactoryBase<VMaterial>: 3-arg ctor, copy ctor, shared assignment and dtor
+        void* src = Scratch(0x60);
+        void* dst = Scratch(0x60);
+        void* asg = Scratch(0x60);
+        void* third = Scratch(0x40);  // the ctor's third (reference) argument, zeroed stand-in
+        std::memset(third, 0, 0x40);
+        void* name = MakePString(r() % 2 ? "factory.one" : "factory.two");
+        void* uid = MakeUid(r() % 2 ? "onetex" : "gloss");
+        Log("  pfb ctor3 name=%s uid=%s\n", Text(*static_cast<void* const*>(name)).c_str(), HexUid(uid).c_str());
+        api[s].pfbCtor3(src, nullptr, name, uid, third);
+        Log("  pfb ctor vptr=%s own=%d\n", Label(*static_cast<void* const*>(src), s).c_str(),
+            *reinterpret_cast<void**>(src) == api[s].pfbVftable ? 1 : 0);
+        DumpFields(src, 0, 0x5c, s, "pfb src");
+        api[s].pfbCopy(dst, nullptr, src);
+        Log("  pfb copy vptr=%s own=%d\n", Label(*static_cast<void* const*>(dst), s).c_str(),
+            *reinterpret_cast<void**>(dst) == api[s].pfbVftable ? 1 : 0);
+        DumpFields(dst, 0, 0x5c, s, "pfb copy");
+        api[s].pfbCtor3(asg, nullptr, name, uid, third);
+        api[s].pfbAssign(asg, nullptr, src);
+        DumpFields(asg, 0, 0x5c, s, "pfb assign");
+        // the three objects share one name node; destroy only two of them here and use an independent
+        // instance for the third so the string cache never sees a double release
+        api[s].pfbDtor(asg, nullptr);
+        api[s].pfbDtor(dst, nullptr);
+        void* solo = Scratch(0x60);
+        void* soloName = MakePString("factory.solo");
+        void* soloUid = MakeUid("gloss");
+        api[s].pfbCtor3(solo, nullptr, soloName, soloUid, third);
+        api[s].pfbDtor(solo, nullptr);
+        Log("  pfb dtors done\n");
+        FreePString(soloName);
+        RealDelete(soloUid);
+        RealDelete(solo);
+        FreePString(name);
+        RealDelete(uid);
+        RealDelete(src);
+        RealDelete(dst);
+        RealDelete(asg);
+        RealDelete(third);
+        break;
+    }
+    case 11: {  // MaterialPlugin: copy / 3-arg ctor, and the factory's dtor/assign as shared aliases
+        void* src = Scratch(0x80);
+        void* dst = Scratch(0x80);
+        void* asg = Scratch(0x80);
+        void* name = MakePString(r() % 2 ? "plugin.gloss" : "plugin.reflect");
+        void* uid = MakeUid(r() % 2 ? "gloss" : "reflect");
+        // the original has no hidden virtual-base flag here: __thiscall(this, name, id), so the harness passes
+        // only the dummy EDX argument and the two real stack arguments
+        api[s].mpCtor3(src, nullptr, name, uid);
+        Log("  mp ctor3 vptr=%s own=%d\n", Label(*static_cast<void* const*>(src), s).c_str(),
+            *reinterpret_cast<void**>(src) == api[s].mpVftable ? 1 : 0);
+        DumpFields(src, 0, 0x7c, s, "mp src");
+        api[s].mpCopy(dst, nullptr, src);
+        Log("  mp copy vptr=%s own=%d\n", Label(*static_cast<void* const*>(dst), s).c_str(),
+            *reinterpret_cast<void**>(dst) == api[s].mpVftable ? 1 : 0);
+        DumpFields(dst, 0, 0x7c, s, "mp copy");
+        api[s].mpCtor3(asg, nullptr, name, uid);
+        api[s].pfbAssign(asg, nullptr, src);  // the base assignment is the alias
+        DumpFields(asg, 0, 0x7c, s, "mp assign");
+        // src/dst/asg share one name node; two destructors plus one independent instance keep the cache balanced
+        api[s].pfbDtor(asg, nullptr);
+        api[s].pfbDtor(dst, nullptr);
+        void* solo = Scratch(0x80);
+        void* soloName = MakePString("plugin.solo");
+        void* soloUid = MakeUid("gloss");
+        api[s].mpCtor3(solo, nullptr, soloName, soloUid);
+        api[s].pfbDtor(solo, nullptr);
+        FreePString(soloName);
+        RealDelete(soloUid);
+        RealDelete(solo);
+        FreePString(name);
+        RealDelete(uid);
+        RealDelete(src);
+        RealDelete(dst);
+        RealDelete(asg);
+        break;
+    }
+    case 12: {  // Material ctor with manager=0 / managerObj, fields, vtable/vbtable/vtordisp, dtor variants
+        for (int mgrKind = 0; mgrKind < 2; ++mgrKind) {
+            for (int ending = 0; ending < 2; ++ending) {
+                void* obj = Scratch(0xc0);
+                *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4) = 5;
+                Log("  mat ctor mgr=%d end=%d\n", mgrKind, ending);
+                api[s].matCtor(obj, nullptr, mgrKind ? managerObj : nullptr, reinterpret_cast<void*>(1));
+                DumpFields(obj, 0, 0x98, s, "mat");
+                const auto* b = static_cast<const unsigned char*>(obj);
+                Log("  mat hdr vf=%s vb=%s vdisp=%s\n", Label(*reinterpret_cast<void* const*>(b), s).c_str(),
+                    Label(*reinterpret_cast<void* const*>(b + 4), s).c_str(),
+                    Label(*reinterpret_cast<void* const*>(b + 8), s).c_str());
+                Log("  mat own vf=%d vb=%d mgrrefs=%d\n",
+                    *reinterpret_cast<void**>(obj) == api[s].matVftable ? 1 : 0,
+                    *reinterpret_cast<void**>(static_cast<unsigned char*>(obj) + 4) == api[s].matVbtable ? 1 : 0,
+                    *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4));
+                if (!ending) {
+                    // the exported Material virtual dtor receives the virtual-base-adjusted pointer Material+0xa0
+                    api[s].matDtor(static_cast<unsigned char*>(obj) + 0xa0, nullptr);
+                    DumpFields(obj, 0, 0x98, s, "mat dtor");
+                } else {
+                    api[s].matVbaseDtor(obj, nullptr);
+                    DumpFields(obj, 0, 0x8, s, "mat vbase");
+                }
+                Log("  mgrrefs after=%d\n", *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4));
+                RealDelete(obj);
+            }
+        }
+        break;
+    }
+    case 13: {  // NullMaterial ctor / dtor / vbase dtor over one shared name node
+        void* name = MakePString(r() % 2 ? "nullmat.a" : "nullmat.b");
+        const unsigned m0 = nodeMade[cur], k0 = nodeKilled[cur];
+        void* node = *static_cast<void* const*>(name);
+        // the cache is shared and side 0 ran first: log only the changes this scenario makes
+        const int r0 = NodeRefs(node), l0 = CacheLiveRefs();
+        Log("  null start\n");
+        void* obj = Scratch(0xc0);  // NullMaterial has a 0xa0-byte Material plus the 0xac-byte virtual base
+        Log("  null ctor name=%s\n", Text(node).c_str());
+        api[s].nullCtor(obj, nullptr, name, reinterpret_cast<void*>(1));
+        DumpFields(obj, 0, 0x5c, s, "null");
+        Log("  null own vf=%d vptr=%s nodes +%u/-%u refs%+d live%+d\n",
+            *reinterpret_cast<void**>(obj) == api[s].nullVftable ? 1 : 0,
+            Label(*reinterpret_cast<void* const*>(obj), s).c_str(), nodeMade[cur] - m0, nodeKilled[cur] - k0,
+            NodeRefs(node) - r0, CacheLiveRefs() - l0);
+        api[s].nullDtor(static_cast<unsigned char*>(obj) + 0xa4, nullptr);
+        DumpFields(obj, 0, 0x5c, s, "null dtor");
+        Log("  nodes +%u/-%u refs%+d live%+d\n", nodeMade[cur] - m0, nodeKilled[cur] - k0, NodeRefs(node) - r0,
+            CacheLiveRefs() - l0);
+        void* obj2 = Scratch(0xc0);
+        api[s].nullCtor(obj2, nullptr, name, reinterpret_cast<void*>(1));
+        api[s].nullVbaseDtor(obj2, nullptr);
+        DumpFields(obj2, 0, 0x8, s, "null vbase");
+        Log("  nodes +%u/-%u refs%+d live%+d\n", nodeMade[cur] - m0, nodeKilled[cur] - k0, NodeRefs(node) - r0,
+            CacheLiveRefs() - l0);
+        FreePString(name);
+        RealDelete(obj);
+        RealDelete(obj2);
+        break;
+    }
+    case 14: {  // the static Material::CreateInstance(const UId&, MaterialManager*) through the UId hook
+        static const char* const tags[] = {"onetex", "gloss", "reflect", "oneten", "CASE", "twoskips"};
+        const char* tag = tags[r() % (sizeof tags / sizeof tags[0])];
+        void* uid = MakeUid(tag);
+        void* mgr = managerObj;  // the original dereferences it unconditionally for the kernel pointer
+        *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4) = 5;
+        uidHookEnabled = true;
+        Log("  createUid %s mgr=%d\n", tag, mgr ? 1 : 0);
+        void* mat = api[s].matCreateUid(uid, mgr);
+        uidHookEnabled = false;
+        Log("  createUid -> %s\n", Label(mat, s).c_str());
+        DumpFields(mat, 0, 0x98, s, "uid mat");
+        Log("  mgrrefs=%d\n", *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4));
+        RealDelete(uid);
+        break;
+    }
+    case 15: {  // the static Material::CreateInstance(const PString&, MaterialManager*) through the name hook
+        static const char* const names[] = {"onetex", "gloss", "reflect", "oneten", "CASE", "twoskips"};
+        const char* name = names[r() % (sizeof names / sizeof names[0])];
+        void* in = MakePString(name);
+        void* mgr = managerObj;  // the original dereferences it unconditionally for the kernel pointer
+        *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4) = 5;
+        Log("  createName %s mgr=%d\n", name, mgr ? 1 : 0);
+        void* mat = api[s].matCreateName(in, mgr);
+        Log("  createName -> %s\n", Label(mat, s).c_str());
+        DumpFields(mat, 0, 0x98, s, "name mat");
+        Log("  mgrrefs=%d\n", *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4));
+        FreePString(in);
+        break;
+    }
+    case 16: {  // Material::operator< over scripted slot-0x54 keys (check the comparison inverts)
+        static const char* const keys[] = {"aa", "bb", "aa", "cc"};
+        const char* ka = keys[r() % (sizeof keys / sizeof keys[0])];
+        const char* kb = keys[r() % (sizeof keys / sizeof keys[0])];
+        void* pa = MakePString(ka);
+        void* pb = MakePString(kb);
+        void* a = Scratch(0xc0);
+        void* b = Scratch(0xc0);
+        SetupKeyed(a, pa);
+        SetupKeyed(b, pb);
+        Log("  less keys '%s' '%s'\n", ka, kb);
+        const bool ab = api[s].matLess(a, b);
+        const bool ba = api[s].matLess(b, a);
+        Log("  less %d %d inv=%d\n", ab ? 1 : 0, ba ? 1 : 0, ab != ba ? 1 : 0);
+        FreePString(pb);
+        FreePString(pa);
+        RealDelete(a);
+        RealDelete(b);
+        break;
+    }
+    case 17: {  // NullMaterial::CreateInstance and operator== (same-side Null vftable vs a generic material)
+        void* name = MakePString("nullequal");
+        void* a = Scratch(0xc0);
+        void* b = Scratch(0xc0);
+        api[s].nullCtor(a, nullptr, name, reinterpret_cast<void*>(1));
+        api[s].nullCtor(b, nullptr, name, reinterpret_cast<void*>(1));
+        Log("  null vt a=%d b=%d\n", *reinterpret_cast<void**>(a) == api[s].nullVftable ? 1 : 0,
+            *reinterpret_cast<void**>(b) == api[s].nullVftable ? 1 : 0);
+        void* created = api[s].nullCreate(a);
+        Log("  created %s\n", Label(created, s).c_str());
+        // +0x14..+0x1c and the high bits of +0x84 are left uninitialised by Alloc::New; +0x24 holds a name
+        // node created inside KernelStandard (outside the patched imports). Compare only the deterministic state.
+        DumpFields(created, 0, 0x10, s, "created");
+        DumpFields(created, 0x20, 0x20, s, "created");
+        DumpFields(created, 0x28, 0x80, s, "created");
+        DumpFields(created, 0x88, 0x98, s, "created");
+        Log("  created 84=%02x\n",
+            *reinterpret_cast<const unsigned char*>(static_cast<const unsigned char*>(created) + 0x84) & 0x0f);
+        const bool same = api[s].nullEqual(a, b);
+        // the original's operator== runs __RTDynamicCast, so the "other" object must carry a real RTTI-bearing
+        // vftable: a test stand-in would make the runtime walk a bogus type_info pointer
+        void* generic = Scratch(0xc0);
+        *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4) = 5;
+        api[s].matCtor(generic, nullptr, managerObj, reinterpret_cast<void*>(1));
+        const bool diff = api[s].nullEqual(a, generic);
+        Log("  eq same=%d generic=%d\n", same ? 1 : 0, diff ? 1 : 0);
+        api[s].matDtor(static_cast<unsigned char*>(generic) + 0xa0, nullptr);
+        RealDelete(generic);
+        api[s].nullDtor(static_cast<unsigned char*>(b) + 0xa4, nullptr);
+        api[s].nullDtor(static_cast<unsigned char*>(a) + 0xa4, nullptr);
+        FreePString(name);
+        RealDelete(a);
+        RealDelete(b);
+        break;
+    }
+    case 18: {  // the data exports: statics, the 4-byte results words and the vtable/vbtable mirrors
+        dataMode = true;
+        Log("  data unique=%s\n", *static_cast<const unsigned*>(api[s].uniqueMatId) ? "set" : "zero");
+        Log("  results mat=%s mgr=%s\n", Label(*static_cast<void* const*>(api[s].matResults), s).c_str(),
+            Label(*static_cast<void* const*>(api[s].mgrResults), s).c_str());
+        Log("  decorated=%s notFound=%s group=%s\n", Text(*static_cast<void* const*>(api[s].decoratedToken)).c_str(),
+            Text(*static_cast<void* const*>(api[s].stringNotFound)).c_str(),
+            Text(*static_cast<void* const*>(api[s].pluginGroupName)).c_str());
+        Log("  groupUid=%s\n", HexUid(api[s].pluginGroupUid).c_str());
+        DumpVtable(api[s].pfbVftable, s, "pfb vt", 3);
+        DumpVtable(api[s].mpVftable, s, "mp vt", 6);
+        DumpVtable(api[s].matVftable, s, "mat vt", 23);
+        DumpVtable(api[s].nullVftable, s, "null vt", 23);
+        DumpVtable(api[s].matVbtable, s, "mat vb", 2);
+        DumpVtable(api[s].nullVbtable, s, "null vb", 2);
+        dataMode = false;
+        break;
+    }
+    case 19: {  // the combined lifetime chain: factory -> plugin -> material + null material, then unwind
+        const unsigned m0 = nodeMade[cur], k0 = nodeKilled[cur];
+        void* name = MakePString(r() % 2 ? "chain.a" : "chain.b");
+        void* uid = MakeUid("onetex");
+        void* fac = Scratch(0x60);
+        void* plug = Scratch(0x80);
+        void* third = Scratch(0x40);
+        std::memset(third, 0, 0x40);
+        api[s].pfbCtor3(fac, nullptr, name, uid, third);
+        // a copy ctor would not register plug with the plugin system, but its destructor unregisters by UId;
+        // construct an independent registered MaterialPlugin so each destructor has a matching construction
+        api[s].mpCtor3(plug, nullptr, name, uid);
+        void* mat = Scratch(0xc0);
+        *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4) = 5;
+        api[s].matCtor(mat, nullptr, managerObj, reinterpret_cast<void*>(1));
+        void* null = Scratch(0xc0);
+        api[s].nullCtor(null, nullptr, name, reinterpret_cast<void*>(1));
+        DumpFields(fac, 0, 0x5c, s, "chain fac");
+        DumpFields(plug, 0, 0x7c, s, "chain plug");
+        DumpFields(mat, 0, 0x98, s, "chain mat");
+        DumpFields(null, 0, 0x5c, s, "chain null");
+        Log("  chain own fac=%d plug=%d mat=%d null=%d\n",
+            *reinterpret_cast<void**>(fac) == api[s].pfbVftable ? 1 : 0,
+            *reinterpret_cast<void**>(plug) == api[s].mpVftable ? 1 : 0,
+            *reinterpret_cast<void**>(mat) == api[s].matVftable ? 1 : 0,
+            *reinterpret_cast<void**>(null) == api[s].nullVftable ? 1 : 0);
+        api[s].nullDtor(static_cast<unsigned char*>(null) + 0xa4, nullptr);
+        api[s].matDtor(static_cast<unsigned char*>(mat) + 0xa0, nullptr);
+        api[s].pfbDtor(plug, nullptr);
+        api[s].pfbDtor(fac, nullptr);
+        Log("  chain nodes +%u/-%u mgrrefs=%d\n", nodeMade[cur] - m0, nodeKilled[cur] - k0,
+            *reinterpret_cast<int*>(static_cast<unsigned char*>(managerObj) + 4));
+        FreePString(name);
+        RealDelete(uid);
+        RealDelete(fac);
+        RealDelete(plug);
+        RealDelete(mat);
+        RealDelete(null);
+        RealDelete(third);
         break;
     }
     default:
@@ -1254,6 +1832,7 @@ int main(int argc, char** argv)
     dbVtable[3] = &DbGetFileName;
     *reinterpret_cast<void**>(dbObj) = dbVtable;
     managerVtable[3] = &ManagerCreate;
+    managerVtable[0x14 / 4] = reinterpret_cast<void*>(&ManagerRemove);  // Material's dtor unregisters here
     managerObj = RealNew(0x20);
     std::memset(managerObj, 0, 0x20);
     *static_cast<void**>(managerObj) = managerVtable;
@@ -1338,6 +1917,9 @@ int main(int argc, char** argv)
     pluginVtable[3] = reinterpret_cast<void*>(&PluginCreateBare);
     pluginVtable[4] = reinterpret_cast<void*>(&PluginSupported);
     pluginVtable[5] = reinterpret_cast<void*>(&PluginCreate);
+    // capture the UId-only LookupPluginType before it is patched, so the hook can delegate outside kinds 14/19
+    RealLookupUid = As<LookupUidFn>(ImportFunction(
+        mod[1], "?LookupPluginType@PluginBase@Jet@@KA?AVResult@2@PAPAVPluginType@2@ABVUId@2@@Z"));
     for (int s = 0; s < 2; ++s) {
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
@@ -1347,15 +1929,18 @@ int main(int argc, char** argv)
         PatchImport(mod[s], "?Destroy@PStringCache@Jet@@QAAXPAUNode@12@@Z", reinterpret_cast<void*>(&HookDestroyNode));
         PatchImport(mod[s], "?LookupPluginType@PluginBase@Jet@@KA?AVResult@2@PAPAVPluginType@2@ABVUId@2@ABVPString@2@@Z",
                     reinterpret_cast<void*>(&HookLookup));
+        PatchImport(mod[s], "?LookupPluginType@PluginBase@Jet@@KA?AVResult@2@PAPAVPluginType@2@ABVUId@2@@Z",
+                    reinterpret_cast<void*>(&HookLookupUid));
     }
     for (int round = 0; round < rounds; ++round) {
         std::mt19937 r(round * 2654435761u + 17);
-        for (int scenario = 0; scenario < 8; ++scenario) {
+        for (int scenario = 0; scenario < 20; ++scenario) {
             materialUsed = 0;
             pick2Full = (r() % 2) != 0;
             for (unsigned i = 0; i < 16; ++i) texturesByType[i] = (r() % 3) == 0;
             plugins[5]->fallbackName = r() % 2 ? "oneten" : "gloss";
             for (int s = 0; s < 2; ++s) {
+                if (const char* only = std::getenv("RS_U7_SIDE")) if (std::atoi(only) != s) continue;
                 // the material stand-ins are memset again for each side: the pool is shared memory, so a side
                 // must not see the name fields the other side left on a material the same plugin hands out
                 materialUsed = 0;

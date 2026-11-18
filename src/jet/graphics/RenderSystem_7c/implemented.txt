@@ -2208,3 +2208,42 @@
 # MaterialFields.cpp)
 ?CreateGeometryChunk@NullMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@@Z=?RsNullMaterialCreateGeometryChunk@Jet@@YAPAVGeometryChunk@1@PAXIIIIHPBVGeometryChunkCreateHint@1@@Z
 ?SetLightingState@Material@Jet@@QBAXPAVDisplay@2@PBVMatrix4@2@PBVGeometryChunk@2@PBVVertexProgram@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@1M_N@Z=?RsMaterialSetLightingState@Jet@@YAXPAXPAVDisplay@1@PBVMatrix4@1@PBX333M_N@Z
+
+# U7 material/plugin lifetime and shared data (MaterialLifetime.cpp, MaterialStatics.cpp): aliases to our helpers.
+# gen_def.py quotes mangled entry names when an alias resolves to an undecorated C symbol.
+# Without the quotes link.exe truncates the export name at its first @.
+??0?$PluginFactoryBase@VMaterial@Jet@@@Jet@@QAE@ABV01@@Z=@RsU7FactoryCopyCtor@12
+??0?$PluginFactoryBase@VMaterial@Jet@@@Jet@@QAE@ABVPString@1@ABVUId@1@1@Z=@RsU7FactoryCtor@20
+??1?$PluginFactoryBase@VMaterial@Jet@@@Jet@@UAE@XZ=@RsU7FactoryDtor@8
+??4?$PluginFactoryBase@VMaterial@Jet@@@Jet@@QAEAAV01@ABV01@@Z=@RsU7FactoryAssign@12
+??1MaterialPlugin@Jet@@UAE@XZ=@RsU7FactoryDtor@8
+??4MaterialPlugin@Jet@@QAEAAV01@ABV01@@Z=@RsU7FactoryAssign@12
+??0MaterialPlugin@Jet@@QAE@ABV01@@Z=@RsU7MaterialPluginCopyCtor@12
+??0MaterialPlugin@Jet@@QAE@ABVPString@1@ABVUId@1@@Z=@RsU7MaterialPluginCtor@16
+??0Material@Jet@@QAE@PAVMaterialManager@1@@Z=@RsU7MaterialCtor@16
+??1Material@Jet@@MAE@XZ=@RsU7MaterialDtor@8
+??_DMaterial@Jet@@IAEXXZ=@RsU7MaterialVbaseDtor@8
+??MMaterial@Jet@@QBA_NABV01@@Z=?RsU7MaterialLess@@YA_NPBX0@Z
+?CreateInstance@Material@Jet@@SAPAV12@ABVUId@2@PAVMaterialManager@2@@Z=?RsU7MaterialCreateInstanceId@@YAPAXPBXPAX@Z
+?CreateInstance@Material@Jet@@SAPAV12@ABVPString@2@PAVMaterialManager@2@@Z=?RsU7MaterialCreateInstanceName@@YAPAXPBXPAX@Z
+??0NullMaterial@Jet@@QAE@ABVPString@1@@Z=@RsU7NullMaterialCtor@16
+??1NullMaterial@Jet@@UAE@XZ=@RsU7NullMaterialDtor@8
+??_DNullMaterial@Jet@@QAEXXZ=@RsU7NullMaterialVbaseDtor@8
+?CreateInstance@NullMaterial@Jet@@UBAPAVMaterial@2@XZ=?RsU7NullCreateInstance@@YAPAXPBX@Z
+??8NullMaterial@Jet@@UBA_NABVMaterial@1@@Z=?RsU7NullEquals@@YA_NPBX0@Z
+?DecoratedTypeToken@Material@Jet@@2VPString@2@A=?RsMatDecoratedTypeToken@@3PAEA
+?STRING_NOT_FOUND@Material@Jet@@2VPString@2@A=?RsMatStringNotFound@@3PAEA
+?results@Material@Jet@@2QBUResultTable@2@B=?RsMaterialResults@@3PAEA
+?results@MaterialManager@Jet@@2QBUResultTable@2@B=?RsMaterialManagerResults@@3PAEA
+?uniqueMatId@Material@Jet@@0KA=?RsMatUniqueMatId@@3PAEA
+?PluginGroupName@MaterialPlugin@Jet@@2VPString@2@A=?RsMatPluginGroupName@@3PAEA
+?PluginGroupUID@MaterialPlugin@Jet@@2VUId@2@A=?RsMatPluginGroupUid@@3PAEA
+??_7?$PluginFactoryBase@VMaterial@Jet@@@Jet@@6B@=?RsMatVftablePluginFactory@@3PAPAXA
+??_7Material@Jet@@6B01@@=?RsMatVftableMaterial@@3PAPAXA
+??_7Material@Jet@@6BPluginInstance@1@@=?RsMatVftableMaterialInstance@@3PAPAXA
+??_7MaterialConfig@Jet@@6B@=?RsMatVftableMaterialConfig@@3PAPAXA
+??_7MaterialPlugin@Jet@@6B@=?RsMatVftableMaterialPlugin@@3PAPAXA
+??_7NullMaterial@Jet@@6BMaterial@1@@=?RsMatVftableNullMaterial@@3PAPAXA
+??_7NullMaterial@Jet@@6BPluginInstance@1@@=?RsMatVftableNullMaterialInstance@@3PAPAXA
+??_8Material@Jet@@7B@=?RsMatVbtableMaterial@@3PAHA
+??_8NullMaterial@Jet@@7B@=?RsMatVbtableNullMaterial@@3PAHA

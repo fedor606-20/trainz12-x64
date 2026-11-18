@@ -600,5 +600,8 @@ heap memory, the kind-alone runs had only seen fresh pages.
 
 Regressions green (diff_rs_u6d 200, u6c2 200, u6c 200, u6b 300, u6 300, all 0 mismatches); the exported
 vftables are unchanged (the not-yet-implemented classes differ as before). Menu check: alive at the menu,
-clean exit, JetLog identical (diff_lines=0). Remaining U7: the PluginFactoryBase families, the Material /
-NullMaterial ctors and dtors, and the seven shared data statics (until U9).
+clean exit, JetLog identical (diff_lines=0). Since then the PluginFactoryBase / MaterialPlugin families and
+the Material / NullMaterial lifetime, instance creation, comparison and data mirrors have been ported
+(2185/2687 exports, 502 forwarded). Remaining U7: the five U9/foundation members (the three Display and two
+RenderKernel material-mode/manager accessors) and the seven shared data statics, which stay original until
+U9.

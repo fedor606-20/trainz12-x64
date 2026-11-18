@@ -2662,3 +2662,35 @@ real .texture files), all 0 mismatches. compare_vtables.py: the exported vftable
 not-yet-implemented classes still differ, as before). The menu check passed (alive at the menu, clean exit,
 JetLog identical to the baseline: diff_lines=0). Remaining U7: the PluginFactoryBase families, the
 Material / NullMaterial ctors and dtors, and the seven shared data statics (until U9).
+
+## RenderSystem U7 material lifetime, factories and data mirrors (2026-11-19)
+
+`MaterialLifetime.cpp` implements the PluginFactoryBase<Material> / MaterialPlugin ctors, copy ctors,
+assignment and destructors, the Material and NullMaterial ctors/dtors/vbase dtors, both CreateInstance
+overloads, operator< and the NullMaterial virtuals; `MaterialStatics.cpp` exports the seven shared statics
+(still owned and advanced by the original DLL until U9) and mirrors every vftable/vbtable, replacing only
+NullMaterial's two slots. `MaterialInstance.cpp` now takes its id from the original counter through
+`RsMatNextUniqueId()`. 35 new exports: 17 implementing functions, 2 aliases sharing the factory dtor and
+assignment, 16 data/vftable/vbtable symbols. RenderSystem is 2185/2687 ours, 502 forwarded;
+check_exports.py 2687/0/0, check_thunks.py 2185 checked / 0 not ours.
+
+`diff_rs_u7` grew to 20 scenarios (factory/plugin lifetime, rings, vbase pointer writes, TS12 operator<,
+RTTI-bearing NullMaterial comparison, exported data and vtable dumps, combined unwind): 3000 rounds,
+60000 checks, 0 mismatches. All five U6 regressions are green again (0 mismatches).
+
+The differential test alone was not sufficient. The first in-game run crashed with `c0000005` in ntdll
+during shutdown even though all 60000 differential checks passed; A/B with the previous DLL reproduced
+it deterministically. The crash dumps showed a stack overflow: ~19900 frames of 52 bytes, every one holding
+`RsU7FactoryDtor`, and the disassembly pinned the return address to the call at RVA+4. Three defects the
+test could not observe had to be fixed in `MaterialStatics.cpp`: every mirrored vftable lacked the
+Complete-Object-Locator at `vptr[-1]` read by `__RTDynamicCast`/EH (each array now owns the word directly
+before its exported first slot, filled from the original); the PluginFactory table has four slots, not the
+three the test dumped; and the two replaced NullMaterial slots need __thiscall thunks, not the raw __cdecl
+exports. Fourth and decisive: `~PluginType()` is virtual in the project header, so the unqualified call in
+`RsU7FactoryDtor` dispatched through our mirrored vftable slot 2 (the original's scalar deleting destructor,
+which calls `PluginFactoryBase<Material>::~PluginFactoryBase` — our own export) and recursed. A qualified
+`->Jet::PluginType::~PluginType()` restores the original's direct call; the game now exits cleanly,
+JetLog 889 bytes, menu check `diff_lines=0`.
+
+Remaining U7: the five U9/foundation members (Display::Get/SetColorMaterialMode, SetMaterialProperties,
+RenderKernel::Get/SetMaterialManager) and the seven shared statics, which stay original until U9.
