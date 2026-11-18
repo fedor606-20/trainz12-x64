@@ -179,6 +179,7 @@ unsigned __cdecl RsMatGeometryFlags(int type, const void* hint)
 }
 float __fastcall RsMatAssetVersion(void* p, void*) { return Field<float>(p, 0x20); }
 void __fastcall RsMatSetAssetVersion(void* p, void*, float value) { Field<float>(p, 0x20) = value; }
+int __cdecl RsMatDstBlendMode(void* p) { return Field<int>(p, 0x7c); }
 int* __cdecl RsMatSplitName(int* result, const PString* name, PString* extension, PString* prefix)
 {
     const char* text = name->Text();

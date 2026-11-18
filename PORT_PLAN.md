@@ -127,7 +127,7 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        tested. Their shared data exports still come from the original DLL, and the power generators call the original
        VC80 pow import. U7 is underway: MaterialSpec, material name conversions, material state accessors, and the
        instance state (Equals, InitInstance, Rename, SetTextureDefinition, VerifyDecoratedName) are ported. Current
-       RenderSystem count: 2130/2687 exports; 557 still forwarded. This laboratory 32-bit build
+       RenderSystem count: 2131/2687 exports; 556 still forwarded. This laboratory 32-bit build
        reached the main menu on 2026-11-18; a fixed driving session still needs a separate game check. Continue U7
        and the remaining units; do not treat forwarding as x64 completion.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).

@@ -1,4 +1,4 @@
-# RenderSystem_7c.dll: reconstruction plan
+﻿# RenderSystem_7c.dll: reconstruction plan
 
 Status: 2026-10-26. U0 (proxy), U1 (value types, vertex records; 939 exports), U4 (modifiers; 54 exports), U2a
 (shader-language data; 99 exports) and U2b1 (ExtendedGfxLanguage, TextureCombiner records; 44 exports) are ours and
@@ -407,7 +407,7 @@ NullMaterial SetTexture pair, VerifyDecoratedName and six leaf accessors (Get/Se
 0x10004340, GetNumPasses, IsLoaded, GetRenderKernel, GetTextureManager). 15 more exports; RenderSystem is now
 2127 of 2687 ours, 560 forwarded (`check_thunks.py`: 2127 checked, 0 not ours). The manager's table trio
 (Add / Remove / Find) followed in the same session: the table at +0x14 is {buckets, count, size} over 97
-FastDynamicArray buckets of Material*, keyed by the decorated name node (+0x24); 2130 of 2687 ours.
+FastDynamicArray buckets of Material*, keyed by the decorated name node (+0x24); 2131 of 2687 ours.
 
 Layouts and behaviour kept from the assembly:
 
@@ -438,3 +438,4 @@ Create/Add/Remove/Find (0x10035670..0x10035e20), the MaterialConfig extractors (
 MaterialResource::CreateInstance and LoadTxt (0x10036060 / 0x10036080), NullMaterial::CreateGeometryChunk
 (0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState (0x10032960), the PluginFactoryBase
 families and the seven shared data statics (they stay the original's until U9, like the other module state).
+

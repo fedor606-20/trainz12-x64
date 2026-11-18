@@ -1281,6 +1281,8 @@ static void ExerciseMaterialFields()
         setBlend(object, mode == 0 ? 1 : mode, mode == 0 ? 0 : 2);
         As<void(__cdecl*)(void*)>(Proc(mod[cur], "?SetIsFallback@Material@Jet@@IAAXXZ"))(object);
         int src = -1, dst = -1; getBlend(object, &src, &dst);
+        const unsigned dstGetter = As<Getter>(Proc(mod[cur], "?GetDstBlendMode@Material@Jet@@QBA?AW4Factor@Dst@2@XZ"))(object);
+        if (dstGetter != static_cast<unsigned>(dst)) Log(" dst-mismatch %u %d", dstGetter, dst);
         Log("  flags %02x blend %d %d src %u", object[0x84], src, dst,
             As<Getter>(Proc(mod[cur], "?GetSrcBlendMode@Material@Jet@@QBA?AW4Factor@Src@2@XZ"))(object));
         for (auto name : flags) Log(" %d", As<FlagGetter>(Proc(mod[cur], name))(object));

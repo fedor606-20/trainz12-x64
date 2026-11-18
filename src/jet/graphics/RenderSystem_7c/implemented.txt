@@ -2179,3 +2179,5 @@
 ?Add@MaterialManager@Jet@@UAAXPAVMaterial@2@@Z=?RsMatManagerAdd@Jet@@YAXPAX0@Z
 ?Find@MaterialManager@Jet@@UAAPAVMaterial@2@ABVPString@2@@Z=?RsMatManagerFind@Jet@@YAPAXPAXPBX@Z
 ?Remove@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@PAVMaterial@2@@Z=?RsMatManagerRemove@Jet@@YAPAHPAXPAH0@Z
+# U7 leaf ops
+?GetDstBlendMode@Material@Jet@@QBA?AW4Factor@Dst@2@XZ=?RsMatDstBlendMode@Jet@@YAHPAX@Z

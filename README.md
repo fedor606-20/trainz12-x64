@@ -71,7 +71,7 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 | InputDirectX_7c | 19 KB | 122 | 0/1 | ⬜ not started |
 | 🎨 **Graphics** | | | | |
 | Render2DCore_7c | 17 KB | 167 | 85/85 | ✅ done |
-| RenderSystem_7c | 351 KB | 3,628 | 2130/2687 | 🟡 partial |
+| RenderSystem_7c | 351 KB | 3,628 | 2131/2687 | 🟡 partial |
 | Render3DCore_7c | 458 KB | 3,168 | 0/2500 | ⬜ not started |
 | Render3DFoundation_7c | 194 KB | 1,453 | 0/1084 | ⬜ not started |
 | Render3DExtension_7c | 38 KB | 326 | 0/186 | ⬜ not started |

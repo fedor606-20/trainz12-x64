@@ -2481,3 +2481,16 @@ PluginGroupName/UID, the two results tables) stay the original's until U9.
 - Who loads `ijl10.dll`, `cudart.dll`, `dx7vb.dll` at runtime?
 - Does `trainznativeinterface.dll` + OpenSSL do licence checks that a rebuilt exe must keep?
 - Exact GS (TrainzScript) bytecode format and whether it stores 32-bit pointers in the VM.
+
+## RenderSystem U7 leaf accessor (2026-11-18)
+
+Material::GetDstBlendMode (+0x7c, 0x1000d2d0) implemented as RsMatDstBlendMode in
+src/jet/graphics/RenderSystem_7c/MaterialFields.cpp and claimed in implemented.txt. src/jet/tests/diff_rs_u6d.cpp
+now exercises it in the material field blend scenarios (value compared to GetBlendMode output, no log change on match):
+10 scenarios, 0 mismatches vs RenderSystem_7c_orig.dll; diff_rs_u6c2 50 scenarios, 0 mismatches.
+	ools/check_thunks.py reports 2131 checked, 0 not ours. RenderSystem: 2131/2687 exports ours (556 forwarded).
+Remaining U7 work: MaterialManager::Create, Material/MaterialManager/MaterialResource/NullMaterial core
+ctors/dtors/CreateInstance/LoadTxt paths, MaterialConfig GetMaterial/extractors/CreateNewMaterial paths,
+NullMaterial::CreateGeometryChunk (+ GeometryChunkTemplate helper), SetLightingState, comparison/vbase-destructor
+exports as needed, and plugin-factory/type/data exports (defer PluginType/PluginFactoryBase<Material> construction
+paths that require unresolved AnsiString(UnicodeString const&)-level replication until understood).
