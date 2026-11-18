@@ -2117,7 +2117,7 @@
 ?GetRequestName@Material@Jet@@QBAABVPString@2@XZ=?RsMatPtr30@Jet@@YAPAXPAX@Z
 ?SetCreationType@Material@Jet@@QAAXABVPString@2@@Z=?RsMatSetCreationType@Jet@@YAXPAXPAVPString@1@@Z
 ?SetRequestName@Material@Jet@@QAAXABVPString@2@@Z=?RsMatSetRequestName@Jet@@YAXPAXPAVPString@1@@Z
-?Init@MaterialManager@Jet@@UAA_NPAVRenderKernel@2@@Z=?RsMatManagerInit@Jet@@YA_NPAX0@Z
+?Init@MaterialManager@Jet@@UAA_NPAVRenderKernel@2@@Z
 ?GetDefaultMaterialType@MaterialManager@Jet@@QBAABVPString@2@XZ=?RsMatManagerDefault@Jet@@YAPAXPAX@Z
 ?SetDefaultMaterialType@MaterialManager@Jet@@QAAXABVPString@2@@Z=?RsMatManagerSetDefault@Jet@@YAXPAXPAVPString@1@@Z
 ?GetPropertyString@Material@Jet@@UBAABVPString@2@ABV32@@Z=?RsMatGetPropertySimple@Jet@@YAPAVPString@1@PAXPBV21@@Z
@@ -2175,9 +2175,12 @@
 ?SetTextureDefinition@Material@Jet@@IAAXHABVPString@2@M@Z=?RsMatSetTextureDefinition@Jet@@YAXPAXHPBXM@Z
 ?VerifyDecoratedName@Material@Jet@@SAXAAVString@2@IABV?$DynamicArray@UTextureDef@Material@Jet@@$06U?$Less@UTextureDef@Material@Jet@@U123@@3@@2@@Z=?RsMatVerifyDecoratedName@Jet@@YAXPAXIPBX@Z
 
-# U7 MaterialManager table (Add, Remove, Find)
-?Add@MaterialManager@Jet@@UAAXPAVMaterial@2@@Z=?RsMatManagerAdd@Jet@@YAXPAX0@Z
-?Find@MaterialManager@Jet@@UAAPAVMaterial@2@ABVPString@2@@Z=?RsMatManagerFind@Jet@@YAPAXPAXPBX@Z
-?Remove@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@PAVMaterial@2@@Z=?RsMatManagerRemove@Jet@@YAPAHPAXPAH0@Z
+# U7 MaterialManager lifetime and table (MaterialManager.cpp: the vftable, ctor, dtor, Init, Add/Remove/Find)
+??0MaterialManager@Jet@@QAE@PAVTextureManager@1@@Z
+??1MaterialManager@Jet@@UAE@XZ
+??_7MaterialManager@Jet@@6B@
+?Add@MaterialManager@Jet@@UAAXPAVMaterial@2@@Z
+?Find@MaterialManager@Jet@@UAAPAVMaterial@2@ABVPString@2@@Z
+?Remove@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@PAVMaterial@2@@Z
 # U7 leaf ops
 ?GetDstBlendMode@Material@Jet@@QBA?AW4Factor@Dst@2@XZ=?RsMatDstBlendMode@Jet@@YAHPAX@Z

@@ -439,3 +439,32 @@ MaterialResource::CreateInstance and LoadTxt (0x10036060 / 0x10036080), NullMate
 (0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState (0x10032960), the PluginFactoryBase
 families and the seven shared data statics (they stay the original's until U9, like the other module state).
 
+## 2026-11-18: U7 MaterialManager lifetime and vftable (MaterialManager.cpp)
+
+The manager is a real class now (`jet/Material.h`), so the module exports its own `??_7MaterialManager@Jet@@6B@`
+(0x100714fc, 7 slots: DeleteThis, the deleting dtor, Init, Create, Add, Remove, Find) and virtual dispatch
+through a manager reaches our code. Layout: ReferenceCount base, kernel +0x08, texture manager +0x0c
+(referenced), the default type PString +0x10 and the material table +0x14 ({buckets, count, size}, the same
+HashTable as the TextureManager's, 97 buckets of 13-item rings).
+
+Kept from the assembly: the ctor (0x10035510) seeds the default type with the node "notex" (0x100714f0),
+inits the table (0x10042d80), then references the texture manager (no null test, as the original) and zeroes
+the kernel; the dtor (0x100355b0) empties the table (0x10035db0), releases the texture manager (null-tested),
+and lets the members go in reverse order (the buckets last, 0x10042e30) before the reference count base.
+Init (0x1000c920) and the table trio moved from their free-function aliases (MaterialFields.cpp,
+MaterialInstance.cpp) into members, so the exports and the vftable slots now name the same code; the table
+behaviour (Add as it comes, Remove the first of the name with the chunk compaction, Find by node) is unchanged
+and still comes from the U7 ring helpers. Create (0x10035670) remains the original's: its plugin-type walk
+is not reconstructed, and both the forwarded export and the vftable slot reach the original.
+
+`check_thunks.py`: 2134 checked, 0 not ours. `compare_vtables.py`: `??_7MaterialManager@Jet@@6B@` 7 slots,
+same. `diff_rs_u6d` gained "op material manager lifetime" (the ctor's state and vftable identity, the empty
+97 buckets, Init through the export and through slot 2, the default type round trip, three materials driven
+through the constructed manager with Find through slot 6 and Remove by export, and the dtor's cleanup read
+back through the alloc log and the cache's usedNodes): 500 rounds, 0 mismatches. The U6 regression probes are
+green (diff_rs_u6c2 500, diff_rs_u6c 500, diff_rs_u6b 300, diff_rs_u6 300 with 400 real .texture files).
+Remaining U7: MaterialManager::Create (0x10035670) is still the original's, the MaterialConfig extractors (0x10033d40..0x10034b40),
+MaterialResource::CreateInstance and LoadTxt (0x10036060 / 0x10036080), NullMaterial::CreateGeometryChunk
+(0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState (0x10032960), the PluginFactoryBase
+families, the Material / NullMaterial / MaterialResource ctors and dtors, and the seven shared data statics.
+

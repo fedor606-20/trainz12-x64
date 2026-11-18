@@ -109,7 +109,6 @@ void __cdecl RsMatSetCreationType(void* p, PString* v)
     target->~PString();
     ::new (target) PString(*v);
 }
-bool __cdecl RsMatManagerInit(void* p, void* kernel) { Field<void*>(p, 8) = kernel; return true; }
 void* __cdecl RsMatManagerDefault(void* p) { return Offset(p, 0x10); }
 void __cdecl RsMatManagerSetDefault(void* p, PString* v)
 {

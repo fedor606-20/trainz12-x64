@@ -1829,6 +1829,67 @@ static void LogMatTable(void* manager)
     }
 }
 
+// the manager's whole lifetime: the ctor's "notex" node and table, Init through the export and the vtable
+// slot, the default type round trip, the table driven through the constructed manager, and the dtor's cleanup
+static void ExerciseMaterialManagerLifetime()
+{
+    using Ctor = void*(__fastcall*)(void*, void*, void*);
+    using Dtor = void(__fastcall*)(void*, void*);
+    using InitFn = bool(__cdecl*)(void*, void*);
+    using Getter = void*(__cdecl*)(void*);
+    using Setter = void(__cdecl*)(void*, const void*);
+    using RemoveFn = int*(__cdecl*)(void*, int*, void*);
+    auto ctor = As<Ctor>(Proc(mod[cur], "??0MaterialManager@Jet@@QAE@PAVTextureManager@1@@Z"));
+    auto dtor = As<Dtor>(Proc(mod[cur], "??1MaterialManager@Jet@@UAE@XZ"));
+    auto init = As<InitFn>(Proc(mod[cur], "?Init@MaterialManager@Jet@@UAA_NPAVRenderKernel@2@@Z"));
+    auto getType = As<Getter>(Proc(mod[cur], "?GetDefaultMaterialType@MaterialManager@Jet@@QBAABVPString@2@XZ"));
+    auto setType = As<Setter>(Proc(mod[cur], "?SetDefaultMaterialType@MaterialManager@Jet@@QAAXABVPString@2@@Z"));
+    auto remove = As<RemoveFn>(Proc(mod[cur],
+        "?Remove@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@PAVMaterial@2@@Z"));
+    Log("op material manager lifetime\n");
+    alignas(4) unsigned char textures[8]{};  // a stand-in texture manager: {vftable, references}
+    At<int>(textures, 4) = 5;
+    alignas(4) unsigned char manager[0x20];
+    std::memset(manager, 0xa5, sizeof manager);
+    ctor(manager, nullptr, textures);
+    Log("  ctor refs %d kernel %d textures %d type %s table %u/%u vft %d\n", At<int>(textures, 4),
+        At<void*>(manager, 8) == nullptr, At<void*>(manager, 0xc) == textures, Text(At<void*>(manager, 0x10)),
+        At<unsigned>(manager, 0x18), At<unsigned>(manager, 0x1c),
+        At<void*>(manager, 0) == Proc(mod[cur], "??_7MaterialManager@Jet@@6B@"));
+    unsigned full = 0;
+    for (unsigned k = 0; k < At<unsigned>(manager, 0x1c); ++k)
+        if (At<void*>(At<void*>(manager, 0x14), k * 4)) ++full;
+    Log("  buckets full %u\n", full);
+    alignas(4) unsigned char kernel[4]{};
+    const bool initOk = init(manager, kernel);
+    Log("  init %d kernel %d\n", initOk, At<void*>(manager, 8) == kernel);
+    At<void*>(manager, 8) = nullptr;
+    const bool vInitOk = SC<bool>(manager, 2, kernel);
+    Log("  vtable init %d kernel %d\n", vInitOk, At<void*>(manager, 8) == kernel);
+    void* type = MakeName("u7-life-type");
+    setType(manager, &type);
+    Log("  default %s\n", Text(At<void*>(getType(manager), 0)));
+    DestroyNode(*cache, type);  // only the manager holds its own node now
+    alignas(4) unsigned char mats[3][0x28];
+    void* entries[3] = {MakeName("u7-life-a"), MakeName("u7-life-b"), MakeName("u7-life-c")};
+    for (int i = 0; i < 3; ++i) {
+        std::memset(mats[i], 0, 0x28);
+        At<void*>(mats[i], 0x24) = entries[i];
+        SC<void>(manager, 4, mats[i]);
+    }
+    Log("  count %u", At<unsigned>(manager, 0x18));
+    for (int i = 0; i < 3; ++i) Log(" %d", SC<void*>(manager, 6, static_cast<unsigned char*>(mats[i]) + 0x24) == mats[i]);
+    void* missing = MakeName("u7-life-missing");
+    Log("  find missing %d\n", SC<void*>(manager, 6, &missing) == nullptr);
+    int result = -1;
+    remove(manager, &result, mats[1]);
+    Log("  remove %d count %u find %d\n", result, At<unsigned>(manager, 0x18),
+        SC<void*>(manager, 6, static_cast<unsigned char*>(mats[1]) + 0x24) == mats[1]);
+    const int used = At<int>(*cache, 0);
+    dtor(manager, nullptr);
+    Log("  dtor refs %d used %d\n", At<int>(textures, 4), At<int>(*cache, 0) - used);
+}
+
 static void ExerciseMaterialManager()
 {
     using Add = void(__cdecl*)(void*, void*);
@@ -2667,6 +2728,7 @@ static void Run(int s, unsigned seed, const Statics& start, void* seeded)
     ExerciseMaterialPropertyMutation();
     ExerciseMaterialInstance();
     ExerciseMaterialManager();
+    ExerciseMaterialManagerLifetime();
     ExerciseCheckDownsize(a, m);
     Log("op refresh settings\n");
     a.refresh(m);

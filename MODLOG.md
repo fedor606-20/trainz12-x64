@@ -2488,9 +2488,42 @@ Material::GetDstBlendMode (+0x7c, 0x1000d2d0) implemented as RsMatDstBlendMode i
 src/jet/graphics/RenderSystem_7c/MaterialFields.cpp and claimed in implemented.txt. src/jet/tests/diff_rs_u6d.cpp
 now exercises it in the material field blend scenarios (value compared to GetBlendMode output, no log change on match):
 10 scenarios, 0 mismatches vs RenderSystem_7c_orig.dll; diff_rs_u6c2 50 scenarios, 0 mismatches.
-	ools/check_thunks.py reports 2131 checked, 0 not ours. RenderSystem: 2131/2687 exports ours (556 forwarded).
+	tools/check_thunks.py reports 2131 checked, 0 not ours. RenderSystem: 2131/2687 exports ours (556 forwarded).
 Remaining U7 work: MaterialManager::Create, Material/MaterialManager/MaterialResource/NullMaterial core
 ctors/dtors/CreateInstance/LoadTxt paths, MaterialConfig GetMaterial/extractors/CreateNewMaterial paths,
 NullMaterial::CreateGeometryChunk (+ GeometryChunkTemplate helper), SetLightingState, comparison/vbase-destructor
 exports as needed, and plugin-factory/type/data exports (defer PluginType/PluginFactoryBase<Material> construction
 paths that require unresolved AnsiString(UnicodeString const&)-level replication until understood).
+
+## RenderSystem U7 MaterialManager lifetime and vftable (2026-11-18)
+
+`jet/Material.h` declares `MaterialManager` as the class the vftable needs (TS12 vftable 0x100714fc): the
+module now exports its own `??_7MaterialManager@Jet@@6B@` (7 slots: DeleteThis, the deleting dtor, Init,
+Create, Add, Remove, Find; `compare_vtables.py` against the original: 7 slots, same), and virtual calls on a
+manager reach our code instead of the original's. Layout: the ReferenceCount base, kernel +0x08, texture
+manager +0x0c (referenced), the default type PString +0x10, and the material table +0x14 ({buckets, count,
+size} = the HashTable the TextureManager also uses: 97 buckets of 13-item ring chunks).
+
+MaterialManager.cpp implements the ctor (0x10035510) and dtor (0x100355b0) from the assembly: the ctor seeds
+the default type with the node "notex" (the literal at 0x100714f0), inits the table (0x10042d80), references
+the texture manager (the original does not test it for null; kept) and zeroes the kernel; the dtor empties the
+table (0x10035db0), releases the texture manager (null-tested), and the members go in reverse order afterwards
+(the buckets last). Init (0x1000c920) and the table trio (Add 0x10035ad0 / Remove 0x10035af0 / Find
+0x10035b50, ring helpers unchanged) moved out of their free-function aliases (MaterialFields.cpp,
+MaterialInstance.cpp) into members, so the exports and the vftable slots name the same functions; the alias
+claims in implemented.txt became plain names. Create (0x10035670) stays the original's (the plugin-type walk
+is not reconstructed): its vftable slot calls the original's export like the forwarded export does.
+
+RenderSystem is 2134 of 2687 exports ours (553 forwarded); check_thunks.py reports 2134 checked, 0 not ours.
+diff_rs_u6d gained "op material manager lifetime" (the ctor's state and vftable identity, the empty buckets,
+Init through the export and through vftable slot 2, the default type round trip, three materials through the
+constructed manager with Find through slot 6, and the dtor's cleanup read back in the alloc log and the
+cache's usedNodes): 500 rounds, 0 mismatches against the original. Regression probes green: diff_rs_u6c2 500,
+diff_rs_u6c 500, diff_rs_u6b 300, diff_rs_u6 300 (400 real .texture files). Housekeeping: the game install
+D:\games\trainz 2012 VDK\bin\RenderSystem_7c.dll held an 18:15 proxy build with no RenderSystem_7c_orig.dll
+next to it (the game cannot start like that, and CMake's ORIG_RS reads the parser tables from that path);
+the pristine module is restored there (hash-checked against D:\trainz12-decomp\bin). The laboratory install
+D:\games\trainz 2012 x64\bin got this build for the next menu check. Remaining U7: MaterialManager::Create
+and the MaterialConfig extractors, MaterialResource::CreateInstance/LoadTxt, NullMaterial::CreateGeometryChunk
+(+ GeometryChunkTemplate), SetLightingState, the Material/NullMaterial/MaterialResource ctors and dtors, and
+the plugin-factory/type/data exports (still deferred as above).

@@ -126,10 +126,13 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        TextureRes and SharedTextureCollection function exports have since been reconstructed and differentially
        tested. Their shared data exports still come from the original DLL, and the power generators call the original
        VC80 pow import. U7 is underway: MaterialSpec, material name conversions, material state accessors, and the
-       instance state (Equals, InitInstance, Rename, SetTextureDefinition, VerifyDecoratedName) are ported. Current
-       RenderSystem count: 2131/2687 exports; 556 still forwarded. This laboratory 32-bit build
+       instance state (Equals, InitInstance, Rename, SetTextureDefinition, VerifyDecoratedName) and the
+       MaterialManager lifetime (ctor 0x10035510, dtor 0x100355b0, Init and the table Add/Remove/Find as class
+       members, our own ??_7MaterialManager@Jet@@6B@ vftable) are ported. Current
+       RenderSystem count: 2134/2687 exports; 553 still forwarded. This laboratory 32-bit build
        reached the main menu on 2026-11-18; a fixed driving session still needs a separate game check. Continue U7
-       and the remaining units; do not treat forwarding as x64 completion.
+       (MaterialManager::Create and the MaterialConfig extractors next) and the remaining units; do not treat
+       forwarding as x64 completion.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
