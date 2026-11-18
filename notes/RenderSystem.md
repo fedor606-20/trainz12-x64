@@ -405,7 +405,9 @@ The material state the manager and the config extractors build on is ours: Equal
 InitInstance (both classes share one body at 0x100331b0 / 0x10037a20), Rename, SetTextureDefinition and the
 NullMaterial SetTexture pair, VerifyDecoratedName and six leaf accessors (Get/SetShininess at 0x10004330 /
 0x10004340, GetNumPasses, IsLoaded, GetRenderKernel, GetTextureManager). 15 more exports; RenderSystem is now
-2127 of 2687 ours, 560 forwarded (`check_thunks.py`: 2127 checked, 0 not ours).
+2127 of 2687 ours, 560 forwarded (`check_thunks.py`: 2127 checked, 0 not ours). The manager's table trio
+(Add / Remove / Find) followed in the same session: the table at +0x14 is {buckets, count, size} over 97
+FastDynamicArray buckets of Material*, keyed by the decorated name node (+0x24); 2130 of 2687 ours.
 
 Layouts and behaviour kept from the assembly:
 

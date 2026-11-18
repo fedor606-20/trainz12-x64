@@ -1808,6 +1808,94 @@ static void ExerciseMaterialInstance()
     }
 }
 
+static void LogMatTable(void* manager)
+{
+    void* buckets = At<void*>(manager, 0x14);
+    const unsigned size = At<unsigned>(manager, 0x1c);
+    Log("  table count %u\n", At<unsigned>(manager, 0x18));
+    for (unsigned k = 0; k < size; ++k) {
+        auto* head = static_cast<unsigned char*>(At<void*>(buckets, k * 4));
+        if (!head) continue;
+        Log("  bucket %u", k);
+        unsigned char* ring = head;
+        do {
+            const unsigned count = At<unsigned>(ring, 8);
+            for (unsigned i = 0; i < count; ++i) Log(" %s", Text(At<void*>(At<void*>(ring, 12 + i * 4), 0x24)));
+            ring = At<unsigned char*>(ring, 0);
+        } while (ring != head);
+        Log("\n");
+    }
+}
+
+static void ExerciseMaterialManager()
+{
+    using Add = void(__cdecl*)(void*, void*);
+    using Remove = int*(__cdecl*)(void*, int*, void*);
+    using Find = void*(__cdecl*)(void*, const void*);
+    auto add = As<Add>(Proc(mod[cur], "?Add@MaterialManager@Jet@@UAAXPAVMaterial@2@@Z"));
+    auto remove = As<Remove>(Proc(mod[cur],
+        "?Remove@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@PAVMaterial@2@@Z"));
+    auto find = As<Find>(Proc(mod[cur], "?Find@MaterialManager@Jet@@UAAPAVMaterial@2@ABVPString@2@@Z"));
+    Log("op material manager table\n");
+    alignas(4) unsigned char manager[0x28]{};
+    auto* block = static_cast<unsigned char*>(RealNew(4 + 97 * 4));
+    std::memset(block, 0, 4 + 97 * 4);
+    At<unsigned>(block, 0) = 97;
+    At<void*>(manager, 0x14) = block + 4;
+    At<unsigned>(manager, 0x1c) = 97;
+    // names grouped by bucket: the fullest bucket gets the two-chunk treatment
+    std::vector<void*> names;
+    std::vector<int> groups[97];
+    for (int i = 0; i < 48; ++i) {
+        char text[32];
+        std::snprintf(text, sizeof text, "u7-mgr-%d", i);
+        void* node = MakeName(text);
+        names.push_back(node);
+        groups[reinterpret_cast<unsigned>(node) % 97].push_back(i);
+    }
+    const std::vector<int>* best = &groups[0];
+    for (auto& g : groups)
+        if (g.size() > best->size()) best = &g;
+    alignas(4) unsigned char mats[20][0x28];
+    std::vector<void*> materials;
+    for (unsigned i = 0; i < best->size() && i < 20; ++i) {
+        std::memset(mats[i], 0, 0x28);
+        At<void*>(mats[i], 0x24) = names[(*best)[i]];
+        materials.push_back(mats[i]);
+    }
+    for (void* m : materials) add(manager, m);
+    LogMatTable(manager);
+    for (void* m : materials) Log("  find %s %d\n", Text(At<void*>(m, 0x24)), find(manager, static_cast<unsigned char*>(m) + 0x24) == m);
+    void* missing = MakeName("u7-mgr-missing");
+    Log("  find missing %d\n", find(manager, &missing) == nullptr);
+    // a name added twice: Remove takes the first entry with that node
+    if (materials.size() >= 2) {
+        alignas(4) unsigned char twin[0x28]{};
+        At<void*>(twin, 0x24) = At<void*>(materials[0], 0x24);
+        add(manager, twin);
+        Log("  twin find %d\n", find(manager, static_cast<unsigned char*>(twin) + 0x24) == materials[0]);
+        int result = -1;
+        remove(manager, &result, twin);
+        Log("  twin remove %d first-gone %d\n", result, find(manager, static_cast<unsigned char*>(twin) + 0x24) != materials[0]);
+    }
+    // every other one goes, then the rest
+    for (unsigned i = 0; i < materials.size(); i += 2) {
+        int result = -1;
+        remove(manager, &result, materials[i]);
+        Log("  remove %u %d\n", i, result);
+    }
+    LogMatTable(manager);
+    for (unsigned i = 1; i < materials.size(); i += 2) {
+        int result = -1;
+        remove(manager, &result, materials[i]);
+        Log("  remove %u %d\n", i, result);
+    }
+    int result = -1;
+    remove(manager, &result, materials[materials.size() - 1]);
+    Log("  remove again %d\n", result);
+    LogMatTable(manager);
+}
+
 static void ExerciseMaterialConversions()
 {
     using Ctor = void*(__fastcall*)(void*, void*);
@@ -2576,6 +2664,7 @@ static void Run(int s, unsigned seed, const Statics& start, void* seeded)
     ExerciseNullMaterial();
     ExerciseMaterialPropertyMutation();
     ExerciseMaterialInstance();
+    ExerciseMaterialManager();
     ExerciseCheckDownsize(a, m);
     Log("op refresh settings\n");
     a.refresh(m);

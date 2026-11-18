@@ -365,4 +365,121 @@ void __cdecl RsMatVerifyDecoratedName(void* name, unsigned hint, const void* tex
     text.Ins(tag, text.Length());
 }
 
+// ---------------------------------------------------------------------------------------------------------------
+// the manager's table (Add 0x10035ad0 / Remove 0x10035af0 / Find 0x10035b50, helpers 0x10035c80 / 0x10035cf0 /
+// 0x10035e20 with the rings 0x1000d530 / 0x1000d5b0): the table at +0x14 is {buckets, count, size} over 97
+// FastDynamicArray buckets of Material*, keyed by the decorated name node at +0x24; the ring chunks hold 13
+// items (0x40). Add inserts as it finds it (duplicates stay), Remove takes the first entry with the same name
+// node and compacts the chunk (a chunk of one goes, the head chunk moving on)
+
+namespace {
+struct MatRing {
+    MatRing* next;
+    MatRing* prev;
+    unsigned count;
+    void* items[13];
+};
+struct MatBucket {
+    MatRing* head;
+};
+struct MatTable {
+    MatBucket* buckets;
+    unsigned count;
+    unsigned size;
+};
+MatTable& Table(void* manager) { return Field<MatTable>(manager, 0x14); }
+
+void BucketAppend(MatBucket& b, void* material)
+{
+    MatRing*& head = b.head;
+    MatRing* tail = head ? head->prev : nullptr;
+    if (!tail || tail->count == 13) {
+        auto* ring = static_cast<MatRing*>(Alloc::New(sizeof(MatRing)));
+        ring->count = 0;
+        if (!head) {
+            head = ring;
+            ring->next = ring->prev = ring;
+        } else {
+            ring->next = head;
+            ring->prev = tail;
+            tail->next = ring;
+            head->prev = ring;
+        }
+        tail = ring;
+    }
+    tail->items[tail->count++] = material;
+}
+
+// the first entry whose material's name node is `node`
+bool FindItem(MatTable& t, void* node, MatRing*& outRing, unsigned& outIndex)
+{
+    MatRing* first = t.buckets[reinterpret_cast<unsigned int>(node) % t.size].head;
+    if (!first) return false;
+    MatRing* ring = first;
+    do {
+        for (unsigned i = 0; i < ring->count; ++i)
+            if (Field<void*>(ring->items[i], 0x24) == node) {
+                outRing = ring;
+                outIndex = i;
+                return true;
+            }
+        ring = ring->next;
+    } while (ring != first);
+    return false;
+}
+
+void BucketRemoveAt(MatBucket& b, MatRing* ring, unsigned index)
+{
+    void** at = &ring->items[index];
+    void** last = &ring->items[ring->count - 1];
+    if (at < last) std::memmove(at, at + 1, reinterpret_cast<char*>(last) - reinterpret_cast<char*>(at));
+    if (ring->count == 1) {
+        MatRing*& head = b.head;
+        MatRing* next = ring->next;
+        ring->prev->next = ring->next;
+        ring->next->prev = ring->prev;
+        const bool wasHead = ring == head;
+        Alloc::Delete(ring);
+        if (wasHead) head = next == ring ? nullptr : next;
+    } else {
+        --ring->count;
+    }
+}
+}  // namespace
+
+// 0x10035ad0
+void __cdecl RsMatManagerAdd(void* self, void* material)
+{
+    MatTable& t = Table(self);
+    ++t.count;
+    BucketAppend(t.buckets[reinterpret_cast<unsigned int>(Field<void*>(material, 0x24)) % t.size], material);
+}
+
+// 0x10035af0: 0 when the entry went, 4 when the table has no such name
+int* __cdecl RsMatManagerRemove(void* self, int* result, void* material)
+{
+    MatTable& t = Table(self);
+    void* node = Field<void*>(material, 0x24);
+    MatRing* ring;
+    unsigned index;
+    if (FindItem(t, node, ring, index)) {
+        --t.count;
+        BucketRemoveAt(t.buckets[reinterpret_cast<unsigned int>(node) % t.size], ring, index);
+        *result = 0;
+    } else {
+        *result = 4;
+    }
+    return result;
+}
+
+// 0x10035b50
+void* __cdecl RsMatManagerFind(void* self, const void* name)
+{
+    MatTable& t = Table(self);
+    MatRing* ring;
+    unsigned index;
+    void* node = *static_cast<void* const*>(name);
+    return FindItem(t, node, ring, index) ? ring->items[index] : nullptr;
+}
+
 }  // namespace Jet

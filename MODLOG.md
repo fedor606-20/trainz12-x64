@@ -2450,8 +2450,11 @@ InitInstance (0x100331b0 and its identical NullMaterial twin 0x10037a20), Rename
 SetTextureDefinition (0x1000c030) and the NullMaterial SetTexture pair (0x100379c0 / 0x100379f0),
 VerifyDecoratedName (0x10032df0), and the leaf accessors GetShininess / SetShininess (0x10004330 / 0x10004340,
 shared with Display::Get/SetNormalLength), GetNumPasses (0x10023b90), IsLoaded (0x1000c860), GetRenderKernel
-(0x1000cab0) and GetTextureManager (0x100106c0). RenderSystem is 2127 of 2687 exports ours (560 forwarded);
-check_thunks.py reports 2127 checked, 0 not ours.
+(0x1000cab0) and GetTextureManager (0x100106c0), and the manager's table trio Add / Remove / Find
+(0x10035ad0 / 0x10035af0 / 0x10035b50). RenderSystem is 2130 of 2687 exports ours (557 forwarded);
+check_thunks.py reports 2130 checked, 0 not ours. The manager's table at +0x14 is {buckets, count, size} over
+97 FastDynamicArray buckets of Material*, keyed by the decorated name node at +0x24; Add inserts duplicates
+as they come, Remove takes the first entry with the same name node and compacts the 13-item ring chunks.
 
 Confirmed from the assembly and kept: the texture definitions are {type, name, weight} at +0x90 in seven-item
 ring chunks (the property pairs {key, value} sit at +0x88) and only an appended definition bumps the count at

@@ -2174,3 +2174,8 @@
 ?SetTexture@NullMaterial@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HPBVResourceDatabase@2@ABVPString@2@MABVString@2@@Z=?RsNullMatSetTextureNamed@Jet@@YAPAHPAXPAHHPBX2M2@Z
 ?SetTextureDefinition@Material@Jet@@IAAXHABVPString@2@M@Z=?RsMatSetTextureDefinition@Jet@@YAXPAXHPBXM@Z
 ?VerifyDecoratedName@Material@Jet@@SAXAAVString@2@IABV?$DynamicArray@UTextureDef@Material@Jet@@$06U?$Less@UTextureDef@Material@Jet@@U123@@3@@2@@Z=?RsMatVerifyDecoratedName@Jet@@YAXPAXIPBX@Z
+
+# U7 MaterialManager table (Add, Remove, Find)
+?Add@MaterialManager@Jet@@UAAXPAVMaterial@2@@Z=?RsMatManagerAdd@Jet@@YAXPAX0@Z
+?Find@MaterialManager@Jet@@UAAPAVMaterial@2@ABVPString@2@@Z=?RsMatManagerFind@Jet@@YAPAXPAXPBX@Z
+?Remove@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@PAVMaterial@2@@Z=?RsMatManagerRemove@Jet@@YAPAHPAXPAH0@Z
