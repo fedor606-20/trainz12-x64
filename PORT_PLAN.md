@@ -128,10 +128,14 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        VC80 pow import. U7 is underway: MaterialSpec, material name conversions, material state accessors, and the
        instance state (Equals, InitInstance, Rename, SetTextureDefinition, VerifyDecoratedName) and the
        MaterialManager lifetime (ctor 0x10035510, dtor 0x100355b0, Init and the table Add/Remove/Find as class
-       members, our own ??_7MaterialManager@Jet@@6B@ vftable) are ported. Current
-       RenderSystem count: 2134/2687 exports; 553 still forwarded. This laboratory 32-bit build
+       members, our own ??_7MaterialManager@Jet@@6B@ vftable) and MaterialManager::Create (0x10035670, the
+       plugin-type walk) with the static SplitDecoratedMaterialName (0x10035b80) and the six MaterialConfig
+       extractors (ExtractMaterialSpec/Specs, ExtractMaterial/Materials, GetMaterial, CreateNewMaterial) are
+       ported and differentially tested (tests/diff_rs_u7.cpp). Current
+       RenderSystem count: 2141/2687 exports; 546 still forwarded. This laboratory 32-bit build
        reached the main menu on 2026-11-18; a fixed driving session still needs a separate game check. Continue U7
-       (MaterialManager::Create and the MaterialConfig extractors next) and the remaining units; do not treat
+       (MaterialResource CreateInstance/LoadTxt, NullMaterial::CreateGeometryChunk, SetLightingState and the
+       plugin-factory families next) and the remaining units; do not treat
        forwarding as x64 completion.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).

@@ -468,3 +468,47 @@ MaterialResource::CreateInstance and LoadTxt (0x10036060 / 0x10036080), NullMate
 (0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState (0x10032960), the PluginFactoryBase
 families, the Material / NullMaterial / MaterialResource ctors and dtors, and the seven shared data statics.
 
+## 2026-11-19: U7 MaterialManager::Create and the MaterialConfig extractors (MaterialManager.cpp, MaterialConfigExtract.cpp, MaterialSpec.cpp)
+
+MaterialSpec is now the real layout in `jet/Material.h` (name +0x00, rename +0x04, DisplayMaterial +0x08,
+values[3] +0x4c, flag +0x58, the properties ring +0x5c, the textures ring +0x60, flags[8] +0x64; sizeof 0x6c).
+`MaterialEntries<T>` (the seven-item ring chunks, {next, prev, count, 7 items}) moved to the header with
+Append/Count/At; MaterialSpec.cpp keeps only the lifetime and the chunk-preserving copy.
+
+MaterialManager::Create (0x10035670) and SplitDecoratedMaterialName (0x10035b80) are ours. The split (the
+static block of the original's first call included) makes the type from the text after the last dot and the
+name from the lowercased prefix minus the "m" of the "m." tag; Create looks the decorated name up in the table
+(an existing material gets AddReference), else walks the material plugin types of the split type (IsSupported
+0x10 per display, CreateInstance 0x14, the fallback name retried, the same name or none stopping the walk),
+sets the skipped flag +0x84 bit 3, the creation type and the names. The SplitBlock (18 display format names) is
+a namespace-scope static: the original builds it from its module CRT initialisers (off FUN_100351d0's guard,
+already tripped at startup), so constructing ours at DLL load keeps the 18 cache nodes out of the log (the
+imports are patched after load).
+
+The MaterialConfig extractors: ExtractMaterialSpec (0x100343a0), ExtractMaterialSpecs (0x10034a30),
+ExtractMaterial (0x10034350), ExtractMaterials (0x10034960), GetMaterial (0x10033d40) and CreateNewMaterial
+(0x10034120). GetMaterial makes the material through the manager (a non-empty "Rename" different from the
+material's name makes a second one and releases the first), then writes the spec field by field and replays
+the properties (a matching key replaces its value, anything else goes through AddProperty) and the textures
+(always through the name form of SetTexture). CreateNewMaterial clones: the blend/opacity/two-sided state, the
+DisplayMaterial by copy, the properties through AddProperty and the textures through GetTexture / AddReference
+/ SetTexture / ReleaseReference.
+
+Two node-traffic details the test pinned: the original passes module-scope static PStrings as its literal keys
+(built at load, so no Create/Destroy per lookup) — replicated with the `keyMaterial`/`keyRename`/`keySrcBlend`/
+`keyDstBlend`/`keyProperties`/`keyTexture`/`keyBitmap`/`keyName` module statics; and the temporary node handed
+to the manager is a raw node, so ours nulls the PString after Destroy rather than letting ~PString double-destroy.
+
+`diff_rs_u7` (new, `tests/diff_rs_u7.cpp`): both modules run the same RNG script over stand-in plugin types,
+materials, textures, a stand-in manager and real ConfigData trees (from KernelStandard), comparing the full log
+(allocs, PString node traffic, vtable calls, material bytes) after every scenario: 8 scenarios a round, 3000
+rounds, 0 mismatches (24000 checks); 200 rounds re-run after the debug prints came out, 0 mismatches.
+`check_thunks.py`: 2141 checked, 0 not ours. `compare_vtables.py`: the exported vftables are unchanged (the
+not-yet-implemented classes still differ, as before). U6 regressions green: diff_rs_u6d 200, diff_rs_u6c2 200,
+diff_rs_u6c 200, diff_rs_u6b 200, diff_rs_u6 300 (400 real .texture files).
+
+Remaining U7: MaterialResource::CreateInstance and LoadTxt (0x10036060 / 0x10036080),
+NullMaterial::CreateGeometryChunk (0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState
+(0x10032960), the PluginFactoryBase families, the Material / NullMaterial / MaterialResource ctors and dtors,
+and the seven shared data statics.
+

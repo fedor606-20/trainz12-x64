@@ -2527,3 +2527,41 @@ D:\games\trainz 2012 x64\bin got this build for the next menu check. Remaining U
 and the MaterialConfig extractors, MaterialResource::CreateInstance/LoadTxt, NullMaterial::CreateGeometryChunk
 (+ GeometryChunkTemplate), SetLightingState, the Material/NullMaterial/MaterialResource ctors and dtors, and
 the plugin-factory/type/data exports (still deferred as above).
+
+## RenderSystem U7 MaterialManager::Create and the MaterialConfig extractors (2026-11-19)
+
+MaterialManager::Create (0x10035670) and the static SplitDecoratedMaterialName (0x10035b80) are ours now
+(MaterialManager.cpp; the split moved out of its RsMatSplitName alias in MaterialFields.cpp). Create looks the
+decorated name up in the table (an existing material gets AddReference), else splits it and walks the material
+plugin types of the type (IsSupported per display, CreateInstance, the fallback name retried, the same name or
+none stopping the walk), sets the skipped flag, the creation type and the names. The SplitBlock (18 display
+format names) is a namespace-scope static, matching the original's module-CRT initialiser: built at DLL load,
+before the imports are patched, so its 18 cache nodes stay out of the log.
+
+The MaterialConfig extractors are ours too (MaterialConfigExtract.cpp): ExtractMaterialSpec (0x100343a0),
+ExtractMaterialSpecs (0x10034a30), ExtractMaterial (0x10034350), ExtractMaterials (0x10034960), GetMaterial
+(0x10033d40) and CreateNewMaterial (0x10034120). MaterialSpec is the real layout in jet/Material.h (name,
+rename, DisplayMaterial, values[3], flag, the two seven-item ring chunks, flags[8]; sizeof 0x6c) and
+MaterialEntries<T> moved to the header with Append/Count/At.
+
+Two node-traffic details the differential test pinned: the original passes module-scope static PStrings as its
+literal keys (no Create/Destroy per lookup), replicated with keyMaterial/keyRename/keySrcBlend/keyDstBlend/
+keyProperties/keyTexture/keyBitmap/keyName module statics; and the temp node handed to the manager is a raw
+node, so ours nulls the PString after Destroy instead of letting ~PString double-destroy.
+
+Test tests/diff_rs_u7.cpp (new): both modules run the same RNG script over stand-in plugin types, materials,
+textures, a stand-in manager and real ConfigData trees (from KernelStandard), comparing the full log (allocs,
+PString node traffic, vtable calls, material bytes) after every scenario. 8 scenarios a round: 3000 rounds, 0
+mismatches (24000 checks), plus 200 rounds re-run after the debug prints came out, 0 mismatches.
+check_thunks.py: 2141 checked, 0 not ours. RenderSystem: 2141/2687 exports ours (546 forwarded); README
+progress refreshed with tools/progress.py --write. Regressions green: diff_rs_u6d 200, diff_rs_u6c2 200,
+diff_rs_u6c 200, diff_rs_u6b 200, diff_rs_u6 300 (400 real .texture files).
+
+Housekeeping note: the WaterSystem_7c target does not build in the current VS 18 2026 configuration
+(WaterGeometry.h:89 JET_LAYOUT32(sizeof(PhysicsWaterGeometry) == 0x7c) fails, and tests/diff_ws_u1.cpp has
+follow-on API errors). Verified pre-existing at HEAD (stashed the U7 work, the same error appears), so it is a
+separate unit's issue, not the U7 change.
+
+Remaining U7: MaterialResource::CreateInstance/LoadTxt (0x10036060 / 0x10036080), NullMaterial::CreateGeometryChunk
+(0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState (0x10032960), the PluginFactoryBase
+families, the Material / NullMaterial / MaterialResource ctors and dtors, and the seven shared data statics.

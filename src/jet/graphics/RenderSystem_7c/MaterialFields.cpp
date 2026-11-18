@@ -179,22 +179,6 @@ unsigned __cdecl RsMatGeometryFlags(int type, const void* hint)
 float __fastcall RsMatAssetVersion(void* p, void*) { return Field<float>(p, 0x20); }
 void __fastcall RsMatSetAssetVersion(void* p, void*, float value) { Field<float>(p, 0x20) = value; }
 int __cdecl RsMatDstBlendMode(void* p) { return Field<int>(p, 0x7c); }
-int* __cdecl RsMatSplitName(int* result, const PString* name, PString* extension, PString* prefix)
-{
-    const char* text = name->Text();
-    if (!text) { *result = 5; return result; }
-    const char* dot = std::strrchr(text, '.');
-    if (!dot || dot == text) { *result = 6; return result; }
-    auto* cache = PString::Cache();
-    prefix->~PString();
-    ::new (prefix) PString();
-    prefix->node = cache->Create(reinterpret_cast<const unsigned char*>(text), static_cast<unsigned>(dot - text - 1));
-    prefix->node = cache->ToLower(prefix->node);
-    extension->~PString();
-    ::new (extension) PString(dot + 1);
-    *result = extension->node ? 0 : 6;
-    return result;
-}
 void __cdecl RsMaterialInit(void* p)
 {
     for (unsigned offset = 0x34; offset < 0x64; offset += 4) Field<float>(p, offset) = 1.0f;

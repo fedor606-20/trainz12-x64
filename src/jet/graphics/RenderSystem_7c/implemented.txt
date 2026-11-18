@@ -2131,7 +2131,16 @@
 ?MakeGeometryChunkFlags@Material@Jet@@SAIW4GeometryType@12@PBVGeometryChunkCreateHint@2@@Z=?RsMatGeometryFlags@Jet@@YAIHPBX@Z
 ?GetMaterialAssetVersion@Material@Jet@@QBEMXZ=?RsMatAssetVersion@Jet@@YIMPAX0@Z
 ?SetMaterialAssetVersion@Material@Jet@@QAEXM@Z=?RsMatSetAssetVersion@Jet@@YIXPAX0M@Z
-?SplitDecoratedMaterialName@MaterialManager@Jet@@SA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@ABVPString@2@AAV42@1@Z=?RsMatSplitName@Jet@@YAPAHPAHPBVPString@1@PAV21@2@Z
+# U7 MaterialManager Create and the config extractors (MaterialManager.cpp, MaterialConfigExtract.cpp):
+# the split (the static block of the original's first call included), the plugin walk and the extractors
+?SplitDecoratedMaterialName@MaterialManager@Jet@@SA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@ABVPString@2@AAV42@1@Z
+?Create@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@AAPAVMaterial@2@ABVPString@2@@Z
+?ExtractMaterialSpec@MaterialConfig@Jet@@QBAPAUMaterialSpec@2@ABVConfigData@2@@Z
+?ExtractMaterialSpecs@MaterialConfig@Jet@@QBA?AV?$FastDynamicArray@PAUMaterialSpec@Jet@@$0N@U?$Less@PAUMaterialSpec@Jet@@PAU12@@2@@2@ABVConfigData@2@@Z
+?ExtractMaterial@MaterialConfig@Jet@@QBAPAVMaterial@2@PAVMaterialManager@2@PBVResourceDatabase@2@ABVConfigData@2@@Z
+?ExtractMaterials@MaterialConfig@Jet@@QBA?AV?$FastDynamicArray@PAVMaterial@Jet@@$0N@U?$Less@PAVMaterial@Jet@@PAV12@@2@@2@PAVMaterialManager@2@PBVResourceDatabase@2@ABVConfigData@2@@Z
+?GetMaterial@MaterialConfig@Jet@@QBAPAVMaterial@2@PAVMaterialManager@2@PBVResourceDatabase@2@ABUMaterialSpec@2@@Z
+?CreateNewMaterial@MaterialConfig@Jet@@IBAPAVMaterial@2@PAVMaterialManager@2@PAV32@ABVPString@2@@Z
 ??0MaterialConfig@Jet@@QAE@XZ=?RsMaterialConfigDefault@Jet@@YIPAXPAX0@Z
 ??0MaterialConfig@Jet@@QAE@ABV01@@Z=?RsMaterialConfigCopy@Jet@@YIPAXPAX0PBX@Z
 ??1MaterialConfig@Jet@@UAE@XZ=?RsMaterialConfigDestroy@Jet@@YIXPAX0@Z

@@ -225,6 +225,9 @@ add_executable(diff_rs_u6c2 tests/diff_rs_u6c2.cpp)
 # RenderSystem U6d1a: TextureManager containers and lifetime (stand-in textures, kernel, database; the streaming
 # half and the substitute generator jump to loggers)
 add_executable(diff_rs_u6d tests/diff_rs_u6d.cpp)
+# RenderSystem U7: MaterialManager Create and SplitDecoratedMaterialName, the MaterialConfig extractors
+# (stand-in plugin types, materials, textures and manager; config trees from KernelStandard)
+add_executable(diff_rs_u7 tests/diff_rs_u7.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)
