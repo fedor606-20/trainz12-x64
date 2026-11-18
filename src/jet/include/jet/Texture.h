@@ -33,6 +33,8 @@ class TextureManager;
 
 class DisplayFormat;
 class TextureManagerInfo;
+struct TextureResizeRequest;
+class TextureAsyncLoadInfo;
 
 // U6c2: a named texture of the TextureManager (ReferenceCount + 0x2c): it registers with the manager (its slots 4
 // add, 6 remove, 9 activate; +0x28 the current frame) and wraps the API texture. TS12 layout and slot order.
@@ -103,16 +105,52 @@ JET_LAYOUT32(sizeof(Texture) == 0x34);
 // levels on disk (+0x50).
 class TextureRes : public Texture, public ResourceObserver {
 public:
-    __declspec(dllimport) TextureRes(const PString& name, TextureManager* manager, const TextureResource* resource);
+    TextureRes(const PString& name, TextureManager* manager, const TextureResource* resource);
+    Texture* __cdecl CreateInstance() const override;
+    TextureAsyncLoadInfo* __cdecl GetAsyncLoadInfo() const;
+    void __cdecl SetAsyncLoadInfo(TextureAsyncLoadInfo* info) const;
+    const Size& __cdecl GetMaxSizeOnDisk() const;
+    int __cdecl GetMipLevelCountOnDisk() const;
+    const ResourceDatabase* __cdecl GetResourceDatabase() const;
+    static void __cdecl SetDelayedLoading(bool enabled);
+    void __cdecl TestUnloadingMips(int size);
+    void __cdecl TestLoadRemainingMips(ResourceDatabase* database);
+    __declspec(noinline) void ChangeMipCount(const Size& size, int levels, bool copy);
+    bool __cdecl IsAvailable() const override;
+    bool __cdecl IsLoadFailure() const override;
+    const PString& __cdecl GetResourceName() const override;
+    TextureAlpha __cdecl GetAlphaHint() const override;
+    Color __cdecl GetAverageColor() const override;
+    TextureDimension __cdecl GetDimension() const override;
+    unsigned int __cdecl GetDepth() const override;
+    Size __cdecl GetSize() const override;
+    Size __cdecl GetAbsoluteSize() const override;
+    void __cdecl SetResourcePriority(float priority) const override;
+    DisplayTexture* __cdecl GetDisplayTexture() const override;
+    TextureManagerInfo* __cdecl GetTextureManagerInfo() override;
+    void __cdecl Bind(unsigned int unit) const override;
+    bool __cdecl DynamicSubload(int x, int y, const Bitmap& bitmap, DisplayFormat& format) override;
+    void __cdecl SetDisplayTexture(DisplayTexture* texture) override;
+
+protected:
+    ~TextureRes() override;
+    static __declspec(dllimport) bool delayedLoading;
+    void __cdecl ForceTextureLoad() const;
+    void __cdecl InitInstance(TextureRes& to) const;
+    const TextureResource* __cdecl GetResource() const override;
 
 private:
-    __declspec(dllimport) void __cdecl OnLoad(const Resource* resource) const override;
+    void __cdecl OnLoad(const Resource* resource) const override;
 
     friend class TextureManager;
-    unsigned char body38[0x14];
-    void* asyncInfo;          // +0x4c
+    int loadState;                 // +0x38
+    const TextureResource* resource;  // +0x3c
+    Size absoluteSize;             // +0x40
+    PString resourceName;          // +0x48
+    mutable TextureResizeRequest* asyncInfo;  // +0x4c
     int mipLevelsOnDisk;      // +0x50
-    unsigned char body54[0xc];
+    Size maxSizeOnDisk;            // +0x54
+    TextureManagerInfo* managerInfo; // +0x5c
 };
 JET_LAYOUT32(sizeof(TextureRes) == 0x60);
 
@@ -629,6 +667,12 @@ public:
     unsigned long __cdecl GetActiveTextureMemory() const;
     RenderKernel* __cdecl GetRenderKernel();
     void __cdecl UpSizeTexture(const TextureRes* texture, int size);  // U6d1b: the original's
+    void __cdecl DownSizeTexture(const TextureRes* texture, int size);
+    bool __cdecl IsTextureBeingResized(const TextureRes* texture);
+    void __cdecl CancelResizeTexture(const TextureRes* texture);
+    void __cdecl RefreshFromChangedSettings();
+    void __cdecl TestUpSizeStreamableTextures();
+    void __cdecl TestDownSizeStreamableTextures();
 
     static void __cdecl SetMinSizeTextureStreaming(int size);
     static void __cdecl SetMaxSizeTextureStreaming(int size);
@@ -651,9 +695,20 @@ protected:
     unsigned int __cdecl GetActiveFrame() const;
     // U6d1b: the original's
     void __cdecl Update();
+    void __cdecl AddAsyncTextureLoad(const TextureRes* texture, const ResourceDatabase* database,
+                                    int firstMip, int reverseLevel);
     bool __cdecl RemovedAsyncTextureLoad(const TextureRes* texture);
-    bool __cdecl RemovedTextureDownSize(const TextureRes* texture);
     void CleanupAsyncTextureLoad();  // __thiscall
+    void CancelActiveLoad();
+    void ReleaseActiveLoad();
+    bool StartActiveLoad();
+    static unsigned int __stdcall RunActiveLoad(void* manager);
+    void __cdecl AddTextureDownSize(const TextureRes* texture, int reverseLevel);
+    bool __cdecl RemovedTextureDownSize(const TextureRes* texture);
+    void __cdecl CheckNeedDownSize(TextureManagerInfo& info);
+    void __cdecl CheckTexturesNeedDownSize();
+    void __cdecl DownSizeRemoveMips(TextureRes* texture, int levels);
+    void AppendMips(TextureRes* texture, TextureResource::TextureInfo* info, int reverseLevel);
 
     static __declspec(dllimport) unsigned int globalSkipLevels;
     static __declspec(dllimport) unsigned int globalSkipThreshold;
@@ -681,12 +736,12 @@ protected:
     unsigned int frame;                                  // +0x28
     unsigned long activeMemory;                          // +0x2c KB
     bool useSubstitute;                                  // +0x30
-    FastDynamicArray<void*, 13> queue34;                 // +0x34 (U6d1b)
+    FastDynamicArray<TextureResizeRequest*, 13> asyncQueue;  // +0x34
     int field38;                                         // +0x38
     TextureResource::TextureInfo info;                   // +0x3c (U6d1b)
     int fieldA4;                                         // +0xa4
     int fieldA8;                                         // +0xa8
-    FastDynamicArray<void*, 13> queueAC;                 // +0xac (U6d1b)
+    FastDynamicArray<TextureResizeRequest*, 13> downsizeQueue;  // +0xac
     ListHead lists[2];                                   // +0xb0
     int listIndex;                                       // +0xd0 the list RegisterStreamableTexture links into
     int fieldD4;                                         // +0xd4 1

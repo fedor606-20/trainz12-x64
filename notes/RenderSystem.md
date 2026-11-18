@@ -285,6 +285,28 @@ copies of the original's Texture / TextureRes vftables for the RTTI, kernel + OS
 line, database and resource; the original's streaming functions and the generator jump to loggers; Resource
 SetScrambleKey / ReleaseReference hooked in both import tables). diff_rs_u6c2 now jumps both modules'
 SetTextureUpdate to its logger. 53/55 mutants (scratchpad mut_u6d1a.py; 2 equivalent).
+
+U6d1b, downsize queue (2026-11-11): the request shared with the original loader is 0x18 bytes: texture at 0,
+database at +4, cancellation flag at +8, reverse mip level at +0xc, first mip at +0x10 and request kind at
++0x14 (1 downsize, 2 async load). The original Update still pops these requests from the +0xac array.
+DownSizeTexture (0x100427a0) clamps the requested dimension to 128 before deriving the mip count. It queues
+only if the texture has more than one mip on disk, a display texture with more mips than the target, and no
+existing request. CancelResizeTexture (0x10042950) dispatches by request kind. RemoveTexture uses the same
+dispatch. RemovedTextureDownSize (0x10042980) erases the queue entry if present, clears the texture's request
+pointer and frees the request. AddTextureDownSize (0x100429f0) and IsTextureBeingResized (0x10042940) complete
+the five exports.
+
+Next async slice: +0x34 holds queued loads and +0x38 the in-flight request. The worker started by 0x100400a0
+fills the embedded TextureInfo at +0x3c and publishes its result at +0xa4 (1 running, 2 ready, 3 failure,
+4 cancelled). Cancellation 0x10040070 sets the request's flag and waits for the running state to end before
+0x10040190 destroys the worker and frees the request. Keep that ordering when replacing Update and cleanup.
+
+Async enqueue (2026-11-11): AddAsyncTextureLoad at 0x10042370 is now ours. Its two integer arguments are
+first mip, then reverse level. It preserves an existing resize request, including a downsize. The queue at
++0x34 uses the same 13-pointer FDA chunks as the original. diff_rs_u6d compares 31 requests across three
+chunks, repeated requests, null/non-null databases and signed mip values, then lets the original cancellation
+code remove every request from both implementations.
+
 Inputs: `ghidra_maps/jet/RenderSystem_7c.dll.functions.tsv`, the export list (`tools/dump_exports.py`), the import tables
 of every module in `bin\` (pefile), the Jet SDK Beta2 headers (`Display.h`, `Material.h`, `Layer.h`, `Modifier.h`,
 `Texture.h`, `RenderKernel.h`...: names and intent only, the TS12 layouts differ) and the private decompile
@@ -344,3 +366,73 @@ add-on files) in the middle with file-level diff tests; Display last.
 * Attribute the 96 KB of unnamed `Global` functions (single-caller propagation, as for KS).
 * Which statics are touched by address from other modules (data imports): `Layer::layerManager`, `TextureManager`
   streaming limits, `VertexType::display`. They decide what must stay forwarded until U9.
+
+U6d1b async cancellation: RemovedAsyncTextureLoad removes queued loads using the same
+queue and allocator as enqueue. Active cancellation now waits for the worker to publish completion, destroys the worker, clears the request and frees the loaded blocks. diff_rs_u6d now compares real queue cancellation
+on both sides, including its 31-request fixture. Next: active cancellation and cleanup,
+then Update and TextureRes.
+
+U6d1b cleanup and active cancellation: CleanupAsyncTextureLoad and the active branch of
+RemovedAsyncTextureLoad now follow the original worker cancellation and release sequence.
+diff_rs_u6d compares both populated queues and active states 1 through 4, including a
+worker that observes cancellation. Update and worker startup still use the original DLL.
+
+U6d1b upsize: UpSizeTexture now selects the target mip count and queues the load,
+using the resource owner and display mip count. diff_rs_u6d compares request values
+and missing owner/display cases with the original. The following work supersedes the counts above.
+
+## 2026-11-15: U6d and initial U7
+
+The TextureManager worker, Update, streaming and TextureRes function exports are reconstructed. Shared texture
+generators include D2 attenuation, substitute, default/bump, power/specular power, spot cube and normal cube.
+`diff_rs_u6d` compares generator uploads, flags, worker queues, texture behaviour and multiple cube sizes against
+the original. SharedTextureCollection and streaming data exports still use the original module's shared state;
+power generators use its VC80 pow import to preserve x87 results. Both dependencies must be removed for x64.
+
+U7 begins with MaterialFileSupport name conversions (including the original DFunction reverse-lookup quirk),
+MaterialSpec constructors, destruction and chunk-preserving copy, and Material state and manager name/flag
+accessors. Differential tests include two-chunk lists, string ownership, copying, flags and blend modes.
+2078 of 2687 exports are implemented; `check_thunks.py` reports zero implemented exports accidentally forwarded.
+A separate laboratory install with the 2078-export build reached the main menu outside the restricted sandbox;
+the sandbox's TADDaemon launch failed to relocate a system DLL. This was a test-environment problem, not proof
+that every user's database error has the same cause. A driving session remains unverified. U6 regression tests
+passed 30 scenarios each: 55 real binary textures, 402 real plus 240 generated texture descriptions, DisplayTexture,
+and Texture. The real content was read from the original installation; outputs went to the temporary directory.
+
+## 2026-11-18: U7 instances and state (MaterialInstance.cpp)
+
+The material state the manager and the config extractors build on is ours: Equals (Material and NullMaterial),
+InitInstance (both classes share one body at 0x100331b0 / 0x10037a20), Rename, SetTextureDefinition and the
+NullMaterial SetTexture pair, VerifyDecoratedName and six leaf accessors (Get/SetShininess at 0x10004330 /
+0x10004340, GetNumPasses, IsLoaded, GetRenderKernel, GetTextureManager). 15 more exports; RenderSystem is now
+2127 of 2687 ours, 560 forwarded (`check_thunks.py`: 2127 checked, 0 not ours).
+
+Layouts and behaviour kept from the assembly:
+
+* Material's lists are ring chunks of seven items: properties {PString key, value} at +0x88 (chunks 0x44) and
+  texture definitions {int type, PString name, float weight} at +0x90 (chunks 0x60). `SetTextureDefinition`
+  replaces the first definition with the same type (the old name node goes first) or appends; only the append
+  bumps the count at +0x8c.
+* `InitInstance(Material&) const` reads the prototype (`this`) and writes the instance (the reference): a fresh
+  name from `uniqueMatId` ("%08x%%%%%s", or the "xx..%%" prefix replaced when the name already carries one:
+  `Find(node, "%%", 8) == 8`, Del 8 characters, Ins the new id), then the names, DisplayMaterial copy,
+  blend/opacity/priority/flag bits 0 and 1, both lists appended item by item, and finally the prototype's
+  manager Add of the instance (slot 4). A name without a node goes to Setf as a null `%s`, like the original.
+* `Rename(decorated, plain)`: no manager -> false; Find of the new decorated name (slot 6) that answers non-null
+  -> false; else Remove (5), SetName, Add (4), true.
+* `VerifyDecoratedName(String&, unsigned, DynamicArray<TextureDef,7> const&)`: ToLower, and when the name has no
+  "m." token (the original's DecoratedTypeToken) the tag is appended at the end (Ins at Length()): "m.notex" /
+  "m.onetex" from the hint alone, else by the texture list (reflect -> "m.gloss" with opacity else "m.reflect";
+  a diffuse map whose name contains "sb_" -> "m.billboard", "tb_" -> "m.tribillboard"; else the diffuse count).
+* Equals compares the DisplayMaterial block through the U1 `operator!=`, the scalars (blend pair, opacity, flag
+  bit 0, priority, the count at +0x8c), then the property walk while both sides run and the texture walk until
+  one side ends (a length difference in the properties alone still answers true: TS12 quirk, kept).
+
+`diff_rs_u6d` gained "op material leaf / equals / texture definitions / null material set texture / init
+instance / rename / verify name": 500 rounds, 0 mismatches against the original, including the two Equals
+quirks, the same-name texture definition replace and the three InitInstance naming paths. The shared statics
+(uniqueMatId; DecoratedTypeToken is only read) start alike on both sides. Remaining U7: MaterialManager
+Create/Add/Remove/Find (0x10035670..0x10035e20), the MaterialConfig extractors (0x10033d40..0x10034b40),
+MaterialResource::CreateInstance and LoadTxt (0x10036060 / 0x10036080), NullMaterial::CreateGeometryChunk
+(0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState (0x10032960), the PluginFactoryBase
+families and the seven shared data statics (they stay the original's until U9, like the other module state).

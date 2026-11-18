@@ -2310,6 +2310,26 @@ unit order in `notes/WaterSystem.md`.
   streaming functions and GenerateSubstituteLoadTexture jump to loggers. Mutations caught: 53 of 55 (scratchpad mut_u6d1a.py); the two left are equivalent (m == MIN is clamped to MIN either way; the second Find of the substitute name cannot differ from the first with a fixed table). The lists' destructor mutant survived at first: the test now dumps the request nodes after the manager is gone.
 - diff_rs_u6c2 now jumps both modules' SetTextureUpdate to its logger (ours is real now). All eleven diff_rs_* tests give 0 mismatches. In game: menu reached, JetLog identical to the baseline.
 
+### RenderSystem_7c U6d1b, downsize queue (2026-11-11): 1950/2687 exports ours
+- Replaced DownSizeTexture, AddTextureDownSize, RemovedTextureDownSize, CancelResizeTexture and
+  IsTextureBeingResized. RemoveTexture now uses the same cancellation path. The request and chunk layouts
+  remain compatible with the original Update and destructor, which still process and clean up the queues.
+- Compared the enqueue threshold, duplicate requests, request fields, and cancellation across multiple chunks
+  with the original DLL in diff_rs_u6d (500 scenarios, 0 mismatches). The 128-pixel downsize floor matches
+  TS12. If the request allocation returns null, our code leaves the queue unchanged.
+- The other differential probes passed except diff_rs_u3, which ended with heap corruption on both the
+  new build and the previous installed DLL when rerun. The game smoke test on an isolated copy stopped
+  before the menu for both DLLs, leaving only `Begin:` in JetLog. In-game verification remains open.
+
+### RenderSystem_7c U6d1b, async enqueue (2026-11-11): 1951/2687 exports ours
+- Replaced AddAsyncTextureLoad (0x10042370), preserving the request layout and FIFO queue ABI.
+  Duplicate requests keep the existing request. Null request allocation leaves the texture unchanged.
+- Win32 build succeeded. Extended diff_rs_u6d passed 500 scenarios with zero mismatches. The added case
+  compares 31 requests across three FDA chunks, both integer fields, database pointers and duplicate
+  requests, then cancels them through the original loader and checks that the queue is empty.
+- Build and probe directory is D:/universal modder/build-trainz32. Update, the worker lifecycle and
+  TextureRes remain pending. The previous in-game verification limitation remains open.
+
 ### Borderless window mode (2026-10-28, not in TS12)
 - Our KernelStandard `Window.cpp` adds a `Borderless` option: `-borderless` on the command line, or in the game
   folder's `trainzoptions.txt` (read by Window::Open itself, since trainz.exe merges that file only after the window
@@ -2411,6 +2431,48 @@ unit order in `notes/WaterSystem.md`.
 
 ### Config
 - `Trainz.cfg` (88 bytes) is binary, not the options file. Real options: TODO (look for `trainzoptions.txt`).
+
+## RenderSystem U6d and U7 checkpoint (2026-11-15)
+
+The texture worker, TextureRes and SharedTextureCollection generators have moved to the reconstructed module;
+their shared exported data and the VC80 pow dependency still use the original DLL. MaterialSpec, material file
+conversion and initial material state/name functions are also ported. `diff_rs_u6d` passed 20 scenarios against
+the original with no mismatches, including material list copy and destruction, names, colours, flags and blend
+modes. `check_thunks.py` checked 2078 exports with none forwarded accidentally (609 still intentionally forwarded).
+An isolated 32-bit game copy using the 2078-export build reached its main menu. Four U6 regression probes each
+passed 30 scenarios, including real texture files. Route driving, other render units and the x64 conversion are
+still outstanding; see `notes/RenderSystem.md`.
+
+## RenderSystem U7 instances and state (2026-11-18)
+
+MaterialInstance.cpp replaces fifteen more exports: Equals (Material 0x10033010 / NullMaterial 0x10037910),
+InitInstance (0x100331b0 and its identical NullMaterial twin 0x10037a20), Rename (0x100328f0),
+SetTextureDefinition (0x1000c030) and the NullMaterial SetTexture pair (0x100379c0 / 0x100379f0),
+VerifyDecoratedName (0x10032df0), and the leaf accessors GetShininess / SetShininess (0x10004330 / 0x10004340,
+shared with Display::Get/SetNormalLength), GetNumPasses (0x10023b90), IsLoaded (0x1000c860), GetRenderKernel
+(0x1000cab0) and GetTextureManager (0x100106c0). RenderSystem is 2127 of 2687 exports ours (560 forwarded);
+check_thunks.py reports 2127 checked, 0 not ours.
+
+Confirmed from the assembly and kept: the texture definitions are {type, name, weight} at +0x90 in seven-item
+ring chunks (the property pairs {key, value} sit at +0x88) and only an appended definition bumps the count at
++0x8c; InitInstance gives the instance a fresh name from the shared uniqueMatId ("00000007%%tail" when the
+prototype's name already has the "xx..%%" prefix, which Find(node, "%%", 8) finds at exactly 8, else
+"%08x%%%%%s" with a null text for a nameless prototype), copies the state and both lists and registers the
+instance with the prototype's manager; Rename is Find(6) / Remove(5) / SetName / Add(4) around the manager at
++0x98; VerifyDecoratedName appends the "m.*" tag at the end of the name (Ins at Length()) after the AnsiString
+ToLower, choosing it from the hint or the texture list (reflect/opacity, "sb_" / "tb_" diffuse names).
+Two Equals quirks stay: the property walk compares only while both cursors run, so a property-count difference
+alone falls through to the texture walk, which answers true as soon as one side ends.
+
+diff_rs_u6d gained seven U7 exercises (leaf accessors, Equals with per-field mutations and one-sided lists,
+texture definition replace/append including a same-name replace, the SetTexture pair, InitInstance's three
+naming paths with a stand-in manager vtable, Rename with an alternating Find and VerifyDecoratedName over
+6 names x 4 hints x 8 texture lists): 500 rounds, 0 mismatches. The U6 regression probes are green again
+(diff_rs_u6c2 500, diff_rs_u6c 500, diff_rs_u6b 300, diff_rs_u6 300 with 400 real .texture files).
+Remaining in U7: MaterialManager Create/Add/Remove/Find, the MaterialConfig extractors, MaterialResource
+CreateInstance/LoadTxt, NullMaterial::CreateGeometryChunk (+ GeometryChunkTemplate), SetLightingState and the
+PluginFactoryBase families; the seven shared data statics (uniqueMatId, DecoratedTypeToken, STRING_NOT_FOUND,
+PluginGroupName/UID, the two results tables) stay the original's until U9.
 
 ## Open questions
 - Who loads `ijl10.dll`, `cudart.dll`, `dx7vb.dll` at runtime?

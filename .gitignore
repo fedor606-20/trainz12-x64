@@ -20,3 +20,6 @@ __pycache__/
 
 .scratch/
 .DS_Store
+
+# an old bundle of the docs that also packs the gitignored string dumps
+ts2012.zip

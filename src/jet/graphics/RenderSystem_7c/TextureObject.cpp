@@ -10,6 +10,303 @@
 
 namespace Jet {
 
+namespace { void X87Copy(float* to, const float* from); }
+
+class TextureManagerInfo {
+public:
+    explicit TextureManagerInfo(TextureRes* texture)
+        : wanted(0), lastFrame(0), texture(texture), owner(&owner), prev(&owner), next(&owner), info(this) {}
+    ~TextureManagerInfo()
+    {
+        *reinterpret_cast<void**>(static_cast<char*>(next) + 4) = prev;
+        *reinterpret_cast<void**>(static_cast<char*>(prev) + 8) = next;
+    }
+
+    int wanted;
+    unsigned int lastFrame;
+    TextureRes* texture;
+    void* owner;
+    void* prev;
+    void* next;
+    TextureManagerInfo* info;
+};
+JET_LAYOUT32(sizeof(TextureManagerInfo) == 0x1c);
+
+TextureRes::TextureRes(const PString& name, TextureManager* manager, const TextureResource* resource)
+    : Texture(name, manager), loadState(0), resource(resource), absoluteSize(0, 0), resourceName(), asyncInfo(nullptr),
+      mipLevelsOnDisk(0), maxSizeOnDisk(0, 0), managerInfo(nullptr)
+{
+    void* const memory = Alloc::New(sizeof(TextureManagerInfo));
+    if (memory) managerInfo = ::new (memory) TextureManagerInfo(this);
+    manager->RegisterStreamableTexture(this);
+    if (resource) {
+        resource->InlineAddReference();
+        texture = nullptr;
+        resourceName = resource->GetName();
+        resource->AddObserver(static_cast<ResourceObserver*>(this));
+    }
+}
+
+TextureRes::~TextureRes()
+{
+    if (manager) {
+        manager->RemoveTexture(this);
+        manager->ReleaseReference();
+        manager = nullptr;
+    }
+    if (managerInfo) {
+        managerInfo->~TextureManagerInfo();
+        Alloc::Delete(managerInfo);
+        managerInfo = nullptr;
+    }
+    if (resource && !loadState) resource->RemoveObserver(static_cast<ResourceObserver*>(this));
+    if (resource) resource->ReleaseReference();
+}
+
+Texture* __cdecl TextureRes::CreateInstance() const
+{
+    PString unique = GenerateUniqueName(name);
+    TextureRes* const instance = new TextureRes(unique, manager, loadState ? nullptr : resource);
+    InitInstance(*instance);
+    return instance;
+}
+
+TextureAsyncLoadInfo* __cdecl TextureRes::GetAsyncLoadInfo() const
+{
+    return reinterpret_cast<TextureAsyncLoadInfo*>(asyncInfo);
+}
+
+void __cdecl TextureRes::SetAsyncLoadInfo(TextureAsyncLoadInfo* info) const
+{
+    asyncInfo = reinterpret_cast<TextureResizeRequest*>(info);
+}
+
+const Size& __cdecl TextureRes::GetMaxSizeOnDisk() const
+{
+    return maxSizeOnDisk;
+}
+
+int __cdecl TextureRes::GetMipLevelCountOnDisk() const { return mipLevelsOnDisk; }
+
+const ResourceDatabase* __cdecl TextureRes::GetResourceDatabase() const
+{
+    const TextureResource* const resource = GetResource();
+    return resource ? resource->Owner() : nullptr;
+}
+
+void __cdecl TextureRes::SetDelayedLoading(bool enabled) { delayedLoading = enabled; }
+
+void __cdecl TextureRes::TestUnloadingMips(int size)
+{
+    int reverseLevel = 0;
+    for (int n = size / 2; n; n /= 2) ++reverseLevel;
+    if (!texture || reverseLevel + 1 >= static_cast<int>(texture->GetNumMipLevels())) return;
+    const Size target = TextureResource::GetMipSizeAtReverseLevel(reverseLevel, texture->GetSize());
+    ChangeMipCount(target, reverseLevel + 1, true);
+}
+
+void __cdecl TextureRes::TestLoadRemainingMips(ResourceDatabase* database)
+{
+    TextureResource::TextureInfo loaded;
+    int first = static_cast<int>(texture->GetNumMipLevels());
+    const int oldTop = first - 1;
+    int last = 32;
+    const char* const name = resourceName.node ? resourceName.node->text : nullptr;
+    if (TextureResource::Load(database, name, resource->ScrambleKey(), first, last, &loaded).code == 0 &&
+        oldTop < last) {
+        ChangeMipCount(loaded.size, last + 1, true);
+        TextureResource::LoadMipLevels(&loaded, texture, first, last);
+    }
+}
+
+void TextureRes::ChangeMipCount(const Size& size, int levels, bool copy)
+{
+    DisplayTexture* const old = texture;
+    const int oldLevels = static_cast<int>(old->GetNumMipLevels());
+    if (levels == oldLevels) return;
+    const DisplayFormat format(old->GetJetFormat());
+    auto* const kernel = *reinterpret_cast<void* const*>(reinterpret_cast<const char*>(manager) + 0x14);
+    auto* const display = *reinterpret_cast<void* const*>(static_cast<const char*>(kernel) + 0x7c);
+    DisplayTexture* const replacement = VCall<DisplayTexture*>(display, 0x98);
+    bool created;
+    {
+        const RenderTextureConstruct construct;
+        created = replacement->Create(size, format, old->GetDimension(), levels, static_cast<TextureAutoMip>(0),
+                                      old->GetDepthLevels(), old->GetAnisotropy(), static_cast<TextureHint>(0),
+                                      static_cast<TextureFilter>(0), static_cast<TextureFilter>(0),
+                                      static_cast<TextureFilter>(0), static_cast<TextureWrap>(2),
+                                      static_cast<TextureWrap>(2), construct);
+    }
+    if (!created) {
+        VDelete(replacement);
+        return;
+    }
+    replacement->CopySamplerAttributesFrom(old);
+    if (copy) {
+        const int source = oldLevels > levels ? oldLevels - levels : 0;
+        const int destination = levels > oldLevels ? levels - oldLevels : 0;
+        const int count = oldLevels < levels ? oldLevels : levels;
+        for (int i = 0; i < count; ++i)
+            old->CopyMipToMip(old, source + i, replacement, destination + i);
+    }
+    SetDisplayTexture(replacement);
+}
+
+void __cdecl TextureRes::OnLoad(const Resource* loaded) const
+{
+    if (!loadState && resource == loaded) ForceTextureLoad();
+}
+
+void __cdecl TextureRes::InitInstance(TextureRes& to) const
+{
+    Texture::InitInstance(to);
+    to.absoluteSize = absoluteSize;
+    to.resourceName = resourceName;
+    to.loadState = loadState;
+}
+
+bool __cdecl TextureRes::IsAvailable() const { return delayedLoading || (loadState != 0 && texture != nullptr); }
+bool __cdecl TextureRes::IsLoadFailure() const { return loadState == 1; }
+const PString& __cdecl TextureRes::GetResourceName() const { return resourceName; }
+const TextureResource* __cdecl TextureRes::GetResource() const { return resource; }
+TextureManagerInfo* __cdecl TextureRes::GetTextureManagerInfo() { return managerInfo; }
+
+TextureAlpha __cdecl TextureRes::GetAlphaHint() const
+{
+    if (!loadState) {
+        if (delayedLoading) return static_cast<TextureAlpha>(0);
+        ForceTextureLoad();
+    }
+    return alpha;
+}
+
+Color __cdecl TextureRes::GetAverageColor() const
+{
+    if (!loadState && !delayedLoading) ForceTextureLoad();
+    return averageColor;
+}
+
+TextureDimension __cdecl TextureRes::GetDimension() const
+{
+    if (!loadState) ForceTextureLoad();
+    return texture && loadState == 2 ? texture->GetDimension() : static_cast<TextureDimension>(3);
+}
+
+unsigned int __cdecl TextureRes::GetDepth() const
+{
+    if (!loadState) ForceTextureLoad();
+    return texture && loadState == 2 ? texture->GetDepthLevels() : 0;
+}
+
+Size __cdecl TextureRes::GetSize() const
+{
+    if (!loadState) ForceTextureLoad();
+    return texture && loadState == 2 ? texture->GetSize() : Size(0, 0);
+}
+
+Size __cdecl TextureRes::GetAbsoluteSize() const
+{
+    if (!loadState) ForceTextureLoad();
+    return absoluteSize;
+}
+
+void __cdecl TextureRes::SetResourcePriority(float priority) const
+{
+    if (resource) resource->SetPriority(priority);
+}
+
+DisplayTexture* __cdecl TextureRes::GetDisplayTexture() const
+{
+    if (!loadState) ForceTextureLoad();
+    return texture;
+}
+
+void __cdecl TextureRes::Bind(unsigned int unit) const
+{
+    if (!delayedLoading && !loadState) {
+        auto* const kernel = *reinterpret_cast<void* const*>(reinterpret_cast<const char*>(manager) + 0x14);
+        auto* const display = *reinterpret_cast<void* const*>(static_cast<const char*>(kernel) + 0x7c);
+        VCall<void>(display, 0x9c, unit);
+        ForceTextureLoad();
+    }
+    if (texture)
+        texture->Bind(unit);
+    else {
+        auto* const kernel = *reinterpret_cast<void* const*>(reinterpret_cast<const char*>(manager) + 0x14);
+        auto* const display = *reinterpret_cast<void* const*>(static_cast<const char*>(kernel) + 0x7c);
+        VCall<void>(display, 0xa0, 0);
+    }
+}
+
+bool __cdecl TextureRes::DynamicSubload(int x, int y, const Bitmap& bitmap, DisplayFormat& format)
+{
+    if (!loadState) ForceTextureLoad();
+    if (!texture || loadState != 2) return false;
+    const Rect area = {x, y, bitmap.width, bitmap.height};
+    return texture->SubLoad(bitmap, area, format, 0);
+}
+
+void __cdecl TextureRes::SetDisplayTexture(DisplayTexture* display)
+{
+    if (!loadState && resource) {
+        resource->RemoveObserver(static_cast<ResourceObserver*>(this));
+        resource->ReleaseReference();
+        resource = nullptr;
+    }
+    if (texture) VDelete(texture);
+    texture = display;
+    if (!loadState) loadState = 2;
+}
+
+void __cdecl TextureRes::ForceTextureLoad() const
+{
+    auto* const self = const_cast<TextureRes*>(this);
+    if (loadState == 1 || loadState == 2) return;
+    if (!resource) {
+        self->loadState = 1;
+        return;
+    }
+    resource->RemoveObserver(static_cast<const ResourceObserver*>(this));
+    if (resource->Lock().code != 0) {
+        self->loadState = 1;
+        resource->ReleaseReference();
+        self->resource = nullptr;
+        return;
+    }
+    const auto* info = *reinterpret_cast<TextureResource::TextureInfo* const*>(
+        reinterpret_cast<const char*>(resource) + 0x5c);
+    const bool streamable = info && info->levelsOnDisk > 1;
+    if (streamable) {
+        self->mipLevelsOnDisk = resource->GetMipLevelCountOnDisk();
+        self->maxSizeOnDisk = resource->GetSize();
+    }
+    self->absoluteSize = resource->GetSize();
+    self->alpha = resource->GetAlphaHint();
+    const Color color = resource->GetAverageColor();
+    X87Copy(&self->averageColor.r, &color.r);
+    X87Copy(&self->averageColor.g, &color.g);
+    X87Copy(&self->averageColor.b, &color.b);
+    X87Copy(&self->averageColor.a, &color.a);
+    auto* const kernel = *reinterpret_cast<void* const*>(reinterpret_cast<const char*>(manager) + 0x14);
+    auto* const display = *reinterpret_cast<void* const*>(static_cast<const char*>(kernel) + 0x7c);
+    if (self->texture) VDelete(self->texture);
+    self->texture = VCall<DisplayTexture*>(display, 0x98);
+    if (!self->texture || resource->Load(self->texture).code == 0) {
+        self->loadState = 2;
+    } else {
+        VDelete(self->texture);
+        self->texture = nullptr;
+        self->loadState = 1;
+    }
+    resource->Unlock();
+    if (streamable) {
+        const_cast<TextureResource*>(resource)->UnloadDataOnly();
+    } else {
+        resource->ReleaseReference();
+        self->resource = nullptr;
+    }
+}
+
 namespace {
 
 void X87Copy(float* to, const float* from)

@@ -74,9 +74,12 @@ public:
 
 class MaterialFileSupport {
 public:
+    MaterialFileSupport& operator=(const MaterialFileSupport&);
     static DFunction __cdecl ConvertDFunction(const PString& name);
     static Src::Factor __cdecl ConvertSrc(const PString& name);
     static Dst::Factor __cdecl ConvertDst(const PString& name);
+private:
+    MaterialFileSupport();
 };
 
 using SystemResourceViewerList = FastDynamicArray<SystemResourceViewer*, 13, Less<SystemResourceViewer*, SystemResourceViewer*>>;

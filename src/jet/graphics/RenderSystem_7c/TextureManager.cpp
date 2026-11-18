@@ -1,7 +1,7 @@
 // Unit U6d1a of RenderSystem_7c: TextureManager's containers and lifetime (0x10041420..0x10042361, the helpers
 // 0x10042d00..0x10043187 and the folded getters 0x10004aa0 / 0x10004eb0 / 0x10004ec0). Behaviour follows the
-// TS12 assembly (addresses per function). The streaming half (Update, UpSizeTexture, the async and down-size
-// queues, CleanupAsyncTextureLoad) is U6d1b: until then those calls go to the original's exports. The manager's
+// TS12 assembly (addresses per function). U6d1b starts with queueing and cancelling texture downsizes.
+// Update and the async loader still call the original's exports. The manager's
 // statics, the TextureResource defaults Init sets, the format-name table (0x100b8780, built by the original's
 // initializer) and SharedTextureCollection's substitute texture and name (0x100b8708 / 0x100b8734) stay the
 // original's.
@@ -14,6 +14,23 @@
 #include <new>
 
 namespace Jet {
+
+DisplayTexture* __cdecl RsGenerateSubstituteTexture(void* display, unsigned width, unsigned height);
+
+// Shared with the original Update and the background loader while they still own queue processing.
+struct TextureResizeRequest {
+    enum State { Downsize = 1, AsyncLoad = 2 };
+
+    const TextureRes* texture;
+    const ResourceDatabase* database;
+    bool cancelled;
+    int reverseLevel;
+    int firstMip;
+    State state;
+};
+JET_LAYOUT32(sizeof(TextureResizeRequest) == 0x18);
+JET_LAYOUT32(offsetof(TextureResizeRequest, reverseLevel) == 0xc);
+JET_LAYOUT32(offsetof(TextureResizeRequest, state) == 0x14);
 
 namespace {
 
@@ -81,6 +98,7 @@ struct InfoNode {
     InfoNode* owner;
     InfoNode* prev;
     InfoNode* next;
+    TextureManagerInfo* info;
 };
 InfoNode* NodeOf(void* info) { return reinterpret_cast<InfoNode*>(static_cast<char*>(info) + 0xc); }
 
@@ -159,40 +177,294 @@ TextureManager::~TextureManager()
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// the forwarded streaming half (U6d1b)
+// forwarded streaming operations
+
+// 0x10042370: queue a load only while the texture has no resize request.
+// Update and its worker retain ownership of consuming and releasing the request.
+void __cdecl TextureManager::AddAsyncTextureLoad(const TextureRes* t, const ResourceDatabase* database,
+                                                int firstMip, int reverseLevel)
+{
+    if (t->asyncInfo) return;
+    void* const mem = Alloc::New(sizeof(TextureResizeRequest));
+    if (!mem) return;
+    auto* const request = ::new (mem) TextureResizeRequest{
+        t, database, false, reverseLevel, firstMip, TextureResizeRequest::AsyncLoad};
+    asyncQueue.Add(request);
+    t->asyncInfo = request;
+}
 
 void __cdecl TextureManager::Update()  // 0x10042480
 {
-    static auto const f = Orig<void(__cdecl*)(TextureManager*)>("?Update@TextureManager@Jet@@IAAXXZ");
-    f(this);
+    if (!TEXTURE_STREAMING_ENABLED) return;
+    if (fieldA4 == 2) {
+        auto* request = reinterpret_cast<TextureResizeRequest*>(field38);
+        AppendMips(const_cast<TextureRes*>(request->texture), &info, request->reverseLevel);
+        ReleaseActiveLoad();
+    }
+    if (fieldA4 != 1) {
+        if (fieldA4 != 0) ReleaseActiveLoad();
+        static auto const system = reinterpret_cast<ResourceSystem**>(GetProcAddress(
+            GetModuleHandleA("KernelResource_7c.dll"), "?resourceSystem@ResourceDatabase@Jet@@0PAVResourceSystem@2@A"));
+        if (asyncQueue && *system && (*system)->GetQueuedResourceCount() < 1) {
+            field38 = reinterpret_cast<int>(asyncQueue.Pop());
+            if (!field38 || !StartActiveLoad()) ReleaseActiveLoad();
+        }
+    }
+    for (int count = 0; count < 4 && downsizeQueue; ++count) {
+        TextureResizeRequest* const request = downsizeQueue.Pop();
+        auto* const texture = const_cast<TextureRes*>(request->texture);
+        DownSizeRemoveMips(texture, request->reverseLevel + 1);
+        texture->asyncInfo = nullptr;
+        Alloc::Delete(request);
+    }
+    CheckTexturesNeedDownSize();
+}
+
+void TextureManager::AppendMips(TextureRes* texture, TextureResource::TextureInfo* loaded, int reverseLevel)
+{
+    const int oldLevels = static_cast<int>(texture->GetDisplayTexture()->GetNumMipLevels());
+    const int first = oldLevels > 1 ? oldLevels - 1 : 0;
+    const Size size = TextureResource::GetMipSizeAtReverseLevel(reverseLevel, loaded->size);
+    texture->ChangeMipCount(size, reverseLevel + 1, true);
+    TextureResource::LoadMipLevels(loaded, texture->GetDisplayTexture(), first, reverseLevel);
 }
 
 bool __cdecl TextureManager::RemovedAsyncTextureLoad(const TextureRes* t)  // 0x100423e0
 {
-    static auto const f = Orig<bool(__cdecl*)(TextureManager*, const TextureRes*)>(
-        "?RemovedAsyncTextureLoad@TextureManager@Jet@@IAA_NPBVTextureRes@2@@Z");
-    return f(this, t);
+    const auto* const active = reinterpret_cast<const TextureResizeRequest*>(field38);
+    if (active && active->texture == t) {
+        if (active->state != TextureResizeRequest::AsyncLoad) return false;
+        CancelActiveLoad();
+        ReleaseActiveLoad();
+        return true;
+    }
+    TextureResizeRequest* const request = t->asyncInfo;
+    if (!request || request->state != TextureResizeRequest::AsyncLoad) return false;
+    const auto i = asyncQueue.Find(request);
+    if (i != asyncQueue.End()) asyncQueue.Remove(i);
+    t->asyncInfo = nullptr;
+    Alloc::Delete(request);
+    return true;
 }
 
-bool __cdecl TextureManager::RemovedTextureDownSize(const TextureRes* t)  // 0x10042980
+void TextureManager::CancelActiveLoad()
 {
-    static auto const f = Orig<bool(__cdecl*)(TextureManager*, const TextureRes*)>(
-        "?RemovedTextureDownSize@TextureManager@Jet@@IAA_NPBVTextureRes@2@@Z");
-    return f(this, t);
+    volatile int& state = fieldA4;
+    if (state != 1) return;
+    auto* const request = reinterpret_cast<TextureResizeRequest*>(field38);
+    if (request) request->cancelled = true;
+    while (state == 1) Time::Delay(16);
+}
+
+void TextureManager::ReleaseActiveLoad()
+{
+    if (fieldA8) {
+        auto* const worker = reinterpret_cast<Thread*>(fieldA8);
+        worker->~Thread();
+        Alloc::Delete(worker);
+    }
+    fieldA8 = 0;
+    auto* const request = reinterpret_cast<TextureResizeRequest*>(field38);
+    if (request && request->texture) request->texture->asyncInfo = nullptr;
+    if (request) Alloc::Delete(request);
+    field38 = 0;
+    info.FreeBlocks();
+    fieldA4 = 0;
+}
+
+unsigned int __stdcall TextureManager::RunActiveLoad(void* manager)
+{
+    auto* const self = static_cast<TextureManager*>(manager);
+    auto* const request = reinterpret_cast<TextureResizeRequest*>(self->field38);
+    self->info.FreeBlocks();
+    const TextureResource* const resource = request->texture->GetResource();
+    const PString& name = request->texture->GetResourceName();
+    const char* const text = name.node ? name.node->text : nullptr;
+    const auto result = TextureResource::Load(request->database, text, resource->ScrambleKey(),
+                                               request->firstMip, request->reverseLevel, &self->info);
+    volatile int& state = self->fieldA4;
+    state = request->cancelled ? 4 : (result.code ? 3 : 2);
+    return 0;
+}
+
+bool TextureManager::StartActiveLoad()
+{
+    auto* const request = reinterpret_cast<TextureResizeRequest*>(field38);
+    if (!request->texture || !request->database || request->cancelled) {
+        fieldA4 = 3;
+        return false;
+    }
+    fieldA4 = 1;
+    void* const memory = Alloc::New(sizeof(Thread));
+    Thread* const worker = memory ? ::new (memory) Thread(&RunActiveLoad, this, true) : nullptr;
+    fieldA8 = reinterpret_cast<int>(worker);
+    if (!worker || !worker->StartedOk()) {
+        if (worker) {
+            worker->~Thread();
+            Alloc::Delete(worker);
+        }
+        fieldA8 = 0;
+        return false;
+    }
+    return true;
 }
 
 void __cdecl TextureManager::UpSizeTexture(const TextureRes* t, int size)  // 0x10042720
 {
-    static auto const f = Orig<void(__cdecl*)(TextureManager*, const TextureRes*, int)>(
-        "?UpSizeTexture@TextureManager@Jet@@QAAXPBVTextureRes@2@H@Z");
-    f(this, t, size);
+    if (t->asyncInfo || t->mipLevelsOnDisk <= 1) return;
+    const TextureResource* const resource = t->GetResource();
+    const ResourceDatabase* const database = resource ? resource->Owner() : nullptr;
+    const DisplayTexture* const display = t->GetDisplayTexture();
+    if (!database || !display) return;
+    const int current = static_cast<int>(display->GetNumMipLevels());
+    int limit = t->mipLevelsOnDisk;
+    if (MAX_STREAMING_TEXTURE_MIP_COUNT < limit) limit = MAX_STREAMING_TEXTURE_MIP_COUNT;
+    const int requested = MipCount(size);
+    if (requested < limit) limit = requested;
+    if (current < limit) AddAsyncTextureLoad(t, database, current, limit - 1);
 }
 
 void TextureManager::CleanupAsyncTextureLoad()  // 0x10042690
 {
-    static auto const f =
-        Orig<void(__fastcall*)(TextureManager*, void*)>("?CleanupAsyncTextureLoad@TextureManager@Jet@@IAEXXZ");
-    f(this, nullptr);
+    CancelActiveLoad();
+    ReleaseActiveLoad();
+    for (auto i = asyncQueue.First(); i != asyncQueue.End(); ++i) Alloc::Delete(*i);
+    asyncQueue.RemoveAll();
+    for (auto i = downsizeQueue.First(); i != downsizeQueue.End(); ++i) Alloc::Delete(*i);
+    downsizeQueue.RemoveAll();
+}
+
+// 0x100427a0: the explicit downsize API has a 128-pixel floor, independent of the streaming settings.
+void __cdecl TextureManager::DownSizeTexture(const TextureRes* t, int size)
+{
+    if (t->asyncInfo || t->mipLevelsOnDisk <= 1) return;
+    const DisplayTexture* const display = t->GetDisplayTexture();
+    if (!display) return;
+    const int mips = MipCount(size < 128 ? 128 : size);
+    if (mips < static_cast<int>(display->GetNumMipLevels())) AddTextureDownSize(t, mips - 1);
+}
+
+void __cdecl TextureManager::DownSizeRemoveMips(TextureRes* texture, int levels)
+{
+    DisplayTexture* const display = texture->GetDisplayTexture();
+    if (!display || levels >= static_cast<int>(display->GetNumMipLevels())) return;
+    const Size size = TextureResource::GetMipSizeAtReverseLevel(levels - 1, texture->maxSizeOnDisk);
+    texture->ChangeMipCount(size, levels, true);
+}
+
+void __cdecl TextureManager::TestUpSizeStreamableTextures()
+{
+    textures.ForEach([this](Texture* texture) {
+        if (auto* res = dynamic_cast<TextureRes*>(texture)) UpSizeTexture(res, 65535);
+    });
+}
+
+void __cdecl TextureManager::TestDownSizeStreamableTextures()
+{
+    textures.ForEach([this](Texture* texture) {
+        auto* res = dynamic_cast<TextureRes*>(texture);
+        if (!res || res->asyncInfo || res->mipLevelsOnDisk <= 1) return;
+        const DisplayTexture* const display = res->GetDisplayTexture();
+        if (display && static_cast<int>(display->GetNumMipLevels()) > 8) AddTextureDownSize(res, 7);
+    });
+}
+
+// 0x10042940
+bool __cdecl TextureManager::IsTextureBeingResized(const TextureRes* t) { return t->asyncInfo != nullptr; }
+
+// 0x10042950
+void __cdecl TextureManager::CancelResizeTexture(const TextureRes* t)
+{
+    if (!t->asyncInfo) return;
+    if (t->asyncInfo->state == TextureResizeRequest::AsyncLoad)
+        RemovedAsyncTextureLoad(t);
+    else if (t->asyncInfo->state == TextureResizeRequest::Downsize)
+        RemovedTextureDownSize(t);
+}
+
+// 0x10042980
+bool __cdecl TextureManager::RemovedTextureDownSize(const TextureRes* t)
+{
+    TextureResizeRequest* const request = t->asyncInfo;
+    if (!request || request->state != TextureResizeRequest::Downsize) return false;
+    const auto i = downsizeQueue.Find(request);
+    if (i != downsizeQueue.End()) downsizeQueue.Remove(i);
+    t->asyncInfo = nullptr;
+    Alloc::Delete(request);
+    return true;
+}
+
+// 0x100429f0: the original Update consumes this request in reverse mip-level coordinates.
+void __cdecl TextureManager::AddTextureDownSize(const TextureRes* t, int reverseLevel)
+{
+    if (t->asyncInfo) return;
+    void* const mem = Alloc::New(sizeof(TextureResizeRequest));
+    if (!mem) return;
+    auto* const request = ::new (mem) TextureResizeRequest{
+        t, nullptr, false, reverseLevel, 0, TextureResizeRequest::Downsize};
+    downsizeQueue.Add(request);
+    t->asyncInfo = request;
+}
+
+// 0x10042c20: revisit textures that have not been considered for 100 frames.
+void __cdecl TextureManager::CheckNeedDownSize(TextureManagerInfo& info)
+{
+    auto* const fields = reinterpret_cast<unsigned int*>(&info);
+    auto* const texture = reinterpret_cast<TextureRes*>(fields[2]);
+    if (texture->mipLevelsOnDisk <= 1) return;
+    const DisplayTexture* const display = texture->GetDisplayTexture();
+    if (!display || static_cast<int>(frame - fields[1]) <= 100) return;
+    int wanted = static_cast<int>(fields[0]);
+    if (wanted < MIN_STREAMING_TEXTURE_MIP_COUNT) wanted = MIN_STREAMING_TEXTURE_MIP_COUNT;
+    fields[0] = static_cast<unsigned int>(wanted);
+    if (wanted < static_cast<int>(display->GetNumMipLevels()))
+        DownSizeTexture(texture, static_cast<int>(1u << ((wanted - 1) & 31)));
+    fields[1] = frame;
+    fields[0] = 0;
+}
+
+void __cdecl TextureManager::CheckTexturesNeedDownSize()
+{
+    int switches = 0;
+    for (int remaining = 10; remaining > 0; --remaining) {
+        bool switched = false;
+        auto* head = reinterpret_cast<InfoNode*>(lists[listIndex].owner);
+        InfoNode* node = head->prev;
+        if (node == head) {
+            const int previous = listIndex;
+            listIndex = fieldD4;
+            fieldD4 = previous;
+            if (++switches > 1) return;
+            switched = true;
+            head = reinterpret_cast<InfoNode*>(lists[listIndex].owner);
+            node = head->prev;
+            if (node == head) continue;
+        }
+        node->next->prev = node->prev;
+        node->prev->next = node->next;
+        node->owner = node->prev = node->next = node;
+        if (!node->info) {
+            if (switched) continue;
+            const int previous = listIndex;
+            listIndex = fieldD4;
+            fieldD4 = previous;
+            if (++switches > 1) return;
+            head = reinterpret_cast<InfoNode*>(lists[listIndex].owner);
+            node = head->prev;
+            if (node == head) continue;
+            node->next->prev = node->prev;
+            node->prev->next = node->next;
+            node->owner = node->prev = node->next = node;
+            if (!node->info) continue;
+        }
+        CheckNeedDownSize(*node->info);
+        auto* destination = reinterpret_cast<InfoNode*>(lists[fieldD4].owner);
+        node->prev = destination;
+        node->next = destination->next;
+        destination->next->prev = node;
+        destination->next = node;
+        node->owner = destination->owner;
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -239,13 +511,7 @@ void __cdecl TextureManager::Add(Texture* t)
 void __cdecl TextureManager::RemoveTexture(Texture* t)
 {
     if (TextureRes* const r = dynamic_cast<TextureRes*>(t)) {
-        if (r->asyncInfo) {
-            const int state = *reinterpret_cast<const int*>(static_cast<char*>(r->asyncInfo) + 0x14);
-            if (state == 2)
-                RemovedAsyncTextureLoad(r);
-            else if (state == 1)
-                RemovedTextureDownSize(r);
-        }
+        CancelResizeTexture(r);
         InfoNode* const n = NodeOf(r->GetTextureManagerInfo());
         n->next->prev = n->prev;
         n->prev->next = n->next;
@@ -326,6 +592,13 @@ unsigned long __cdecl TextureManager::GetActiveTextureMemory() const { return ac
 unsigned int __cdecl TextureManager::GetActiveFrame() const { return frame; }                 // 0x10004ec0
 RenderKernel* __cdecl TextureManager::GetRenderKernel() { return kernel; }                    // 0x10004aa0
 
+void __cdecl TextureManager::RefreshFromChangedSettings()  // 0x10042c90
+{
+    textures.ForEach([](Texture* texture) {
+        if (DisplayTexture* display = texture->GetDisplayTexture()) display->RefreshFromChangedSettings();
+    });
+}
+
 // 0x10041730: names without a .texture/.movie extension get "-tex"; the table is keyed by "database:name"
 Texture* __cdecl TextureManager::Create(const ResourceDatabase* db, const PString& name, const String& key)
 {
@@ -370,9 +643,7 @@ Texture* __cdecl TextureManager::GetSubstituteTexture()
             r->AddReference();
         } else {
             if (Find(SubstituteName())) return nullptr;
-            static auto const gen = Orig<DisplayTexture*(__cdecl*)(Display*, unsigned int, unsigned int)>(
-                "?GenerateSubstituteLoadTexture@SharedTextureCollection@Jet@@KAPAVDisplayTexture@2@PAVDisplay@2@II@Z");
-            DisplayTexture* const d = gen(KernelDisplay(kernel), 0, 0);
+            DisplayTexture* const d = RsGenerateSubstituteTexture(KernelDisplay(kernel), 0, 0);
             if (!d) return nullptr;
             void* const mem = Alloc::New(sizeof(Texture));
             r = mem ? ::new (mem) Texture(SubstituteName(), this, d, static_cast<TextureAlpha>(0)) : nullptr;

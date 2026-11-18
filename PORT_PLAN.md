@@ -121,7 +121,15 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        moves to U6d, whose TextureManager lists it works in. U6d analysis started 2026-11-09 (notes/RenderSystem.md
        "U6d analysis"): split into U6d1 TextureManager + TextureRes (possibly U6d1a containers/lifetime, U6d1b
        streaming) and U6d2 SharedTextureCollection. U6d1a (TextureManager containers and lifetime,
-       TextureManager.cpp, 1945/2687, test diff_rs_u6d) done 2026-11-09. Next: U6d1b (streaming + TextureRes).
+       TextureManager.cpp, 1945/2687, test diff_rs_u6d) done 2026-11-09. U6d1b started 2026-11-11 with the
+       downsize queue, resize cancellation and async enqueue (1951/2687, diff_rs_u6d). Worker startup, Update,
+       TextureRes and SharedTextureCollection function exports have since been reconstructed and differentially
+       tested. Their shared data exports still come from the original DLL, and the power generators call the original
+       VC80 pow import. U7 is underway: MaterialSpec, material name conversions, material state accessors, and the
+       instance state (Equals, InitInstance, Rename, SetTextureDefinition, VerifyDecoratedName) are ported. Current
+       RenderSystem count: 2127/2687 exports; 560 still forwarded. This laboratory 32-bit build
+       reached the main menu on 2026-11-18; a fixed driving session still needs a separate game check. Continue U7
+       and the remaining units; do not treat forwarding as x64 completion.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
