@@ -2565,3 +2565,46 @@ separate unit's issue, not the U7 change.
 Remaining U7: MaterialResource::CreateInstance/LoadTxt (0x10036060 / 0x10036080), NullMaterial::CreateGeometryChunk
 (0x10037a30, with GeometryChunkTemplate 0x10037af0), SetLightingState (0x10032960), the PluginFactoryBase
 families, the Material / NullMaterial / MaterialResource ctors and dtors, and the seven shared data statics.
+
+## RenderSystem U7 MaterialResource (2026-11-19)
+
+MaterialResource.cpp replaces seven more exports: the ctor (PString, ResourceDatabase) 0x10035fb0, the copy
+ctor 0x10035f00, operator= 0x10035f30, the dtor 0x10035fe0, the vftable `??_7MaterialResource@Jet@@6B@`
+(0x10071554), LoadTxt 0x10036080 and CreateInstance 0x10036060. RenderSystem is 2148 of 2687 exports ours
+(539 forwarded); check_thunks.py reports 2148 checked, 0 not ours. compare_vtables.py: the vftable has 19
+slots like the original's (the 18 Resource slots - half of them the folded 6-byte thunks into
+KernelResource_7c at 0x100572xx - plus CreateInstance at 18); the not-yet-implemented classes still differ,
+as before.
+
+The class sits in jet/Material.h: Resource at +0x00, the extracted MaterialSpec* at +0x5c and a MaterialConfig
+subobject at +0x60. The subobject is a member, not a base (the original exports no
+`??_7MaterialResource@Jet@@6BMaterialConfig@1@@` secondary vftable, and MaterialConfig's own vtable at
+0x10071158 is a single slot, its deleting destructor), and its vptr is written by hand to the shared
+MaterialConfig vtable in the ctors and the dtor - ours does the same through RsMaterialConfigSetVtable
+(MaterialConfigExtract.cpp, the alias family's helper now shared), keeping that data export the original's
+until U9. The copy ctor copies the spec pointer raw, with no reference, like the original.
+
+LoadTxt (0x10036080) decoded from the assembly: ConfigParser over the file, opened through the owner's
+GetFileName (vtable slot 3, the class-return hidden pointer comes back in EAX - the test stand-in must return
+it, a crash found in testing) when the resource has an owner, else the name is the path. The parse code must
+be 0, the parsed root must exist and the parser version must equal 2.0f exactly (the literal at 0x10062b9c;
+UCOMISS + LAHF/TEST/PARITY is the == test). The old spec is destroyed and cleared, then the "Material" item
+(the original's static PString at 0x100b86ec, whose initializer interns the literal at 0x100710bc at module
+load) is extracted through config.ExtractMaterialSpec; no spec answers Result(1). Every texture definition
+keeps its name converted for the resource's database: String from the node text (null text without a node),
+ConvertResourceName, then the old node destroyed (no cache-null test in this loop) and a raw replacement node
+created. The walk is FUN_1000d390's state machine over the seven-item ring chunks (item +0xc, the chunk's
+count past its end moves to the next chunk, stopping at the head). CreateInstance (0x10036060) is
+config.GetMaterial(manager, db, *spec).
+
+diff_rs_u7 gained "material resource" and "resource copy": files written with ConfigParser::Save from the
+same scripted tree both sides build (version 2.0 and 1.0, missing "Material", 0..11 texture definitions
+crossing the ring chunks, pathy and empty file names), the owner's GetFileName answering the name or an
+uppercase alias of the path, reloads replacing the spec, CreateInstance over the stand-in manager, the dtor,
+and the copy ctor / operator= sharing the spec pointer. 3000 rounds x 8 scenarios: 24000 checks, 0
+mismatches. Regressions green: diff_rs_u6d 200, diff_rs_u6c2 200, diff_rs_u6c 200, diff_rs_u6b 300 (402
+real + 240 generated .texture.txt files), diff_rs_u6 300 (400 real .texture files). The build reached the
+laboratory install and the menu check passed (alive at the menu, clean exit, JetLog identical to the
+baseline: diff_lines=0). Remaining U7: NullMaterial::CreateGeometryChunk (with
+GeometryChunkTemplate), SetLightingState, the PluginFactoryBase families, the Material / NullMaterial ctors
+and dtors, and the seven shared data statics (until U9).

@@ -131,10 +131,11 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        members, our own ??_7MaterialManager@Jet@@6B@ vftable) and MaterialManager::Create (0x10035670, the
        plugin-type walk) with the static SplitDecoratedMaterialName (0x10035b80) and the six MaterialConfig
        extractors (ExtractMaterialSpec/Specs, ExtractMaterial/Materials, GetMaterial, CreateNewMaterial) are
-       ported and differentially tested (tests/diff_rs_u7.cpp). Current
-       RenderSystem count: 2141/2687 exports; 546 still forwarded. This laboratory 32-bit build
+       ported and differentially tested (tests/diff_rs_u7.cpp). MaterialResource (the ctors, dtor, assignment,
+       vftable, LoadTxt and CreateInstance) is ported and differentially tested too (2026-11-19). Current
+       RenderSystem count: 2148/2687 exports; 539 still forwarded. This laboratory 32-bit build
        reached the main menu on 2026-11-18; a fixed driving session still needs a separate game check. Continue U7
-       (MaterialResource CreateInstance/LoadTxt, NullMaterial::CreateGeometryChunk, SetLightingState and the
+       (NullMaterial::CreateGeometryChunk, SetLightingState and the
        plugin-factory families next) and the remaining units; do not treat
        forwarding as x64 completion.
    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).

@@ -1,5 +1,6 @@
-// Differential test of the U7 material config extractors and MaterialManager's Create /
-// SplitDecoratedMaterialName (notes/RenderSystem.md), ours against RenderSystem_7c_orig.dll in one process.
+// Differential test of the U7 material config extractors, MaterialManager's Create /
+// SplitDecoratedMaterialName and MaterialResource (notes/RenderSystem.md), ours against
+// RenderSystem_7c_orig.dll in one process.
 //
 // As in diff_rs_u6d: both modules' Jet::Alloc and PStringCache Create (both the (text) and the (text, length)
 // overloads) and Destroy imports are hooked and logged,
@@ -11,7 +12,8 @@
 // KernelStandard's ConfigData, once per side over the same shared cache nodes.
 //
 // usage: diff_rs_u7.exe <bin dir> [rounds]
-//   env RS_U7_ECHO (echo the log), RS_U7_DUMP=<prefix> (each mismatch's logs: <prefix>.<n>.ours.txt / .orig.txt)
+//   env RS_U7_ECHO (echo the log), RS_U7_DUMP=<prefix> (each mismatch's logs: <prefix>.<n>.ours.txt / .orig.txt),
+//   RS_U7_ONLY=<scenario> (run only that scenario kind)
 #define NOMINMAX
 #include <windows.h>
 
@@ -332,6 +334,25 @@ static unsigned char kernelObj[0x100];
 static unsigned char displayObj[0x40];
 static unsigned char dbObj[0x20];
 
+// the database stand-in's slot 3 (GetFileName): the name's text, or dbMapped when set (the load then parses
+// that file)
+static void* dbVtable[8];
+static const char* dbMapped;
+
+static void* __cdecl DbGetFileName(void* self, void* ret, const void* name)
+{
+    const char* text = nullptr;
+    if (name) {
+        void* node = *static_cast<void* const*>(name);
+        if (node) text = static_cast<const char*>(node) + 0x18;
+    }
+    Log("  %s.getFileName '%s'\n", Name(self), text ? text : "null");
+    const char* answer = dbMapped ? dbMapped : text;
+    *static_cast<void**>(ret) =
+        answer ? RealCreateNode(*cache, reinterpret_cast<const unsigned char*>(answer)) : nullptr;
+    return ret;  // the class return goes back in EAX, as the callers expect
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // the per-side API
 
@@ -348,6 +369,13 @@ struct Api {
     void* (__cdecl* getMaterial)(void*, void*, const void*, const void*);
     void* (__cdecl* createNew)(void*, void*, void*, const void*);
     void (__fastcall* specDtor)(void*, void*);
+    // MaterialResource (the dtor as __fastcall like the manager's, the rest as declared)
+    void* (__thiscall* resCtor)(void*, const void*, const void*);
+    void* (__thiscall* resCtorCopy)(void*, const void*);
+    void* (__thiscall* resAssign)(void*, const void*);
+    void (__fastcall* resDtor)(void*, void*);
+    int* (__cdecl* resLoadTxt)(void*, int*, const char*);
+    void* (__cdecl* resCreateInstance)(const void*, void*, const void*);
 };
 static Api api[2];
 
@@ -381,6 +409,15 @@ static void LoadApi(int s)
     a.createNew = As<decltype(a.createNew)>(
         Proc(m, "?CreateNewMaterial@MaterialConfig@Jet@@IBAPAVMaterial@2@PAVMaterialManager@2@PAV32@ABVPString@2@@Z"));
     a.specDtor = As<decltype(a.specDtor)>(Proc(m, "??1MaterialSpec@Jet@@QAE@XZ"));
+    a.resCtor = As<decltype(a.resCtor)>(Proc(m, "??0MaterialResource@Jet@@QAE@ABVPString@1@PBVResourceDatabase@1@@Z"));
+    a.resCtorCopy = As<decltype(a.resCtorCopy)>(Proc(m, "??0MaterialResource@Jet@@QAE@ABV01@@Z"));
+    a.resAssign = As<decltype(a.resAssign)>(Proc(m, "??4MaterialResource@Jet@@QAEAAV01@ABV01@@Z"));
+    a.resDtor = As<decltype(a.resDtor)>(Proc(m, "??1MaterialResource@Jet@@UAE@XZ"));
+    a.resLoadTxt = As<decltype(a.resLoadTxt)>(Proc(m,
+        "?LoadTxt@MaterialResource@Jet@@MAA?AV?$ResultClass@$1?results@Resource@Jet@@2QBUResultTable@2@"
+        "BW4Results@Resource@Jet@@@2@PBD@Z"));
+    a.resCreateInstance = As<decltype(a.resCreateInstance)>(Proc(m,
+        "?CreateInstance@MaterialResource@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PBVResourceDatabase@2@@Z"));
 }
 
 // the config building (KernelStandard, shared by both sides). The ctor/dtor are __thiscall; operator() is the
@@ -412,6 +449,14 @@ static void* AddBlock(void* parent, const char* key, const char* value)
     FreePString(k);
     return c;
 }
+
+// the material files LoadTxt parses are written through ConfigParser::Save (KernelStandard, shared): the same
+// "version x.xx" and tree text the parser reads back
+static void* (__thiscall* parserCtor)(void*);
+static void (__fastcall* parserDtor)(void*, void*);
+static void (__cdecl* parserSetConfig)(void*, void*);
+static void (__cdecl* parserSetVersion)(void*, float);
+static bool (__fastcall* parserSave)(const void*, void*, const char*, bool, int);
 
 // the material fields a dump reads back
 static void DumpSpec(std::string& out, const unsigned char* spec)
@@ -480,17 +525,36 @@ static void DumpMaterial(std::string& out, const void* material)
     out += "\n";
 }
 
+// a MaterialResource's identity fields: its own vtable (each side writes its own), the spec pointer and the
+// MaterialConfig subobject's vtable (both sides write the original's shared one)
+static void* resVtable[2];
+static void* cfgVtable;
+
+static void DumpResource(std::string& out, const void* res, int s, const char* tag)
+{
+    const auto* m = static_cast<const unsigned char*>(res);
+    char buf[128];
+    std::snprintf(buf, sizeof buf, "  %s vf=%s spec=%s cfgv=%s\n", tag,
+                  *reinterpret_cast<void* const*>(m) == resVtable[s] ? "self" : "OTHER",
+                  *reinterpret_cast<void* const*>(m + 0x5c) ? "set" : "null",
+                  *reinterpret_cast<void* const*>(m + 0x60) == cfgVtable ? "mc" : "OTHER");
+    out += buf;
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // scenarios (each fills the log on the current side)
 
 static void* configRoot;
+static char tempDir[256];
 
 // the per-round script parameters both sides see
 static bool pick2Full;
 
-static void* BuildSpecConfig(std::mt19937& r, bool full, bool rename, bool oddKeys)
+// `textures` < 0: the old random count; else exactly that many definitions (LoadTxt's walk crosses into a
+// second ring chunk above seven)
+static void* BuildSpecConfig(void* parent, std::mt19937& r, bool full, bool rename, bool oddKeys, int textures)
 {
-    void* c = AddBlock(configRoot, "Material", "name.m.onetex");
+    void* c = AddBlock(parent, "Material", "name.m.onetex");
     if (full) {
         AddPair(c, "Ambient", "1 0 0 1");
         AddPair(c, "Diffuse", "0.5 0.5 0.5 1");
@@ -509,21 +573,50 @@ static void* BuildSpecConfig(std::mt19937& r, bool full, bool rename, bool oddKe
         for (int i = 0; i < n; ++i) AddPair(p, i % 2 ? "Amount" : "Name", "prop");
         AddPair(p, "Name", "value");
     }
-    const int textures = full ? 3 : static_cast<int>(r() % 3);
+    const int count = textures < 0 ? (full ? 3 : static_cast<int>(r() % 3)) : textures;
     static const char* const kinds[] = {"ambient", "diffuse", "Reflect", "lookup3", "nosuch", "opacity"};
     static const char* const fileKeys[] = {"Bitmap", "Name", "Bitmap"};
-    for (int i = 0; i < textures; ++i) {
+    static const char* const fileNames[] = {"tex.bmp", "other.dds", "..\\parent.tga", "sub\\dir\\c.dds",
+                                            "C:/abs/x.dds", ""};
+    for (int i = 0; i < count; ++i) {
         void* t = AddBlock(c, "Texture", kinds[r() % 6]);
-        if (r() % 3) AddPair(t, fileKeys[i % 3], "tex.bmp");
+        if (r() % 3) AddPair(t, fileKeys[i % 3], fileNames[r() % 6]);
         if (r() % 2) AddPair(t, "Name", "other.dds");
         if (r() % 2) AddPair(t, "Amount", "0.5");
     }
     return c;
 }
 
+// a "version" line and the tree text on disk, for MaterialResource::LoadTxt to parse
+static void WriteMaterialFile(std::mt19937& r, const char* path, float version, bool haveMaterial)
+{
+    if (haveMaterial) {
+        BuildSpecConfig(configRoot, r, r() % 2 != 0, r() % 2 != 0, r() % 2 != 0, static_cast<int>(r() % 12));
+    } else {
+        AddPair(configRoot, "SomethingElse", "1");
+    }
+    void* parser = RealNew(0x18);
+    std::memset(parser, 0, 0x18);
+    parserCtor(parser);
+    parserSetConfig(parser, configRoot);
+    parserSetVersion(parser, version);
+    Log("  file version=%d material=%d\n", static_cast<int>(version), haveMaterial ? 1 : 0);
+    parserSave(parser, nullptr, path, false, 0);
+    parserSetConfig(parser, nullptr);  // the tree stays the scenario's; the parser dtor must not delete it
+    parserDtor(parser, nullptr);
+    RealDelete(parser);
+}
+
+static void RunScenarioCase(int s, std::mt19937& r, unsigned kind);
+
 static void RunScenario(int s, std::mt19937& r)
 {
-    const unsigned kind = r() % 6;
+    const unsigned kind = r() % 8;
+    if (const char* only = std::getenv("RS_U7_ONLY")) return RunScenarioCase(s, r, static_cast<unsigned>(std::atoi(only)));
+    return RunScenarioCase(s, r, kind);
+}
+static void RunScenarioCase(int s, std::mt19937& r, unsigned kind)
+{
     switch (kind) {
     case 0: {  // the split
         static const char* const names[] = {
@@ -573,7 +666,7 @@ static void RunScenario(int s, std::mt19937& r)
         // BuildSpecConfig hands back the "Material" item (what the single-item extractors take); the list
         // extractors walk the root's "Material" children. The tree's nodes come from KernelStandard's ConfigData
         // pool, so only the root is destroyed (its destructor deletes the children); the item is not freed here.
-        void* config = BuildSpecConfig(r, pick2Full, r() % 2 != 0, r() % 2 != 0);
+        void* config = BuildSpecConfig(configRoot, r, pick2Full, r() % 2 != 0, r() % 2 != 0, -1);
         if (r() % 4 == 0) {
             void* list = RealNew(4);
             *static_cast<void**>(list) = nullptr;
@@ -637,7 +730,7 @@ static void RunScenario(int s, std::mt19937& r)
     }
     case 4: {  // GetMaterial through the stand-in manager
         // the same single "Material" item; only the root is destroyed
-        void* config = BuildSpecConfig(r, r() % 2 != 0, true, r() % 2 != 0);
+        void* config = BuildSpecConfig(configRoot, r, r() % 2 != 0, true, r() % 2 != 0, -1);
         unsigned char* spec = static_cast<unsigned char*>(api[s].extractSpec(nullptr, config));
         managerMaterial = NextMaterial("NEW");
         managerCode = r() % 5 == 0 ? 2 : 0;
@@ -650,7 +743,7 @@ static void RunScenario(int s, std::mt19937& r)
         }
         break;
     }
-    default: {  // CreateNewMaterial over the stand-in manager
+    case 5: {  // CreateNewMaterial over the stand-in manager
         void* base = NextMaterial("BASE");
         // the base's state: two properties and two definitions in its lists
         static unsigned char lists[0x200];
@@ -690,6 +783,86 @@ static void RunScenario(int s, std::mt19937& r)
         FreePString(name);
         break;
     }
+    case 6: {  // MaterialResource: ctor, LoadTxt, CreateInstance and the dtor
+        char path[512];
+        std::snprintf(path, sizeof path, "%srs_u7_material.txt", tempDir);
+        const bool withOwner = r() % 2 != 0;
+        const bool goodVersion = r() % 5 != 0;
+        const bool haveMaterial = r() % 6 != 0;
+        WriteMaterialFile(r, path, goodVersion ? 2.0f : 1.0f, haveMaterial);
+        char upper[512];
+        std::snprintf(upper, sizeof upper, "%s", path);
+        _strupr(upper);
+        dbMapped = withOwner && r() % 2 != 0 ? upper : nullptr;
+        void* res = RealNew(0x64);
+        std::memset(res, 0, 0x64);
+        void* name = MakePString(r() % 2 ? "mym.onetex" : "converted.m.gloss");
+        api[s].resCtor(res, name, withOwner ? dbObj : nullptr);
+        DumpResource(logText[cur], res, s, "ctor");
+        Log("  loadTxt owner=%d mapped=%d\n", withOwner ? 1 : 0, dbMapped ? 1 : 0);
+        int result = -1;
+        api[s].resLoadTxt(res, &result, path);
+        Log("  loadTxt -> %d\n", result);
+        unsigned char* spec = *reinterpret_cast<unsigned char**>(static_cast<unsigned char*>(res) + 0x5c);
+        std::string dump;
+        DumpSpec(dump, spec);
+        Log("%s", dump.c_str());
+        if (spec) {
+            managerMaterial = NextMaterial("NEW");
+            managerCode = r() % 5 == 0 ? 2 : 0;
+            Log("  createInstance code=%d\n", managerCode);
+            void* material = api[s].resCreateInstance(res, managerObj, dbObj);
+            DumpMaterial(logText[cur], material);
+            if (r() % 2) {  // a reload: the old spec goes before the new one is extracted
+                WriteMaterialFile(r, path, 2.0f, true);
+                Log("  reload\n");
+                api[s].resLoadTxt(res, &result, path);
+                Log("  loadTxt -> %d\n", result);
+                spec = *reinterpret_cast<unsigned char**>(static_cast<unsigned char*>(res) + 0x5c);
+                dump.clear();
+                DumpSpec(dump, spec);
+                Log("%s", dump.c_str());
+            }
+        }
+        api[s].resDtor(res, nullptr);
+        RealDelete(res);
+        FreePString(name);
+        dbMapped = nullptr;
+        break;
+    }
+    case 7: {  // MaterialResource copy and assignment: the spec pointer is shared without a reference
+        char path[512];
+        std::snprintf(path, sizeof path, "%srs_u7_material.txt", tempDir);
+        WriteMaterialFile(r, path, 2.0f, true);
+        void* res = RealNew(0x64);
+        std::memset(res, 0, 0x64);
+        void* name = MakePString(r() % 2 ? "copym.onetex" : "a.b.c");
+        api[s].resCtor(res, name, r() % 2 ? dbObj : nullptr);
+        int result = -1;
+        api[s].resLoadTxt(res, &result, path);
+        Log("  loadTxt -> %d\n", result);
+        void* res2 = RealNew(0x64);
+        std::memset(res2, 0, 0x64);
+        api[s].resCtorCopy(res2, res);
+        DumpResource(logText[cur], res2, s, "copy");
+        Log("  shared=%d\n",
+            *reinterpret_cast<void**>(static_cast<unsigned char*>(res2) + 0x5c) ==
+                    *reinterpret_cast<void**>(static_cast<unsigned char*>(res) + 0x5c)
+                ? 1
+                : 0);
+        api[s].resAssign(res2, res);
+        DumpResource(logText[cur], res2, s, "assign");
+        // the shallow copy shares the spec with no reference count: only one of the two may free it
+        *reinterpret_cast<void**>(static_cast<unsigned char*>(res2) + 0x5c) = nullptr;
+        api[s].resDtor(res2, nullptr);
+        RealDelete(res2);
+        api[s].resDtor(res, nullptr);
+        RealDelete(res);
+        FreePString(name);
+        break;
+    }
+    default:
+        break;
     }
 }
 
@@ -743,13 +916,29 @@ int main(int argc, char** argv)
     configChild = As<decltype(configChild)>(Proc(ks, "??RConfigData@Jet@@QAAAAV01@ABVPString@1@0@Z"));
     configBlock = As<decltype(configBlock)>(Proc(ks, "??RConfigData@Jet@@QAAAAV01@ABVPString@1@@Z"));
     configDtor = As<decltype(configDtor)>(Proc(ks, "??1ConfigData@Jet@@QAE@XZ"));
-    for (int s = 0; s < 2; ++s) LoadApi(s);
+    parserCtor = As<decltype(parserCtor)>(Proc(ks, "??0ConfigParser@Jet@@QAE@XZ"));
+    parserDtor = As<decltype(parserDtor)>(Proc(ks, "??1ConfigParser@Jet@@UAE@XZ"));
+    parserSetConfig = As<decltype(parserSetConfig)>(Proc(ks, "?SetConfig@ConfigParser@Jet@@QAAXPAVConfigData@2@@Z"));
+    parserSetVersion = As<decltype(parserSetVersion)>(Proc(ks, "?SetVersion@ConfigParser@Jet@@QAAXM@Z"));
+    parserSave = As<decltype(parserSave)>(Proc(ks, "?Save@ConfigParser@Jet@@QBE_NPBD_NH@Z"));
+    for (int s = 0; s < 2; ++s) {
+        LoadApi(s);
+        resVtable[s] = Proc(mod[s], "??_7MaterialResource@Jet@@6B@");
+    }
+    cfgVtable = Proc(mod[1], "??_7MaterialConfig@Jet@@6B@");
+    GetTempPathA(sizeof tempDir, tempDir);
+    // KernelResource's Resource reads the resource system's time: a zeroed stand-in (as in diff_rs_u3)
+    static unsigned char fakeSystem[0x400];
+    As<void(__cdecl*)(void*)>(Proc(GetModuleHandleA("KernelResource_7c.dll"),
+                                  "?InitRS@Resource@Jet@@CAXPAVResourceSystem@2@@Z"))(fakeSystem);
     // the stand-ins
     *reinterpret_cast<void**>(textureManagerObj) = &MatDeleteThis;
     for (unsigned i = 1; i < 0x20 / 4; ++i) reinterpret_cast<void**>(textureManagerObj)[i] = &MatRefCountAdd;
     std::memset(kernelObj, 0, sizeof kernelObj);
     *reinterpret_cast<void**>(kernelObj + 0x7c) = displayObj;
     std::memset(dbObj, 0, sizeof dbObj);
+    dbVtable[3] = &DbGetFileName;
+    *reinterpret_cast<void**>(dbObj) = dbVtable;
     managerVtable[3] = &ManagerCreate;
     managerObj = RealNew(0x20);
     std::memset(managerObj, 0, 0x20);

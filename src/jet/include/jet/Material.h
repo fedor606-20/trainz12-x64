@@ -1,6 +1,7 @@
-// RenderSystem_7c unit U7 (notes/RenderSystem.md), the material manager and the material config extractors.
-// TS12 layout and slot order (vftable 0x100714fc): the hash table of materials keyed by their decorated name
-// node, the texture manager it hands out and the default material type ("notex" until set).
+// RenderSystem_7c unit U7 (notes/RenderSystem.md): the material manager, the material config extractors and
+// the material text resource. TS12 layout and slot order (MaterialManager vftable 0x100714fc): the hash table
+// of materials keyed by their decorated name node, the texture manager it hands out and the default material
+// type ("notex" until set).
 #pragma once
 
 #include <jet/FastDynamicArray.h>
@@ -8,6 +9,7 @@
 #include <jet/KernelStandard.h>
 #include <jet/PString.h>
 #include <jet/RenderTypes.h>
+#include <jet/Resource.h>
 #include <jet/Result.h>
 
 #include <cstdint>
@@ -226,5 +228,31 @@ protected:
     Material* __cdecl CreateNewMaterial(MaterialManager* manager, Material* material,
                                         const PString& name) const;                       // 0x10034120
 };
+
+// ---- MaterialResource: the material text resource (0x64 bytes; 0x10035f00..0x10036300). The Resource at
+// +0x00, the extracted spec at +0x5c and a MaterialConfig subobject at +0x60 whose vtable only holds its
+// destructor (the original writes the shared MaterialConfig vtable there by hand; ours does the same, so the
+// vtable data exports stay the original's until U9).
+
+class MaterialResource : public Resource {
+public:
+    MaterialResource(const PString& name, const ResourceDatabase* owner);  // 0x10035fb0
+    MaterialResource(const MaterialResource& o);                           // 0x10035f00
+    ~MaterialResource() override;                                          // 0x10035fe0
+    MaterialResource& operator=(const MaterialResource& o);                // 0x10035f30
+
+    // the material of the extracted spec, through the manager (0x10036060)
+    virtual Material* __cdecl CreateInstance(MaterialManager* manager, const ResourceDatabase* db) const;  // 18
+
+protected:
+    Result __cdecl LoadTxt(const char* name) override;  // 11 (0x10036080)
+
+public:
+    // (public for the layout checks, like MaterialManager)
+    MaterialSpec* spec;     // +0x5c
+    MaterialConfig config;  // +0x60 (the vptr slot is written by hand)
+};
+JET_LAYOUT32(sizeof(MaterialResource) == 0x64);
+JET_LAYOUT32(offsetof(MaterialResource, spec) == 0x5c && offsetof(MaterialResource, config) == 0x60);
 
 }  // namespace Jet

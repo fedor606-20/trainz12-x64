@@ -2193,3 +2193,13 @@
 ?Remove@MaterialManager@Jet@@UAA?AV?$ResultClass@$1?results@MaterialManager@Jet@@2QBUResultTable@2@BW4Results@MaterialManager@Jet@@@2@PAVMaterial@2@@Z
 # U7 leaf ops
 ?GetDstBlendMode@Material@Jet@@QBA?AW4Factor@Dst@2@XZ=?RsMatDstBlendMode@Jet@@YAHPAX@Z
+
+# U7 MaterialResource (MaterialResource.cpp: the ctors, dtor and assignment, the vftable, LoadTxt and
+# CreateInstance)
+??0MaterialResource@Jet@@QAE@ABVPString@1@PBVResourceDatabase@1@@Z
+??0MaterialResource@Jet@@QAE@ABV01@@Z
+??1MaterialResource@Jet@@UAE@XZ
+??4MaterialResource@Jet@@QAEAAV01@ABV01@@Z
+??_7MaterialResource@Jet@@6B@
+?CreateInstance@MaterialResource@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PBVResourceDatabase@2@@Z
+?LoadTxt@MaterialResource@Jet@@MAA?AV?$ResultClass@$1?results@Resource@Jet@@2QBUResultTable@2@BW4Results@Resource@Jet@@@2@PBD@Z

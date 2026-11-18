@@ -149,18 +149,16 @@ ReferenceCount* MaterialRefs(void* material)
 // ---------------------------------------------------------------------------------------------------------------
 // the leaf extractors and the object's lifetime (free functions under the exported names)
 
-namespace {
-void SetMaterialConfigVtable(void* object)
+void __cdecl RsMaterialConfigSetVtable(void* object)
 {
     static void* const table = reinterpret_cast<void*>(GetProcAddress(
         GetModuleHandleA("RenderSystem_7c_orig.dll"), "??_7MaterialConfig@Jet@@6B@"));
     *static_cast<void**>(object) = table;
 }
-}  // namespace
 
-void* __fastcall RsMaterialConfigDefault(void* object, void*) { SetMaterialConfigVtable(object); return object; }
-void* __fastcall RsMaterialConfigCopy(void* object, void*, const void*) { SetMaterialConfigVtable(object); return object; }
-void __fastcall RsMaterialConfigDestroy(void* object, void*) { SetMaterialConfigVtable(object); }
+void* __fastcall RsMaterialConfigDefault(void* object, void*) { RsMaterialConfigSetVtable(object); return object; }
+void* __fastcall RsMaterialConfigCopy(void* object, void*, const void*) { RsMaterialConfigSetVtable(object); return object; }
+void __fastcall RsMaterialConfigDestroy(void* object, void*) { RsMaterialConfigSetVtable(object); }
 void* __fastcall RsMaterialConfigAssign(void* object, void*, const void*) { return object; }
 
 namespace {

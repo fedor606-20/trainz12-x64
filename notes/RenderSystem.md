@@ -512,3 +512,41 @@ NullMaterial::CreateGeometryChunk (0x10037a30, with GeometryChunkTemplate 0x1003
 (0x10032960), the PluginFactoryBase families, the Material / NullMaterial / MaterialResource ctors and dtors,
 and the seven shared data statics.
 
+
+## 2026-11-19: U7 MaterialResource (MaterialResource.cpp)
+
+The material text resource is ours: the ctor from a name and owner (0x10035fb0), the copy ctor (0x10035f00),
+operator= (0x10035f30), the dtor (0x10035fe0), the vftable (0x10071554) and with them LoadTxt (0x10036080)
+and CreateInstance (0x10036060). 7 more exports; RenderSystem is 2148 of 2687 ours (539 forwarded),
+`check_thunks.py`: 2148 checked, 0 not ours. `compare_vtables.py`: `??_7MaterialResource@Jet@@6B@` 19 slots,
+same (the 18 Resource slots, half of them folded thunks into KernelResource_7c, plus CreateInstance at 18).
+
+Layout kept from the assembly: `Resource` at +0x00, the extracted `MaterialSpec*` at +0x5c and a
+`MaterialConfig` subobject at +0x60. The subobject is a member (not a base: the original exports no secondary
+vftable for it) whose vptr the ctors and the dtor write by hand to the shared `MaterialConfig` vtable -
+ours does the same through `RsMaterialConfigSetVtable` (MaterialConfigExtract.cpp), so the vtable data export
+stays the original's until U9. The copy ctor copies the raw spec pointer with no reference (kept).
+
+LoadTxt (0x10036080, __cdecl: `this`, hidden result, name): a ConfigParser reads the text form through the
+owner's `GetFileName` (slot 3) when there is an owner, else the name is the path; the parse result is 0 on
+success. Then `root != null && version == 2.0f` exactly (the literal at 0x10062b9c) or the result is 1; the
+old spec (if any) goes, the "Material" item (the original's static PString at 0x100b86ec, interned at load)
+is extracted into a fresh spec, and every texture definition's file name is converted through
+`ConvertResourceName` and re-interned (the old node destroyed first, the new one raw, no cache-null test -
+the walk is FUN_1000d390's state machine over the seven-item ring chunks and stops at the head). No spec or
+an extract failure answers 1. CreateInstance (0x10036060) is `config.GetMaterial(manager, db, *spec)`.
+
+`diff_rs_u7` gained two scenarios: "material resource" (the ctor's vtable identity on each side, the shared
+MaterialConfig vptr, LoadTxt over files written by ConfigParser::Save from the same script tree - version 2.0
+and 1.0, with and without a "Material" item, 0..11 texture definitions crossing the ring chunks, names with
+paths and empty names, the owner's GetFileName answering the name or an uppercase alias, reloads replacing
+the spec - then CreateInstance over the stand-in manager and the dtor) and "resource copy" (the copy ctor and
+operator= sharing the spec pointer, one owner frees it). 3000 rounds x 8 scenarios: 24000 checks, 0
+mismatches. Regressions green: diff_rs_u6d 200, diff_rs_u6c2 200, diff_rs_u6c 200, diff_rs_u6b 300 (402
+real + 240 generated .texture.txt), diff_rs_u6 300 (400 real .texture files). The menu check passed (the
+game reached the menu and closed cleanly, JetLog identical to the baseline: diff_lines=0). New test hook:
+`RS_U7_ONLY=<scenario>` runs just one scenario kind.
+
+Remaining U7: NullMaterial::CreateGeometryChunk (0x10037a30, with GeometryChunkTemplate 0x10037af0),
+SetLightingState (0x10032960), the PluginFactoryBase families, the Material / NullMaterial ctors and dtors,
+and the seven shared data statics (they stay the original's until U9, like the other module state).
