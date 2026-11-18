@@ -35,6 +35,7 @@ enum PointPosition { POINT_CENTRE = 0, POINT_CORNER = 1 };
 //   +0x10c vertex declaration GetDeclaration(format id)
 class Display {
 public:
+    void __cdecl SetLightingMode(bool on);  // ?SetLightingMode@Display@Jet@@QAAX_N@Z (the original's until U9)
     void __cdecl SetAlphaBlendFunction(Src::Factor src, Dst::Factor dst);
     void __cdecl SetAlphaTestFunction(DFunction function, float reference);
     void __cdecl SetAlphaTestMode(bool on);

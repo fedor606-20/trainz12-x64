@@ -3,6 +3,7 @@
 #include <new>
 #include <jet/PString.h>
 #include <jet/KernelStandard.h>
+#include <jet/RenderSystem.h>
 #include <windows.h>
 
 namespace Jet {
@@ -214,5 +215,138 @@ void __cdecl RsMaterialAddProperty(void* p, const PString* key, const PString* v
     }
     MaterialProperty item{*key, *value};
     AppendMaterialItem(p, 0x88, item);
+}
+
+namespace {
+
+// SetLightingState's view of a display: +0x50 the light count it fills up to, +0x54 the render state block
+// (+0xa1 bit 2 the lighting mode, +0xa4 the colour the program call takes, +0x110 the "light set" byte array)
+struct ColorArg {
+    float v[4];
+};
+struct MaterialBlock {  // 0x44: four colours and the power
+    float v[17];
+};
+
+void X87Copy(float* to, const float* from)
+{
+#if defined(_M_IX86)
+    __asm {
+        mov eax, from
+        mov edx, to
+        fld dword ptr [eax]
+        fstp dword ptr [edx]
+    }
+#else
+    *to = *from;
+#endif
+}
+
+// the light ring of the FastDynamicArray (chunks of 13 {next, prev, count, items})
+struct LightChunk {
+    LightChunk* next;
+    LightChunk* prev;
+    unsigned count;
+    void* items[13];
+};
+
+const Matrix4* Identity(Matrix4& out)
+{
+    std::memset(&out, 0, sizeof out);
+    auto* f = reinterpret_cast<float*>(&out);
+    f[0] = f[5] = f[10] = f[15] = 1.0f;
+    return &out;
+}
+
+}  // namespace
+
+// 0x10032960: the lighting state of a draw. With a program the material block (the synthetic one of the flag,
+// otherwise the material's own with its diffuse alpha replaced by `opacity`) and the display state's colour go
+// to the program's slot 17; without one the display's light slots are filled up to its light count. Kept from
+// the assembly: the colour goes through the x87 stack (a signalling NaN comes out quiet), the const method
+// writes `opacity` into the material at +0x50 in the unflagged paths, the chunk's lit bit 0x20 takes the early
+// out, and the second Matrix4 argument is never read.
+void __cdecl RsMaterialSetLightingState(void* self, Display* display, const Matrix4* transform, const void* chunk,
+                                        const void* program, const void* lights, const void*, float opacity,
+                                        bool flag)
+{
+    unsigned char* const state = *reinterpret_cast<unsigned char**>(reinterpret_cast<unsigned char*>(display) + 0x54);
+    Matrix4 identity;
+    if (!program) {
+        if (*reinterpret_cast<const unsigned*>(static_cast<const unsigned char*>(chunk) + 0x18) & 0x20) {
+            display->SetLightingMode(false);
+            return;
+        }
+        unsigned count = 0;
+        auto* const head = *static_cast<LightChunk* const*>(lights);
+        for (auto* c = head; c;) {
+            count += c->count;
+            c = c->next;
+            if (c == head) break;
+        }
+        VCall<void>(display, 0x90, count, transform ? transform : Identity(identity));
+        auto* c = head;
+        void** item = head ? head->items : nullptr;
+        for (unsigned i = 0; item;) {
+            if (static_cast<int>(i) < *reinterpret_cast<const int*>(reinterpret_cast<unsigned char*>(display) + 0x50)) {
+                VCall<void>(display, 0x22c, i, *item);
+                VCall<void>(display, 0x224, i, 1);
+                (*reinterpret_cast<unsigned char**>(state + 0x110))[i] = 1;
+            }
+            ++i;
+            ++item;
+            if (item >= c->items + c->count) {
+                c = c->next;
+                if (c == head) break;
+                item = c->items;
+            }
+        }
+        VCall<void>(display, 0x94);
+        MaterialBlock block;
+        const void* material;
+        if (flag) {
+            // the synthetic material both flagged paths pass: ambient (1, 1, 1, 1), diffuse (1, 1, 1, opacity),
+            // specular and emissive (0, 0, 0, 1), power 0
+            block.v[0] = block.v[1] = block.v[2] = block.v[3] = 1.0f;
+            block.v[4] = block.v[5] = block.v[6] = 1.0f;
+            block.v[7] = opacity;
+            block.v[8] = block.v[9] = block.v[10] = 0.0f;
+            block.v[11] = 1.0f;
+            block.v[12] = block.v[13] = block.v[14] = 0.0f;
+            block.v[15] = 1.0f;
+            block.v[16] = 0.0f;
+            material = &block;
+        } else {
+            *reinterpret_cast<float*>(static_cast<unsigned char*>(self) + 0x50) = opacity;
+            material = static_cast<unsigned char*>(self) + 0x34;
+        }
+        VCall<void>(display, 0xcc, material);
+        if (!(state[0xa1] & 4)) {
+            VCall<void>(display, 0x1f0, 1);
+            state[0xa1] |= 4;
+        }
+    } else {
+        MaterialBlock block;
+        const void* material;
+        if (flag) {
+            // ambient (1, 1, 1, 1), diffuse (1, 1, 1, opacity), specular and emissive (0, 0, 0, 1), power 0
+            block.v[0] = block.v[1] = block.v[2] = block.v[3] = 1.0f;
+            block.v[4] = block.v[5] = block.v[6] = 1.0f;
+            block.v[7] = opacity;
+            block.v[8] = block.v[9] = block.v[10] = 0.0f;
+            block.v[11] = 1.0f;
+            block.v[12] = block.v[13] = block.v[14] = 0.0f;
+            block.v[15] = 1.0f;
+            block.v[16] = 0.0f;
+            material = &block;
+        } else {
+            *reinterpret_cast<float*>(static_cast<unsigned char*>(self) + 0x50) = opacity;
+            material = static_cast<unsigned char*>(self) + 0x34;
+        }
+        ColorArg color;
+        for (int i = 0; i < 4; ++i) X87Copy(&color.v[i], reinterpret_cast<const float*>(state + 0xa4) + i);
+        VCall<void>(program, 0x44, lights, color, material, transform ? transform : Identity(identity));
+        display->SetLightingMode(false);
+    }
 }
 }

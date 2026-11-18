@@ -331,7 +331,7 @@ static void* __cdecl ManagerCreate(void* self, int* result, void** out, const vo
 
 static unsigned char textureManagerObj[0x20];
 static unsigned char kernelObj[0x100];
-static unsigned char displayObj[0x40];
+static unsigned char displayObj[0x220];  // +0x50 the light count, +0x54 the state block, +0x20c the manager
 static unsigned char dbObj[0x20];
 
 // the database stand-in's slot 3 (GetFileName): the name's text, or dbMapped when set (the load then parses
@@ -351,6 +351,173 @@ static void* __cdecl DbGetFileName(void* self, void* ret, const void* name)
     *static_cast<void**>(ret) =
         answer ? RealCreateNode(*cache, reinterpret_cast<const unsigned char*>(answer)) : nullptr;
     return ret;  // the class return goes back in EAX, as the callers expect
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// the chunk and lighting stand-ins (U7: NullMaterial::CreateGeometryChunk and Material::SetLightingState)
+
+// an interior pointer named through the allocation it sits in ("A<alloc>+<offset>"), the way the chunk's
+// vertex data points inside its block
+static std::string Near(const void* p)
+{
+    const auto* b = static_cast<const unsigned char*>(p);
+    const void* best = nullptr;
+    unsigned bestOffset = 0;
+    for (unsigned i = 0; i < nameCount[cur]; ++i) {
+        const auto* s = static_cast<const unsigned char*>(names[cur][i]);
+        if (s <= b && (!best || s > best)) {
+            best = s;
+            bestOffset = static_cast<unsigned>(b - s);
+        }
+    }
+    if (!best) return Name(p);
+    char buf[64];
+    std::snprintf(buf, sizeof buf, "%s+%x", Name(best), bestOffset);
+    return buf;
+}
+
+// the vertex buffer the display slots hand out: a reference count (slot 0 the delete) and a name
+struct FakeBuffer {
+    void* vtable;
+    int refs;
+};
+static FakeBuffer buffers[8];
+static void* bufferVtable[4];
+static unsigned bufferUsed;
+static void __cdecl BufferDeleteThis(void* self) { Log("  %s.deleteThis\n", Name(self)); }
+
+// the vertex type the display's declaration slot hands out: a reference count and a streams block whose first
+// word is the stride
+struct FakeVertexType {
+    void* vtable;
+    int refs;
+    unsigned id;
+    unsigned streams;
+    void* streamList;
+};
+static FakeVertexType vertexType;
+static unsigned vertexTypeStream[4];
+static void __cdecl VertexTypeDeleteThis(void* self) { Log("  %s.deleteThis\n", Name(self)); }
+
+// the program's slot 17 (0x44): (self, lights, four floats by value, the material block, the transform)
+struct ColorArg {
+    float v[4];
+};
+static unsigned char programObj[8];
+static void* programVtable[24];
+static unsigned char matrixObj[0x40];
+
+static void __cdecl ProgramSlot17(void* self, const void* lights, ColorArg color, const void* block,
+                                  const void* transform)
+{
+    Log("  %s.light %s %08x%08x%08x%08x", Name(self), Name(lights),
+        *reinterpret_cast<const unsigned*>(&color.v[0]), *reinterpret_cast<const unsigned*>(&color.v[1]),
+        *reinterpret_cast<const unsigned*>(&color.v[2]), *reinterpret_cast<const unsigned*>(&color.v[3]));
+    const auto* m = static_cast<const unsigned char*>(block);
+    for (unsigned i = 0; i < 0x44; i += 4) Log(" %08x", *reinterpret_cast<const unsigned*>(m + i));
+    Log(" w=%s\n", Name(transform));
+}
+
+// the display's slots: 0x90 lights(count, matrix), 0x94 end, 0xcc material, 0x104/0x108 make vertex/index
+// buffer, 0x10c declaration, 0x1f0 lighting mode, 0x224/0x22c one light
+static void* displayVtable[0x230 / 4];
+static unsigned char stateBlock[0x120];
+static unsigned char lightSet[16];
+static int displayMaxLights;
+static bool displayNoBuffer;   // the make-buffer slots answer null
+static int managerUploadCode;  // 8 answers false, 11 answers -1, 0 both succeed
+static unsigned char managerObj2[8];
+
+static void __cdecl DisplayLights(void* self, unsigned count, const void* matrix)
+{
+    Log("  %s.lights %u %s\n", Name(self), count, Name(matrix));
+}
+static void __cdecl DisplayEnd(void* self) { Log("  %s.end\n", Name(self)); }
+static void __cdecl DisplayMaterialSlot(void* self, const void* material)
+{
+    Log("  %s.material", Name(self));
+    const auto* m = static_cast<const unsigned char*>(material);
+    for (unsigned i = 0; i < 0x44; i += 4) Log(" %08x", *reinterpret_cast<const unsigned*>(m + i));
+    Log("\n");
+}
+static void* __cdecl DisplayMakeVertex(void* self, unsigned vertices, unsigned stride)
+{
+    FakeBuffer* b = displayNoBuffer ? nullptr : &buffers[bufferUsed < 8 ? bufferUsed++ : 7];
+    Log("  %s.makeVertex %u %u -> %s\n", Name(self), vertices, stride, b ? Name(b) : "null");
+    return b;
+}
+static void* __cdecl DisplayMakeIndex(void* self, unsigned count, unsigned)
+{
+    FakeBuffer* b = displayNoBuffer ? nullptr : &buffers[bufferUsed < 8 ? bufferUsed++ : 7];
+    Log("  %s.makeIndex %u -> %s\n", Name(self), count, b ? Name(b) : "null");
+    return b;
+}
+static void* __cdecl DisplayDeclaration(void* self, int format)
+{
+    Log("  %s.declaration %d -> VT\n", Name(self), format);
+    return &vertexType;
+}
+static void __cdecl DisplayLightingMode(void* self, int on) { Log("  %s.mode %d\n", Name(self), on); }
+static void __cdecl DisplayLightSlot(void* self, unsigned i, int on) { Log("  %s.light %u %d\n", Name(self), i, on); }
+static void __cdecl DisplayOneLight(void* self, unsigned i, void* light)
+{
+    Log("  %s.setlight %u %s\n", Name(self), i, Name(light));
+}
+static unsigned char __cdecl ManagerUpload(void* self, void* type, void* buffer, void* data, unsigned count,
+                                           int one, void* out, int zero)
+{
+    Log("  %s.uploadV %s %s %s %u %d %d\n", Name(self), Near(type).c_str(), Name(buffer), Near(data).c_str(), count,
+        one, zero);
+    *static_cast<unsigned*>(out) = 0;
+    return managerUploadCode == 8 ? 0 : 1;
+}
+static int __cdecl ManagerUploadIndex(void* self, void* buffer, void* data, unsigned count, int one, void* out)
+{
+    Log("  %s.uploadI %s %s %u %d\n", Name(self), Name(buffer), Near(data).c_str(), count, one);
+    *static_cast<unsigned*>(out) = 0;
+    return managerUploadCode == 1 ? -1 : 0;
+}
+
+// the light ring of a FastDynamicArray<DisplayLight*, 13> (chunks of 13 {next, prev, count, items})
+struct LightChunk {
+    LightChunk* next;
+    LightChunk* prev;
+    unsigned count;
+    void* items[13];
+};
+static LightChunk lightChunks[2];
+static void* lightPool[4];
+static unsigned char chunkObj[0x50];  // the chunk SetLightingState reads the flags of
+
+static void* BuildLights(std::mt19937& r, unsigned chunks)
+{
+    if (!chunks) return nullptr;
+    for (unsigned c = 0; c < chunks; ++c) {
+        LightChunk& chunk = lightChunks[c];
+        chunk.count = c + 1 == chunks ? r() % 14 : 13;
+        for (unsigned i = 0; i < chunk.count; ++i) chunk.items[i] = lightPool[r() % 4];
+    }
+    for (unsigned c = 0; c < chunks; ++c) {
+        lightChunks[c].next = &lightChunks[(c + 1) % chunks];
+        lightChunks[c].prev = &lightChunks[(c + chunks - 1) % chunks];
+    }
+    return &lightChunks[0];
+}
+
+static void ResetLightingStandins()
+{
+    std::memset(stateBlock, 0, sizeof stateBlock);
+    std::memset(lightSet, 0, sizeof lightSet);
+    *reinterpret_cast<unsigned char**>(stateBlock + 0x110) = lightSet;
+    displayMaxLights = 0;
+    displayNoBuffer = false;
+    managerUploadCode = 0;
+    bufferUsed = 0;
+    for (auto& b : buffers) b.refs = 1;
+    vertexType.refs = 1;
+    *reinterpret_cast<int*>(displayObj + 0x50) = 0;
+    *reinterpret_cast<void**>(displayObj + 0x54) = stateBlock;
+    *reinterpret_cast<void**>(displayObj + 0x20c) = managerObj2;
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -376,6 +543,10 @@ struct Api {
     void (__fastcall* resDtor)(void*, void*);
     int* (__cdecl* resLoadTxt)(void*, int*, const char*);
     void* (__cdecl* resCreateInstance)(const void*, void*, const void*);
+    // the null material's chunk and the material's lighting state
+    void* (__cdecl* createChunk)(void*, unsigned, unsigned, unsigned, unsigned, int, void*);
+    void (__cdecl* setLighting)(void*, void*, const void*, const void*, const void*, const void*, const void*, float,
+                                int);
 };
 static Api api[2];
 
@@ -418,6 +589,12 @@ static void LoadApi(int s)
         "BW4Results@Resource@Jet@@@2@PBD@Z"));
     a.resCreateInstance = As<decltype(a.resCreateInstance)>(Proc(m,
         "?CreateInstance@MaterialResource@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PBVResourceDatabase@2@@Z"));
+    a.createChunk = As<decltype(a.createChunk)>(Proc(m,
+        "?CreateGeometryChunk@NullMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAV"
+        "GeometryChunkCreateHint@2@@Z"));
+    a.setLighting = As<decltype(a.setLighting)>(Proc(m,
+        "?SetLightingState@Material@Jet@@QBAXPAVDisplay@2@PBVMatrix4@2@PBVGeometryChunk@2@PBVVertexProgram@2@PBV?$"
+        "FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@1M_N@Z"));
 }
 
 // the config building (KernelStandard, shared by both sides). The ctor/dtor are __thiscall; operator() is the
@@ -607,11 +784,50 @@ static void WriteMaterialFile(std::mt19937& r, const char* path, float version, 
     RealDelete(parser);
 }
 
+// a GeometryChunkTemplate's written fields: its own vtable (inside the module's image), the counts and the
+// blocks (refs and count only: the item size and the capacity are heap garbage in both modules)
+static void DumpChunk(std::string& out, const void* c, int s, const char* tag)
+{
+    char buf[256];
+    if (!c) {
+        std::snprintf(buf, sizeof buf, "  %s null\n", tag);
+        out += buf;
+        return;
+    }
+    const auto* m = static_cast<const unsigned char*>(c);
+    const auto* const vt = reinterpret_cast<const unsigned char*>(*reinterpret_cast<void* const*>(m));
+    const auto* const base = reinterpret_cast<const unsigned char*>(mod[s]);
+    const bool self = vt >= base && vt < base + 0x200000;
+    std::snprintf(buf, sizeof buf, "  %s vf=%s flags=%08x prims=%u idx=%u vtx=%u max=%u faces=%u op=%08x\n", tag,
+                  self ? "self" : "OTHER", *reinterpret_cast<const unsigned*>(m + 0x18),
+                  *reinterpret_cast<const unsigned*>(m + 0x1c), *reinterpret_cast<const unsigned*>(m + 0x20),
+                  *reinterpret_cast<const unsigned*>(m + 0x24), *reinterpret_cast<const unsigned*>(m + 0x28),
+                  *reinterpret_cast<const unsigned*>(m + 0x38), *reinterpret_cast<const unsigned*>(m + 0x3c));
+    out += buf;
+    std::snprintf(buf, sizeof buf, "  fields vb=%s ib=%s vt=%s vp=%s\n", Name(*reinterpret_cast<void* const*>(m + 0x4c)),
+                  Name(*reinterpret_cast<void* const*>(m + 0x50)), Name(*reinterpret_cast<void* const*>(m + 0x54)),
+                  Name(*reinterpret_cast<void* const*>(m + 0x58)));
+    out += buf;
+    static const unsigned blocks[] = {0x2c, 0x30, 0x34, 0x5c};
+    for (unsigned off : blocks) {
+        auto* const b = *reinterpret_cast<void* const*>(m + off);
+        if (!b) {
+            std::snprintf(buf, sizeof buf, "  block %x null\n", off);
+        } else {
+            std::snprintf(buf, sizeof buf, "  block %x %s refs=%d count=%u\n", off, Near(b).c_str(),
+                          *reinterpret_cast<const int*>(b), *reinterpret_cast<const unsigned*>(
+                                                               static_cast<const unsigned char*>(b) + 4));
+        }
+        out += buf;
+    }
+}
+
 static void RunScenarioCase(int s, std::mt19937& r, unsigned kind);
 
 static void RunScenario(int s, std::mt19937& r)
 {
-    const unsigned kind = r() % 8;
+    const unsigned kind = r() % 10;
+    if (std::getenv("RS_U7_TRACE")) std::fprintf(stderr, "side %d kind %u\n", s, kind);
     if (const char* only = std::getenv("RS_U7_ONLY")) return RunScenarioCase(s, r, static_cast<unsigned>(std::atoi(only)));
     return RunScenarioCase(s, r, kind);
 }
@@ -861,6 +1077,104 @@ static void RunScenarioCase(int s, std::mt19937& r, unsigned kind)
         FreePString(name);
         break;
     }
+    case 8: {  // Material::SetLightingState: the program path and the display's light slots
+        ResetLightingStandins();
+        std::memset(chunkObj, 0, sizeof chunkObj);
+        *reinterpret_cast<unsigned*>(chunkObj + 0x18) = r() % 8 == 0 ? 0x20u : (r() & 7);  // the lit bit 0x20
+        displayMaxLights = static_cast<int>(r() % 5);
+        *reinterpret_cast<int*>(displayObj + 0x50) = displayMaxLights;
+        for (unsigned i = 0; i < 4; ++i) {  // the state colour; NaNs quiet through the x87 copy
+            unsigned bits = r();
+            if (r() % 4 == 0) bits = 0x7f800000u | (r() & 0x3fffff);
+            *reinterpret_cast<unsigned*>(stateBlock + 0xa4 + 4 * i) = bits;
+        }
+        stateBlock[0xa1] = static_cast<unsigned char>(r() & 4);
+        const bool flag = (r() % 2) != 0;
+        const bool withProgram = (r() % 4) != 0;
+        // the no-program path reads the lights array without a null check in both modules
+        void* lights = BuildLights(r, withProgram ? static_cast<unsigned>(r() % 3) : 1u + static_cast<unsigned>(r() % 2));
+        void* material = NextMaterial("MAT");
+        unsigned opacity = r();
+        if (r() % 6 == 0) opacity = 0x7f800000u | (r() & 0x7fffff);
+        void* transform = r() % 2 ? matrixObj : nullptr;
+        Log("  lighting program=%d flag=%d lights=%s max=%d opacity=%08x\n", withProgram ? 1 : 0, flag ? 1 : 0,
+            lights ? "ring" : "null", displayMaxLights, opacity);
+        api[s].setLighting(material, displayObj, transform, chunkObj, withProgram ? programObj : nullptr, lights,
+                           nullptr, *reinterpret_cast<float*>(&opacity), flag ? 1 : 0);
+        Log("  state a1=%02x set=%02x%02x%02x%02x\n", stateBlock[0xa1], lightSet[0], lightSet[1], lightSet[2],
+            lightSet[3]);
+        DumpMaterial(logText[cur], material);
+        break;
+    }
+    case 9: {  // NullMaterial::CreateGeometryChunk and the GeometryChunkTemplate's slots
+        ResetLightingStandins();
+        displayNoBuffer = r() % 8 == 0;
+        managerUploadCode = r() % 8 == 0 ? (r() % 2 ? 8 : 1) : 0;
+        const unsigned v = r() % 4, p = r() % 4, i = r() % 3, f = r() % 3;
+        const int type = static_cast<int>(r() % 6);
+        unsigned char hintBuf[0x24];
+        void* hint = nullptr;
+        const int hintKind = static_cast<int>(r() % 4);
+        unsigned hintSize = 0x10;
+        if (hintKind) {
+            std::memset(hintBuf, 0, sizeof hintBuf);
+            *reinterpret_cast<unsigned*>(hintBuf + 0) = r() % 4 == 0 ? 1u : 2u;  // version 1 sets dynamic data
+            *reinterpret_cast<unsigned*>(hintBuf + 4) = 2;
+            *reinterpret_cast<unsigned*>(hintBuf + 8) = hintKind >= 2 ? 1u : (r() & 1);
+            *reinterpret_cast<unsigned*>(hintBuf + 0xc) = r();
+            hintBuf[0x10] = static_cast<unsigned char>(r() & 7);
+            hintSize = hintKind == 3 ? 0x24u : hintKind == 2 ? 0x20u : 0x10u;
+            hint = hintBuf;
+        }
+        Log("  chunk %u %u %u %u type=%d hint=%d size=%x\n", v, p, i, f, type, hintKind, hintSize);
+        if (std::getenv("RS_U7_TRACE"))
+            std::fprintf(stderr, "  chunk %u %u %u %u type=%d hint=%d size=%x buf=%d up=%d\n", v, p, i, f, type,
+                         hintKind, hintSize, displayNoBuffer ? 1 : 0, managerUploadCode);
+        void* chunk = api[s].createChunk(nullptr, v, p, i, f, type, hint);
+        DumpChunk(logText[cur], chunk, s, "made");
+        if (!chunk) break;
+        auto* vt = *reinterpret_cast<void***>(chunk);
+        // a pattern in the vertex data (the block's items are heap garbage otherwise)
+        void* data = As<void*(__cdecl*)(void*, int, int)>(vt[13])(chunk, 0, 0);
+        Log("  vertexData %s\n", Near(data).c_str());
+        for (unsigned k = 0; k < v * 0x20; ++k) static_cast<unsigned char*>(data)[k] = static_cast<unsigned char>(k * 7 + v);
+        // every item offset and view
+        Log("  offsets");
+        for (int t = 0; t < 39; ++t) Log(" %d", As<int(__cdecl*)(void*, int, int)>(vt[44])(chunk, t, 0));
+        Log("\n");
+        static const int viewSlots[] = {46, 47, 48, 49, 50, 51, 52, 53, 54, 55};
+        for (int t = 0; t < 39; t += 7) {
+            Log("  view t=%d", t);
+            for (int s2 = 0; s2 < 10; ++s2) {
+                unsigned out[2] = {9, 9};
+                As<void*(__cdecl*)(void*, void*, int, int)>(vt[viewSlots[s2]])(chunk, out, t, 0);
+                Log(" %u %s", out[0], out[1] == 9 ? "same" : Near(reinterpret_cast<void*>(out[1])).c_str());
+            }
+            Log("\n");
+        }
+        Log("  typeId %d size %d\n", As<int(__cdecl*)(void*, int)>(vt[42])(chunk, 0),
+            As<int(__cdecl*)(void*, int)>(vt[43])(chunk, 0));
+        // the buffer cycle, sometimes with the dynamic bits set and the uploads failing
+        if (r() % 2) *reinterpret_cast<unsigned*>(static_cast<unsigned char*>(chunk) + 0x18) |= r() % 2 ? 0x10000u : 0x100u;
+        const bool upload = (r() % 2) != 0;
+        Log("  initBuffers %d\n", As<int(__cdecl*)(void*, void*, int)>(vt[4])(chunk, displayObj, upload ? 1 : 0) & 0xff);
+        DumpChunk(logText[cur], chunk, s, "inited");
+        Log("  loadBuffers %d\n", As<int(__cdecl*)(void*, void*)>(vt[5])(chunk, displayObj) & 0xff);
+        As<void(__cdecl*)(void*, void*, int, int)>(vt[7])(chunk, displayObj, 0, 0);
+        DumpChunk(logText[cur], chunk, s, "duped");
+        As<void(__cdecl*)(void*, void*, unsigned, int, int)>(vt[9])(chunk, displayObj, v + 1, 0, 0);
+        DumpChunk(logText[cur], chunk, s, "resized");
+        As<void(__cdecl*)(void*, void*)>(vt[8])(chunk, displayObj);
+        DumpChunk(logText[cur], chunk, s, "dupIndex");
+        void* copy = As<void*(__cdecl*)(void*)>(vt[3])(chunk);
+        DumpChunk(logText[cur], copy, s, "copy");
+        if (copy) As<void(__fastcall*)(void*, void*, unsigned)>(vt[1])(copy, nullptr, 1);
+        void* copy2 = As<void*(__cdecl*)(void*, unsigned, unsigned, unsigned, unsigned)>(vt[2])(chunk, 1, 2, 1, 1);
+        DumpChunk(logText[cur], copy2, s, "copy2");
+        if (copy2) As<void(__fastcall*)(void*, void*, unsigned)>(vt[1])(copy2, nullptr, 1);
+        As<void(__fastcall*)(void*, void*, unsigned)>(vt[1])(chunk, nullptr, 1);
+        break;
+    }
     default:
         break;
     }
@@ -947,6 +1261,48 @@ int main(int argc, char** argv)
     fixedNames[displayObj] = "D";
     fixedNames[textureManagerObj] = "TM";
     fixedNames[dbObj] = "DB";
+    // the U7 chunk and lighting stand-ins
+    displayVtable[0x90 / 4] = reinterpret_cast<void*>(&DisplayLights);
+    displayVtable[0x94 / 4] = reinterpret_cast<void*>(&DisplayEnd);
+    displayVtable[0xcc / 4] = reinterpret_cast<void*>(&DisplayMaterialSlot);
+    displayVtable[0x104 / 4] = reinterpret_cast<void*>(&DisplayMakeVertex);
+    displayVtable[0x108 / 4] = reinterpret_cast<void*>(&DisplayMakeIndex);
+    displayVtable[0x10c / 4] = reinterpret_cast<void*>(&DisplayDeclaration);
+    displayVtable[0x1f0 / 4] = reinterpret_cast<void*>(&DisplayLightingMode);
+    displayVtable[0x224 / 4] = reinterpret_cast<void*>(&DisplayLightSlot);
+    displayVtable[0x22c / 4] = reinterpret_cast<void*>(&DisplayOneLight);
+    *reinterpret_cast<void***>(displayObj) = displayVtable;
+    static void* bufferManagerVtable[16];
+    bufferManagerVtable[0x20 / 4] = reinterpret_cast<void*>(&ManagerUpload);
+    bufferManagerVtable[0x2c / 4] = reinterpret_cast<void*>(&ManagerUploadIndex);
+    std::memset(managerObj2, 0, sizeof managerObj2);
+    *reinterpret_cast<void***>(managerObj2) = bufferManagerVtable;
+    programVtable[0x44 / 4] = reinterpret_cast<void*>(&ProgramSlot17);
+    std::memset(programObj, 0, sizeof programObj);
+    *reinterpret_cast<void***>(programObj) = programVtable;
+    bufferVtable[0] = reinterpret_cast<void*>(&BufferDeleteThis);
+    bufferVtable[1] = reinterpret_cast<void*>(&BufferDeleteThis);
+    for (unsigned i = 0; i < 8; ++i) {
+        buffers[i].vtable = bufferVtable;
+        buffers[i].refs = 1;
+        fixedNames[&buffers[i]] = std::string("VB") + static_cast<char>('0' + i);
+    }
+    vertexType.vtable = bufferVtable;
+    vertexType.refs = 1;
+    vertexType.id = 18;
+    vertexType.streams = 1;
+    vertexType.streamList = vertexTypeStream;
+    vertexTypeStream[0] = 32;
+    fixedNames[&vertexType] = "VT";
+    fixedNames[managerObj2] = "BM";
+    fixedNames[programObj] = "PRG";
+    fixedNames[matrixObj] = "MX";
+    fixedNames[chunkObj] = "CHK";
+    for (unsigned i = 0; i < 4; ++i) {
+        lightPool[i] = &lightChunks[0].items[i];  // just named addresses for the logs
+        fixedNames[lightPool[i]] = std::string("L") + static_cast<char>('0' + i);
+    }
+    ResetLightingStandins();
     for (unsigned i = 0; i < 4; ++i) {
         texturePool[i] = RealNew(0x10);
         std::memset(texturePool[i], 0, 0x10);

@@ -2203,3 +2203,8 @@
 ??_7MaterialResource@Jet@@6B@
 ?CreateInstance@MaterialResource@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PBVResourceDatabase@2@@Z
 ?LoadTxt@MaterialResource@Jet@@MAA?AV?$ResultClass@$1?results@Resource@Jet@@2QBUResultTable@2@BW4Results@Resource@Jet@@@2@PBD@Z
+
+# U7 NullMaterial::CreateGeometryChunk and Material::SetLightingState (GeometryChunkTemplate.cpp,
+# MaterialFields.cpp)
+?CreateGeometryChunk@NullMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@@Z=?RsNullMaterialCreateGeometryChunk@Jet@@YAPAVGeometryChunk@1@PAXIIIIHPBVGeometryChunkCreateHint@1@@Z
+?SetLightingState@Material@Jet@@QBAXPAVDisplay@2@PBVMatrix4@2@PBVGeometryChunk@2@PBVVertexProgram@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@1M_N@Z=?RsMaterialSetLightingState@Jet@@YAXPAXPAVDisplay@1@PBVMatrix4@1@PBX333M_N@Z

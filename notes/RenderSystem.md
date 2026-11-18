@@ -550,3 +550,55 @@ game reached the menu and closed cleanly, JetLog identical to the baseline: diff
 Remaining U7: NullMaterial::CreateGeometryChunk (0x10037a30, with GeometryChunkTemplate 0x10037af0),
 SetLightingState (0x10032960), the PluginFactoryBase families, the Material / NullMaterial ctors and dtors,
 and the seven shared data statics (they stay the original's until U9, like the other module state).
+
+
+## 2026-11-19: U7 NullMaterial::CreateGeometryChunk and Material::SetLightingState (GeometryChunkTemplate.cpp, MaterialFields.cpp)
+
+The null material's chunk and the lighting state are ours. `GeometryChunkTemplate.cpp` holds
+GeometryChunkTemplate<PackedVertexPNT, GeometryChunkSingleStream> (the vtable at 0x10071834, the functions
+0x10037bb0..0x100383a3) and CreateGeometryChunk (0x10037a30); `MaterialFields.cpp` adds SetLightingState
+(0x10032960). Two more exports: RenderSystem is 2150 of 2687 ours (537 forwarded), check_thunks.py 2150
+checked / 0 not ours.
+
+Layout and vtable: the class is 0x60 bytes = GeometryChunkSingleStream (0x5c) + the vertex block pointer at
++0x5c (a GenericReferenceArray-shaped block). Its vtable differs from the exported
+GeometryChunkSingleStream's exactly in the slots 1-5, 7-9, 12/13, 39, 42-44 and 46..55 (dumped from the
+original's two vftables and compared), so the class derives from ours and overrides those. The views return
+through the hidden result pointer a member function gets for an 8-byte class return; a free function would
+return it in EDX:EAX (compile-tested), so they must stay members.
+
+Kept from the assembly: the block writes only its reference count and count (the item size and the capacity
+keep the heap garbage; nothing reads them); DuplicateVertexArray copies maxVertices items whatever the old
+block holds; ResizeVertexArray copies min(old max, n) then writes both counts; GetVertexArray is
+block + 0x10 without a null test (0x10 without a block); the no-upload dirty call passes (on, i) without the
+stream argument (the implementations ignore it); the view table is PackedVertexPNT::vertexItemOffset (the
+same 0x100664b0 table, ours since U1). CreateGeometryChunk: the flags are RsMatGeometryFlags (the
+0x1006cd84 table and the hint bits), and a hint of version 1 makes it SetVertexDataDynamic(0, -2, true).
+Deviation: on a failed 0x60 allocation with a version-1 hint the original calls through null; ours answers
+null.
+
+SetLightingState (the second Matrix4 argument is never read; kept): with a program its slot 17 gets (lights,
+the display state block's colour at +0xa4 copied through the x87 stack - a signalling NaN comes out quiet,
+the material block, the transform or a local identity matrix); without one the display's light slots fill up
+to its light count at +0x50 (0x22c per light, 0x224 enabled, the state's lightSet[i] = 1), then 0x94, then
+0xcc with the material block, and the tail (0x1f0 with the state bit +0xa1 bit 2) only when the bit is
+clear. Both flagged paths share one synthetic white material (ambient 1111, diffuse (1,1,1,opacity),
+specular and emissive 0001, power 0; the test corrected a first misread of the no-program stores); the
+unflagged paths write opacity into the material's diffuse alpha at +0x50 through the const this. With no
+program and no lights array both modules read address 0 (the test avoids it).
+
+diff_rs_u7 gained "lighting" and "chunk": the state colour with NaNs, light rings (up to two chunks, a
+count-0 one included), the mode flag, both material blocks and SNaN opacity on one side; on the other
+CreateGeometryChunk over every GeometryType and hint shape (null, base, Standard with the bits byte,
+Database; version 1 and 2), then the 39 item offsets, all ten views, the buffer cycle with scripted
+no-buffer and failed uploads, DuplicateVertexArray, ResizeVertexArray, DuplicateIndexArray, both
+CreateInstance overloads and the deleting destructor (the block refs and the vertex bytes compared through
+the allocation names). 3000 rounds x 8 scenarios: 24000 checks, 0 mismatches; each kind also 3000 rounds
+alone. New hook RS_U7_TRACE. The mixed run caught a real bug: the template's default constructor left the
+block pointer uninitialised (the original writes it at the end of 0x10038340) - visible only on recycled
+heap memory, the kind-alone runs had only seen fresh pages.
+
+Regressions green (diff_rs_u6d 200, u6c2 200, u6c 200, u6b 300, u6 300, all 0 mismatches); the exported
+vftables are unchanged (the not-yet-implemented classes differ as before). Menu check: alive at the menu,
+clean exit, JetLog identical (diff_lines=0). Remaining U7: the PluginFactoryBase families, the Material /
+NullMaterial ctors and dtors, and the seven shared data statics (until U9).
