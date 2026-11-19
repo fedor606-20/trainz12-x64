@@ -1,0 +1,390 @@
+MISSING ?ConvertToWindowAndClip@LayerGroup@Jet@@QBAXAAURect@2@@Z
+
+@@@?ConvertToWindow@LayerGroup@Jet@@QBAXAAUPoint@2@@Z
+// ==== 1000b2f0  Jet::LayerGroup::ConvertToWindow  [ANALYSIS, 51 bytes]
+
+/* public: void __cdecl Jet::LayerGroup::ConvertToWindow(struct Jet::Point &)const  */
+
+void __thiscall Jet::LayerGroup::ConvertToWindow(LayerGroup *this,Point *param_1)
+
+{
+  int iVar1;
+  int *in_stack_00000008;
+  
+                    /* 0xb2f0  816  ?ConvertToWindow@LayerGroup@Jet@@QBAXAAUPoint@2@@Z */
+  *in_stack_00000008 = *in_stack_00000008 + *(int *)(param_1 + 0x2c);
+  in_stack_00000008[1] = in_stack_00000008[1] + *(int *)(param_1 + 0x30);
+  for (iVar1 = *(int *)(param_1 + 0x1c); iVar1 != 0; iVar1 = *(int *)(iVar1 + 0x1c)) {
+    *in_stack_00000008 = *in_stack_00000008 + *(int *)(iVar1 + 0x2c);
+    in_stack_00000008[1] = in_stack_00000008[1] + *(int *)(iVar1 + 0x30);
+  }
+  return;
+}
+
+
+@@@?ConvertToWindow@Layer@Jet@@QBAXAAUPoint@2@@Z
+// ==== 100316c0  Jet::Layer::ConvertToWindow  [ANALYSIS, 21 bytes]
+
+/* public: void __cdecl Jet::Layer::ConvertToWindow(struct Jet::Point &)const  */
+
+void __thiscall Jet::Layer::ConvertToWindow(Layer *this,Point *param_1)
+
+{
+                    /* 0x316c0  815  ?ConvertToWindow@Layer@Jet@@QBAXAAUPoint@2@@Z */
+  if (*(Point **)(param_1 + 0x1c) != (Point *)0x0) {
+    LayerGroup::ConvertToWindow((LayerGroup *)this,*(Point **)(param_1 + 0x1c));
+    return;
+  }
+  return;
+}
+
+
+@@@?ConvertToWindowAndClip@Layer@Jet@@QBAXAAURect@2@@Z
+// ==== 100316e0  Jet::Layer::ConvertToWindowAndClip  [ANALYSIS, 21 bytes]
+
+/* public: void __cdecl Jet::Layer::ConvertToWindowAndClip(struct Jet::Rect &)const  */
+
+void __thiscall Jet::Layer::ConvertToWindowAndClip(Layer *this,Rect *param_1)
+
+{
+                    /* 0x316e0  817  ?ConvertToWindowAndClip@Layer@Jet@@QBAXAAURect@2@@Z */
+  if (*(Rect **)(param_1 + 0x1c) != (Rect *)0x0) {
+    LayerGroup::ConvertToWindowAndClip((LayerGroup *)this,*(Rect **)(param_1 + 0x1c));
+    return;
+  }
+  return;
+}
+
+
+@@@?FindLayer@LayerGroup@Jet@@QAAPAVLayer@2@ABVPString@2@@Z
+// ==== 100319d0  Jet::LayerGroup::FindLayer  [ANALYSIS, 102 bytes]
+
+/* public: class Jet::Layer * __cdecl Jet::LayerGroup::FindLayer(class Jet::PString const &) */
+
+Layer * __thiscall Jet::LayerGroup::FindLayer(LayerGroup *this,PString *param_1)
+
+{
+  PString *pPVar1;
+  Layer *pLVar2;
+  LayerGroup *extraout_ECX;
+  PString *pPVar3;
+  int *in_stack_00000008;
+  
+                    /* 0x319d0  940  ?FindLayer@LayerGroup@Jet@@QAAPAVLayer@2@ABVPString@2@@Z */
+  if (*(int *)(param_1 + 0x20) == 0) {
+    pPVar3 = (PString *)0x0;
+  }
+  else {
+    pPVar3 = (PString *)(*(int *)(param_1 + 0x20) + -4);
+  }
+  while( true ) {
+    if (param_1 == (PString *)0xffffffe0) {
+      pPVar1 = (PString *)0x0;
+    }
+    else {
+      pPVar1 = param_1 + 0x1c;
+    }
+    if (pPVar3 == pPVar1) {
+      return (Layer *)0x0;
+    }
+    if (*(int *)(pPVar3 + 0xc) == *in_stack_00000008) {
+      return (Layer *)pPVar3;
+    }
+    if ((((byte)pPVar3[0x14] & 2) != 0) &&
+       (pLVar2 = FindLayer(this,pPVar3), this = extraout_ECX, pLVar2 != (Layer *)0x0)) break;
+    if (*(int *)(pPVar3 + 4) == 0) {
+      pPVar3 = (PString *)0x0;
+    }
+    else {
+      pPVar3 = (PString *)(*(int *)(pPVar3 + 4) + -4);
+    }
+  }
+  return pLVar2;
+}
+
+
+@@@?GetLayerAt@LayerGroup@Jet@@QAAPAVLayer@2@ABVVector2@2@@Z
+// ==== 10031a40  Jet::LayerGroup::GetLayerAt  [ANALYSIS, 111 bytes]
+
+/* public: class Jet::Layer * __cdecl Jet::LayerGroup::GetLayerAt(class Jet::Vector2 const &) */
+
+Layer * __thiscall Jet::LayerGroup::GetLayerAt(LayerGroup *this,Vector2 *param_1)
+
+{
+  char cVar1;
+  Vector2 *pVVar2;
+  Layer *pLVar3;
+  LayerGroup *extraout_ECX;
+  LayerGroup *extraout_ECX_00;
+  Vector2 *pVVar4;
+  
+                    /* 0x31a40  1271  ?GetLayerAt@LayerGroup@Jet@@QAAPAVLayer@2@ABVVector2@2@@Z */
+  if (*(int *)(param_1 + 0x20) == 0) {
+    pVVar4 = (Vector2 *)0x0;
+  }
+  else {
+    pVVar4 = (Vector2 *)(*(int *)(param_1 + 0x20) + -4);
+  }
+  while( true ) {
+    if (param_1 == (Vector2 *)0xffffffe0) {
+      pVVar2 = (Vector2 *)0x0;
+    }
+    else {
+      pVVar2 = param_1 + 0x1c;
+    }
+    if (pVVar4 == pVVar2) break;
+    if (((byte)pVVar4[0x14] & 2) == 0) {
+      cVar1 = (**(code **)(*(int *)pVVar4 + 0x10))();
+      this = extraout_ECX_00;
+      if (cVar1 != '\0') {
+        return (Layer *)pVVar4;
+      }
+    }
+    else {
+      pLVar3 = GetLayerAt(this,pVVar4);
+      this = extraout_ECX;
+      if (pLVar3 != (Layer *)0x0) {
+        return pLVar3;
+      }
+    }
+    if (*(int *)(pVVar4 + 4) == 0) {
+      pVVar4 = (Vector2 *)0x0;
+    }
+    else {
+      pVVar4 = (Vector2 *)(*(int *)(pVVar4 + 4) + -4);
+    }
+  }
+  return (Layer *)0x0;
+}
+
+
+@@@?GetLayerUnder@LayerGroup@Jet@@QAAPAVLayer@2@ABVVector2@2@0@Z
+// ==== 10031ab0  Jet::LayerGroup::GetLayerUnder  [ANALYSIS, 115 bytes]
+
+/* public: class Jet::Layer * __cdecl Jet::LayerGroup::GetLayerUnder(class Jet::Vector2 const
+   &,class Jet::Vector2 const &) */
+
+Layer * __thiscall
+Jet::LayerGroup::GetLayerUnder(LayerGroup *this,Vector2 *param_1,Vector2 *param_2)
+
+{
+  char cVar1;
+  Vector2 *pVVar2;
+  Layer *pLVar3;
+  LayerGroup *extraout_ECX;
+  LayerGroup *extraout_ECX_00;
+  Vector2 *pVVar4;
+  
+                    /* 0x31ab0  1276  ?GetLayerUnder@LayerGroup@Jet@@QAAPAVLayer@2@ABVVector2@2@0@Z
+                        */
+  if (*(int *)(param_1 + 0x20) == 0) {
+    pVVar4 = (Vector2 *)0x0;
+  }
+  else {
+    pVVar4 = (Vector2 *)(*(int *)(param_1 + 0x20) + -4);
+  }
+  while( true ) {
+    if (param_1 == (Vector2 *)0xffffffe0) {
+      pVVar2 = (Vector2 *)0x0;
+    }
+    else {
+      pVVar2 = param_1 + 0x1c;
+    }
+    if (pVVar4 == pVVar2) break;
+    if (((byte)pVVar4[0x14] & 2) == 0) {
+      cVar1 = (**(code **)(*(int *)pVVar4 + 0xc))();
+      this = extraout_ECX_00;
+      if (cVar1 != '\0') {
+        return (Layer *)pVVar4;
+      }
+    }
+    else {
+      pLVar3 = GetLayerUnder(this,pVVar4,param_2);
+      this = extraout_ECX;
+      if (pLVar3 != (Layer *)0x0) {
+        return pLVar3;
+      }
+    }
+    if (*(int *)(pVVar4 + 4) == 0) {
+      pVVar4 = (Vector2 *)0x0;
+    }
+    else {
+      pVVar4 = (Vector2 *)(*(int *)(pVVar4 + 4) + -4);
+    }
+  }
+  return (Layer *)0x0;
+}
+
+
+@@@?Reset@LayerGroup@Jet@@UAAXXZ
+// ==== 10031990  Jet::LayerGroup::Reset  [ANALYSIS, 64 bytes]
+
+/* public: virtual void __cdecl Jet::LayerGroup::Reset(void) */
+
+void __thiscall Jet::LayerGroup::Reset(LayerGroup *this)
+
+{
+  int *piVar1;
+  int *piVar2;
+  int in_stack_00000004;
+  
+                    /* 0x31990  2075  ?Reset@LayerGroup@Jet@@UAAXXZ */
+  if (*(int *)(in_stack_00000004 + 0x20) == 0) goto LAB_100319a5;
+  piVar2 = (int *)(*(int *)(in_stack_00000004 + 0x20) + -4);
+  while( true ) {
+    if (in_stack_00000004 == -0x20) {
+      piVar1 = (int *)0x0;
+    }
+    else {
+      piVar1 = (int *)(in_stack_00000004 + 0x1c);
+    }
+    if (piVar2 == piVar1) break;
+    (**(code **)(*piVar2 + 0x14))(piVar2);
+    if (piVar2[1] == 0) {
+LAB_100319a5:
+      piVar2 = (int *)0x0;
+    }
+    else {
+      piVar2 = (int *)(piVar2[1] + -4);
+    }
+  }
+  return;
+}
+
+
+@@@?Render@LayerGroup@Jet@@MAAXXZ
+// ==== 10021870  Jet::TextureStage::~TextureStage  [ANALYSIS, 1 bytes]
+
+/* public: __thiscall Jet::TextureStage::~TextureStage(void) */
+
+void __thiscall Jet::TextureStage::~TextureStage(TextureStage *this)
+
+{
+                    /* 0x21870  310  ??1TextureStage@Jet@@QAE@XZ
+                       0x21870  699  ?Activate@NullMaterial@Jet@@UAAXH@Z
+                       0x21870  700  ?Activate@RenderingCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z
+                       0x21870  738
+                       ?BatchCalculateDiffuse@DisplayLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z
+                       0x21870  739  ?Begin@Layer@Jet@@MAAXXZ
+                       0x21870  747  ?Bind@NullMaterial@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z
+                       0x21870  753  ?BindVertexProgram@GeometryChunkMultiStream@Jet@@UBAXH_N@Z
+                       0x21870  755  ?BindVertexProgram@GeometryChunkSingleStream@Jet@@UBAXH_N@Z
+                       0x21870  764
+                       ?CacheChunk@NullMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z
+                       0x21870  820
+                       ?CopyMipToMip@DisplayTextureNull@Jet@@UAAXPAVDisplayTexture@2@H0H@Z
+                       0x21870  867  ?Cull@Element@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z
+                       0x21870  892  ?DrawComplete@VertexBufferManager@Jet@@UAAXABVVertexType@2@@Z
+                       0x21870  893  ?DrawComplete@VertexBufferManager@Jet@@UAAXPBVStaticBuffer@2@@Z
+                       0x21870  915  ?End@Layer@Jet@@MAAXXZ
+                       0x21870  920  ?EndFrameStats@DisplayTexture@Jet@@SAXXZ
+                       0x21870  921  ?EndLightingUpdate@Display@Jet@@UAAXXZ
+                       0x21870  922  ?Enter@RenderingCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z
+                       0x21870  949  ?FlushState@VertexBufferManager@Jet@@UAAXXZ
+                       0x21870  1877  ?InitInstance@DisplayTextureNull@Jet@@IBAXAAV12@@Z
+                       0x21870  1887  ?InitInstance@Projector@Jet@@IBAXAAV12@@Z
+                       0x21870  1898
+                       ?InitializeVertexTypeForAPI@Display@Jet@@UBAXAAVVertexType@2@PBXPBD@Z
+                       0x21870  1943  ?Leave@RenderingCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z
+                       0x21870  1962  ?LoadConstantRegisters@VertexProgram@Jet@@UBAXXZ
+                       0x21870  1982  ?LogInitFailure@DisplayTexture@Jet@@IBAXPBD@Z
+                       0x21870  2017  ?RefreshFromChangedSettings@DisplayTexture@Jet@@UAAXXZ
+                       0x21870  2049
+                       ?Render@Element@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@@Z
+                       0x21870  2050  ?Render@LayerGroup@Jet@@MAAXXZ
+                       0x21870  2053
+                       ?RenderChunk@NullMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@H@Z
+                       0x21870  2054  ?RenderChunkColor@GeometryChunk@Jet@@QBAXPAVDisplay@2@@Z
+                       0x21870  2055
+                       ?RenderDebug@Element@Jet@@UAAXPAVDisplay@2@AAVDebugViewPort@2@AAVMatrix4@2@K@Z
+                       0x21870  2065
+                       ?RenderNumChunks@NullMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAPAVGeometryChunk@2@PAPBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PAPBVMatrix4@2@IH@Z
+                       0x21870  2069
+                       ?RenderPrimitives@NullMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@IPBGIW4DPrimitive@2@H@Z
+                       0x21870  2074  ?Reset@Layer@Jet@@UAAXXZ
+                       0x21870  2077  ?ResetDynamicBufferForReuse@VertexBufferManager@Jet@@UAAXXZ
+                       0x21870  2079  ?ResetDynamicBufferOffsets@VertexBufferManager@Jet@@UAAXXZ
+                       0x21870  2087  ?ResizeVertexArray@GeometryChunk@Jet@@UAAXPAVDisplay@2@IHH@Z
+                       0x21870  2118  ?SetActiveTextureStage@Display@Jet@@UAAXH@Z
+                       0x21870  2139  ?SetBasicState@DisplayTextureNull@Jet@@IBAXXZ
+                       0x21870  2249  ?SetMaxAnisotropy@Display@Jet@@UAAXM@Z
+                       0x21870  2297
+                       ?SetProgramState@VertexProgram@Jet@@UBAXABV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@VColor@2@ABUDisplayMaterial@2@ABVMatrix4@2@@Z
+                       0x21870  2310  ?SetResourcePriority@Texture@Jet@@UBAXM@Z
+                       0x21870  2380  ?SetZBiasEnabled@Display@Jet@@UAAX_N@Z
+                       0x21870  2416  ?Unbind@NullMaterial@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z
+                       0x21870  2422  ?UnreferenceResources@Display@Jet@@UAAXXZ
+                       0x21870  2425  ?Update@Layer@Jet@@MAAXM@Z
+                       0x21870  2430  ?Update@Texture@Jet@@UAAXM@Z
+                       0x21870  2432  ?Update@VertexBufferManager@Jet@@UAAXXZ */
+  return;
+}
+
+
+@@@?GetLayerAt@LayerManager@Jet@@QAAPAVLayer@2@ABVVector2@2@@Z
+// ==== 1000b4b0  Jet::LayerManager::GetLayerAt  [ANALYSIS, 16 bytes]
+
+/* public: class Jet::Layer * __cdecl Jet::LayerManager::GetLayerAt(class Jet::Vector2 const &) */
+
+Layer * __thiscall Jet::LayerManager::GetLayerAt(LayerManager *this,Vector2 *param_1)
+
+{
+  Layer *pLVar1;
+  
+                    /* 0xb4b0  1272  ?GetLayerAt@LayerManager@Jet@@QAAPAVLayer@2@ABVVector2@2@@Z */
+  pLVar1 = LayerGroup::GetLayerAt((LayerGroup *)(param_1 + 4),param_1 + 4);
+  return pLVar1;
+}
+
+
+@@@?FindLayer@LayerManager@Jet@@QAAPAVLayer@2@ABVPString@2@@Z
+// ==== 1000b4a0  Jet::LayerManager::FindLayer  [ANALYSIS, 16 bytes]
+
+/* public: class Jet::Layer * __cdecl Jet::LayerManager::FindLayer(class Jet::PString const &) */
+
+Layer * __thiscall Jet::LayerManager::FindLayer(LayerManager *this,PString *param_1)
+
+{
+  Layer *pLVar1;
+  
+                    /* 0xb4a0  941  ?FindLayer@LayerManager@Jet@@QAAPAVLayer@2@ABVPString@2@@Z */
+  pLVar1 = LayerGroup::FindLayer((LayerGroup *)(param_1 + 4),param_1 + 4);
+  return pLVar1;
+}
+
+
+@@@?GetLayerUnder@LayerManager@Jet@@QAAPAVLayer@2@ABVVector2@2@0@Z
+// ==== 1000b4c0  Jet::LayerManager::GetLayerUnder  [ANALYSIS, 16 bytes]
+
+/* public: class Jet::Layer * __cdecl Jet::LayerManager::GetLayerUnder(class Jet::Vector2 const
+   &,class Jet::Vector2 const &) */
+
+Layer * __thiscall
+Jet::LayerManager::GetLayerUnder(LayerManager *this,Vector2 *param_1,Vector2 *param_2)
+
+{
+  Layer *pLVar1;
+  
+                    /* 0xb4c0  1277  ?GetLayerUnder@LayerManager@Jet@@QAAPAVLayer@2@ABVVector2@2@0@Z
+                        */
+  pLVar1 = LayerGroup::GetLayerUnder((LayerGroup *)this,param_1 + 4,param_2);
+  return pLVar1;
+}
+
+
+@@@?Reset@LayerManager@Jet@@QAAXXZ
+// ==== 1000b550  Jet::LayerManager::Reset  [ANALYSIS, 19 bytes]
+
+/* public: void __cdecl Jet::LayerManager::Reset(void) */
+
+void __thiscall Jet::LayerManager::Reset(LayerManager *this)
+
+{
+  int in_stack_00000004;
+  
+                    /* 0xb550  2076  ?Reset@LayerManager@Jet@@QAAXXZ */
+                    /* WARNING: Could not recover jumptable at 0x1000b561. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+  (**(code **)(*(int *)(in_stack_00000004 + 4) + 0x14))();
+  return;
+}

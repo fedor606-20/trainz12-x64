@@ -11,10 +11,13 @@ namespace Jet {
 class TaskManager;
 
 // intrusive list link (KernelStandard's IListNode: {next, prev})
+#ifndef JET_ILISTNODE_DEFINED
+#define JET_ILISTNODE_DEFINED
 struct IListNode {
     IListNode* next = nullptr;
     IListNode* prev = nullptr;
 };
+#endif
 
 // A periodically updated process. MSVC pads the vfptr to the class's 8-byte alignment, so the links sit at +8.
 struct TaskList;

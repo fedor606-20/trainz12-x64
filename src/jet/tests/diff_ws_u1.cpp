@@ -51,6 +51,7 @@ static void SameFloat(float a, float b, const char* what, const std::string& det
 
 // thiscall through a fastcall pointer: ecx = this, edx unused, the rest on the stack
 using Fn0 = void*(__fastcall*)(void*, void*);                       // no args
+using FnCopy = void*(__fastcall*)(void*, void*, const void*);       // copy-assign/copy-ctor-like (this, edx, src)
 using Fn1i = void*(__fastcall*)(void*, void*, int);                 // one int (SetNumOctaves)
 using Fn2i = void*(__fastcall*)(void*, void*, int, int);            // FrameAnimation ctor
 using Fn1f = void(__fastcall*)(void*, void*, float);                // Update
@@ -78,8 +79,8 @@ static void TestFrameAnimation(int rounds)
     auto ctor1 = reinterpret_cast<Fn2i>(Proc(1, "??0FrameAnimation@Jet@@QAE@HH@Z"));
     auto upd = reinterpret_cast<Fn1f>(Proc(0, "?Update@FrameAnimation@Jet@@QAAXM@Z"));
     auto upd1 = reinterpret_cast<Fn1f>(Proc(1, "?Update@FrameAnimation@Jet@@QAAXM@Z"));
-    auto assign = reinterpret_cast<Fn0>(Proc(0, "??4FrameAnimation@Jet@@QAEAAV01@ABV01@@Z"));
-    auto assign1 = reinterpret_cast<Fn0>(Proc(1, "??4FrameAnimation@Jet@@QAEAAV01@ABV01@@Z"));
+    auto assign = reinterpret_cast<FnCopy>(Proc(0, "??4FrameAnimation@Jet@@QAEAAV01@ABV01@@Z"));
+    auto assign1 = reinterpret_cast<FnCopy>(Proc(1, "??4FrameAnimation@Jet@@QAEAAV01@ABV01@@Z"));
     auto dtor = reinterpret_cast<Fn0>(Proc(0, "??1FrameAnimation@Jet@@QAE@XZ"));
     auto dtor1 = reinterpret_cast<Fn0>(Proc(1, "??1FrameAnimation@Jet@@QAE@XZ"));
     auto numFrames = reinterpret_cast<GetI>(Proc(0, "?GetNumFrames@FrameAnimation@Jet@@QBAHXZ"));
@@ -95,11 +96,11 @@ static void TestFrameAnimation(int rounds)
 
     unsigned char a[0x20], b[0x20];
     for (int r = 0; r < rounds; ++r) {
-        int sampleRate = Pick(1, 30), period = Pick(1, 10);
+        int sampleRate = Pick(1, 30), periodVal = Pick(1, 10);
         std::memset(a, 0xcc, sizeof(a));
         std::memset(b, 0xcc, sizeof(b));
-        ctor(a, nullptr, sampleRate, period);
-        ctor1(b, nullptr, sampleRate, period);
+        ctor(a, nullptr, sampleRate, periodVal);
+        ctor1(b, nullptr, sampleRate, periodVal);
         Same(a, b, 0x18, "fa ctor");
         Check(numFrames(a, nullptr) == numFrames1(b, nullptr), "fa numframes");
         Check(period(a, nullptr) == period1(b, nullptr), "fa period");
@@ -141,10 +142,10 @@ static void TestWaterGrid(const char* part, const GridNames& n, int elem, int ro
     }
     auto dtor = reinterpret_cast<Fn0>(Proc(0, n.dtor));
     auto dtor1 = reinterpret_cast<Fn0>(Proc(1, n.dtor));
-    Fn0 assign = nullptr, assign1 = nullptr;
+    FnCopy assign = nullptr, assign1 = nullptr;
     if (*n.assign) {
-        assign = reinterpret_cast<Fn0>(Proc(0, n.assign));
-        assign1 = reinterpret_cast<Fn0>(Proc(1, n.assign));
+        assign = reinterpret_cast<FnCopy>(Proc(0, n.assign));
+        assign1 = reinterpret_cast<FnCopy>(Proc(1, n.assign));
     }
     auto init = reinterpret_cast<GridInitS>(Proc(0, n.init));
     auto init1 = reinterpret_cast<GridInitS>(Proc(1, n.init));
@@ -162,8 +163,10 @@ static void TestWaterGrid(const char* part, const GridNames& n, int elem, int ro
         std::memset(b, 0xcc, sizeof(b));
         ctorS(a, nullptr, &sz);
         ctorS1(b, nullptr, &sz);
-        Same(a + 4, b + 4, 8, std::string(part) + " ctor size");  // width, height (vftable and data ptr differ)
-        Check(data(a, nullptr) != nullptr && data1(b, nullptr) != nullptr, std::string(part) + " ctor data");
+        const std::string ctorSize = std::string(part) + " ctor size";
+        const std::string ctorData = std::string(part) + " ctor data";
+        Same(a + 4, b + 4, 8, ctorSize.c_str());  // width, height (vftable and data ptr differ)
+        Check(data(a, nullptr) != nullptr && data1(b, nullptr) != nullptr, ctorData.c_str());
         for (int s = 0; s < 30; ++s) {
             int x = Pick(0, sz.w - 1), y = Pick(0, sz.h - 1);
             unsigned char v[16];
@@ -172,10 +175,12 @@ static void TestWaterGrid(const char* part, const GridNames& n, int elem, int ro
             set1(b, nullptr, x, y, v);
             const void* pa = get(a, nullptr, x, y);
             const void* pb = get1(b, nullptr, x, y);
-            Same(pa, pb, elem * 4, std::string(part) + " get");
+            const std::string getWhat = std::string(part) + " get";
+            const std::string getOffsetWhat = std::string(part) + " get offset";
+            Same(pa, pb, elem * 4, getWhat.c_str());
             Check(static_cast<const unsigned char*>(pa) - static_cast<const unsigned char*>(data(a, nullptr))
                       == static_cast<const unsigned char*>(pb) - static_cast<const unsigned char*>(data1(b, nullptr)),
-                  std::string(part) + " get offset");
+                  getOffsetWhat.c_str());
         }
         unsigned char a2[0x40], b2[0x40];
         std::memset(a2, 0xcc, sizeof(a2));
@@ -183,14 +188,17 @@ static void TestWaterGrid(const char* part, const GridNames& n, int elem, int ro
         if (ctorC) {
             ctorC(a2, nullptr, a);
             ctorC1(b2, nullptr, b);
-            Same(a2 + 4, b2 + 4, 8, std::string(part) + " copy size");
+            const std::string copySize = std::string(part) + " copy size";
+            const std::string copyGet = std::string(part) + " copy get";
+            const std::string assignSize = std::string(part) + " assign size";
+            Same(a2 + 4, b2 + 4, 8, copySize.c_str());
             for (int s = 0; s < 10; ++s) {
                 int x = Pick(0, sz.w - 1), y = Pick(0, sz.h - 1);
-                Same(get(a2, nullptr, x, y), get1(b2, nullptr, x, y), elem * 4, std::string(part) + " copy get");
+                Same(get(a2, nullptr, x, y), get1(b2, nullptr, x, y), elem * 4, copyGet.c_str());
             }
             assign(a, nullptr, a2);
             assign1(b, nullptr, b2);
-            Same(a + 4, b + 4, 8, std::string(part) + " assign size");
+            Same(a + 4, b + 4, 8, assignSize.c_str());
             dtor(a2, nullptr);
             dtor1(b2, nullptr);
         }
@@ -202,7 +210,8 @@ static void TestWaterGrid(const char* part, const GridNames& n, int elem, int ro
         std::memset(b3, 0xcc, sizeof(b3));
         init(a3, nullptr, &sz);
         init1(b3, nullptr, &sz);
-        Same(a3 + 4, b3 + 4, 8, std::string(part) + " init size");
+        const std::string initSize = std::string(part) + " init size";
+        Same(a3 + 4, b3 + 4, 8, initSize.c_str());
         dtor(a3, nullptr);
         dtor1(b3, nullptr);
     }
@@ -213,8 +222,8 @@ static void TestPNoise(int rounds)
 {
     auto ctor = reinterpret_cast<Fn0>(Proc(0, "??0PNoise@Jet@@QAE@XZ"));
     auto ctor1 = reinterpret_cast<Fn0>(Proc(1, "??0PNoise@Jet@@QAE@XZ"));
-    auto assign = reinterpret_cast<Fn0>(Proc(0, "??4PNoise@Jet@@QAEAAV01@ABV01@@Z"));
-    auto assign1 = reinterpret_cast<Fn0>(Proc(1, "??4PNoise@Jet@@QAEAAV01@ABV01@@Z"));
+    auto assign = reinterpret_cast<FnCopy>(Proc(0, "??4PNoise@Jet@@QAEAAV01@ABV01@@Z"));
+    auto assign1 = reinterpret_cast<FnCopy>(Proc(1, "??4PNoise@Jet@@QAEAAV01@ABV01@@Z"));
     auto oct = reinterpret_cast<Fn1i>(Proc(0, "?SetNumOctaves@PNoise@Jet@@QAAXH@Z"));
     auto oct1 = reinterpret_cast<Fn1i>(Proc(1, "?SetNumOctaves@PNoise@Jet@@QAAXH@Z"));
     auto n1 = reinterpret_cast<Fn3f>(Proc(0, "?Noise1@PNoise@Jet@@QAAMM@Z"));

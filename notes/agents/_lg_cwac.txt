@@ -1,0 +1,28 @@
+// ==== 10031d30  Jet::LayerGroup::ConvertToWindowAndClip  [ANALYSIS, 86 bytes]
+
+/* public: void __cdecl Jet::LayerGroup::ConvertToWindowAndClip(struct Jet::Rect &)const  */
+
+void __thiscall Jet::LayerGroup::ConvertToWindowAndClip(LayerGroup *this,Rect *param_1)
+
+{
+  int iVar1;
+  int *in_stack_00000008;
+  
+  do {
+    iVar1 = *(int *)(param_1 + 0x34);
+    if ((0 < iVar1) && (0 < *(int *)(param_1 + 0x38))) {
+      if (iVar1 < in_stack_00000008[2] + *in_stack_00000008) {
+        in_stack_00000008[2] = iVar1 - *in_stack_00000008;
+      }
+      if (*(int *)(param_1 + 0x38) < in_stack_00000008[3] + in_stack_00000008[1]) {
+        in_stack_00000008[3] = *(int *)(param_1 + 0x38) - in_stack_00000008[1];
+      }
+    }
+    *in_stack_00000008 = *in_stack_00000008 + *(int *)(param_1 + 0x2c);
+    in_stack_00000008[1] = in_stack_00000008[1] + *(int *)(param_1 + 0x30);
+    param_1 = *(Rect **)(param_1 + 0x1c);
+  } while (param_1 != (Rect *)0x0);
+  return;
+}
+
+

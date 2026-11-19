@@ -1,0 +1,63 @@
+MISSING ?ConvertToWindowAndClip@LayerGroup@Jet@@QBAXAAURect@2@@Z
+
+@@@?GetExtensionString@Display@Jet@@QBAPBDW4DExtension@2@@Z
+// ==== 1001b890  Jet::Display::GetExtensionString  [ANALYSIS, 12 bytes]
+
+/* public: char const * __cdecl Jet::Display::GetExtensionString(enum Jet::DExtension)const  */
+
+char * __thiscall Jet::Display::GetExtensionString(Display *this,DExtension param_1)
+
+{
+  int in_stack_00000008;
+  
+                    /* 0x1b890  1111  ?GetExtensionString@Display@Jet@@QBAPBDW4DExtension@2@@Z */
+  return (&PTR_s_D_MULTI_TEXTURE_100b6c9c)[in_stack_00000008 * 2];
+}
+
+
+@@@?ConvertTexCompressionString@Display@Jet@@QBAPBDW4DTexCompression@2@@Z
+// ==== 1001b8a0  Jet::Display::ConvertTexCompressionString  [ANALYSIS, 20 bytes]
+
+/* public: char const * __cdecl Jet::Display::ConvertTexCompressionString(enum
+   Jet::DTexCompression)const  */
+
+char * __thiscall Jet::Display::ConvertTexCompressionString(Display *this,DTexCompression param_1)
+
+{
+  uint in_stack_00000008;
+  
+                    /* 0x1b8a0  814
+                       ?ConvertTexCompressionString@Display@Jet@@QBAPBDW4DTexCompression@2@@Z */
+  if (in_stack_00000008 < 9) {
+    return (char *)(&DAT_100b817c)[in_stack_00000008];
+  }
+  return (char *)0x0;
+}
+
+
+@@@?ConvertTexCompressionString@Display@Jet@@QBA?AW4DTexCompression@2@PBD@Z
+// ==== 1001b8c0  Jet::Display::ConvertTexCompressionString  [ANALYSIS, 27 bytes]
+
+/* public: enum Jet::DTexCompression __cdecl Jet::Display::ConvertTexCompressionString(char const
+   *)const  */
+
+DTexCompression __thiscall Jet::Display::ConvertTexCompressionString(Display *this,char *param_1)
+
+{
+  DTexCompression DVar1;
+  int in_stack_00000008;
+  
+                    /* 0x1b8c0  813
+                       ?ConvertTexCompressionString@Display@Jet@@QBA?AW4DTexCompression@2@PBD@Z */
+  DVar1 = 0;
+  do {
+    if (in_stack_00000008 == (&DAT_100b817c)[DVar1]) {
+      return DVar1;
+    }
+    DVar1 = DVar1 + 1;
+  } while ((int)DVar1 < 9);
+  return 0xffffffff;
+}
+
+MISSING ?GetAllVideoModes@Display@Jet@@QBA_NAAPBV?@UVideoMode@Display@Jet@@@@2@@Z
+MISSING ?GetAllVideoFormats@Display@Jet@@QBA_NAAPBV?@UVideoFormat@Display@Jet@@@@2@@Z

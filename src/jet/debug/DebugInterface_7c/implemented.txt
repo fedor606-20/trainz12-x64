@@ -1,0 +1,3 @@
+# DebugInterface_7c exports taken from our code (one mangled name per line); all others forward to DebugInterface_7c_orig.dll
+# Wave 1 scaffold: only the plugin entry is stubbed for now; enable others after ABI/layout verification.
+JetGetPluginsDebugInterface

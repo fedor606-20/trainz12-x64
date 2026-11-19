@@ -1,0 +1,12 @@
+# RenderDirectX9_7c exports taken from our code (one mangled name per line); all others forward to RenderDirectX9_7c_orig.dll when wired.
+# Wave 2/4 scaffold (proxy-first): default to forwarding all 41 exports. No exports are enabled.
+#
+# Evidenced ABI-visible entrypoints/symbols (see D:\trainz12-decomp\exports\RenderDirectX9_7c.tsv):
+#   - JetGetPluginsRenderDirectX9 (ordinal 41, rva 0xfb30): plugin registration/factory side effects not recovered.
+#   - Jet::DisplayDescriptorDirectX9: ctor/copy/assign/dtor, Initialize/Destroy, vf0, vftable export.
+#   - Jet::DisplayTextureDirectX9: texture lifecycle/create/load/subl​oad/bind/upload/copy/format/surface/bitmap APIs, vftable export.
+#   - Statics: Jet::DisplayTextureDirectX9::{canAutoMip, mipCubeMapSupport, mipVolumeMapSupport}.
+#
+# ABI/layout/object sizes, vtable slot meanings/ordering, calling conventions/COM lifetime, D3D9/D3DX/Cg
+# behavior, and RenderSystem display/texture/program/buffer/combiner contracts must be recovered from
+# decomp/evidence before enabling any local export. Do not assume a no-op or guessed implementation is safe.

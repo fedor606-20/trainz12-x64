@@ -1,0 +1,3 @@
+# InterfaceResources_7c exports taken from our code (one mangled name per line); all others forward to InterfaceResources_7c_orig.dll when wired.
+# Wave 1 scaffold: plugin entry only, stub/no-op registration pending ABI/factory/ID verification.
+JetGetPluginsInterfaceResources
