@@ -1,1 +1,0 @@
-JetGetPluginsInputDirectX (stub/scaffold only; no DI behavior, no registration wired pending ABI/ID verification)

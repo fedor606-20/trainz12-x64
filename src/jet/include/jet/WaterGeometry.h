@@ -78,7 +78,6 @@ public:
     int gridSize;             // +0x50  size.w
     int gridSizeMinus1;       // +0x54
     float cellSize;           // +0x58  size.w * scale.x
-    float pad5c;              // +0x5c  unused/padding in original TS12 layout
     float wave1;              // +0x60  (4 - v16*8) * v17
     float wave2;              // +0x64  (waveSpeed * deltaTime - 2) * v17
     float wave3;              // +0x68  (v17 * v16) * 2

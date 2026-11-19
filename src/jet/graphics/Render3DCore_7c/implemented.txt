@@ -1,5 +1,0 @@
-# Render3DCore_7c exports taken from our code (one mangled name per line); all others forward to Render3DCore_7c_orig.dll when wired.
-# Wave 2 scaffold (proxy-first): default to forwarding all via future wiring. No exports are enabled yet.
-# JetGetPluginsRender3DCore (ordinal 2500, RVA 0x608e0, ~80 bytes per ghidra map) is the only
-# evidenced module entrypoint; its registration side effects must be recovered from decomp before
-# enabling a local implementation. Do NOT assume a no-op is behaviorally safe.

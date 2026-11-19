@@ -1,4 +1,0 @@
-# InterfaceSystem_7c exports taken from our code (one mangled name per line); all others forward to InterfaceSystem_7c_orig.dll when wired.
-# Wave 5 scaffold (proxy-first): default forward all. No exports enabled.
-# Evidenced plugin entrypoint exists in exports/fmap (JetGetPluginsInterfaceSystem, unmangled extern "C", RVA 0x27040)
-# but registration ABI/side effects/order are not recovered; keep forwarded until trivially-safe and verified.

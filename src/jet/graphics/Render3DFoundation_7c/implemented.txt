@@ -1,8 +1,0 @@
-# Render3DFoundation_7c exports taken from our code (one mangled name per line); all others forward to Render3DFoundation_7c_orig.dll when wired.
-# Wave 2/3 scaffold (proxy-first): default to forwarding all via future wiring. No exports are enabled yet.
-# Evidence (read-only): D:\trainz12-decomp\exports\Render3DFoundation_7c.tsv (1085 lines incl header => 1084 exports, ordinals 1..1084);
-# trainz12-x64/ghidra_maps/jet/graphics/Render3DFoundation_7c.dll.functions.tsv (1643 lines incl header => 1642 funcs, 623 Global, 200001 mapped bytes);
-# trainz12-x64/ghidra_maps/jet/graphics/vtnames_Render3DFoundation_7c.dll.tsv (221 lines incl header => 220 slot entries, 43 vftable/2 vbtable export families).
-# JetGetPluginsRender3DFoundation (ordinal 1084, RVA 0x218a0, export line 1085; function map 100218a0 size 40, Global, IMPORTED false)
-# is the only evidenced module/plugin entrypoint. Its registration side effects/factory/resource-type set/order/IDs must be recovered from
-# decomp before enabling a local implementation. Do NOT assume a no-op is behaviorally safe.

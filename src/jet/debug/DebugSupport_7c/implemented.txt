@@ -1,5 +1,0 @@
-# DebugSupport_7c exports taken from our code (one mangled name per line); all others forward to DebugSupport_7c_orig.dll
-# Wave 1 scaffold (module-owned, proxy-first): only the plugin entry is a trivially-safe no-op stub.
-# All 118 other exports (classes/vftables/data/methods) remain forwarded until ABI/layout/vtables/
-# registration/runtime hooks are recovered from decomp and verified.
-JetGetPluginsDebugSupport
