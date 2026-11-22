@@ -857,3 +857,12 @@ Do not group `Layer::GetLayerManager` with the local reads: it uses the original
 - Game checks `game-20261123-001309` and, after review fixes,
   `game-20261123-003656` exited with code `0` and matched the baseline JetLog
   line for line.
+- U12: `JetGetPluginsRenderSystem` is local (2672/2687 exports). It registers
+  the ten factories in this order: `bmp-tex`, `tga-tex`, `bmframe-tex`,
+  `pcx-tex`, `jpg-tex`, `texture`, `texture.txt`, `vtx.txt`, `pxl.txt`,
+  `material.txt`. `PluginRegistration.cpp` copies each factory vtable from
+  the original image, including `[-1]`, and keeps the original call sequence
+  through imports. Factory virtual methods remain original-owned.
+- `diff_rs_u12` patches UId, Alloc, PStringCache and ResourceTypeBase imports
+  in both DLLs and compares the registration trace and installed vtables.
+  Game check `game-20261123-010531` exited `0` with no non-heap JetLog diff.

@@ -3113,3 +3113,23 @@ the offline main menu and exited with code `0`; the normalized 17-line JetLog ha
 zero differences. Artifacts: `game-20261123-001309` and, after the review fixes,
 `game-20261123-003656`. DLLs were restored and hash-checked. No driving session
 was run.
+
+### U12: resource factory registration (2026-11-23)
+
+`JetGetPluginsRenderSystem` is now local. It registers the same ten factory
+types in the original order: `bmp-tex`, `tga-tex`, `bmframe-tex`, `pcx-tex`,
+`jpg-tex`, `texture`, `texture.txt`, `vtx.txt`, `pxl.txt`, `material.txt`.
+Each factory is built with the original call sequence: category `UId`,
+`Alloc::New(0x20)`, interned extension, type `UId`, `ResourceTypeBase` ctor,
+vptr assignment, extension node release. The factory vftables are copied from
+the original image into local data, including their `[-1]` RTTI locator; the
+virtual methods themselves remain original-owned until those classes are
+ported.
+
+`diff_rs_u12` patches the relevant imports in both DLLs and compares the full
+call trace plus every installed vtable: 1168 entries, no differences. The
+module now has **2672/2687** local exports and 15 forwarders. All earlier
+differential tests passed. With the local TNI patch, the game reached the
+offline main menu and exited with code `0`; the normalized 17-line JetLog had
+zero differences outside heap counters. Artifacts: `game-20261123-010531`.
+DLLs were restored and hash-checked. No driving session was run.

@@ -2763,6 +2763,9 @@
 ?uniqueTexId@Texture@Jet@@1KA=?RsRsD073@@3PAEA
 ?vertexMap@VertexProgramBasic@Jet@@1PBUVertexMap@12@B=?RsRsD074@@3PAEA
 ?vertexSymbol@VertexProgramBasic@Jet@@1PBDB=?RsRsD075@@3PAEA
+
+# U12: resource factory registration
+JetGetPluginsRenderSystem=?RsJetGetPluginsRenderSystem@@YAXXZ
 ??_7Display@Jet@@6B01@@=?RsRsV001@@3PAEA
 ??_7Display@Jet@@6BPluginInstance@1@@=?RsRsV002@@3PAEA
 ??_7DisplayContext@Display@Jet@@6B@=?RsRsV003@@3PAEA
