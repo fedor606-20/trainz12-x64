@@ -119,7 +119,7 @@ double PNoise::Noise1D(float x) const
     return xf * s * d + dot0;
 }
 
-float PNoise::Noise1(float x) const
+float PNoise::Noise1(float x)
 {
     return static_cast<float>(Noise1D(x));
 }
@@ -152,7 +152,7 @@ double PNoise::Noise2D(const float* p) const
     return (dot01 + row1 * sx - row0) * sy + row0;
 }
 
-float PNoise::Noise2(const float* p) const
+float PNoise::Noise2(float* const p)
 {
     return static_cast<float>(Noise2D(p));
 }
@@ -211,7 +211,7 @@ double PNoise::Noise3D(const float* p) const
     return (row0z1 + (dot011 + (dot111 - dot011) * sx - row0z1) * sy - row1z0) * sz + row1z0;
 }
 
-float PNoise::Noise3(const float* p) const
+float PNoise::Noise3(float* const p)
 {
     return static_cast<float>(Noise3D(p));
 }
@@ -235,7 +235,7 @@ double PNoise::Turbulence1D(float x) const
     return sum;
 }
 
-float PNoise::Turbulence1(float x) const
+float PNoise::Turbulence1(float x)
 {
     return static_cast<float>(Turbulence1D(x));
 }
@@ -254,13 +254,13 @@ double PNoise::Turbulence2D(const float* p) const
     return sum;
 }
 
-float PNoise::Turbulence2(const float* p) const
+float PNoise::Turbulence2(float* const p)
 {
     return static_cast<float>(Turbulence2D(p));
 }
 
 // 0x10001CC0
-float PNoise::Turbulence2(float x, float y) const
+float PNoise::Turbulence2(float x, float y)
 {
     float p[2] = {x, y};
     return Turbulence2(p);
@@ -280,13 +280,13 @@ double PNoise::Turbulence3D(const float* p) const
     return sum;
 }
 
-float PNoise::Turbulence3(const float* p) const
+float PNoise::Turbulence3(float* const p)
 {
     return static_cast<float>(Turbulence3D(p));
 }
 
 // 0x10001C80
-float PNoise::Turbulence3(float x, float y, float z) const
+float PNoise::Turbulence3(float x, float y, float z)
 {
     float p[3] = {x, y, z};
     return Turbulence3(p);
@@ -307,7 +307,7 @@ double PNoise::TurbulenceTiledD(float x, float y, float z, float period) const
     return ((Turbulence3D(xywz) * wx + t2) * y + t1) / (static_cast<double>(period) * period);
 }
 
-float PNoise::TurbulenceTiled(float x, float y, float z, float period) const
+float PNoise::TurbulenceTiled(float x, float y, float z, float period)
 {
     return static_cast<float>(TurbulenceTiledD(x, y, z, period));
 }
@@ -319,7 +319,7 @@ double PNoise::TurbulenceLoopingTiledD(float x, float y, float z, float period, 
     return (TurbulenceTiledD(x, y, z, period) * (loopPeriod - z) + a) / loopPeriod;
 }
 
-float PNoise::TurbulenceLoopingTiled(float x, float y, float z, float period, float loopPeriod) const
+float PNoise::TurbulenceLoopingTiled(float x, float y, float z, float period, float loopPeriod)
 {
     return static_cast<float>(TurbulenceLoopingTiledD(x, y, z, period, loopPeriod));
 }

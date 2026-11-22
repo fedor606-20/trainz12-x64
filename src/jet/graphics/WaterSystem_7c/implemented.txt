@@ -164,3 +164,9 @@
 ?Initialize@WaterGeometryVS@Jet@@UAA_NPAVRenderKernel@2@PAVWaterMaterial@2@ABUSize@2@ABVVector3@2@ABVVector2@2@3MM@Z
 ?Render@WaterGeometryVS@Jet@@UAEXPAVDisplay@2@AAVViewPort@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@AAVMatrix4@2@@Z
 ?Update@WaterGeometryVS@Jet@@UAAXM@Z
+
+# U5 tail: WaterGeometryAnimation lifetime (WaterGeometry.cpp)
+??0WaterGeometryAnimation@Jet@@QAE@ABV01@@Z
+??0WaterGeometryAnimation@Jet@@QAE@XZ
+??1WaterGeometryAnimation@Jet@@QAE@XZ
+??4WaterGeometryAnimation@Jet@@QAEAAV01@ABV01@@Z

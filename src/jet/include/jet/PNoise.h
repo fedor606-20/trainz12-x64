@@ -15,17 +15,18 @@ public:
 
     void __cdecl SetNumOctaves(int numOctaves);
 
-    float __cdecl Noise1(float x) const;
-    float __cdecl Noise2(const float* p) const;
-    float __cdecl Noise3(const float* p) const;
+    // The exported wrappers are non-const __cdecl members, and the pointer overloads take float* const.
+    float __cdecl Noise1(float x);
+    float __cdecl Noise2(float* const p);
+    float __cdecl Noise3(float* const p);
 
-    float __cdecl Turbulence1(float x) const;
-    float __cdecl Turbulence2(const float* p) const;  // doubles p[0..1] in place
-    float __cdecl Turbulence2(float x, float y) const;
-    float __cdecl Turbulence3(const float* p) const;  // doubles p[0..1] in place (not p[2])
-    float __cdecl Turbulence3(float x, float y, float z) const;
-    float __cdecl TurbulenceTiled(float x, float y, float z, float period) const;
-    float __cdecl TurbulenceLoopingTiled(float x, float y, float z, float period, float loopPeriod) const;
+    float __cdecl Turbulence1(float x);
+    float __cdecl Turbulence2(float* const p);  // doubles p[0..1] in place
+    float __cdecl Turbulence2(float x, float y);
+    float __cdecl Turbulence3(float* const p);  // doubles p[0..1] in place (not p[2])
+    float __cdecl Turbulence3(float x, float y, float z);
+    float __cdecl TurbulenceTiled(float x, float y, float z, float period);
+    float __cdecl TurbulenceLoopingTiled(float x, float y, float z, float period, float loopPeriod);
 
 private:
     // byte-exact TS12 layout; the hash chains index the permutation 1-based (perm[1..256]) and wrap into the

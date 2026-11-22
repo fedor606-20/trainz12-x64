@@ -100,6 +100,8 @@ target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.li
                       "${IMPLIB}/KernelResources_7c.lib")
 # WaterSystem_7c: replaced unit by unit (notes/WaterSystem.md); its module state stays the original's until U10
 target_compile_definitions(WaterSystem_7c PRIVATE JET_WS_BUILD)
+# the water code still calls RenderSystem classes (GeometryChunk, Texture, DisplayFormat) by their original names
+target_link_libraries(WaterSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c.lib")
 # the map lets the diff tests find the parsers' internal entry points (RsTest*)
 target_link_options(RenderSystem_7c PRIVATE /MAP)
 # the shader-language scanners' DFA tables and their Lemon parsers' tables (generated output with no source), read
@@ -240,6 +242,8 @@ add_executable(diff_rs_u12 tests/diff_rs_u12.cpp)
 add_executable(diff_rs_u13 tests/diff_rs_u13.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
+# WaterSystem U5 tail: WaterGeometryAnimation lifetime (chunk-level copy and ownership)
+add_executable(diff_ws_u5 tests/diff_ws_u5.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)
 add_executable(diff_is_obs tests/diff_is_obs.cpp)
 add_executable(diff_is_dev tests/diff_is_dev.cpp)

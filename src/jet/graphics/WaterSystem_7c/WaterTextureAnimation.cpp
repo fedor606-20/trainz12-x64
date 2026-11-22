@@ -22,9 +22,15 @@ namespace Jet {
 namespace {
 
 // the original's `*v14 = &Jet::Texture::vftable` (an import from RenderSystem_7c.dll); the linker aliases our
-// reference onto the import stub so the object gets the original's vftable, not a local one
+// reference onto the import slot so the object gets the original's vftable, not a local one
 extern "C" const void* WaterSystemTextureVftable;
-#pragma comment(linker, "/alternatename:_WaterSystemTextureVftable=??_7Texture@Jet@@6B@")
+#pragma comment(linker, "/alternatename:_WaterSystemTextureVftable=__imp_??_7Texture@Jet@@6B@")
+
+// call the imported Texture ctor without constructing a C++ object here: a placement new of a dllimport class
+// with a virtual destructor makes the compiler emit a local scalar deleting destructor, which the original does not
+using TextureCtorFn = void (__thiscall*)(void*, const PString&, TextureManager*, DisplayTexture*, TextureAlpha);
+extern "C" TextureCtorFn TextureCtorImport;
+#pragma comment(linker, "/alternatename:_TextureCtorImport=__imp_??0Texture@Jet@@QAE@ABVPString@1@PAVTextureManager@1@PAVDisplayTexture@1@W4TextureAlpha@1@@Z")
 
 // *(RenderKernel + 124): the texture manager; its vtable slot 38 hands back the DisplayTexture used to make
 // and fill a texture (the original's raw call chain)
@@ -105,8 +111,9 @@ bool WaterTextureAnimation::Initialize(RenderKernel* kernel, FrameAnimation* fra
         name.Setf("WaterBumpTex%d_%d", instance, frame);
         auto* texture = static_cast<Texture*>(Alloc::New(0x34));
         if (texture) {
-            new (texture) Texture(name, *reinterpret_cast<TextureManager**>(reinterpret_cast<char*>(kernel) + 148),
-                                  static_cast<DisplayTexture*>(display), static_cast<TextureAlpha>(0));
+            TextureCtorImport(texture, name,
+                              *reinterpret_cast<TextureManager**>(reinterpret_cast<char*>(kernel) + 148),
+                              static_cast<DisplayTexture*>(display), static_cast<TextureAlpha>(0));
             *reinterpret_cast<const void**>(texture) = WaterSystemTextureVftable;  // the original's explicit write
         }
         textures.Add(texture);
@@ -144,8 +151,9 @@ bool WaterTextureAnimation::Initialize(RenderKernel* kernel, int frameCount, Siz
         name.Setf("BumpTex_%d", i);
         auto* texture = static_cast<Texture*>(Alloc::New(0x34));
         if (texture) {
-            new (texture) Texture(name, *reinterpret_cast<TextureManager**>(reinterpret_cast<char*>(kernel) + 148),
-                                  static_cast<DisplayTexture*>(display), static_cast<TextureAlpha>(0));
+            TextureCtorImport(texture, name,
+                              *reinterpret_cast<TextureManager**>(reinterpret_cast<char*>(kernel) + 148),
+                              static_cast<DisplayTexture*>(display), static_cast<TextureAlpha>(0));
             *reinterpret_cast<const void**>(texture) = WaterSystemTextureVftable;
         }
         textures.Add(texture);

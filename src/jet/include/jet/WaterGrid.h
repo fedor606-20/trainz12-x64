@@ -15,9 +15,9 @@ public:
     explicit WaterGrid(const Size& size);  // allocates, contents untouched
     WaterGrid(const WaterGrid& o);    // deep copy
     ~WaterGrid();                     // frees the block
-    void operator=(const WaterGrid& o);  // deep copy (the original returns void)
+    void __cdecl operator=(const WaterGrid& o);  // deep copy (the original returns void)
 
-    virtual void __cdecl Initialize(const Size& size);  // (re)allocates, contents untouched
+    virtual void __thiscall Initialize(const Size& size);  // (re)allocates, contents untouched
 
     const T& __cdecl Get(int x, int y) const;
     void __cdecl Set(int x, int y, const T& v);

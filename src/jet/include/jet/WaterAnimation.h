@@ -24,7 +24,7 @@ public:
     virtual WaterGrid<Vector2>* __cdecl GetXYFrame(unsigned int frame);  // the original's stub returns null
 
     const Size& __cdecl GetSize() const;   // +0x0c
-    float __cdecl GetAnimMaxHeight() const;  // +0x14
+    float __thiscall GetAnimMaxHeight() const;  // +0x14
     bool __cdecl Init();                     // returns true (a stub in the original, 0x10013f10)
     static WaterAnimation* __cdecl CreateInstance(const PString& name);
 

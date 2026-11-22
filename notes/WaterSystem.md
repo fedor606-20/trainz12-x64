@@ -110,10 +110,19 @@ generated .def, like the other modules.
   2c*k with c = speed^2*viscosity^2/scale.x^2, k = 1/(speed*dt+2)) and a static cos-wave flavour selected by
   the bool; Update writes the heights plus the wave attributes (items 24/25) and pings the buffers. The time
   accumulator is a module static. Displace(hull,...) overlays negative heights.
-- WaterGeometryAnimation 0x1c {geometry, frames, xyFrames, currentFrame, width, height, scale 0.1}: Create
+- WaterGeometryAnimation 0x1c {geometry, frames, xyFrames, currentFrame, width, height, scale 0.25}: Create
   samples the animation's frames (its vtable slots 1 and 2) into WaterGrids and morphs the chunk in Update
   (the original's quirks kept: the last row reads past the grid, the right neighbour wraps to the row's second
-  element).
+  element). The default scale comes from `0x3e800000` at `0x1001F1D8`; the earlier local `0.1` was wrong.
+- U5 tail: constructor, copy constructor, assignment and destructor are local. The default constructor zeros
+  `geometry`, `frames`, `xyFrames` and `currentFrame` but leaves `width` and `height` untouched; the copy
+  constructor copies them. Copy construction uses the chunk-level append helper at `0x10004670`; assignment
+  uses the clear-and-chunk-copy helper at `0x10004460`. Assignment has no self-assignment guard, so
+  self-assignment empties both arrays. `FastDynamicArray::AppendChunks` default-constructs unused slots; the
+  original leaves them `0xcd`. Local destruction calls geometry vtable slot `+4` with flag `1`, as the
+  original does; the local compiler's plain `delete` calls the same slot without pushing the flag.
+  `diff_ws_u5` exercises constructor, copy, assignment and self-assignment against the original DLL with
+  patched `Alloc::New`/`Delete` and fake non-static `__thiscall` destructors; 4 scenarios, 0 mismatches.
 - WaterGeometryVS 0x48 {frequency, material}: the vertex-program variant fills the attribute items 24/25 with
   cos/sin border waves and rand-based interior terms (rand()/32768), the gradients, and all (0,0,1) normals.
 - The PackedVertexPCT record is a local shell (4 corners, 24 bytes each: position, color 0xffffffff, texCoord);

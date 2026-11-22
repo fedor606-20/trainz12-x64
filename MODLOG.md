@@ -3156,3 +3156,30 @@ and thunk checks pass. With the local TNI patch, the game reached the offline
 main menu and exited with code `0`; the normalized JetLog had zero differences
 outside heap counters. Artifacts: `game-20261123-022033`. DLLs were restored and
 hash-checked. No driving session was run.
+
+### WaterSystem U5 tail: animation geometry lifetime (2026-11-23)
+
+The remaining U5 exports are local: `WaterGeometryAnimation` constructor, copy
+constructor, assignment operator and destructor, plus `WaterGeometryVS::Update`.
+The module now has **156/490** local exports and 334 forwarders. The default
+scale is `0.25`, from the original `0x3e800000` constant; the earlier local
+`0.1` was wrong. The default constructor zeros `geometry`, `frames`, `xyFrames`
+and `currentFrame` and leaves `width` and `height` untouched; the copy
+constructor copies them.
+
+Copy construction and assignment use the original chunk-level array copy, not
+an item-wise `FastDynamicArray` copy. Assignment has no self-assignment guard;
+self-assignment clears both arrays. The differential fake destructors are
+non-static `__thiscall` members stored through `DtorSlot()`, matching the
+original side. The geometry vtable's slots 0 and `+4` have distinct test stubs.
+Local destruction calls slot `+4` with flag `1`, as the original does; the local
+compiler's plain `delete` calls the same slot without pushing the flag.
+
+`diff_ws_u5` compares all four lifetime scenarios and reports 4 scenarios with
+zero mismatches. All RenderSystem differential tests passed; `diff_rs_u3` had
+one transient heap-corruption failure and passed on rerun with 1000 scenarios.
+Export and thunk checks pass. With the local TNI patch, the game reached the
+offline main menu and exited with code `0`; the normalized JetLog had zero
+differences outside timings and heap counters. Artifact:
+`game-20261123-034957`. DLLs were restored and hash-checked. No driving session
+was run.

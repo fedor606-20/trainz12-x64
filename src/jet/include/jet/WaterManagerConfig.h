@@ -24,10 +24,10 @@ struct AnimProp {
     ~AnimProp();
     AnimProp& operator=(const AnimProp& o);
 
-    void __cdecl Load(const ConfigData& config);
-    bool __cdecl LoadFile(File& file);              // the binary "WANI" form
-    bool __cdecl LoadFile(const PString& fileName);  // WANI, or a config file when the binary read fails
-    bool __cdecl SaveFile(File& file, unsigned char* frameData) const;
+    void __thiscall Load(const ConfigData& config);
+    bool __thiscall LoadFile(File& file);              // the binary "WANI" form
+    bool __thiscall LoadFile(const PString& fileName);  // WANI, or a config file when the binary read fails
+    bool __thiscall SaveFile(File& file, unsigned char* frameData) const;
 
     PString animName;         // +0x00 "WaterAnimationPN"
     Size animSize;            // +0x04 {128, 128}
@@ -63,7 +63,7 @@ struct MaterialProp {
     ~MaterialProp();
     MaterialProp& operator=(const MaterialProp& o);
 
-    void __cdecl Load(const ConfigData& config);
+    void __thiscall Load(const ConfigData& config);
 
     PString materialName;   // +0x00 "Default.m.WaterMaterialFresWave"
     float materialRI;       // +0x04 1.3333 (refractive index)
@@ -86,7 +86,7 @@ struct TileProp {
     ~TileProp();
     TileProp& operator=(const TileProp& o);
 
-    void __cdecl Load(const ConfigData& config);
+    void __thiscall Load(const ConfigData& config);
 
     float reserved;       // +0x00 never set by the original's ctor or Load
     PString tileName;     // +0x04 "WaterStdTile"
@@ -103,7 +103,7 @@ struct PhysicsProp {
     PhysicsProp();
     PhysicsProp& operator=(const PhysicsProp& o);
 
-    void __cdecl Load(const ConfigData& config);
+    void __thiscall Load(const ConfigData& config);
 
     float waveSpeed;  // +0x00 100.0
     float viscosity;  // +0x04 0.5
@@ -122,17 +122,17 @@ public:
     WaterManagerConfig& operator=(const WaterManagerConfig& o);
 
     // vtable slots 0 and 1, in declaration order as in the original
-    virtual bool __cdecl Load(const ConfigData& config, const ResourceDatabase* db, const PString& path);
-    virtual bool __cdecl Load(const PString& fileName, const ResourceDatabase* db);
+    virtual bool __thiscall Load(const ConfigData& config, const ResourceDatabase* db, const PString& path);
+    virtual bool __thiscall Load(const PString& fileName, const ResourceDatabase* db);
 
-    const PString& __cdecl GetManagerName() const;   // +0x04
-    const AnimProp& __cdecl GetSurfaceAnimation() const;  // +0x08
-    const AnimProp& __cdecl GetDetailAnimation() const;   // +0x68
-    AnimProp& __cdecl GetDetailAnimation();               // (the non-const overload)
-    const PString* __cdecl GetCubeTextures() const;       // +0x148, six entries posX negX negZ posZ posY negY
-    const MaterialProp& __cdecl GetMaterialProperties() const;  // +0xc8
-    const TileProp& __cdecl GetTileProperties() const;          // +0x118
-    const PhysicsProp& __cdecl GetPhysicsProperties() const;    // +0x13c
+    const PString& __thiscall GetManagerName() const;   // +0x04
+    const AnimProp& __thiscall GetSurfaceAnimation() const;  // +0x08
+    const AnimProp& __thiscall GetDetailAnimation() const;   // +0x68
+    AnimProp& __thiscall GetDetailAnimation();               // (the non-const overload)
+    const PString* __thiscall GetCubeTextures() const;       // +0x148, six entries posX negX negZ posZ posY negY
+    const MaterialProp& __thiscall GetMaterialProperties() const;  // +0xc8
+    const TileProp& __thiscall GetTileProperties() const;          // +0x118
+    const PhysicsProp& __thiscall GetPhysicsProperties() const;    // +0x13c
 
 private:
     PString managerName;                 // +0x04

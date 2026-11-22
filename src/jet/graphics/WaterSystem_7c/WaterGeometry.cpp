@@ -69,15 +69,15 @@ WaterGeometry::~WaterGeometry()
 }
 
 // 0x10007590
-void WaterGeometry::Destroy()
+void __thiscall WaterGeometry::Destroy()
 {
     if (chunk)
         chunk->ReleaseReference();
 }
 
 // 0x100075a0: the full form over a four-corner vertex record
-bool WaterGeometry::Initialize(RenderKernel* kernel, WaterMaterial* material_, const Size& size_,
-                               const PackedVertexPCT* corners, bool waveVertexProgram)
+bool __thiscall WaterGeometry::Initialize(RenderKernel* kernel, WaterMaterial* material_, const Size& size_,
+                                          const PackedVertexPCT* const corners, bool waveVertexProgram)
 {
     size = size_;
     material = material_;
@@ -187,8 +187,8 @@ bool WaterGeometry::Initialize(RenderKernel* kernel, WaterMaterial* material_, c
 }
 
 // 0x10007cb0: the simple form builds the four-corner record and calls the full form
-bool WaterGeometry::Initialize(RenderKernel* kernel, WaterMaterial* material_, const Size& size_,
-                               const Vector3& scale_, const Vector2& texScale, bool waveVertexProgram)
+bool __thiscall WaterGeometry::Initialize(RenderKernel* kernel, WaterMaterial* material_, const Size& size_,
+                                          const Vector3& scale_, const Vector2& texScale, bool waveVertexProgram)
 {
     scale = scale_;
     PackedVertexPCT corners[4];
@@ -209,8 +209,8 @@ bool WaterGeometry::Initialize(RenderKernel* kernel, WaterMaterial* material_, c
 }
 
 // 0x10007c80
-void WaterGeometry::Render(Display* display, ViewPort& viewport, const DisplayLightArray* lights,
-                           const Matrix4& world)
+void __thiscall WaterGeometry::Render(Display* display, ViewPort& viewport, const DisplayLightArray* lights,
+                                      Matrix4& world)
 {
     MaterialRenderChunk(material, display, viewport, chunk, lights, world);
 }
@@ -220,33 +220,33 @@ void WaterGeometry::Update(float time)
 {
 }
 
-GeometryChunk* WaterGeometry::GetChunk()
+GeometryChunk* __thiscall WaterGeometry::GetChunk()
 {
     return chunk;
 }
 
-WaterMaterial* WaterGeometry::GetMaterial()
+WaterMaterial* __thiscall WaterGeometry::GetMaterial()
 {
     return material;
 }
 
-const Size& WaterGeometry::GetSize() const
+const Size& __thiscall WaterGeometry::GetSize() const
 {
     return size;
 }
 
-Vector3 WaterGeometry::GetScale() const
+const Vector3 __thiscall WaterGeometry::GetScale() const
 {
     return scale;
 }
 
-void WaterGeometry::GetBoundingBox(Vector3& min, Vector3& max) const
+void __thiscall WaterGeometry::GetBoundingBox(Vector3& min, Vector3& max) const
 {
     min = boundsMin;
     max = boundsMax;
 }
 
-float WaterGeometry::GetRadius() const
+float __thiscall WaterGeometry::GetRadius() const
 {
     return radius;
 }
@@ -392,10 +392,33 @@ void PhysicsWaterGeometry::Displace(DisplacementHull* hull, int x, int y, float 
 // ---------------------------------------------------------------------------------------------------------------
 // WaterGeometryAnimation
 
-// 0x10007dc0
-WaterGeometryAnimation::WaterGeometryAnimation() : geometry(nullptr), currentFrame(0), width(0), height(0),
-    scale(0.1f)
+// 0x10007dc0. The original leaves width and height untouched.
+WaterGeometryAnimation::WaterGeometryAnimation() : geometry(nullptr), currentFrame(0), scale(0.25f)
 {
+}
+
+// 0x100055b0. Copy each source chunk verbatim, like the original's array helper at 0x10004670.
+WaterGeometryAnimation::WaterGeometryAnimation(const WaterGeometryAnimation& other)
+    : geometry(other.geometry), currentFrame(other.currentFrame), width(other.width), height(other.height),
+      scale(other.scale)
+{
+    frames.AppendChunks(other.frames);
+    xyFrames.AppendChunks(other.xyFrames);
+}
+
+// 0x10005640. The original has no self-assignment guard: it clears both arrays before copying them.
+WaterGeometryAnimation& WaterGeometryAnimation::operator=(const WaterGeometryAnimation& other)
+{
+    geometry = other.geometry;
+    frames.RemoveAll();
+    frames.AppendChunks(other.frames);
+    xyFrames.RemoveAll();
+    xyFrames.AppendChunks(other.xyFrames);
+    currentFrame = other.currentFrame;
+    width = other.width;
+    height = other.height;
+    scale = other.scale;
+    return *this;
 }
 
 // 0x10007de0
@@ -405,7 +428,7 @@ WaterGeometryAnimation::~WaterGeometryAnimation()
 }
 
 // 0x10007ea0: drop the frames, the xy frames and the geometry
-void WaterGeometryAnimation::Destroy()
+void __thiscall WaterGeometryAnimation::Destroy()
 {
     for (auto i = frames.First(); i != frames.End(); ++i)
         if (*i)
@@ -415,24 +438,31 @@ void WaterGeometryAnimation::Destroy()
         if (*i)
             delete *i;
     xyFrames.RemoveAll();
-    if (geometry)
-        delete geometry;
+    // the original calls vtable slot +4 with flag 1; the local compiler's `delete geometry` calls the same
+    // slot but leaves the flag unset, so push it explicitly
+    if (geometry) {
+        void** vt = *reinterpret_cast<void***>(geometry);
+        using VectorDtor = void (WaterGeometry::*)(unsigned);
+        VectorDtor fn;
+        std::memcpy(&fn, &vt[1], sizeof fn);
+        (geometry->*fn)(1);
+    }
 }
 
-WaterGeometry* WaterGeometryAnimation::GetGeometry()
+WaterGeometry* __thiscall WaterGeometryAnimation::GetGeometry()
 {
     return geometry;
 }
 
-WaterGrid<float>* WaterGeometryAnimation::GetFrame(int frame)
+WaterGrid<float>* __thiscall WaterGeometryAnimation::GetFrame(int frame)
 {
     return frames[frame];
 }
 
 // 0x10008320: one geometry, the animation frames and the xy (normal) frames
-bool WaterGeometryAnimation::Create(RenderKernel* kernel, WaterMaterial* material_, FrameAnimation* frameAnimation,
-                                    WaterAnimation* animation, const Size& size_, const Vector3& scale_,
-                                    const Vector2& texScale)
+bool __thiscall WaterGeometryAnimation::Create(RenderKernel* kernel, WaterMaterial* material_,
+                                               FrameAnimation* frameAnimation, WaterAnimation* animation,
+                                               const Size& size_, const Vector3& scale_, const Vector2& texScale)
 {
     width = size_.w;
     height = size_.h;
@@ -471,7 +501,7 @@ bool WaterGeometryAnimation::Create(RenderKernel* kernel, WaterMaterial* materia
 }
 
 // 0x100080a0: morph the chunk between the current and the next frame
-void WaterGeometryAnimation::Update(FrameAnimation* frameAnimation)
+void __thiscall WaterGeometryAnimation::Update(FrameAnimation* frameAnimation)
 {
     if (currentFrame == frameAnimation->GetCurrentFrame())
         return;
@@ -524,7 +554,7 @@ WaterGeometryVS::~WaterGeometryVS() = default;
 
 // 0x10008930: the base grid plus the vertex-program attributes (cos/sin wave fields on the border, rand inside)
 bool WaterGeometryVS::Initialize(RenderKernel* kernel, WaterMaterial* material_, const Size& size_,
-                                 const PackedVertexPCT* corners, const Vector3& origin, float frequency_,
+                                 const PackedVertexPCT* const corners, const Vector3& origin, float frequency_,
                                  float amplitude)
 {
     PNoise noise;  // built by the original, never used in its flow
@@ -644,10 +674,15 @@ bool WaterGeometryVS::Initialize(RenderKernel* kernel, WaterMaterial* material_,
 }
 
 // 0x100091e0
-void WaterGeometryVS::Render(Display* display, ViewPort& viewport, const DisplayLightArray* lights,
-                             const Matrix4& world)
+void __thiscall WaterGeometryVS::Render(Display* display, ViewPort& viewport, const DisplayLightArray* lights,
+                                        Matrix4& world)
 {
     MaterialRenderChunk(material, display, viewport, chunk, lights, world);
+}
+
+// 0x100091d0: the original exports a separate no-op Update for WaterGeometryVS
+void WaterGeometryVS::Update(float time)
+{
 }
 
 }  // namespace Jet
