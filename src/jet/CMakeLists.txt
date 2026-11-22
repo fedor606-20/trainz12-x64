@@ -236,6 +236,8 @@ add_executable(diff_rs_u9 tests/diff_rs_u9.cpp)
 add_executable(diff_rs_u10 tests/diff_rs_u10.cpp)
 add_executable(diff_rs_u11 tests/diff_rs_u11.cpp)
 add_executable(diff_rs_u12 tests/diff_rs_u12.cpp)
+# RenderSystem U13: RenderKernel ctor/dtor/closure and the two DumpScreenSave exports
+add_executable(diff_rs_u13 tests/diff_rs_u13.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)

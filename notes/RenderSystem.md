@@ -866,3 +866,25 @@ Do not group `Layer::GetLayerManager` with the local reads: it uses the original
 - `diff_rs_u12` patches UId, Alloc, PStringCache and ResourceTypeBase imports
   in both DLLs and compares the registration trace and installed vtables.
   Game check `game-20261123-010531` exited `0` with no non-heap JetLog diff.
+- U13: RenderKernel ctor `0x39350`, dtor `0x394e0`, deleting-dtor closure
+  `0x39250`, dump member `0x3a0d0` and dump thread `0x3a0c0` are local
+  (2677/2687 exports). `RenderKernelLifetime.cpp` calls private helpers in the
+  original image by RVA: LayerManager ctor/dtor/list cleanup, SceneGraph
+  ctor/dtor, cache-list walker, queue helpers and queue wake. Local objects get
+  the local vtable mirrors `RsRsV009` (Task) and `RsRsV008` (LayerManager).
+- Task occupies `this`, LayerManager `+0x28`. The queue begins at `+0xb8`:
+  CriticalSection `+0x00`, WEvent `+0x0c`, count `+0x14`, capacity `+0x18`,
+  buffer `+0x1c`, write index `+0x20`, read index `+0x24`, done `+0x28`.
+  Entries are eight bytes: `Bitmap*` at `+0x00` and an in-place `String` at
+  `+0x04`. Init `0x3a1a0` and teardown `0x3a210` are `__stdcall`; pop-one
+  `0x3a350` takes the queue in ESI and the output pointer on the stack.
+- The dump member is `__cdecl(this)`; the thread is static `__stdcall(void*)`.
+  The deleting destructor only wraps the ctor with priority `8.0f`.
+  The dtor stops the dump thread, destroys the SceneGraph, releases material
+  and texture, walks the cache list, releases the display plugin, tears down
+  the queue, destroys the filename string, repeats the empty-list walk, then
+  destroys the LayerManager and Task. Keep this order.
+- The test must swap local mirror slot 0 to a deleting-destructor stand-in.
+  It takes ECX plus one stack argument. A zero-argument stand-in corrupts the
+  stack. `diff_rs_u13` matched 71/71/30 checks; game check
+  `game-20261123-022033` exited `0` with no non-heap JetLog diff.

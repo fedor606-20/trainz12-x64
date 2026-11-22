@@ -2777,3 +2777,10 @@ JetGetPluginsRenderSystem=?RsJetGetPluginsRenderSystem@@YAXXZ
 ??_7RenderKernel@Jet@@6BTask@1@@=?RsRsV009@@3PAEA
 ??_7SharedContext@Jet@@6B@=?RsRsV010@@3PAEA
 ??_8Display@Jet@@7B@=?RsRsVb001@@3PAEA
+
+# U13: RenderKernel lifetime and screen-dump queue
+??0RenderKernel@Jet@@QAE@PAVSceneGraph@1@M@Z=?RsRenderKernelCtorThunk@Jet@@YAXXZ
+??1RenderKernel@Jet@@UAE@XZ=?RsRenderKernelDtorThunk@Jet@@YAXXZ
+??_FRenderKernel@Jet@@QAEXXZ=?RsRenderKernelClosureThunk@Jet@@YAXXZ
+?DumpScreenSave@RenderKernel@Jet@@IAAIXZ=?RsRenderKernelDumpMember@Jet@@YAIPAX@Z
+?DumpScreenSave@RenderKernel@Jet@@KGIPAX@Z=?RsRenderKernelDumpThread@Jet@@YGIPAX@Z

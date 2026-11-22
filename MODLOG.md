@@ -3133,3 +3133,26 @@ differential tests passed. With the local TNI patch, the game reached the
 offline main menu and exited with code `0`; the normalized 17-line JetLog had
 zero differences outside heap counters. Artifacts: `game-20261123-010531`.
 DLLs were restored and hash-checked. No driving session was run.
+
+### U13: RenderKernel lifetime and screen dumps (2026-11-23)
+
+The RenderKernel constructor, destructor, default-constructor closure and both
+`DumpScreenSave` overloads are local. The module now has **2677/2687** local
+exports and ten forwarders. The private helpers stay in the original DLL; the
+ported code calls them by RVA. The local constructor and destructor install the
+local Task and LayerManager vtable mirrors, not the original tables.
+
+The screen-dump queue at `+0xb8` keeps its original layout. The local pop helper
+uses the original ESI/stack ABI and leaves each output `String` unconstructed
+until the helper constructs it in place. Queue initialization and teardown keep
+the original `__stdcall` cleanup. The destructor repeats the original empty
+list walk after `0x31fd0` has already freed the nodes.
+
+`diff_rs_u13` patches the imported callbacks in both DLLs, swaps only the local
+Task mirror's deleting-destructor slot during local destruction, and compares
+traces, object bytes and vtables. It matched 71 constructor/destructor,
+71 closure and 30 dump checks. All earlier differential tests passed. Export
+and thunk checks pass. With the local TNI patch, the game reached the offline
+main menu and exited with code `0`; the normalized JetLog had zero differences
+outside heap counters. Artifacts: `game-20261123-022033`. DLLs were restored and
+hash-checked. No driving session was run.
