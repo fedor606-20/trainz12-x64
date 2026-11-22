@@ -2679,3 +2679,10 @@
 ?RemoveSystemResource@RenderKernel@Jet@@QAAXPAVSystemResourceManager@2@@Z
 ?SetSceneGraph@RenderKernel@Jet@@QAAXPAVSceneGraph@2@@Z
 ?SetTextureManager@RenderKernel@Jet@@QAAXPAVTextureManager@2@@Z
+
+# U10: pixel conversion and scratch storage
+?Convert@Jet@@YA_NABVDisplayFormat@1@0PAX1HHHH@Z=?RsConvertRaw@Jet@@YA_NABVDisplayFormat@1@0PAX1HHHH@Z
+?Convert@Jet@@YA_NABVDisplayFormat@1@0PAXAAPAXHHH@Z=?RsConvertAlloc@Jet@@YA_NABVDisplayFormat@1@0PAXAAPAXHHH@Z
+?Convert@Jet@@YA_NABVDisplayFormat@1@0AAPAXAAH22HH@Z=?RsConvertScratch@Jet@@YA_NABVDisplayFormat@1@0AAPAXAAH22HH@Z
+?Repitch@Jet@@YAXAAVDisplayFormat@1@AAPAXAAH22HH@Z=?RsRepitch@Jet@@YAXAAVDisplayFormat@1@AAPAXAAH22HH@Z
+?FlushScratchBuffer@Jet@@YAXXZ=?RsFlushScratchBuffer@Jet@@YAXXZ

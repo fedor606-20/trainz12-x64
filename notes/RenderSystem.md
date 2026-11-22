@@ -810,3 +810,17 @@ Do not group `Layer::GetLayerManager` with the local reads: it uses the original
 - `RenderKernel::Init` tests cover absence of a renderer and the `NullRender` backend
   with existing and newly allocated managers. Windows gamma calls are intercepted in
   the test process; the test compares exact ramp values without touching the desktop.
+
+### U10: pixel conversions at 2585/2687 (2026-11-22)
+
+- The three `Convert` overloads, `Repitch` and `FlushScratchBuffer` are local.
+  The row helpers keep their original strides: 4/4 for 32-bit RGB swaps, 4/3 and
+  3/4 for channel expansion, 3/3 for 24-bit swaps, and 3/2 for 24-bit RGB565.
+- 32-bit RGB-to-565 loads four bytes even for 24-bit sources; the upper byte is
+  masked away but must be readable. L16 scaling uses `fistp` with nearest-even
+  rounding, not a truncating integer conversion.
+- The scratch buffer reallocates only when `need != size && size <= need`.
+  `Repitch` returns `scratch + need` in the data reference and clears `a` and `b`.
+- `diff_rs_u10` compares 1969 trace entries, including guard bytes and all
+  supported format pairs. Game check `game-20261122-233441` exited with code `0`
+  and matched the baseline JetLog line for line.

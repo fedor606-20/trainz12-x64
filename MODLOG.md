@@ -3056,3 +3056,23 @@ pass, as do export and thunk checks. With the local TNI patch the game reached t
 offline main menu and exited with code `0`; the normalized JetLog matched the
 2574-export build. Artifacts: `game-20261122-225037`. DLLs were restored and
 hash-checked. No driving session was run.
+
+### U10: pixel conversion and scratch storage (2026-11-22)
+
+Moved the last five conversion exports: three `Jet::Convert` overloads, `Jet::Repitch`,
+and `Jet::FlushScratchBuffer`. The Win32 module now has **2585/2687** local
+exports and 102 forwarders.
+
+The raw converter reproduces all 34 format pairs, including four-byte loads from
+three-byte pixels, the zero-fill fallback, and the untouched destination padding
+in 32-bit RGB swaps. The scratch buffer grows only when the requested size
+exceeds the recorded size; shrinking reuses the allocation. `Repitch` advances
+the data pointer by exactly the copied bytes and resets both sub-pixel offsets.
+
+`diff_rs_u10` matched 1969 trace entries over all supported pairs, padded pitches,
+zero pitches, allocation and reuse, growth, repitching and double flush.
+`diff_rs_u9` matched 181,602 entries; `diff_rs_u8` and `diff_rs_u5` passed.
+Export and thunk checks pass. With the local TNI patch, the game reached the
+offline main menu and exited with code `0`; the normalized 17-line JetLog had
+zero differences. Artifacts: `game-20261122-233441`. DLLs were restored and
+hash-checked. No driving session was run.
