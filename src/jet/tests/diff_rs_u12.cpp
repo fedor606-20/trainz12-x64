@@ -82,7 +82,7 @@ static void* __stdcall FakeTypeCtor(const void* ext, const unsigned char* id, co
     __asm { mov self, ecx }  // the original calls this import with __thiscall
     trace->insert(trace->end(), {4, -1});
     for (unsigned i = 0; i < nodeCount; ++i)
-        if (ext == nodes[i]) trace->back() = static_cast<int>(i);
+        if (*static_cast<const void* const*>(ext) == nodes[i]) trace->back() = static_cast<int>(i);
     for (int i = 0; i < 4; ++i) trace->push_back(static_cast<int>(reinterpret_cast<const uint32_t*>(id)[i]));
     for (int i = 0; i < 4; ++i) trace->push_back(static_cast<int>(reinterpret_cast<const uint32_t*>(parent)[i]));
     return self;
@@ -97,11 +97,13 @@ static void __cdecl FakeDestroy(void* cache, void* node)
 
 static const std::array<int, 10> kSlotCounts{7, 7, 7, 7, 7, 6, 6, 6, 6, 6};
 
-static void DumpVtables()
+static void DumpVtables(HMODULE module)
 {
+    const auto* base = reinterpret_cast<const unsigned char*>(module);
     for (unsigned i = 0; i < objectCount; ++i) {
         const auto* vtable = static_cast<const unsigned*>(*reinterpret_cast<void**>(objects[i]));
-        trace->insert(trace->end(), {6, static_cast<int>(i)});
+        const auto* vptr = reinterpret_cast<const unsigned char*>(vtable - 1);
+        trace->insert(trace->end(), {6, static_cast<int>(i), vptr >= base && vptr < base + 0x100000});
         for (int j = -1; j < kSlotCounts[i]; ++j)
             trace->push_back(static_cast<int>(vtable[j]));
     }
@@ -112,7 +114,7 @@ static Trace Run(HMODULE module, void (*plugins)())
     trace->clear();
     objectCount = nodeCount = 0;
     plugins();
-    DumpVtables();
+    DumpVtables(module);
     return *trace;
 }
 

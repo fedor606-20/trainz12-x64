@@ -47,6 +47,7 @@ void Register(Jet::PStringCache* cache, const char* extension, const char* guid,
     InitTables();
     Jet::UId parent("4C414E80-BBDA-11d4-9AD7-0001025364B8");
     void* object = Jet::Alloc::New(sizeof(Jet::ResourceTypeBase));
+    if (!object) return;
     auto* node = cache->Create(reinterpret_cast<const unsigned char*>(extension));
     auto& name = *reinterpret_cast<Jet::PString*>(&node);  // borrowed: the caller releases the node
     Jet::UId id(guid);

@@ -3127,7 +3127,7 @@ virtual methods themselves remain original-owned until those classes are
 ported.
 
 `diff_rs_u12` patches the relevant imports in both DLLs and compares the full
-call trace plus every installed vtable: 1168 entries, no differences. The
+call trace plus every installed vtable: 1178 entries, no differences. The
 module now has **2672/2687** local exports and 15 forwarders. All earlier
 differential tests passed. With the local TNI patch, the game reached the
 offline main menu and exited with code `0`; the normalized 17-line JetLog had
