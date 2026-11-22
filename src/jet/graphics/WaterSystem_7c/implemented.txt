@@ -170,3 +170,27 @@
 ??0WaterGeometryAnimation@Jet@@QAE@XZ
 ??1WaterGeometryAnimation@Jet@@QAE@XZ
 ??4WaterGeometryAnimation@Jet@@QAEAAV01@ABV01@@Z
+
+# U7a: water material factories' lifetime, IsSupported and mirrored vtables (WaterMaterial*.cpp)
+??0WaterBumpMaterialPlugin@Jet@@IAE@ABVPString@1@ABVUId@1@@Z=??0WsBumpNamedCtor@@IAE@ABVPString@Jet@@ABVUId@2@@Z
+??0WaterBumpMaterialPlugin@Jet@@QAE@ABV01@@Z=??0WsBumpCopyCtor@@QAE@ABV0@@Z
+??0WaterBumpMaterialPlugin@Jet@@QAE@XZ=??0WsBumpDefaultCtor@@QAE@XZ
+??1WaterBumpMaterialPlugin@Jet@@UAE@XZ=??1WsBumpDtor@@UAE@XZ
+??4WaterBumpMaterialPlugin@Jet@@QAEAAV01@ABV01@@Z=??4WsBumpAssign@@QAEAAV0@ABV0@@Z
+?IsSupported@WaterBumpMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?SupportedByDisplay@WsVfThunks@@QAA_NPAVDisplay@Jet@@AAVPString@3@@Z
+??_7WaterBumpMaterialPlugin@Jet@@6B@=?WsBumpVftable@@3PAPAXA
+??0WaterMaterialOneTexPlugin@Jet@@QAE@ABV01@@Z=??0WsOneTexCopyCtor@@QAE@ABV0@@Z
+??0WaterMaterialOneTexPlugin@Jet@@QAE@XZ=??0WsOneTexDefaultCtor@@QAE@XZ
+??1WaterMaterialOneTexPlugin@Jet@@UAE@XZ=??1WsOneTexDtor@@UAE@XZ
+??4WaterMaterialOneTexPlugin@Jet@@QAEAAV01@ABV01@@Z=??4WsOneTexAssign@@QAEAAV0@ABV0@@Z
+?IsSupported@WaterMaterialOneTexPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?SupportedAlways@WsVfThunks@@QAA_NPAVDisplay@Jet@@AAVPString@3@@Z
+??_7WaterMaterialOneTexPlugin@Jet@@6B@=?WsOneTexVftable@@3PAPAXA
+??0WaterOceanMaterialPlugin@Jet@@IAE@ABVPString@1@ABVUId@1@@Z=??0WsOceanNamedCtor@@IAE@ABVPString@Jet@@ABVUId@2@@Z
+??0WaterOceanMaterialPlugin@Jet@@QAE@ABV01@@Z=??0WsOceanCopyCtor@@QAE@ABV0@@Z
+??0WaterOceanMaterialPlugin@Jet@@QAE@XZ=??0WsOceanDefaultCtor@@QAE@XZ
+??1WaterOceanMaterialPlugin@Jet@@UAE@XZ=??1WsOceanDtor@@UAE@XZ
+??4WaterOceanMaterialPlugin@Jet@@QAEAAV01@ABV01@@Z=??4WsOceanAssign@@QAEAAV0@ABV0@@Z
+?IsSupported@WaterOceanMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?SupportedByDisplay@WsVfThunks@@QAA_NPAVDisplay@Jet@@AAVPString@3@@Z
+??_7WaterOceanMaterialPlugin@Jet@@6B@=?WsOceanVftable@@3PAPAXA
+?IsSupported@WaterMaterialFresWavePlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?SupportedAlways@WsVfThunks@@QAA_NPAVDisplay@Jet@@AAVPString@3@@Z
+??_7WaterMaterialFresWavePlugin@Jet@@6B@=?WsFresWaveVftable@@3PAPAXA

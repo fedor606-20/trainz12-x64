@@ -244,6 +244,8 @@ add_executable(diff_rs_u13 tests/diff_rs_u13.cpp)
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 # WaterSystem U5 tail: WaterGeometryAnimation lifetime (chunk-level copy and ownership)
 add_executable(diff_ws_u5 tests/diff_ws_u5.cpp)
+# WaterSystem U7a: material factory lifetime, mirrored vtables and IsSupported
+add_executable(diff_ws_u7 tests/diff_ws_u7.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)
 add_executable(diff_is_obs tests/diff_is_obs.cpp)
 add_executable(diff_is_dev tests/diff_is_dev.cpp)

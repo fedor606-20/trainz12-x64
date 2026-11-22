@@ -17,7 +17,8 @@ below them; the module is replaced unit by unit the same way as RenderSystem_7c,
 | U4 | WaterAnimation, WaterAnimationPN | 10003440..100056F0, 10004890, 10004A80..10004FE0 | 24 | ✅ ours (2026-10-27) |
 | U5 | WaterGeometry, PhysicsWaterGeometry, WaterGeometryAnimation, WaterGeometryVS | 10002130..10002A00, 100055B0..10008320, 100088E0..100091E0 | 33 | ✅ ours (2026-10-27) |
 | U6 | WaterTextureAnimation | 10003490..10016C70 | 13 | ✅ ours (2026-10-27) |
-| U7 | WaterMaterial (base) + WaterBumpMaterialPlugin, WaterOceanMaterialPlugin, WaterMaterialFresWavePlugin, WaterMaterialOneTexPlugin | 10003530..10003700, 1000D080, 1000D220, 10007240..10007340, 10012900..10012F00, 10013E60..10013F20, 100159D0..10015AD0 | ~35 | ⬜ |
+| U7a | WaterBumpMaterialPlugin, WaterOceanMaterialPlugin, WaterMaterialFresWavePlugin, WaterMaterialOneTexPlugin (lifetime, IsSupported, vtables) | 10007240..10007340, 10012900..10012F00, 10013E60..10013F20, 100159D0..10015AD0 | 22 | ✅ ours (2026-11-23) |
+| U7b | WaterMaterial base and the factories' CreateInstance | 10003530..10003700, 1000D080, 1000D220 | ~13 | ⬜ |
 | U8 | WaterBumpMaterial, WaterOceanMaterial, WaterMaterialFresWave, WaterMaterialOneTex | 10005710..10006B20, 1000D290..10011930, 10013040..10013800, 10013FD0..10015410 | ~150 | ⬜ |
 | U9 | WaterTile, Water, WaterTiled, WaterSurface | 10003700..10003F20, 10015C10..10015D00, 100171A0..10017810 | ~40 | ⬜ |
 | U10 | WaterManager, WaterManagerGeneric, WaterManagerOceanSim, JetGetPluginsWaterSystem | 100092A0..1000CB90, 100162F0 | ~35 | ⬜ |
@@ -127,3 +128,21 @@ generated .def, like the other modules.
   cos/sin border waves and rand-based interior terms (rand()/32768), the gradients, and all (0,0,1) normals.
 - The PackedVertexPCT record is a local shell (4 corners, 24 bytes each: position, color 0xffffffff, texCoord);
   RenderKernel stays opaque (its +124 member feeds the chunk's slot 4, its +148 the TextureManager).
+
+## U7a notes (done 2026-11-23)
+
+- Each factory is 0x20 bytes: vptr at 0, then the imported `MaterialPlugin` base (UId at 4, empty PString at
+  0x14, two pointers at 0x18/0x1c). The base stays the original's; local ctors pass two zeroed 0x10-byte
+  objects from one shared zero buffer and then write the derived vptr. Local copy/assign forward to the
+  imported base copy/assign; local dtors write the derived vptr, then call the imported base dtor.
+- The four published vftables are mirrored in dedicated sections. `WaterMaterialStatics.cpp` copies all six
+  slots and the RTTI locator from `WaterSystem_7c_orig.dll` at load. Slots 0, 1 and 3 stay the original's
+  `AddReference`, `ReleaseReference` and bare `CreateInstance` IAT thunks. Slot 4 becomes the local
+  `IsSupported`: Bump/Ocean check bytes 0x211 and 0x212 of the Display, FresWave/OneTex always return true.
+- Bump, OneTex and Ocean get local deleting destructors in slot 2. They call the imported base dtor once for
+  flag 1 and once per element for flag 2, using `base[-1]` as the element count, then call `Alloc::Delete`.
+  FresWave's slot 2 stays the original's: its lifetime exports are still forwarded in this batch.
+- `diff_ws_u7` loads the original first so the mirror initialiser can read it. It patches the imported base
+  methods, plugin-type thunks and bare `CreateInstance` in both modules, compares allocation logs and object
+  bytes, calls virtuals through the real `__thiscall` convention, and checks the mirror words. 41 scenarios,
+  0 mismatches. `CreateInstance` factories and the `WaterMaterial` base remain U7b work.

@@ -3183,3 +3183,26 @@ offline main menu and exited with code `0`; the normalized JetLog had zero
 differences outside timings and heap counters. Artifact:
 `game-20261123-034957`. DLLs were restored and hash-checked. No driving session
 was run.
+
+### WaterSystem U7a: material factory lifetime and IsSupported (2026-11-23)
+
+The four water material factories' constructors, copy constructors, assignment
+operators and destructors are local, along with their `IsSupported` exports and
+mirrored vftables. The module now has **178/490** local exports and 312
+forwarders. The shared `MaterialPlugin` base stays the original's; each local
+method calls it through the imported name. Only the Bump, OneTex and Ocean
+vftables get a local deleting-destructor slot. FresWave keeps its original
+lifetime in this batch, so its mirror keeps the original slot `+8`. All four
+mirrors get a local `IsSupported` slot `+16`.
+
+Each mirror copies the original table at load, keeps the original's RTTI
+complete-object locator in `table[-1]`, and leaves slots `0`, `+4` and `+12`
+pointing at the original's import thunks. `diff_ws_u7` patches the base methods
+and plugin-type thunks in both DLLs, compares object bytes and allocation logs,
+calls the virtuals with the original `__thiscall` convention, and checks the
+mirrored table words. It reports 41 scenarios with zero mismatches. Export and
+thunk checks pass. `CreateInstance` stays the original slot in this batch. The
+game check reached the offline main menu and exited with code `0`; the 17-line
+JetLog matched. Screenshot capture timed out after 20 seconds. Artifact:
+`game-20261123-042743`. DLLs were restored and hash-checked. No driving session
+was run.
