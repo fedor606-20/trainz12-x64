@@ -103,8 +103,9 @@ target_compile_definitions(WaterSystem_7c PRIVATE JET_WS_BUILD)
 # the map lets the diff tests find the parsers' internal entry points (RsTest*)
 target_link_options(RenderSystem_7c PRIVATE /MAP)
 # the shader-language scanners' DFA tables and their Lemon parsers' tables (generated output with no source), read
-# from the installed original at build time like KernelStandard's ConfigParser
-set(ORIG_RS "D:/games/trainz 2012 VDK/bin/RenderSystem_7c.dll")
+# from the pristine binary snapshot, not the game directory where the proxy is installed.
+set(ORIG_RS "D:/trainz12-decomp/bin/RenderSystem_7c.dll" CACHE FILEPATH
+    "Pristine Trainz 2012 RenderSystem_7c.dll used to extract the parser tables")
 set(RS_TABLES "")
 foreach(t "gfxqk_acclist;6cdb0;88;u16" "gfxqk_accept;6ce60;96;u16" "gfxqk_ec;6cf20;128;u8" "gfxqk_meta;6cfa0;42;u32"
           "gfxqk_base;6d048;100;u16" "gfxqk_def;6d110;100;u16" "gfxqk_nxt;6d1d8;208;u16" "gfxqk_chk;6d378;208;u16"
@@ -122,7 +123,7 @@ foreach(t "gfxqk_acclist;6cdb0;88;u16" "gfxqk_accept;6ce60;96;u16" "gfxqk_ec;6cf
     add_custom_command(
         OUTPUT "${GEN}/${n}.h"
         COMMAND ${PY} -I "${TOOLS}/extract_data.py" "${ORIG_RS}" ${rva} ${cnt} ${kind} ${macro} "${GEN}/${n}.h"
-        DEPENDS "${TOOLS}/extract_data.py" VERBATIM)
+        DEPENDS "${TOOLS}/extract_data.py" "${ORIG_RS}" VERBATIM)
     list(APPEND RS_TABLES "${GEN}/${n}.h")
 endforeach()
 foreach(t "gfxqk;100b5de0;32;100b5fc8;19;" "gfxpp;100b66c0;95;100b6c28;54;" "gfxtp;100b14a8;119;100b1b58;69;"
@@ -138,7 +139,7 @@ foreach(t "gfxqk;100b5de0;32;100b5fc8;19;" "gfxpp;100b66c0;95;100b6c28;54;" "gfx
         OUTPUT "${GEN}/${n}_lemon.h"
         COMMAND ${PY} -I "${TOOLS}/extract_lemon.py" "${ORIG_RS}" ${states} ${nstates} ${rules} ${nrules} ${macro}
                 "${GEN}/${n}_lemon.h" ${mode}
-        DEPENDS "${TOOLS}/extract_lemon.py" VERBATIM)
+        DEPENDS "${TOOLS}/extract_lemon.py" "${ORIG_RS}" VERBATIM)
     list(APPEND RS_TABLES "${GEN}/${n}_lemon.h")
 endforeach()
 target_sources(RenderSystem_7c PRIVATE ${RS_TABLES})
@@ -228,6 +229,9 @@ add_executable(diff_rs_u6d tests/diff_rs_u6d.cpp)
 # RenderSystem U7: MaterialManager Create and SplitDecoratedMaterialName, the MaterialConfig extractors
 # (stand-in plugin types, materials, textures and manager; config trees from KernelStandard)
 add_executable(diff_rs_u7 tests/diff_rs_u7.cpp)
+# RenderSystem U8: Layer and Overlay state on stand-in objects
+add_executable(diff_rs_u8 tests/diff_rs_u8.cpp)
+add_executable(diff_rs_u9 tests/diff_rs_u9.cpp)
 # WaterSystem U1: FrameAnimation, PNoise and WaterGrid, ours vs WaterSystem_7c_orig.dll on the same inputs
 add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)

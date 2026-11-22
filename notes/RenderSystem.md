@@ -605,3 +605,208 @@ the Material / NullMaterial lifetime, instance creation, comparison and data mir
 (2185/2687 exports, 502 forwarded). Remaining U7: the five U9/foundation members (the three Display and two
 RenderKernel material-mode/manager accessors) and the seven shared data statics, which stay original until
 U9.
+
+### U8: layer state (2026-11-22)
+
+The existing `Layer`/`Overlay` declarations were sufficient for the first seven leaf exports.
+The saved RenderSystem Ghidra export shows `Layer::IsVisible` (0x1000ae40) and `SetVisible`
+(0x1000ae50) use bit 0 at `+0x14`, `IsGroup` (0x1000aef0) uses bit 1, and `GetPriority`
+(0x100106d0) reads the signed word at `+0x10`. `Overlay::SetViewPortMode` (0x10038570) updates
+bit 1 at `+0x20`; `SetClipping`/`GetClipping` (0x10038c00/0x10038c20) copy four ints at `+0x24`.
+`diff_rs_u8` checks all initial flag-byte values and both setter states, compares surrounding bytes,
+and exercises the original cdecl member ABI for the rectangle returned by value.
+
+Do not group `Layer::GetLayerManager` with the local reads: it uses the original shared manager.
+
+### U8: LayerGroup and root-group operations (2026-11-22)
+
+- `Layer +0x04` is an embedded `{next, prev}` link. `LayerGroup` has its sentinel at `+0x20`, count
+  at `+0x28` and view rect at `+0x2c`; `LayerManager` embeds the root group at `+0x04` and stores its
+  viewer array immediately after it at `+0x40`.
+- `Add` walks forward in increasing priority order, inserting after ties; `BringToBack` reinserts before
+  ties. `Remove` searches for membership, unlinks and clears both links but leaves `Layer::group` alone.
+  `SetParent` removes, assigns, then adds even if the new group is the same. `SetPriority` writes the priority
+  before removing and adding.
+- Find and hit tests visit the list in forward order, recursing into group children. Group render checks the
+  group's visibility; group update/reset do not. Base render calls `CanRender` then `Begin`, `Render`, `End`
+  in that order when visible; base update calls `Update` only when visible.
+- View calculations preserve the original fallback: if no explicit positive size, read the active display
+  target (the render target if set, otherwise the window). The kernel cache uses the original's shared
+  `Layer::layerManager` when not already set. Keep its pointer storage original until U9.
+- `diff_rs_u8` compares 8632 group trace entries as well as the 512 state cases.
+
+### U8: layer lifetime and rendering (2026-11-22)
+
+- `LayerLifetime.cpp`: default and named Layer constructors use the shared manager root; the grouped
+  overload accepts a null manager without inserting. Copies and assignment are shallow for links and
+  groups, retain the interned string and preserve undefined flag bits/padding. The group owns its
+  children: destruction unlinks each child before calling its deleting destructor, so the child does not
+  remove itself twice. Default constructor names are `Not initialised` and `ClearLayer`.
+- ClearLayer renders with the clipped group viewport, converts Y using the current target height,
+  sets the color and clears with mask 7. Overlay sets viewport/projection and translated scissor,
+  configures blending, and saves the mode, wireframe, depth and culling bits. End restores those saved
+  states in the retail order; it does not restore every setting changed by Begin.
+- `diff_rs_u8` gained 4744 lifetime and rendering trace entries: raw initialization patterns,
+  group membership, balanced name references, deletion order, clear and overlay backend calls,
+  reversed culling, and both projections. The constructors still use retail virtual tables.
+
+### U8: manager, scene graph and virtual table cutover (2026-11-22)
+
+- `LayerManager` 0x10031df0/0x10031ec0 (lifetime) and 0x10031f80 (find): it publishes the manager after
+  constructing the root group and unpublishes it only if the pointer still refers to this instance.
+  Its owning viewer list is a ring of 13-pointer chunks. Find compares the interned name at viewer `+0x08`.
+  Copy/assignment copy chunk fill and viewer pointers; assignment frees old chunks without deleting viewers.
+- SceneGraph holds active scenes and a delayed-delete queue in two such rings and owns the modifier task.
+  Shutdown purges delayed deletes first, then destroys active scenes, then destroys the modifier task.
+  Copy and assignment are shallow for scene and task pointers, preserving the original behavior.
+- The seven U8 virtual tables now dispatch non-abstract entries to the port. The locator at `vptr[-1]`
+  and the pure-call entries remain original. Slot zero implements scalar and vector deleting destruction,
+  including the original array header and Jet allocator; the other slots use the x86 stack-`this` ABI.
+- U9 must migrate the `Layer::layerManager` pointer and the two LayerManager profiling records together
+  with their original callers. The Win32 U8 code is ported, not a standalone x64 module.
+
+### U9: Display viewport and clear/cull state (2026-11-22)
+
+- `DisplayState.cpp` owns the viewport/scissor cache, pixel and normalized 2D projections, window and
+  render-target sizes, clear color/depth/stencil values, and cull/reflection settings (20 exports).
+  Changing the viewport always resets the scissor, even when the two rectangles already match.
+  Reflection changes swap the backend cull modes 1 and 2 without changing the cached logical mode.
+- Overlay and ClearLayer now call these implementations for their Display state; target-size and
+  normalized-projection logic is no longer duplicated in the U8 code.
+- `diff_rs_u9` compares 12216 entries across 64 rounds, including the backend call order, both target
+  sizes, redundant-state suppression, NaNs and signed zero. `diff_rs_u8` passes on the same build.
+- Material state ported: `Display::SetMaterialProperties` (0x10003360) compares the cached
+  `DisplayMaterial` at state `+0x114` and calls backend slot `+0x21c` before updating it; color material
+  mode is at state `+0x98`. `RenderKernel::SetMaterialManager` (0x10039650) releases the old pointer
+  at `+0x90`, stores/retains the new one and calls its initialization slot `+0x08`. Setting the same
+  pointer still releases, retains and initializes it. Differential checks cover that case, replacing
+  the last reference to the old manager, and setting the pointer to null.
+
+### U9: Display write masks, depth and alpha state (2026-11-22)
+
+- 21 exports now come from `DisplayState.cpp`: color write mask, depth write/test/function/clamp,
+  alpha test mode/function/reference, and alpha blend mode/equation/factors. Lighting, fog and
+  ambient remain forwarded.
+- Backend slot `0x1ac` takes `(target, uint32_t mask)`: target 1 is color, target 2 is depth.
+  Widen the depth boolean before the call so the upper 24 bits are zero on x86. Cached setters call
+  the backend before writing state, and the original reads the state pointer again after the callback.
+- Alpha-test reference clamps to `[0, 1]`, with NaN and negative zero mapped to positive zero
+  for a changed state. An equal cached pair skips the write, including for opposite signed zeros.
+- `diff_rs_u9` compares the backend argument trace, duplicate-call suppression, shared bits and
+  cache bytes; it also switches the state pointer during the write-mask callback.
+- For the next lighting batch, the retail light loops at `0x10003cf0` and `0x10003d50`
+  reload both the flag array after a backend callback and the hardware-light count for the
+  loop bound. Check that behavior before activating the draft lighting methods.
+
+### U9: Display lighting, fog, ambient and scalar colors (2026-11-22)
+
+- 24 lighting/fog/ambient exports and three scalar color exports now come from
+  `DisplayState.cpp`. Light setters and loops reread the active flag array after backend
+  callbacks, and loops reread the light count. The original base `EndLightingUpdate`
+  is an empty method; derived virtual overrides are unchanged.
+- Packed formats 1 and 2 are ARGB and ABGR. Unsupported encode returns `0xffffffff`;
+  unsupported decode leaves the caller's output buffer untouched. Scalar routines read
+  the shared `Display::internalColorFormat` data from the original until its writers move.
+- `diff_rs_u9` exercises backend ordering, callback-driven replacement of the flag
+  array, count changes, light bounds, NaNs, both packed formats and all 256 byte values.
+- Next array batch: `0x1001c0c0` and `0x1001c110` swap red and blue in place only for
+  internal format 1. The latter takes a byte stride followed by a packed data pointer by value.
+  Compare arbitrary strides, untouched padding, nonpositive counts and other format IDs.
+- Remaining export inventory: 148 `Display`, 23 `RenderKernel`, 8 `DisplaySelector`,
+  6 `NonRenderContext`, 4 `DisplaySaveBuffer`, 3 `SharedContext`, and 116 other symbols.
+  The latter group includes streamed vertex and element lifetimes, shared data and
+  virtual tables. Move these with their users rather than counting forwarding as a port.
+
+### U9: color arrays and geometry display modes (2026-11-22)
+
+- All four packed-color array overloads are local. The two typed conversions use the
+  same channel transforms as the scalar versions and leave buffers untouched for
+  unsupported formats. The in-place routines swap red and blue only in format 1.
+- The Win32 `VertexItemPtr` adapter takes its two words in order: signed byte stride,
+  then pointer. Differential tests compare negative, zero, positive and unaligned
+  strides, padding and nonpositive counts.
+- Twenty geometry display exports are local. Wireframe uses cached state byte `0xa0`,
+  bit zero, and calls slot `0x18c` only on change. Other view modes update the Display
+  object itself, not its state block. Tests compare raw bytes and backend calls.
+- Next polygon-offset probe: `0x10004480` caches modes 0–2 separately, ignores 3 and
+  4, and always calls slot `0x238` for mode 5 before setting all three cached flags.
+
+### U9: stencil, polygon offset and texture capabilities (2026-11-22)
+
+- 14 exports are local. Stencil mode caches enable and two-sided flags. If backend
+  slot `0x1bc` rejects an update, only the enable flag is cleared.
+- The per-face stencil record is 28 bytes. Its setters keep the record selected
+  before the callback even if the callback changes the active Display state pointer.
+  Combined setup changes the function and operations without changing the write mask.
+- Polygon offset uses cached float pairs and mode bytes. Mode 5 always calls the
+  backend and updates all three mode bytes. The probe compares mode-cache bytes,
+  redundant updates, NaNs, signed zero, stencil rejection and old-record ownership.
+- Next getter batch: at `0x100041f0`–`0x10004240`, the retail capability flags
+  and three manager pointers are object fields, not cached backend calls.
+  `GetAllVideoModes` returns the embedded array address even if its count is zero,
+  while current and default video mode copy 16 bytes and always return true.
+
+### U9: Display capabilities, video, managers and frame information (2026-11-22)
+
+- 24 exports are local. The manager and frame-info getters return existing pointers;
+  video-mode and current-format getters copy 16 and 32 bytes, respectively.
+  The video lists always return the embedded pointer, with a true result for at
+  least one mode or at least two formats.
+- `SetAntiAliasing` updates its cached bit before calling the backend and skips
+  the call when unsupported or already equal. `GetAntiAliasModes` clears the
+  output count, deduplicates sample counts in input order, and uses Jet's allocator
+  to grow capacity in groups of ten.
+- Differential tests cover pointer identity, copy footprints, video-list count
+  thresholds, first-occurrence order, capacity reuse and growth, and cache-before-call ordering.
+- Next projection probe: `IsNormalized2DViewport` at `0x10004580` requires a
+  cached mode of 0 and an absolute horizontal span strictly below `1.01f`.
+  Compare values at the threshold, reversed bounds and unordered inputs.
+
+### U9: Display projection, texture state and render targets (2026-11-22)
+
+- 15 exports are now local. Projection setters cache raw inputs before dispatch.
+  The transitional setter reorders the cache relative to the backend arguments;
+  the offset setter passes `near + offset` to the backend but caches both separately.
+  `SetViewModeParams` stores all eight floats even when a mode has no backend action.
+- Texture generation caches mode and coordinate count, not the stage. Global
+  texture toggles use `global && local` and preserve the local flag while disabled.
+  Render-target assignment always calls the backend after storing the target.
+  Projected-texture updates call before caching the enabled flag. The retail base
+  active-stage selector is empty; renderer overrides are unchanged.
+- The oracle covers exact callbacks for view modes 0–5, out-of-range modes, near-plane
+  offsets, repeated updates, NaNs, reversed spans, null targets and both texture flags.
+- Next RenderKernel ownership probe: `DestroySceneGraph` and `SetSceneGraph`
+  destroy and free the prior pointer at `+0x80`; neither checks for equal pointers.
+  `GetRenderKernel` at `0x1000d300` is a secondary-base adjustment (`this - 0x28`).
+
+### U9: RenderKernel access and resource ownership (2026-11-22)
+
+- Ten exports are local. RenderKernel owns the SceneGraph at `+0x80` and frees its previous
+  allocation after destruction, even if a destructor callback changes the field.
+  The SceneGraph destructor still owns pending and live scenes and its modifier task.
+- TextureManager uses the same release, store, retain and initialize order as MaterialManager.
+  System resources use a 13-pointer chunk ring at `+0x88`: append preserves duplicates and
+  removal acts on the first equal pointer without releasing the pointed-to resource.
+- Differential checks cover the secondary-base adjustment, replacement/destruction order,
+  callback mutation, manager reference counts and a three-chunk resource ring.
+- Next context batch: `SharedContext`, `NonRenderContext` and `DisplaySaveBuffer` all
+  construct `ReferenceCount` with count 1. Their base destructors restore their own
+  vtable before tail-calling `ReferenceCount::~ReferenceCount`. The save buffer also
+  stores its type at `+0x08`. Verify RTTI and deleting-destructor slots before making
+  their exported vtables local.
+
+### U9: remaining export groups at 2580/2687 (2026-11-22)
+
+- 21 functions still forward, including Display lifecycle, vertex-type construction,
+  pixel conversion and scratch storage, RenderKernel lifetime/frame control,
+  screenshot saving, and `JetGetPluginsRenderSystem`. DisplaySelector video and
+  format selection and `Display::SetupVideoFormat` are now local.
+- 11 virtual/base tables still forward. Context, selector, and element-loader
+  constructors still install original tables; direct export tests do not establish
+  that original vtable dispatch uses the replacements.
+- 75 other data exports still forward. Migrate each state owner with every remaining
+  reader and writer. In particular, do not create a second mutable registry or
+  interned-key table while the original still initializes or updates the first one.
+- `RenderKernel::Init` tests cover absence of a renderer and the `NullRender` backend
+  with existing and newly allocated managers. Windows gamma calls are intercepted in
+  the test process; the test compares exact ramp values without touching the desktop.

@@ -4,7 +4,7 @@
 // 0x10024a90) and GenericReferenceArray (0x10022ab0..0x10022d9e). Behaviour follows the TS12 assembly (addresses
 // per function), including its quirks: the multi stream render calls ignore the primitive and count they are given,
 // GenericGeometryChunkMultiStream's constructor passes its flags as the stream count and 4 as the flags, the multi
-// stream InitInstance copies the bones a second time. GeometryChunk::primitiveLookup stays the original's.
+// stream InitInstance copies the bones a second time.
 #include <jet/Geometry.h>
 #include <jet/VCall.h>
 
@@ -14,6 +14,13 @@
 #include <cstring>
 
 namespace Jet {
+
+const DPrimitive GeometryChunk::primitiveLookup[32] = {
+    DPrimitive(0), DPrimitive(1), DPrimitive(2), DPrimitive(0),
+    DPrimitive(3), DPrimitive(0), DPrimitive(0), DPrimitive(0),
+    DPrimitive(4), DPrimitive(0), DPrimitive(0), DPrimitive(0),
+    DPrimitive(0), DPrimitive(0), DPrimitive(0), DPrimitive(0), DPrimitive(5),
+};
 
 void AppendMatrixMap(Array<VertexProgram::MatrixMap*, 128>& a, VertexProgram::MatrixMap* m);  // GeometryChunk.cpp
 

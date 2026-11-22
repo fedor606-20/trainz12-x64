@@ -2694,3 +2694,365 @@ JetLog 889 bytes, menu check `diff_lines=0`.
 
 Remaining U7: the five U9/foundation members (Display::Get/SetColorMaterialMode, SetMaterialProperties,
 RenderKernel::Get/SetMaterialManager) and the seven shared statics, which stay original until U9.
+
+## RenderSystem U8: Layer and Overlay state (2026-11-22)
+
+`LayerState.cpp` replaces seven local-state exports: `Layer::GetPriority`, `IsVisible`, `IsGroup`,
+`SetVisible`, and `Overlay::SetViewPortMode`, `SetClipping`, `GetClipping`. The flags live at `+0x14`
+(visibility bit 0, group bit 1) and `+0x20` (viewport mode bit 1); the clipping rectangle is at `+0x24`.
+Constructors, group membership and rendering remain original. See `notes/RenderSystem.md` for the next boundary.
+
+Clean Win32 Release build, using `-DORIG_RS:FILEPATH=D:/trainz12-decomp/bin/RenderSystem_7c.dll` to
+generate the parser tables from the pristine DLL instead of the modified copy on the default VDK path.
+`diff_rs_u8`: 512 cases, 0 mismatches, in a separate probe directory; checks flag preservation, signed
+priority and the x86 struct-return ABI for the clipping rectangle. U7 regression: 60000 checks, 0 mismatches.
+Export names/ordinals: 2687 verified,
+no missing or extra; `check_thunks.py`: 2192 checked, 0 not ours. No game DLL deployed for this check;
+menu and driving session have not been retested.
+
+### U8: ordering, traversal and viewport (2026-11-22)
+
+`LayerGroup.cpp` and `LayerState.cpp` replace 45 further exports: list mutations including
+`SetParent`/`SetPriority`, ordered queries and traversal, base layer render/update, `LayerManager`'s
+root-group operations, and the window/viewport rectangle calculations. Current count: **2237/2687**
+(450 forwarded). `LayerGroup` holds the sentinel, count and rectangle inline; direct `Add`/`Remove` change
+the list without changing the layer's parent pointer. For equal priorities, front insertion goes after
+other equal entries, back insertion before them.
+
+Win32 Release builds of RenderSystem and dependent Render2DCore succeeded. `diff_rs_u8` matched all
+512 state cases and 8632 trace entries (list links, reparenting, callbacks, nested clipping and render-target
+fallback). All 2687 export names/ordinals matched; none of the 2237 selected exports points to a forwarding
+thunk. Regressions: U7 60000 checks and Render2DCore 31015 checks, no mismatches; the latter loaded no
+SpriteResource files, so it did not validate real sprite assets. The game was not started: U8 is still open
+and the launch is scheduled after it.
+
+### U8: layer lifetime, clearing and overlay rendering (2026-11-22)
+
+30 more exports, now **2267/2687** (420 forwarded). Constructors, copy/assignment and ordinary
+destructors of Layer, LayerGroup, Overlay and ClearLayer preserve the original links, interned names,
+flags and ownership. Group destruction unlinks each child before calling its deleting destructor.
+The replacement constructors still install the original tables (with their RTTI and deleting-destructor
+slots). ClearLayer applies a clipped viewport, sets its clear color and clears with mask 7. Overlay
+Begin/End set and restore render state in the observed order, with both pixel and normalized projections
+covered. Display foundation methods remain original.
+
+Win32 Release RenderSystem and Render2DCore built. `diff_rs_u8`: 512 state cases, 8632 group trace
+entries, and 4744 lifetime/render trace entries, no differences. All 2687 export names and ordinals
+matched, and all 2267 selected exports passed the thunk check. Regressions: U7 (60000 checks) and
+Render2DCore (31015 checks; no real SpriteResource files loaded), both with zero mismatches.
+No in-game check yet.
+
+### U8: manager, resources, scene graph and virtual tables (2026-11-22)
+
+39 more exports, for **2306/2687** RenderSystem exports (381 forwarded). LayerManager's owning list,
+dispatch, and lifetime, SystemResourceManager/Viewer, SceneGraph, and seven virtual tables are now
+implemented. The virtual tables preserve the retail RTTI locator and pure-call entries but route
+implemented slots, including scalar/vector deletion, into the port. Three shared data exports remain
+original until U9: the manager pointer and both LayerManager profiling records.
+
+Win32 Release RenderSystem and Render2DCore built. `diff_rs_u8`: 512 state cases, 8632 group entries,
+and 5446 lifetime/render/resource/scene entries matched. The seven virtual tables passed locator and
+slot-ownership checks. All 2687 export
+names/ordinals matched; the thunk audit reported 2306 checked and zero unexpected forwarders.
+U7 (60000 checks) and Render2DCore (31015 checks; no real SpriteResource files loaded) also passed.
+
+First laboratory launch loaded both the U8 replacement and the original forwarding DLL. The captured
+window still showed `Loading…` after 25 seconds. Closing the window returned `0xc0000005` in `ntdll.dll`;
+the normalized JetLog had zero differing lines, which does not establish a clean exit. The previous
+laboratory DLL was restored and verified against its backup. Historical (Nov 19) dumps have the same
+TrainzNativeInterface/KernelStandard stack region, so the crash cannot yet be attributed to U8.
+
+Matched A/B follow-up (55 seconds after a window appeared): both the previous DLL and U8 reached the
+full main menu as confirmed by window captures, then exited cleanly with code 0. The normalized JetLogs
+had zero differing lines between the two runs. The U8 DLL is installed in the laboratory copy;
+the previous DLL and screenshots are saved in
+`%LOCALAPPDATA%\Temp\opencode\trainz12-u8-clean\game-20261122-111724`.
+This verified the menu and normal shutdown, not a route or closing during startup.
+
+### U9: Display viewport and clear/cull state (2026-11-22)
+
+20 more exports: **2326/2687** RenderSystem exports, 361 forwarded. `DisplayState.cpp` replaces the
+viewport/scissor cache, 2D projection, target/window sizing, and clear/culling operations used by U8.
+The original backend vtable ABI and callback order are preserved. U8 now uses this code for overlay
+and clear rendering instead of depending on the original DLL for those Display methods.
+
+Win32 Release builds passed. `diff_rs_u9`: 64 rounds, 12216 matching trace entries; `diff_rs_u8`
+passed again. Export audit: 2687 matching names/ordinals, 2326 locally implemented.
+U7 and Render2DCore passed (60000 and 31015 checks, no mismatches; no real SpriteResource files loaded).
+
+Laboratory run with U9 showed the full offline main menu on the screenshot at 55 seconds. Normalized
+JetLog matched U8, but closing the window returned `0xc0000005`. The dump (`trainz.exe.32728.dmp`)
+has the same fault RVA in ntdll and the same TrainzNativeInterface/KernelStandard stack region as the
+earlier U8 failure (`trainz.exe.9600.dmp`); this does not establish the cause. Restored the last verified
+U8 DLL and checked its hash. Artifacts: `%LOCALAPPDATA%\Temp\opencode\trainz12-u8-clean\game-u9-20261122-112819`.
+
+### U9: material ownership and shutdown comparison (2026-11-22)
+
+Five deferred U7 methods are now local: Display's color-material mode getter/setter and
+`SetMaterialProperties`, plus RenderKernel's material-manager getter/setter. RenderSystem:
+**2331/2687** exports (356 forwarded). In a separate probe directory, Win32 `diff_rs_u9`
+matched 29519 entries over 64 rounds, including cache/callback order and manager release/retain
+semantics; `diff_rs_u8` stayed green. Export audit: 2687 matching names/ordinals and 2331 local entries.
+
+The repeated control run (`shutdown-ab-20261122-113721`) showed the full menu on U8 and returned
+`0xc0000005` on exit. The next DLL swap was blocked by a temporary file lock; the paired U9 run did
+not start. U8 was restored and its hash verified. The frame-pointer chain in the U8 dump (PID 31372)
+matches the prior U9 dump (PID 32728): `TrainzNativeInterface+0xa41f` → `+0x50cc` →
+`KernelStandard!Jet::Alloc::Delete+0x29` → `msvcr80+0x4c39` → `ntdll+0x4e7e2`. The allocator uses
+its large-block free path. Those dumps omit the pointed-to heap block, so they do not identify
+the allocator or earlier write that produced the invalid pointer/header. No allocator change made.
+The build with the five material methods has not been deployed to the game.
+
+### TrainzNativeInterface: allocator changes between initialization and shutdown (2026-11-22)
+
+The shipped DLL in the build snapshot and the laboratory have the same SHA-256
+(`4fb237298d2eb93e42a3def70577dfd50d674686b89f15a325e3c6c10c54c1c0`).
+Its CRT initializer (RVA `0xc99c`) constructs the module-global tree at `0x12200`.
+The constructor allocates a 24-byte sentinel via `TNIAllocMem` and stores it at `0x12204`.
+The CRT exit callback (`0xd9b7`) destroys that tree. The shutdown return address `0x50cc`
+is immediately after its `TNIFreeMem` call on the sentinel. `TNISetAllocator` replaces the
+allocation and free callbacks without migrating the sentinel.
+
+An isolated x86 probe verified the mismatch in ownership: before setting callbacks,
+VC80 `_msize` reported 24 bytes for the sentinel. After `TNISetAllocator`, unloading the
+DLL sent that same pointer to the new free callback exactly once, with no allocations via
+the new allocator. The probe forwarded frees to VC80, so it did not exercise the game's
+Jet callback. Combined with the recorded U8 and U9 stacks, this identifies a CRT-owned
+sentinel reaching Jet's delete path. No shutdown fix has been installed or verified in game.
+
+Rebuilt Win32 RenderSystem from the pristine parser-table input and reran `diff_rs_u8`
+and `diff_rs_u9` in an isolated directory: both returned 0; U9 matched 29,519 trace entries.
+`ORIG_RS` now defaults to the pristine snapshot. For an existing CMake cache that points
+at the laboratory proxy, reconfigure with
+`-DORIG_RS:FILEPATH=D:/trainz12-decomp/bin/RenderSystem_7c.dll`.
+
+### TrainzNativeInterface: keep the static sentinel on the VC80 heap
+
+`tools/fix_tni_shutdown.py` produces a separate DLL from the pinned pristine copy. It
+changes only the sentinel-free call site and routes the module-global tree's sentinel
+to the existing VC80 `free` import. Other trees and other call sites still use
+`TNIFreeMem`. The helper is position-independent. The tool rejects a different input
+hash and never overwrites an existing output. All 94 exports retain their original
+names, ordinals and RVAs.
+
+`src/jet/tests/tni_allocator_probe.cpp` verifies unload and regular TNI allocation in
+an isolated Win32 process with the DLL relocated. Original: one normal allocation, two callback frees, one
+of them the CRT sentinel. Patched: one normal allocation, one callback free, and no
+sentinel delivered to the callback. This is a local compatibility patch, not a rebuilt
+TrainzNativeInterface or part of the x64 port.
+
+Generate the local test DLL from the repository root:
+
+```powershell
+python -I tools/fix_tni_shutdown.py D:/trainz12-decomp/bin/trainznativeinterface.dll C:/path/to/test/trainznativeinterface.dll
+```
+
+U8 and U9 (2331 local RenderSystem exports) each reached the offline main menu with
+the patched TNI and exited with code `0` after a normal window close. Their JetLogs
+matched after filtering timestamps and variable pool counters (6 retained lines each).
+The immediate U9 swap hit a temporary file lock; U9 passed on a separate launch.
+The test restored and hash-checked both laboratory DLLs. A driving session was not
+tested. Screenshots and logs are in `game-20261122-164452` (U8) and
+`game-20261122-164648` (U9) under
+`%LOCALAPPDATA%\Temp\opencode\trainz-rs-probe-6d7acaddbfb04c56a9a2ca2950ab00c9`.
+
+### U9: Display write masks, depth and alpha state (2026-11-22)
+
+Activated 21 previously forwarded exports, bringing RenderSystem to **2352/2687**
+local exports. The first differential run found nonzero upper bytes in the depth
+write-mask argument. The retail backend expects a 32-bit mask, even when the
+caller takes a boolean. Widened the argument and preserved post-callback state
+pointer lookup.
+
+Win32 Release built. `diff_rs_u9` matched 48,315 trace entries over 64 rounds;
+`diff_rs_u8` stayed green. Export audit: all 2687 names and ordinals matched,
+with no unexpected thunks among the 2352 local entries.
+
+The 2352-export build with the local TNI fix reached the offline menu and exited
+with code `0`. Its normalized JetLog matched the previous 2331-export U9 build
+(6 retained lines each). The run is in `game-20261122-165146` under the same probe
+directory. Both laboratory DLLs were restored and hash-checked. No driving
+session was run.
+
+### U9: Display lighting, fog, ambient and scalar colors (2026-11-22)
+
+Replaced 27 exports, bringing RenderSystem to **2379/2687** local exports with
+308 still forwarded. Light handling preserves backend call order, bounds,
+and the original's flag array/count reloads after callbacks. The packed-color
+code preserves ARGB/ABGR layouts and the unsupported-format behavior; it reads
+the original shared `internalColorFormat` storage. The array conversions remain
+forwarded.
+
+Win32 Release built. `diff_rs_u9` matched 78,473 trace entries over 64 rounds;
+`diff_rs_u8` passed again. The 2687 export names and ordinals match, with zero
+unexpected thunks among the 2379 local entries.
+
+The 2379-export build with the local TNI patch reached the offline main menu
+and exited with code `0`. Its normalized JetLog matched the previous build
+(6 retained lines each). Both laboratory DLLs were restored and hash-checked.
+Artifacts: `game-20261122-170015` under the same probe directory. No driving
+session was run.
+
+### U9: packed-color arrays and geometry display modes (2026-11-22)
+
+Replaced four array conversion exports and 20 geometry display exports: **2403/2687**
+local, 284 forwarded. The x86 strided color iterator stores its byte stride before
+the pointer. The differential probe initially passed the two words in reverse order
+and faulted inside the original; correcting the test and adapter made all cases pass.
+
+Win32 Release built. `diff_rs_u9` matched 87,951 trace entries over 64 rounds;
+`diff_rs_u8` passed. All 2687 export names and ordinals matched, and none of the
+2403 local entries was an unexpected forwarding thunk.
+
+The 2403-export build with the local TNI patch reached the offline main menu
+and exited with code `0`. Its normalized JetLog matched the previous build
+(6 retained lines each). Both laboratory DLLs were restored and hash-checked.
+Artifacts: `game-20261122-170726` under the same probe directory. No driving
+session was run.
+
+### U9: stencil, polygon offset and texture capabilities (2026-11-22)
+
+Replaced 14 exports: stencil state, polygon offset, three texture limits and the
+alpha-to-coverage getter. RenderSystem now has **2417/2687** local exports and 270
+forwarders.
+
+Win32 Release built. `diff_rs_u9` matched 114,887 trace entries over 64 rounds;
+`diff_rs_u8` passed. All 2687 export names and ordinals matched, with no unexpected
+forwarding thunks among the 2417 local entries.
+
+With the local TNI patch, the 2417-export build reached the offline menu and
+exited with code `0`. The normalized JetLog matched the 2403-export build.
+Both laboratory DLLs were restored and hash-checked. Run artifacts are in
+`game-20261122-171326` under the same probe directory. No driving session was run.
+
+### U9: Display capabilities, video, managers and frame information (2026-11-22)
+
+Replaced 24 exports, including video-list and snapshot getters, manager pointers
+and antialiasing state. The sample-count list keeps the original order and
+allocator. RenderSystem is now **2441/2687** local with 246 forwarded.
+
+Win32 Release built. `diff_rs_u9` matched 115,472 trace entries over 64 rounds;
+`diff_rs_u8` passed. All 2687 export names and ordinals matched, and none of the
+2441 local entries was an unexpected forwarding thunk.
+
+With the local TNI patch, the 2441-export build reached the offline menu and
+exited with code `0`. The normalized JetLog matched the 2417-export build.
+Both laboratory DLLs were restored and hash-checked. Run artifacts are in
+`game-20261122-172011` under the same probe directory. No driving session was run.
+
+### U9: Display projection, texture state and render targets (2026-11-22)
+
+Replaced 15 exports, bringing RenderSystem to **2456/2687** local entries with
+231 still forwarded. The port preserves the original projection argument order,
+cache keys, and before/after-callback updates. Win32 Release built; `diff_rs_u9`
+matched 141,264 trace entries over 64 rounds and `diff_rs_u8` passed. All 2687 names
+and ordinals matched, with no unexpected thunks among the 2456 local entries.
+
+The 2456-export build with the local TNI patch reached the offline menu and
+exited with code `0`; its normalized JetLog matched the 2441-export build.
+Both laboratory DLLs were restored and hash-checked. Artifacts:
+`game-20261122-172651` under the same probe directory. No driving session was run.
+
+### U9: RenderKernel access and resource ownership (2026-11-22)
+
+Replaced ten RenderKernel exports: accessors, secondary-base adjustment, SceneGraph
+ownership, TextureManager references and the system-resource ring. RenderSystem is
+now **2466/2687** local with 221 forwarded. Win32 Release built; `diff_rs_u9`
+matched 141,377 trace entries and `diff_rs_u8` passed. All 2687 names and ordinals
+matched, with no unexpected thunks among the 2466 local entries.
+
+The 2466-export build with the local TNI patch reached the offline menu and
+exited with code `0`; its normalized JetLog matched the 2456-export build.
+Both laboratory DLLs were restored and hash-checked. Artifacts:
+`game-20261122-213819` under the same probe directory. No driving session was run.
+
+### U9: base Display context factories (2026-11-22)
+
+Ported `CreateSharedContext` (RVA `0x1b590`) and `CreateNonRenderContext`
+(`0x1b5c0`). Both allocate through `Jet::Alloc` and start with one reference.
+They retain the original vtables until the context lifetime methods move.
+Win32 Release built with 2468 local exports and 219 forwarded. In isolation,
+`diff_rs_u9` matched 141,391 trace entries, including distinct allocations,
+vtable identity, initial reference counts, and release of the final reference.
+This build was not run in game.
+
+Ported the four exported SharedContext and NonRenderContext constructors and
+destructors. The destructors delegate to KernelStandard's ReferenceCount base
+destructor. The original context vtables and their deleting entries remain in
+use. Win32 Release built with 2472 local exports and 215 forwarded.
+`diff_rs_u9` matched 141,403 trace entries, including constructor and destructor
+state. No game check was run for this build.
+
+Ported the DisplayContext default constructor (`0x1c280`) and destructor
+(`0x1c4d0`). The constructor preserves untouched bytes and the upper three bits
+at `0xa1`. The destructor restores the original vtable and releases the owned
+buffer at `0x110` through Jet::Alloc. Win32 Release built with 2474 local exports.
+`diff_rs_u9` matched all 143,518 entries, including three initial fill patterns
+and both null and allocated buffer cases. Copy operations still forward.
+This build was not run in game.
+
+Ported DisplayContext copy construction and assignment, all 12 VideoMode and
+VideoFormat exports, and the two Streamed3Vertex default constructors sharing
+the original VideoMode constructor body. The context copy retains padding and
+copies the buffer pointer without allocating. Win32 Release built with 2490
+local exports and 197 forwarded. All 2687 names and ordinals match the original.
+`diff_rs_u9` matched 146,829 entries. No game check was run for this build.
+
+### U9: base Display initialization (2026-11-22)
+
+Ported `Display::Init` (RVA `0x10db0`). It creates and installs the OS window,
+sets the initialized byte, and registers the original critical shutdown and
+startup callbacks in that order. Repeated calls leave state unchanged.
+
+Win32 Release built. `diff_rs_u9` matched 146,830 trace entries, including the
+window and callback handles and the repeated-call guard. `diff_rs_u8` passed.
+All 2687 export names and ordinals match; 2491 local entries have no unexpected
+forwarding thunks. 196 exports still forward.
+
+With the local TNI compatibility patch, the 2491-export build reached the
+offline main menu and exited with code `0`. Its normalized JetLog matched the
+2466-export run (6 retained lines each). Both laboratory DLLs were restored and
+hash-checked. Artifacts: `game-20261122-220312` under the same probe directory.
+No driving session was run.
+
+### U9: RenderKernel initialization and Display tail batch (2026-11-22)
+
+Moved 83 additional exports, bringing the Win32 module to **2574/2687** local
+exports and 113 forwarders. The batch covers streamed-vertex and value-type
+lifetime, selector/context lifetime, base frame and buffer methods, extension
+and compression lookups, screenshots, gamma and critical callbacks,
+`RenderKernel::Init`, and screenshot scheduling.
+
+`RenderKernel::Init` still delegates renderer loading to the original
+`LoadRenderSystem`. Existing context vtables, the compression-token table,
+and the VC80 `_CIpow` helper still come from the original DLL. The immutable
+inverse-cull and primitive lookup tables are now local.
+
+Win32 Release built. All 2687 names and ordinals match the original, with no
+unexpected forwarding thunks in the 2574 local exports. `diff_rs_u9` matched
+162,697 entries, including renderer-load failure, NullRender initialization with
+existing/new managers, screenshot readback and row reversal, and exact gamma
+ramps using test-only GDI substitutes. `diff_rs_u8` passed; `diff_rs_u5` matched
+all 1,800 geometry cases.
+
+With the local TNI patch, the game reached the offline main menu and exited
+with code `0`. The normalized JetLog matched the 2491-export build (6 retained
+lines each). The laboratory DLLs were restored and hash-checked. Artifacts:
+`game-20261122-222452` under the same probe directory. No driving session was run.
+
+### U9: DisplaySelector video and format selection (2026-11-22)
+
+Moved six more exports: `SelectResolution`, `SelectScreenMode`, `SelectWindowArea`,
+`SelectVideoMode`, `SelectVideoFormat`, and `Display::SetupVideoFormat`. The Win32
+module now has **2580/2687** local exports and 107 forwarders (21 functions,
+11 virtual/base tables, 75 data symbols). The selector keeps calling the original
+`SelectResolution` hook for legacy side effects; the new code still reads the
+original format list and selector vtables.
+
+`diff_rs_u9` matched 181,602 trace entries across 64 rounds. The new cases cover
+13 option scenarios, parent-window handling, mode/format ranking and empty lists,
+plus `SetupVideoFormat` success and fallback. `diff_rs_u8` and `diff_rs_u5` still
+pass, as do export and thunk checks. With the local TNI patch the game reached the
+offline main menu and exited with code `0`; the normalized JetLog matched the
+2574-export build. Artifacts: `game-20261122-225037`. DLLs were restored and
+hash-checked. No driving session was run.

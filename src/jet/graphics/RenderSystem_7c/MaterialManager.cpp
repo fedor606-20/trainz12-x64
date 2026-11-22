@@ -6,6 +6,7 @@
 // plugin types of that name (their IsSupported / CreateInstance) until one makes a material.
 #include <jet/Material.h>
 #include <jet/Plugin.h>
+#include <jet/RenderSystem.h>
 #include <jet/Texture.h>
 #include <jet/UId.h>
 #include <jet/VCall.h>
@@ -16,6 +17,22 @@
 #include <new>
 
 namespace Jet {
+
+MaterialManager* __cdecl RenderKernel::GetMaterialManager()
+{
+    return *reinterpret_cast<MaterialManager**>(reinterpret_cast<unsigned char*>(this) + 0x90);
+}
+
+void __cdecl RenderKernel::SetMaterialManager(MaterialManager* manager)
+{
+    auto& current = *reinterpret_cast<MaterialManager**>(reinterpret_cast<unsigned char*>(this) + 0x90);
+    if (current) current->ReleaseReference();
+    current = manager;
+    if (manager) {
+        manager->AddReference();
+        VCall<bool>(manager, 0x08, this);
+    }
+}
 
 // the material name state (MaterialFields.cpp, their own exports)
 void __cdecl RsMatSetName(void* p, const PString* decorated, const PString* plain);

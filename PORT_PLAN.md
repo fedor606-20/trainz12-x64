@@ -135,13 +135,59 @@ After each step, refresh the README progress block: `python -I tools/progress.py
        vftable, LoadTxt and CreateInstance) is ported and differentially tested too (2026-11-19), as are
        NullMaterial::CreateGeometryChunk with its GeometryChunkTemplate<PackedVertexPNT,
        GeometryChunkSingleStream> chunk and Material::SetLightingState (2026-11-19). Current
-       RenderSystem count: 2185/2687 exports; 502 still forwarded. This laboratory 32-bit build
-       reached the main menu on 2026-11-18; a fixed driving session still needs a separate game check. Continue U7
-       (the five U9/foundation members - Display::GetColorMaterialMode, SetColorMaterialMode,
-       SetMaterialProperties and RenderKernel::GetMaterialManager, SetMaterialManager - and the seven shared data
-       statics, which stay original until U9) and the remaining units; do not treat
+        U7 checkpoint: 2185/2687 exports; that laboratory 32-bit build reached the main menu. A fixed driving
+        session still needs a separate game check. Finish the remaining U7 work with U9
+        (the five foundation methods are now ported below, but the seven shared data statics still
+        need migration) and the remaining units; do not treat
        forwarding as x64 completion.
-   8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
+    8d. RenderSystem_7c U5 (geometry), U6 (textures), U7 (materials), U8 (layers), U9 (Display, RenderKernel).
+        U8's Win32 code and virtual tables are ported (2026-11-22): 121 exports added in U8,
+        bringing RenderSystem to **2306/2687** (381 forwarded). `diff_rs_u8` covers layer ordering,
+        lifetime/rendering, resource viewers, SceneGraph and all seven U8 virtual tables.
+        Three U8 data symbols (`Layer::layerManager` and the two LayerManager profiling records) still use
+        original storage until U9 so original and ported code observe the same state. The x86 virtual tables
+        still use original RTTI and pure-call entries.
+        Laboratory retest: reached the main menu with U8, exited with code 0, and matched the normalized
+        JetLog from the previous DLL. A first attempt closed on the loading screen and crashed on exit;
+        a driving session has not been tested yet.
+        U9 started: 20 Display viewport, scissor, 2D projection, clear and cull exports passed `diff_rs_u9`,
+        bringing RenderSystem to 2326/2687. The five deferred Display/RenderKernel material methods
+        passed the extended `diff_rs_u9`, bringing the count to **2331/2687** (356 forwarded).
+         A local TrainzNativeInterface compatibility patch now preserves the CRT-owned
+         tree sentinel's allocator pairing. U8 and U9 both reached the offline menu and
+         exited with code 0 with the patch. The laboratory binaries were restored after
+         testing. Display's color write mask, depth state and alpha blending/test state
+         are now ported and differentially tested: **2352/2687** exports (335 forwarded).
+         This build also reached the offline menu and exited with code 0 with the TNI patch.
+         Lighting, fog, ambient state and scalar packed-color conversion are now ported:
+         **2379/2687** local exports. Packed-color arrays and geometry display modes
+         are now ported too: **2403/2687** local exports. Polygon offset, stencil state
+         and four capability getters brought the count to **2417/2687**. Another 24
+         Display capability, manager, video and frame exports bring it to **2441/2687**
+         (246 forwarded at that checkpoint). Projection, view-mode handling, texture
+         state and render targets bring the count to **2456/2687** (231 forwarded).
+         Ten RenderKernel access and ownership methods now bring the count to
+          **2466/2687** (221 forwarded). The two base Display context factories passed
+          `diff_rs_u9`, bringing the count to **2468/2687** (219 forwarded). Their
+          vtables still come from the original DLL. The exported SharedContext
+          and NonRenderContext constructors and destructors passed `diff_rs_u9`:
+          **2472/2687** (215 forwarded). The DisplayContext default constructor
+          and destructor passed `diff_rs_u9`: **2474/2687** (213 forwarded).
+          DisplayContext copy construction and assignment, VideoMode, VideoFormat,
+          and two Streamed3Vertex default constructors passed `diff_rs_u9`:
+           **2490/2687** (197 forwarded). Base `Display::Init` now passes `diff_rs_u9`:
+           **2491/2687** at that checkpoint. The next batch moved another 83 exports:
+           `RenderKernel::Init`, screenshot scheduling and capture, vertex values,
+           Display frame and buffer operations, gamma and critical callbacks.
+           DisplaySelector video and format selection then moved six more exports:
+           **2580/2687** are local; 107 still forward (21 functions, 11 virtual/base
+           tables, and 75 other data exports). `RenderKernel::Init` still uses the
+           original `LoadRenderSystem`. Move the remaining Display/RenderKernel
+           lifecycle and plugin registration before switching the shared data.
+           Test vtable slots and RTTI against the original, then run the module
+           with the original DLL removed. Keep shared writable data in original
+           storage until its readers and writers move together.
+           A fixed driving session remains unverified.
    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
        picked in the launcher.

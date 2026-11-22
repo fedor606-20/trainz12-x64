@@ -607,7 +607,7 @@ protected:
     static __declspec(dllimport) HashTable<unsigned int, RegistrationData*, RegistrationDataOp, 13> registrations;
 
 public:
-    static __declspec(dllimport) const DPrimitive primitiveLookup[];  // by the primitive bits (flags & 0x1f)
+    static const DPrimitive primitiveLookup[32];  // by the primitive bits (flags & 0x1f)
 
 private:
     const GeometryChunk& operator=(const GeometryChunk& o);  // 0x10038c50: nothing
