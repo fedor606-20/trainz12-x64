@@ -3076,3 +3076,33 @@ Export and thunk checks pass. With the local TNI patch, the game reached the
 offline main menu and exited with code `0`; the normalized 17-line JetLog had
 zero differences. Artifacts: `game-20261122-233441`. DLLs were restored and
 hash-checked. No driving session was run.
+
+### U11: all data exports local (2026-11-23)
+
+Moved the remaining 86 data exports into local byte mirrors: 75 plain statics,
+10 virtual/base tables and one vbtable. The original DLL still owns every live
+object. Each mirror is filled at load, and each vftable mirror owns the RTTI
+locator word at `table[-1]`. `gen_def.py` now marks `?__info@` records as `DATA`
+too, so all 2687 names and ordinals still match.
+
+The Win32 module has **2671/2687** local exports and 16 forwarders. Sixteen
+functions remain: Display lifecycle and vertex-type construction, RenderKernel
+lifetime and frame control, and `JetGetPluginsRenderSystem`.
+
+`trainz.exe` resolves five texture defaults and `Element::currentVisited` by
+name. Those are snapshots, not aliases. Every ported writer of a mirrored
+mutable static now calls `RsMirrorSync` after changing the original's value:
+the texture defaults, file compression, streaming limits and enable flag,
+`TextureManager::Init` options, `Texture::uniqueTexId`, both manager pointers
+and `Element::currentVisited`. `diff_rs_u11` exercises the direct setters and
+`Element::ResetVisited`, then re-checks each export.
+
+`diff_rs_u11` matched all 111 checks (86 mirrors plus 25 writer checks).
+`diff_rs_u9` now reads `internalColorFormat` from the original module, since the
+U11 export is a mirror and the tested code still uses the owner's static.
+`diff_rs_u9` matched 181,602 entries; `diff_rs_u10`, `diff_rs_u8`, `diff_rs_u5`,
+`diff_rs_u6b`, `diff_rs_u6c`, `diff_rs_u6c2`, `diff_rs_u6d` and `diff_rs_u7`
+passed. Export and thunk checks pass. With the local TNI patch, the game reached
+the offline main menu and exited with code `0`; the normalized 17-line JetLog had
+zero differences. Artifacts: `game-20261123-001309`. DLLs were restored and
+hash-checked. No driving session was run.

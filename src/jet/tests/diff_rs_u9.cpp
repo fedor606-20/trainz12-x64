@@ -278,7 +278,9 @@ static void CheckLighting(HMODULE m)
     const auto disable = Proc<void(__cdecl*)(void*)>(m, "?DisableAllLights@Display@Jet@@QAAXXZ");
     const auto begin = Proc<void(__cdecl*)(void*, int, const float*)>(m, "?StartLightingUpdate@Display@Jet@@UAAXHABVMatrix4@2@@Z");
     const auto end = Proc<void(__cdecl*)(void*)>(m, "?EndLightingUpdate@Display@Jet@@UAAXXZ");
-    auto* format = Proc<int*>(m, "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A");
+    // this is the original's live static: our U11 export is a mirror, and the code under test reads the original
+    auto* format = Proc<int*>(GetModuleHandleA("RenderSystem_7c_orig.dll"),
+        "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A");
     const int savedFormat = *format;
     FARPROC table[0x230 / 4 + 1]{};
     table[0x1f0 / 4] = reinterpret_cast<FARPROC>(Mode<0x1f0>);
@@ -354,7 +356,9 @@ static void CheckPackedColor(HMODULE m)
     const auto get = Proc<int(__cdecl*)()>(m, "?GetInternalColorFormat@Display@Jet@@SA?AW4DFormatId@2@XZ");
     const auto encode = Proc<unsigned long(__cdecl*)(const Color*)>(m, "?ConvertColor@Display@Jet@@SAKABVColor@2@@Z");
     const auto decode = Proc<Color*(__cdecl*)(Color*, unsigned long)>(m, "?ConvertColor@Display@Jet@@SA?AVColor@2@K@Z");
-    auto* format = Proc<int*>(m, "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A");
+    // this is the original's live static: our U11 export is a mirror, and the code under test reads the original
+    auto* format = Proc<int*>(GetModuleHandleA("RenderSystem_7c_orig.dll"),
+        "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A");
     const int savedFormat = *format;
     const float nan = std::bit_cast<float>(UINT32_C(0x7fc12345));
     for (const int mode : {-1, 0, 1, 2, 3}) {
@@ -386,7 +390,9 @@ static void CheckColorArrays(HMODULE m)
         m, "?ConvertColorArray@Display@Jet@@SAXPAKH@Z");
     const auto strided = Proc<void(__cdecl*)(int, void*, int)>(
         m, "?ConvertColorArray@Display@Jet@@SAXV?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@H@Z");
-    auto* format = Proc<int*>(m, "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A");
+    // this is the original's live static: our U11 export is a mirror, and the code under test reads the original
+    auto* format = Proc<int*>(GetModuleHandleA("RenderSystem_7c_orig.dll"),
+        "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A");
     const int savedFormat = *format;
     const float nan = std::bit_cast<float>(UINT32_C(0x7fc12345));
     const Color source[]{

@@ -2,6 +2,7 @@
 // RenderTextureConstruct, TextureArgs/TextureStage, DisplayDescriptor, Element, Projector). Behaviour follows the TS12
 // assembly (addresses per function); several share one body in the original (identical-code folding).
 #include <jet/RenderTypes.h>
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 #include <jet/VCall.h>
 
 #include <cstdio>
@@ -302,7 +303,11 @@ bool Element::GetCulled(const Display* display) const
 }
 bool Element::IsVisited() const { return visited == currentVisited; }
 unsigned int Element::GetLastCulledFrame() const { return lastCulledFrame; }
-void Element::ResetVisited() { ++currentVisited; }
+void Element::ResetVisited()
+{
+    ++currentVisited;
+    RsMirrorSync("?currentVisited@Element@Jet@@0IA");
+}
 
 // ---------------------------------------------------------------------------------------------------------------
 // Projector (0x10038c40..0x10038cd0, 0x10021870)

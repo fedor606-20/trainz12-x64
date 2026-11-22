@@ -13,6 +13,7 @@
 
 #include <new>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
 
 DisplayTexture* __cdecl RsGenerateSubstituteTexture(void* display, unsigned width, unsigned height);
@@ -152,10 +153,16 @@ void __cdecl TextureManager::SetMaxSizeTextureStreaming(int size)  // 0x10041450
 {
     MAX_STREAMING_TEXTURE_SIZE = size;
     MAX_STREAMING_TEXTURE_MIP_COUNT = MipCount(size);
+    RsMirrorSync("?MAX_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA");
+    RsMirrorSync("?MAX_STREAMING_TEXTURE_MIP_COUNT@TextureManager@Jet@@2HA");
     BitmapResource::SetMaxSizeTextureStreaming(size);
 }
 
-void __cdecl TextureManager::SetEnableTextureStreaming(bool on) { TEXTURE_STREAMING_ENABLED = on; }  // 0x10041490
+void __cdecl TextureManager::SetEnableTextureStreaming(bool on)  // 0x10041490
+{
+    TEXTURE_STREAMING_ENABLED = on;
+    RsMirrorSync("?TEXTURE_STREAMING_ENABLED@TextureManager@Jet@@2_NA");
+}
 
 // ---------------------------------------------------------------------------------------------------------------
 // lifetime
@@ -665,19 +672,25 @@ bool __cdecl TextureManager::Init(RenderKernel* k)
     const Options* const o = KernelOS(k)->GetOptions();
     if (!o) return true;
     o->Get("GlobalTextureResolution", globalSkipLevels, globalSkipLevels);
+    RsMirrorSync("?globalSkipLevels@TextureManager@Jet@@1IA");
     o->Get("TextureResThreshold", globalSkipThreshold, globalSkipThreshold);
+    RsMirrorSync("?globalSkipThreshold@TextureManager@Jet@@1IA");
     PString format(DefaultFormatName());
     o->Get("DefaultTextureFormat", format, format);
     for (int i = 0; i < 16; ++i)
         if (!FormatNames()[i].name->CompareIgnoreCase(format)) {
             TextureResource::DISPLAYFORMATID_DEFAULT = FormatNames()[i].id;
+            RsMirrorSync("?DISPLAYFORMATID_DEFAULT@TextureResource@Jet@@0W4DFormatId@2@A");
             break;
         }
     float aniso;
     if (o->Get("DefaultAnisotropy", aniso, TextureResource::ANISOTROPY_DEFAULT)) {
         Display* const d = KernelDisplay(k);
         if (aniso > MaxAnisotropy(d)) aniso = MaxAnisotropy(d);
-        if (aniso >= 1.0f) TextureResource::ANISOTROPY_DEFAULT = aniso;
+        if (aniso >= 1.0f) {
+            TextureResource::ANISOTROPY_DEFAULT = aniso;
+            RsMirrorSync("?ANISOTROPY_DEFAULT@TextureResource@Jet@@0MA");
+        }
     }
     PString filter;
     if (o->Get("DefaultTextureFilter", filter, filter)) {
@@ -685,29 +698,38 @@ bool __cdecl TextureManager::Init(RenderKernel* k)
             TextureResource::MIN_FILTER_DEFAULT = static_cast<TextureFilter>(0);
             TextureResource::MIP_FILTER_DEFAULT = static_cast<TextureFilter>(0);
             TextureResource::MAG_FILTER_DEFAULT = static_cast<TextureFilter>(0);
+            RsMirrorSync("?MIN_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
+            RsMirrorSync("?MIP_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
+            RsMirrorSync("?MAG_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
         } else {
             const bool trilinear = !filter.CompareIgnoreCase("trilinear");
             TextureResource::MIN_FILTER_DEFAULT = static_cast<TextureFilter>(1);
             TextureResource::MAG_FILTER_DEFAULT = static_cast<TextureFilter>(1);
             TextureResource::MIP_FILTER_DEFAULT = static_cast<TextureFilter>(trilinear ? 1 : 0);
+            RsMirrorSync("?MIN_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
+            RsMirrorSync("?MIP_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
+            RsMirrorSync("?MAG_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
         }
     } else {
         if (o->Get("DefaultMinFilter", filter, filter))
             for (int i = 0; i < 2; ++i)
                 if (!filter.CompareIgnoreCase(kFilterNames[i])) {
                     TextureResource::MIN_FILTER_DEFAULT = static_cast<TextureFilter>(i);
+                    RsMirrorSync("?MIN_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
                     break;
                 }
         if (o->Get("DefaultMipFilter", filter, filter))
             for (int i = 0; i < 2; ++i)
                 if (!filter.CompareIgnoreCase(kFilterNames[i])) {
                     TextureResource::MIP_FILTER_DEFAULT = static_cast<TextureFilter>(i);
+                    RsMirrorSync("?MIP_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
                     break;
                 }
         if (o->Get("DefaultMagFilter", filter, filter))
             for (int i = 0; i < 2; ++i)
                 if (!filter.CompareIgnoreCase(kFilterNames[i])) {
                     TextureResource::MAG_FILTER_DEFAULT = static_cast<TextureFilter>(i);
+                    RsMirrorSync("?MAG_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A");
                     break;
                 }
     }
@@ -717,10 +739,12 @@ bool __cdecl TextureManager::Init(RenderKernel* k)
             for (int i = 0; i < 4; ++i)
                 if (!mip.CompareIgnoreCase(kAutoMipNames[i])) {
                     TextureResource::AUTO_MIP_DEFAULT = static_cast<TextureAutoMip>(i);
+                    RsMirrorSync("?AUTO_MIP_DEFAULT@TextureResource@Jet@@0W4TextureAutoMip@2@A");
                     break;
                 }
     } else {
         TextureResource::AUTO_MIP_DEFAULT = static_cast<TextureAutoMip>(0);
+        RsMirrorSync("?AUTO_MIP_DEFAULT@TextureResource@Jet@@0W4TextureAutoMip@2@A");
     }
     o->Get("UseSubstituteTexture", useSubstitute, useSubstitute);
     return true;

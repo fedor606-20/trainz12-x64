@@ -824,3 +824,29 @@ Do not group `Layer::GetLayerManager` with the local reads: it uses the original
 - `diff_rs_u10` compares 1969 trace entries, including guard bytes and all
   supported format pairs. Game check `game-20261122-233441` exited with code `0`
   and matched the baseline JetLog line for line.
+
+### U11: data mirrors at 2671/2687 (2026-11-23)
+
+- All 86 remaining data exports are local byte mirrors: 75 plain statics, 10
+  vftables/vbtables plus the `?__info@` records, and one Display vbtable. The
+  original module still owns the objects. `DataMirrorList.h` is the single list
+  used by both `DataStatics.cpp` and `diff_rs_u11.cpp`.
+- Every vftable mirror owns its RTTI locator at `table[-1]`. A dedicated
+  section keeps that word adjacent to the exported array. Plain mirrors use
+  `alignas(4)` with their exact byte sizes (1, 4, 8, 12, 16, 24, 32 or 320).
+- A data export is a snapshot. `RsMirrorSync(name)` recopies one mirror from
+  the original after a ported writer changes the live static. Every local
+  writer of a mutable mirror calls it: texture defaults, file compression,
+  streaming limits and enable flag, `TextureManager::Init` options,
+  `Texture::uniqueTexId`, both manager pointers and
+  `Element::currentVisited`. Do not alias an export to our IAT slot.
+- `diff_rs_u11` checks all 86 mirrors plus 25 writer checks (111 total).
+- `gen_def.py` classifies `?__info@` as data; forwarders now carry `DATA` too.
+  `diff_rs_u9` reads `internalColorFormat` from the original module because the
+  U11 export is a mirror and the code under test still uses the owner's value.
+- Sixteen functions still forward: eight Display lifecycle (including the
+  deferred 38 KB `CreateVertexTypeObject`), seven RenderKernel lifetime/frame
+  exports and `JetGetPluginsRenderSystem`. RenderKernel ownership and Display
+  layout notes from the U9 analysis remain the starting point for U12.
+- Game check `game-20261123-001309` exited with code `0` and matched the
+  baseline JetLog line for line.

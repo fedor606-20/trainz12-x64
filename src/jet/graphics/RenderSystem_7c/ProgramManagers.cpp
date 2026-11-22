@@ -8,6 +8,7 @@
 
 #include <cstring>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 #include "GfxParse.h"
 
 namespace Jet {
@@ -50,7 +51,10 @@ void Release(VertexType* t) { reinterpret_cast<ReferenceCount*>(t)->ReleaseRefer
 VertexProgramManager::VertexProgramManager(Display* d) : display(d)
 {
     programs.Init();
-    if (!theManager) theManager = this;
+    if (!theManager) {
+        theManager = this;
+        RsMirrorSync("?theManager@VertexProgramManager@Jet@@1PAV12@A");
+    }
 }
 
 // 0x10053c50
@@ -59,6 +63,7 @@ VertexProgramManager::~VertexProgramManager()
     programs.ForEach([](VertexProgram* p) { p->ReleaseReference(); });
     if (this == theManager) {
         theManager = nullptr;
+        RsMirrorSync("?theManager@VertexProgramManager@Jet@@1PAV12@A");
         registeredProgramList.ForEach([](RegisteredName*& r) {
             delete r;
             r = nullptr;
@@ -233,6 +238,7 @@ TextureCombinerManager::TextureCombinerManager(Display* d) : display(d)
 {
     combiners.Init();
     theManager = this;
+    RsMirrorSync("?theManager@TextureCombinerManager@Jet@@1PAV12@A");
     for (unsigned int i = 0; i < builtInProgramList.count; ++i)
         LoadBuiltInPrograms(builtInProgramList.data[i].name, builtInProgramList.data[i].text);
 }

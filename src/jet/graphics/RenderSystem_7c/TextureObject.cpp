@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <new>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
 
 namespace { void X87Copy(float* to, const float* from); }
@@ -507,6 +508,7 @@ PString __cdecl Texture::GenerateUniqueName(const PString& n) const
         const unsigned int id = static_cast<unsigned int>(uniqueTexId++);
         s.Setf("%08x%%%%%s", id, n.Text());
     }
+    RsMirrorSync("?uniqueTexId@Texture@Jet@@1KA");
     return PString(static_cast<const char*>(s));
 }
 

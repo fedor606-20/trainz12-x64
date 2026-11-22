@@ -9,6 +9,7 @@
 #include <cstring>
 #include <new>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
 
 namespace {
@@ -128,25 +129,25 @@ TextureResource::~TextureResource() { DeleteInfo(info); }  // 0x100014d0
 // defaults (the original's statics)
 
 TextureWrap __cdecl TextureResource::GetDefaultWrapS() { return WRAP_S_DEFAULT; }               // 0x100011d0
-void __cdecl TextureResource::SetDefaultWrapS(TextureWrap w) { WRAP_S_DEFAULT = w; }            // 0x100011e0
+void __cdecl TextureResource::SetDefaultWrapS(TextureWrap w) { WRAP_S_DEFAULT = w; RsMirrorSync("?WRAP_S_DEFAULT@TextureResource@Jet@@0W4TextureWrap@2@A"); }            // 0x100011e0
 TextureWrap __cdecl TextureResource::GetDefaultWrapT() { return WRAP_T_DEFAULT; }               // 0x100011f0
-void __cdecl TextureResource::SetDefaultWrapT(TextureWrap w) { WRAP_T_DEFAULT = w; }            // 0x10001200
+void __cdecl TextureResource::SetDefaultWrapT(TextureWrap w) { WRAP_T_DEFAULT = w; RsMirrorSync("?WRAP_T_DEFAULT@TextureResource@Jet@@0W4TextureWrap@2@A"); }            // 0x10001200
 TextureFilter __cdecl TextureResource::GetDefaultMinFilter() { return MIN_FILTER_DEFAULT; }     // 0x10001210
-void __cdecl TextureResource::SetDefaultMinFilter(TextureFilter f) { MIN_FILTER_DEFAULT = f; }  // 0x10001220
+void __cdecl TextureResource::SetDefaultMinFilter(TextureFilter f) { MIN_FILTER_DEFAULT = f; RsMirrorSync("?MIN_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"); }  // 0x10001220
 TextureFilter __cdecl TextureResource::GetDefaultMagFilter() { return MAG_FILTER_DEFAULT; }     // 0x10001230
-void __cdecl TextureResource::SetDefaultMagFilter(TextureFilter f) { MAG_FILTER_DEFAULT = f; }  // 0x10001240
+void __cdecl TextureResource::SetDefaultMagFilter(TextureFilter f) { MAG_FILTER_DEFAULT = f; RsMirrorSync("?MAG_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"); }  // 0x10001240
 TextureFilter __cdecl TextureResource::GetDefaultMipFilter() { return MIP_FILTER_DEFAULT; }     // 0x10001250
-void __cdecl TextureResource::SetDefaultMipFilter(TextureFilter f) { MIP_FILTER_DEFAULT = f; }  // 0x10001260
+void __cdecl TextureResource::SetDefaultMipFilter(TextureFilter f) { MIP_FILTER_DEFAULT = f; RsMirrorSync("?MIP_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"); }  // 0x10001260
 TextureAutoMip __cdecl TextureResource::GetDefaultAutoMip() { return AUTO_MIP_DEFAULT; }        // 0x10001270
-void __cdecl TextureResource::SetDefaultAutoMip(TextureAutoMip m) { AUTO_MIP_DEFAULT = m; }     // 0x10001280
+void __cdecl TextureResource::SetDefaultAutoMip(TextureAutoMip m) { AUTO_MIP_DEFAULT = m; RsMirrorSync("?AUTO_MIP_DEFAULT@TextureResource@Jet@@0W4TextureAutoMip@2@A"); }     // 0x10001280
 TextureAlpha __cdecl TextureResource::GetDefaultAlphaHint() { return ALPHA_HINT_DEFAULT; }      // 0x10001290
-void __cdecl TextureResource::SetDefaultAlphaHint(TextureAlpha a) { ALPHA_HINT_DEFAULT = a; }   // 0x100012a0
+void __cdecl TextureResource::SetDefaultAlphaHint(TextureAlpha a) { ALPHA_HINT_DEFAULT = a; RsMirrorSync("?ALPHA_HINT_DEFAULT@TextureResource@Jet@@0W4TextureAlpha@2@A"); }   // 0x100012a0
 TextureHint __cdecl TextureResource::GetDefaultTextureHint() { return HINT_DEFAULT; }           // 0x10008de0
-void __cdecl TextureResource::SetDefaultTextureHint(TextureHint h) { HINT_DEFAULT = h; }        // 0x100012b0
+void __cdecl TextureResource::SetDefaultTextureHint(TextureHint h) { HINT_DEFAULT = h; RsMirrorSync("?HINT_DEFAULT@TextureResource@Jet@@0W4TextureHint@2@A"); }        // 0x100012b0
 DFormatId __cdecl TextureResource::GetDefaultDisplayFormatId() { return DISPLAYFORMATID_DEFAULT; }   // 0x100012c0
-void __cdecl TextureResource::SetDefaultDisplayFormatId(DFormatId f) { DISPLAYFORMATID_DEFAULT = f; }  // 0x100012d0
+void __cdecl TextureResource::SetDefaultDisplayFormatId(DFormatId f) { DISPLAYFORMATID_DEFAULT = f; RsMirrorSync("?DISPLAYFORMATID_DEFAULT@TextureResource@Jet@@0W4DFormatId@2@A"); }  // 0x100012d0
 float __cdecl TextureResource::GetDefaultAnisotropyFilterLevel() { return ANISOTROPY_DEFAULT; }      // 0x100012e0
-void __cdecl TextureResource::SetDefaultAnisotropyFilterLevel(float a) { ANISOTROPY_DEFAULT = a; }  // 0x100012f0
+void __cdecl TextureResource::SetDefaultAnisotropyFilterLevel(float a) { ANISOTROPY_DEFAULT = a; RsMirrorSync("?ANISOTROPY_DEFAULT@TextureResource@Jet@@0MA"); }  // 0x100012f0
 
 // 0x10001300 / 0x10001320: the static's own 8 bytes, as a char[8]
 void __cdecl TextureResource::GetDefaultFileCompression(char* const out)
@@ -156,6 +157,7 @@ void __cdecl TextureResource::GetDefaultFileCompression(char* const out)
 void __cdecl TextureResource::SetDefaultFileCompression(char* name)
 {
     std::strncpy(reinterpret_cast<char*>(&FILE_COMPRESSION_DEFAULT), name, 8);
+    RsMirrorSync("?FILE_COMPRESSION_DEFAULT@TextureResource@Jet@@0PADA");
 }
 
 // ---------------------------------------------------------------------------------------------------------------

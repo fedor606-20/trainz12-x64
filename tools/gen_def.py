@@ -37,12 +37,13 @@ lines = [f"LIBRARY {module}", "EXPORTS"]
 pragmas = []
 for e in exports:
     name, ordinal = e["mangled"], e["ordinal"]
-    is_data = "(" not in e["demangled"] and name.startswith("?")  # vftables, vbtables, statics
+    # ?__info@ records have '(' in their demangled scope but are still 0x20-byte data objects.
+    is_data = name.startswith("?") and ("(" not in e["demangled"] or name.startswith("?__info@"))
     if name in implemented:
         target = f"={aliases[name]}" if name in aliases else ""
         lines.append(f"    {name}{target} @{ordinal}" + (" DATA" if is_data else ""))
     elif name.startswith("?"):
-        lines.append(f"    {name}={module}_orig.{name} @{ordinal}")
+        lines.append(f"    {name}={module}_orig.{name} @{ordinal}" + (" DATA" if is_data else ""))
     else:
         # link.exe (x86) rejects a .def forwarder for an undecorated C name; the /export pragma works
         pragmas.append(f'#pragma comment(linker, "/export:{name}={module}_orig.{name},@{ordinal}")')
