@@ -7,6 +7,7 @@
 #include <cstddef>
 
 extern void* RsLayerManagerVftable[2];
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 
 namespace Jet {
 
@@ -294,16 +295,22 @@ void __cdecl LayerManager::Update(float dt)
     // The original callers still use these same counters.
     static auto* const info = reinterpret_cast<Profile::Info*>(
         LayerManagerSymbol("?__info@?1??Update@LayerManager@Jet@@QAAXM@Z@4UInfo@Profile@3@A"));
-    Profile profile(info);
-    VCall<void>(&root, 0x08, dt);
+    {
+        Profile profile(info);
+        VCall<void>(&root, 0x08, dt);
+    }
+    RsMirrorSync("?__info@?1??Update@LayerManager@Jet@@QAAXM@Z@4UInfo@Profile@3@A");
 }
 
 void __cdecl LayerManager::Render()
 {
     static auto* const info = reinterpret_cast<Profile::Info*>(
         LayerManagerSymbol("?__info@?1??Render@LayerManager@Jet@@QAAXXZ@4UInfo@Profile@3@A"));
-    Profile profile(info);
-    VCall<void>(&root, 0x04, &viewers);
+    {
+        Profile profile(info);
+        VCall<void>(&root, 0x04, &viewers);
+    }
+    RsMirrorSync("?__info@?1??Render@LayerManager@Jet@@QAAXXZ@4UInfo@Profile@3@A");
 }
 
 void* __fastcall RsGroupGrouped(void*, void*, void*, const void*, int, bool);

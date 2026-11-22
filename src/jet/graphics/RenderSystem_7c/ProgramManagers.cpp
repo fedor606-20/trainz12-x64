@@ -69,6 +69,7 @@ VertexProgramManager::~VertexProgramManager()
             r = nullptr;
         });
         registeredProgramList.Clear();
+        RsMirrorSync("?registeredProgramList@VertexProgramManager@Jet@@1V?$HashTable@ABVPString@Jet@@PAURegisteredName@VertexProgramManager@2@UNameHash@42@$0N@@2@A");
     }
     programs.Destroy();
 }
@@ -215,6 +216,7 @@ void __cdecl VertexProgramManager::RegisterBuiltInPrograms(const PString& name, 
                       const Ctx& c = *static_cast<Ctx*>(p);
                       RegisteredName* const r = new RegisteredName{*c.name};
                       registeredProgramList.Insert(r, r->name.node);
+                      RsMirrorSync("?registeredProgramList@VertexProgramManager@Jet@@1V?$HashTable@ABVPString@Jet@@PAURegisteredName@VertexProgramManager@2@UNameHash@42@$0N@@2@A");
                       const GfxNameList::Chunk* const head = names.head;
                       if (!head) return;
                       const GfxNameList::Chunk* chunk = head;
@@ -223,6 +225,7 @@ void __cdecl VertexProgramManager::RegisterBuiltInPrograms(const PString& name, 
                               const ProgramItem item{*c.name, *reinterpret_cast<const PString*>(&chunk->names[i]),
                                                      c.text};
                               builtInProgramList.Add(item);
+                              RsMirrorSync("?builtInProgramList@VertexProgramManager@Jet@@1V?$Array@UProgramItem@VertexProgramManager@Jet@@$0IA@@2@A");
                           }
                           chunk = chunk->next;
                       } while (chunk != head);
@@ -259,6 +262,7 @@ void __cdecl TextureCombinerManager::RegisterBuiltInPrograms(const PString& name
     }
     const ProgramItem item{name, text};
     builtInProgramList.Add(item);
+    RsMirrorSync("?builtInProgramList@TextureCombinerManager@Jet@@1V?$Array@UProgramItem@TextureCombinerManager@Jet@@$0IA@@2@A");
 }
 
 // 0x10040b20: once per name; the display's combiner keeps the manager's reference

@@ -13,6 +13,8 @@
 #include <cstring>
 #include <new>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
+
 // The original's _purecall answers 0 (its pure slots are `xor eax, eax; ret`); so does ours
 extern "C" int __cdecl _purecall() { return 0; }
 
@@ -1035,6 +1037,7 @@ bool __cdecl GeometryChunk::RegisterName(const PString& name, GeometryChunk*(__c
         r->create = create;
     }
     registrations.Insert(r, r->name.node);
+    RsMirrorSync("?registrations@GeometryChunk@Jet@@1V?$HashTable@IPAURegistrationData@GeometryChunk@Jet@@URegistrationDataOp@23@$0N@@2@A");
     return true;
 }
 
@@ -1056,6 +1059,7 @@ void __cdecl GeometryChunk::ReleaseRegistrationData()
         }
         r = nullptr;
     });
+    RsMirrorSync("?registrations@GeometryChunk@Jet@@1V?$HashTable@IPAURegistrationData@GeometryChunk@Jet@@URegistrationDataOp@23@$0N@@2@A");
 }
 
 // ---------------------------------------------------------------------------------------------------------------

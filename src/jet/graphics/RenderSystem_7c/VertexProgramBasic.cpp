@@ -9,6 +9,7 @@
 
 #include <cstring>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 // VS2005 mangled the `T const * const` statics as P..B, today's compiler as Q..B: the imports take the old names
 #define JET_VPB_OLD_NAME(name, type) \
     __pragma(comment(linker, "/alternatename:__imp_?" #name "@VertexProgramBasic@Jet@@1Q" type "B=__imp_?" #name \
@@ -133,6 +134,9 @@ VertexProgramBasic::~VertexProgramBasic()
         if (envParameters) Alloc::Delete(envParameters);
         envParameters = nullptr;
     }
+    RsMirrorSync("?staticParameterInit@VertexProgramBasic@Jet@@1HA");
+    RsMirrorSync("?numEnvParameters@VertexProgramBasic@Jet@@1HA");
+    RsMirrorSync("?envParameters@VertexProgramBasic@Jet@@1PAVVector4@2@A");
     // (the three arrays' blocks and the declarations go with the members, the last list first)
 }
 

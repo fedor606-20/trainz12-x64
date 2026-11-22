@@ -7,6 +7,7 @@
 
 #include <cstdio>
 #include <new>
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 
 extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
@@ -95,7 +96,11 @@ const ResourceDatabase* __cdecl TextureRes::GetResourceDatabase() const
     return resource ? resource->Owner() : nullptr;
 }
 
-void __cdecl TextureRes::SetDelayedLoading(bool enabled) { delayedLoading = enabled; }
+void __cdecl TextureRes::SetDelayedLoading(bool enabled)
+{
+    delayedLoading = enabled;
+    RsMirrorSync("?delayedLoading@TextureRes@Jet@@1_NA");
+}
 
 void __cdecl TextureRes::TestUnloadingMips(int size)
 {

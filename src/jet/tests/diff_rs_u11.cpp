@@ -45,6 +45,21 @@ static bool CheckIntSetter(const char* setter, const char* data, int value)
     return *live == saved && Check(data, 4, false);
 }
 
+static bool CheckBoolSetter(const char* setter, const char* data)
+{
+    const auto set = reinterpret_cast<void(__cdecl*)(bool)>(GetProcAddress(rebuilt, setter));
+    auto* const live = reinterpret_cast<unsigned char*>(GetProcAddress(original, data));
+    if (!set || !live) {
+        std::printf("missing writer/export: %s\n", setter);
+        return false;
+    }
+    const unsigned char saved = *live;
+    set(saved == 0);
+    if (*live == saved || !Check(data, 1, false)) return false;
+    set(saved != 0);
+    return *live == saved && Check(data, 1, false);
+}
+
 static bool CheckWriterSync()
 {
     struct IntCase { const char* setter; const char* data; int value; };
@@ -58,9 +73,16 @@ static bool CheckWriterSync()
         {"?SetDefaultAlphaHint@TextureResource@Jet@@SAXW4TextureAlpha@2@@Z", "?ALPHA_HINT_DEFAULT@TextureResource@Jet@@0W4TextureAlpha@2@A", 1},
         {"?SetDefaultTextureHint@TextureResource@Jet@@SAXW4TextureHint@2@@Z", "?HINT_DEFAULT@TextureResource@Jet@@0W4TextureHint@2@A", 2},
         {"?SetDefaultDisplayFormatId@TextureResource@Jet@@SAXW4DFormatId@2@@Z", "?DISPLAYFORMATID_DEFAULT@TextureResource@Jet@@0W4DFormatId@2@A", 5},
+        {"?SetMinSizeTextureStreaming@TextureManager@Jet@@SAXH@Z", "?MIN_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA", 128},
+        {"?SetMaxSizeTextureStreaming@TextureManager@Jet@@SAXH@Z", "?MAX_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA", 4096},
     };
     for (const IntCase& c : intCases)
         if (!CheckIntSetter(c.setter, c.data, c.value)) return false;
+
+    if (!CheckBoolSetter("?SetUsePath@AsciiTextureResource@Jet@@SAX_N@Z",
+                         "?noPath@AsciiTextureResource@Jet@@1_NA")) return false;
+    if (!CheckBoolSetter("?SetDelayedLoading@TextureRes@Jet@@SAX_N@Z",
+                         "?delayedLoading@TextureRes@Jet@@1_NA")) return false;
 
     const char* const anisoSetter = "?SetDefaultAnisotropyFilterLevel@TextureResource@Jet@@SAXM@Z";
     const char* const anisoData = "?ANISOTROPY_DEFAULT@TextureResource@Jet@@0MA";

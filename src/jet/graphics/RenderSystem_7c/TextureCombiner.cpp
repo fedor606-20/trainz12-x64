@@ -8,6 +8,7 @@
 
 #include "GfxParse.h"
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
 
 namespace {
@@ -52,6 +53,8 @@ bool __cdecl TextureCombiner::SupportedByPlatform(Display* d, float)
     if (!supportChecked) {
         supported = VCall<bool>(d, 0x1c, 0x15);
         supportChecked = true;
+        RsMirrorSync("?supportChecked@TextureCombiner@Jet@@1_NA");
+        RsMirrorSync("?supported@TextureCombiner@Jet@@1_NA");
     }
     return supported;
 }

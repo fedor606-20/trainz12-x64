@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 
 #include "DataMirrorList.h"
@@ -55,6 +56,11 @@ __declspec(allocate("RsDsV09")) __declspec(align(4)) unsigned char RsRsV009[6 * 
 __declspec(allocate("RsDsV10")) __declspec(align(4)) void* RsRsV010Meta;
 __declspec(allocate("RsDsV10")) __declspec(align(4)) unsigned char RsRsV010[2 * 4];
 
+// The exported table starts one word after its locator. C++ forbids a constant-expression cast between
+// the separate globals, so check the layout rule here and the actual addresses when the mirrors load.
+struct VTableAdjacency { void* meta; unsigned char table[4]; };
+static_assert(offsetof(VTableAdjacency, table) == sizeof(void*), "RTTI locator must precede a vtable");
+
 alignas(4) unsigned char RsRsVb001[2 * 4];
 
 namespace {
@@ -96,6 +102,7 @@ struct MirrorAll {
         for (const MirrorEntry& e : entries) {
             void* const source = OrigSym(e.name);
             if (!source) continue;
+            if (e.meta && reinterpret_cast<unsigned char*>(e.meta + 1) != e.local) std::abort();
             std::memcpy(e.local, source, e.size);
             if (e.meta) {
                 void* const locator = *reinterpret_cast<void**>(static_cast<unsigned char*>(source) - 4);

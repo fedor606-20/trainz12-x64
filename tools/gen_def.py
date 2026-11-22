@@ -9,6 +9,7 @@ implemented.txt: one mangled name per line, '#' comments allowed. "name=symbol" 
 original name (for compiler-generated members C++ cannot define, e.g. a default constructor closure).
 """
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -37,8 +38,10 @@ lines = [f"LIBRARY {module}", "EXPORTS"]
 pragmas = []
 for e in exports:
     name, ordinal = e["mangled"], e["ordinal"]
-    # ?__info@ records have '(' in their demangled scope but are still 0x20-byte data objects.
-    is_data = name.startswith("?") and ("(" not in e["demangled"] or name.startswith("?__info@"))
+    # Static data inside a function has a backtick-quoted function signature in its demangled name.
+    # Strip those quotes before asking whether the remaining text looks like a function.
+    plain = re.sub(r"`[^`]*`", "", e["demangled"])
+    is_data = name.startswith("?") and "(" not in plain
     if name in implemented:
         target = f"={aliases[name]}" if name in aliases else ""
         lines.append(f"    {name}{target} @{ordinal}" + (" DATA" if is_data else ""))

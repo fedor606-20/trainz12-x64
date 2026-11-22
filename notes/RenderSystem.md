@@ -832,21 +832,28 @@ Do not group `Layer::GetLayerManager` with the local reads: it uses the original
   original module still owns the objects. `DataMirrorList.h` is the single list
   used by both `DataStatics.cpp` and `diff_rs_u11.cpp`.
 - Every vftable mirror owns its RTTI locator at `table[-1]`. A dedicated
-  section keeps that word adjacent to the exported array. Plain mirrors use
-  `alignas(4)` with their exact byte sizes (1, 4, 8, 12, 16, 24, 32 or 320).
+  section keeps that word adjacent to the exported array. A layout
+  `static_assert` and a load-time address check enforce that adjacency. Plain
+  mirrors use `alignas(4)` with their exact byte sizes
+  (1, 4, 8, 12, 16, 24, 32 or 320).
 - A data export is a snapshot. `RsMirrorSync(name)` recopies one mirror from
   the original after a ported writer changes the live static. Every local
   writer of a mutable mirror calls it: texture defaults, file compression,
   streaming limits and enable flag, `TextureManager::Init` options,
-  `Texture::uniqueTexId`, both manager pointers and
-  `Element::currentVisited`. Do not alias an export to our IAT slot.
-- `diff_rs_u11` checks all 86 mirrors plus 25 writer checks (111 total).
-- `gen_def.py` classifies `?__info@` as data; forwarders now carry `DATA` too.
+  `Texture::uniqueTexId`, both manager pointers, `Element::currentVisited`,
+  `AsciiTextureResource::noPath`, `TextureRes::delayedLoading`, texture support
+  flags, program lists, registration tables, `VertexType::display`,
+  `DisplayTextureNull` counters and LayerManager profile counters. Do not alias
+  an export to our IAT slot.
+- `diff_rs_u11` checks all 86 mirrors plus 33 writer checks (119 total).
+- `gen_def.py` classifies `?__info@` and static data inside a quoted function
+  scope as data; forwarders now carry `DATA` too.
   `diff_rs_u9` reads `internalColorFormat` from the original module because the
   U11 export is a mirror and the code under test still uses the owner's value.
 - Sixteen functions still forward: eight Display lifecycle (including the
   deferred 38 KB `CreateVertexTypeObject`), seven RenderKernel lifetime/frame
   exports and `JetGetPluginsRenderSystem`. RenderKernel ownership and Display
   layout notes from the U9 analysis remain the starting point for U12.
-- Game check `game-20261123-001309` exited with code `0` and matched the
-  baseline JetLog line for line.
+- Game checks `game-20261123-001309` and, after review fixes,
+  `game-20261123-003656` exited with code `0` and matched the baseline JetLog
+  line for line.

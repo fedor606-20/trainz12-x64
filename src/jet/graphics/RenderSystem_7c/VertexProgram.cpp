@@ -9,6 +9,7 @@
 
 #include "GfxParse.h"
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
 
 namespace {
@@ -125,6 +126,8 @@ bool __cdecl VertexProgram::SupportedByPlatform(Display* d, float generation)
     if (!supportChecked[i]) {
         supported[i] = VCall<bool>(d, 0x1c, i + 0x12);
         supportChecked[i] = true;
+        RsMirrorSync("?supportChecked@VertexProgram@Jet@@1PA_NA");
+        RsMirrorSync("?supported@VertexProgram@Jet@@1PA_NA");
     }
     return supported[i];
 }

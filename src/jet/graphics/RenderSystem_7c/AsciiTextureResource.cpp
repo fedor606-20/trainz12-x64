@@ -12,6 +12,7 @@
 #include <cstring>
 #include <new>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 struct EnumCheck {
     const char* name;
     int value;
@@ -264,7 +265,11 @@ unsigned int __cdecl AsciiTextureResource::GetDepth() const { return depth; }   
 bool __cdecl AsciiTextureResource::GetMustResetWhenFinished() const { return false; }       // 0x10009500 (folded)
 unsigned int __cdecl AsciiTextureResource::CalculateSize() const { return 0xd8; }          // 0x10001e30
 unsigned int __cdecl AsciiTextureResource::CalculateDataSize() const { return 0; }         // 0x1001dec0 (folded)
-void __cdecl AsciiTextureResource::SetUsePath(bool on) { noPath = on; }                     // 0x10004ed0
+void __cdecl AsciiTextureResource::SetUsePath(bool on)
+{
+    noPath = on;
+    RsMirrorSync("?noPath@AsciiTextureResource@Jet@@1_NA");
+}  // 0x10004ed0
 
 // ---------------------------------------------------------------------------------------------------------------
 // the bitmap resources

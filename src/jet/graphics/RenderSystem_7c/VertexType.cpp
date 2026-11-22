@@ -7,6 +7,8 @@
 
 #include <new>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
+
 // VS2005 mangled `T const * const` statics with P..B, today's compilers with Q..B
 #pragma comment(linker, "/alternatename:__imp_?display@VertexType@Jet@@1QBVDisplay@2@B=__imp_?display@VertexType@Jet@@1PBVDisplay@2@B")
 
@@ -297,6 +299,7 @@ void __cdecl VertexType::SetApiData(const Display* d, unsigned long data)
     if (apiData && d) VCall<void>(d, 0x40, &apiData);
     apiData = data;
     *const_cast<const Display**>(&display) = d;
+    RsMirrorSync("?display@VertexType@Jet@@1PBVDisplay@2@B");
 }
 
 unsigned long __cdecl VertexType::GetApiData() const { return apiData; }      // 0x10004aa0
@@ -405,6 +408,7 @@ bool __cdecl VertexType::RegisterName(const PString& name)
         AddReference();
     }
     registrations.Insert(r, r->name.node);
+    RsMirrorSync("?registrations@VertexType@Jet@@1V?$HashTable@IPAURegistrationData@VertexType@Jet@@URegistrationDataOp@23@$0N@@2@A");
     return true;
 }
 
@@ -432,6 +436,7 @@ void __cdecl VertexType::Shutdown()
         r = nullptr;
     });
     registrations.Clear();  // 0x10057180
+    RsMirrorSync("?registrations@VertexType@Jet@@1V?$HashTable@IPAURegistrationData@VertexType@Jet@@URegistrationDataOp@23@$0N@@2@A");
 }
 
 }  // namespace Jet

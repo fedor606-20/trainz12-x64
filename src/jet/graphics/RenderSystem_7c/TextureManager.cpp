@@ -147,6 +147,8 @@ void __cdecl TextureManager::SetMinSizeTextureStreaming(int size)  // 0x10041420
 {
     MIN_STREAMING_TEXTURE_SIZE = size;
     MIN_STREAMING_TEXTURE_MIP_COUNT = MipCount(size);
+    RsMirrorSync("?MIN_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA");
+    RsMirrorSync("?MIN_STREAMING_TEXTURE_MIP_COUNT@TextureManager@Jet@@2HA");
 }
 
 void __cdecl TextureManager::SetMaxSizeTextureStreaming(int size)  // 0x10041450

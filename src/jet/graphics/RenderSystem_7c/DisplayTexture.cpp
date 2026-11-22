@@ -12,6 +12,7 @@
 #include <cstring>
 #include <new>
 
+extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
 
 bool __cdecl Convert(const DisplayFormat& from, const DisplayFormat& to, void*& data, int& pitch, int& a, int& b,
@@ -273,6 +274,9 @@ DisplayTextureNull::DisplayTextureNull(Display* d) : DisplayTexture(d)
         canAutoMip = Query(d, 5);
         bound = static_cast<const DisplayTextureNull**>(Alloc::New(1000 * sizeof(void*)));
         for (int i = 0; i < 1000; ++i) bound[i] = nullptr;
+        RsMirrorSync("?numObjects@DisplayTextureNull@Jet@@1IA");
+        RsMirrorSync("?canAutoMip@DisplayTextureNull@Jet@@1_NA");
+        RsMirrorSync("?bound@DisplayTextureNull@Jet@@1PAPBV12@A");
     }
     image = nullptr;
 }
@@ -322,6 +326,9 @@ DisplayTextureNull::~DisplayTextureNull()
         if (bound) Alloc::Delete(bound);
         bound = nullptr;
     }
+    RsMirrorSync("?numObjects@DisplayTextureNull@Jet@@1IA");
+    RsMirrorSync("?canAutoMip@DisplayTextureNull@Jet@@1_NA");
+    RsMirrorSync("?bound@DisplayTextureNull@Jet@@1PAPBV12@A");
 }
 
 // 0x1001f8c0: the settings only (no API object); refuses a volume texture, and a render target that is not 2D or
