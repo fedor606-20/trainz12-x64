@@ -1,5 +1,7 @@
 ﻿# RenderOpenGL_7c
 
+Port plan and milestones: `notes/RenderOpenGL_plan.md`.
+
 OpenGL backend of the Jet renderer. Retail module: 274432 bytes, **51 exports**,
 **944 functions / 139 KB of code**, 345 imports. It consumes 178
 `RenderSystem_7c` exports, 60 `KernelStandard_7c` and 10 `Kernel_7c`; Cg comes
