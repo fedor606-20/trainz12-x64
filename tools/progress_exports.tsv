@@ -1,6 +1,6 @@
 module	exports	owned_bytes
 Kernel_7c	256	17771
-KernelStandard_7c	1762	182979
+KernelStandard_7c	1762	183626
 KernelResources_7c	51	2989
 KernelResource_7c	187	16045
 InputWin32_7c	1	5
@@ -8,10 +8,10 @@ InputSystem_7c	327	52811
 InputDirectX_7c	1	0
 Render2DCore_7c	85	9109
 RenderSystem_7c	2687	231626
-Render3DCore_7c	2500	0
+Render3DCore_7c	2500	69334
 Render3DFoundation_7c	1084	0
 Render3DExtension_7c	186	0
-RenderOpenGL_7c	51	0
+RenderOpenGL_7c	51	8029
 RenderDirectX9_7c	41	0
 WaterSystem_7c	490	27217
 InterfaceSystem_7c	2022	0

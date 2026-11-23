@@ -48,7 +48,7 @@ EMOJI = {"Engine core": "🔧", "Input": "🎮", "Graphics": "🎨", "User inter
          "Game": "🚂", "Not seen loaded": "💤"}
 STATUS_ICON = {"done": "✅", "done*": "✅", "partial": "🟡", "not started": "⬜"}
 FOLDER = {n: FOLDERS[label] for label, _, g, names in GROUPS if g == "jet" for n in names}
-ORIGINAL_REQUIRED = {"RenderSystem_7c"}
+ORIGINAL_REQUIRED = {"RenderOpenGL_7c"}
 
 
 def map_path(group, fname):
@@ -74,11 +74,16 @@ def code_size(group, name):
 def owned_names(name):
     if name not in FOLDER:  # the game (src/trainz/) is not started
         return []
-    impl = ROOT / "src" / "jet" / FOLDER[name] / name / "implemented.txt"
-    if not impl.exists():
-        return []
-    return [line.split("=", 1)[0].strip() for line in impl.read_text(encoding="utf-8").splitlines()
-            if line.strip() and not line.startswith("#")]
+    folder = ROOT / "src" / "jet" / FOLDER[name] / name
+    paths = [folder / "implemented.txt"]
+    paths += sorted((folder / "implemented.d").glob("*.txt")) if (folder / "implemented.d").is_dir() else []
+    names = []
+    for path in paths:
+        if not path.exists():
+            continue
+        names += [line.split("=", 1)[0].strip() for line in path.read_text(encoding="utf-8").splitlines()
+                  if line.strip() and not line.startswith("#")]
+    return names
 
 
 def owned(name):
@@ -186,8 +191,9 @@ def block():
         "",
         "`done*`: KernelStandard_7c keeps one export, `HardwareException::GetCallStack` (an x86 stack walk), "
         "forwarded to the original until the x64 rewrite.",
-        "RenderSystem_7c has no export forwarders, but still requires the original DLL for private helpers, "
-        "RTTI, and shared state.",
+        "RenderSystem_7c has no export forwarders and no private-code dependency on the retail DLL; "
+        "only optional data/table mirrors remain. RenderOpenGL_7c exports are local, but the internal "
+        "display/vtable, vertex-buffer and shader backend is still being ported.",
         "",
         "</details>",
         END,

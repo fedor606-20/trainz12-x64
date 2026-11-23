@@ -26,15 +26,15 @@ https://discord.gg/DmqMJGtCZ
 ## 📊 Progress
 
 <!-- progress:start -->
-Measured by code size: a finished module counts whole, a partial one by the code behind the exports that are already ours (`tools/progress.py`, 2026-11-23).
+Measured by code size: a finished module counts whole, a partial one by the code behind the exports that are already ours (`tools/progress.py`, 2026-11-24).
 
 ```
-🌍 Whole game         ███░░░░░░░░░░░░░░░░░░░░░░░░░░░   9.5 %   6,988 KB left of 7,719
+🌍 Whole game         ████░░░░░░░░░░░░░░░░░░░░░░░░░░  12.1 %   6,787 KB left of 7,719
 
-🧩 Jet engine         ██████████░░░░░░░░░░░░░░░░░░░░  33.1 %   1,477 KB left of 2,208  7/19 modules
+🧩 Jet engine         █████████████░░░░░░░░░░░░░░░░░  42.2 %   1,277 KB left of 2,208  8/19 modules
   🔧 Engine core      ██████████████████████████████ 100.0 %       0 KB left of   378  4/4 modules
   🎮 Input            ████████████████████████░░░░░░  81.2 %      19 KB left of   103  2/3 modules
-  🎨 Graphics         ██████░░░░░░░░░░░░░░░░░░░░░░░░  19.9 %   1,085 KB left of 1,355  1/8 modules
+  🎨 Graphics         ██████████░░░░░░░░░░░░░░░░░░░░  34.7 %     885 KB left of 1,355  2/8 modules
   🪟 User interface   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %     354 KB left of   354  0/2 modules
   🐞 Debug            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %      18 KB left of    18  0/2 modules
 
@@ -62,7 +62,7 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 |---|---:|---:|---:|---|
 | 🔧 **Engine core** | | | | |
 | Kernel_7c | 52 KB | 534 | 256/256 | ✅ done |
-| KernelStandard_7c | 286 KB | 2,250 | 1761/1762 | ✅ done* |
+| KernelStandard_7c | 286 KB | 2,250 | 1762/1762 | ✅ done |
 | KernelResources_7c | 10 KB | 118 | 51/51 | ✅ done |
 | KernelResource_7c | 31 KB | 396 | 187/187 | ✅ done |
 | 🎮 **Input** | | | | |
@@ -71,11 +71,11 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 | InputDirectX_7c | 19 KB | 122 | 0/1 | ⬜ not started |
 | 🎨 **Graphics** | | | | |
 | Render2DCore_7c | 17 KB | 167 | 85/85 | ✅ done |
-| RenderSystem_7c | 351 KB | 3,628 | 2687/2687 | 🟡 partial |
-| Render3DCore_7c | 458 KB | 3,168 | 0/2500 | ⬜ not started |
+| RenderSystem_7c | 351 KB | 3,628 | 2687/2687 | ✅ done |
+| Render3DCore_7c | 458 KB | 3,168 | 505/2500 | 🟡 partial |
 | Render3DFoundation_7c | 194 KB | 1,453 | 0/1084 | ⬜ not started |
 | Render3DExtension_7c | 38 KB | 326 | 0/186 | ⬜ not started |
-| RenderOpenGL_7c | 135 KB | 944 | 0/51 | ⬜ not started |
+| RenderOpenGL_7c | 135 KB | 944 | 51/51 | 🟡 partial |
 | RenderDirectX9_7c | 70 KB | 404 | 0/41 | ⬜ not started |
 | WaterSystem_7c | 92 KB | 714 | 196/490 | 🟡 partial |
 | 🪟 **User interface** | | | | |
@@ -92,7 +92,7 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 | DSMoviePlayer_7c | 58 KB | 728 | 0/1 | ⬜ not started |
 
 `done*`: KernelStandard_7c keeps one export, `HardwareException::GetCallStack` (an x86 stack walk), forwarded to the original until the x64 rewrite.
-RenderSystem_7c has no export forwarders and no static imports from the original DLL, but still requires it at load and run time for mirrored data, RTTI/vtables, and private helpers reached by `GetProcAddress`/RVA.
+RenderSystem_7c has no export forwarders and no private-code dependency on the retail DLL; only optional data/table mirrors remain. RenderOpenGL_7c exports are local, but the internal display/vtable, vertex-buffer and shader backend is still being ported.
 
 </details>
 <!-- progress:end -->
@@ -110,7 +110,7 @@ RenderSystem_7c has no export forwarders and no static imports from the original
     `HardwareException::GetCallStack` still forwards to the renamed original), `KernelResource_7c`,
     `KernelResources_7c`.
   - 🎮 `input/`: `InputSystem_7c`, `InputWin32_7c`.
-  - 🎨 `graphics/`: `Render2DCore_7c`, `RenderSystem_7c` (in progress).
+  - 🎨 `graphics/`: `Render2DCore_7c`, `RenderSystem_7c` (done; optional retail-data mirrors remain).
   - `ui/`, `debug/` and `not_loaded/` appear when their first module is started.
   - 📐 `include/jet/`: our declarations of the Jet classes with their binary layouts.
   - 🧪 `tests/diff_*.cpp`: differential tests. Each loads our module and the original in one process and runs the
