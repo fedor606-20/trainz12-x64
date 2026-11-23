@@ -85,7 +85,7 @@ endforeach()
 target_sources(KernelStandard_7c PRIVATE ${SCFG_TABLES})
 
 # step 5, small Jet modules: drop-in proxies, replaced module by module (the rest forwards to <module>_orig.dll)
-foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c WaterSystem_7c)
+foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c WaterSystem_7c RenderOpenGL_7c)
     jet_module(${m})
     target_compile_definitions(${m} PRIVATE _CRT_SECURE_NO_WARNINGS)
     # each calls the other Jet modules by their original names (our proxies or the originals)
@@ -103,6 +103,8 @@ target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.li
 target_compile_definitions(WaterSystem_7c PRIVATE JET_WS_BUILD)
 # the water code still calls RenderSystem classes (GeometryChunk, Texture, DisplayFormat) by their original names
 target_link_libraries(WaterSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c.lib")
+# RenderOpenGL_7c: the OpenGL backend; no static imports from its renamed original yet
+target_link_libraries(RenderOpenGL_7c PRIVATE "${IMPLIB}/RenderSystem_7c.lib" "${IMPLIB}/Kernel_7c.lib" "${IMPLIB}/KernelStandard_7c.lib")
 # the map lets the diff tests find the parsers' internal entry points (RsTest*)
 target_link_options(RenderSystem_7c PRIVATE /MAP)
 # the shader-language scanners' DFA tables and their Lemon parsers' tables (generated output with no source), read

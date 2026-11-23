@@ -1,0 +1,3 @@
+# RenderOpenGL_7c: the OpenGL backend (DisplayOpenGL/XTerm, WGL interfaces, texture/vertex
+# buffer/shader backends). Every export still forwards to RenderOpenGL_7c_orig.dll; names move
+# here unit by unit. The decompiled reference is D:\trainz12-decomp\decomp\RenderOpenGL_7c.dll.c.
