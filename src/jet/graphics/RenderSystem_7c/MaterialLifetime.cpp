@@ -45,10 +45,13 @@ F Sym(HMODULE module, const char* name)
     return reinterpret_cast<F>(GetProcAddress(module, name));
 }
 
-void* OrigRva(unsigned rva)
+// The ReferenceCount subobject exists on both sides; its vftable is exported by KernelStandard.
+void* ReferenceCountVtable()
 {
-    static unsigned char* const base = reinterpret_cast<unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll"));
-    return base + rva;
+    if (HMODULE const ks = GetModuleHandleA("KernelStandard_7c.dll"))
+        if (void* const local = reinterpret_cast<void*>(GetProcAddress(ks, "??_7ReferenceCount@Jet@@6B@")))
+            return local;
+    return nullptr;
 }
 
 // ReferenceCount's destructor is protected, and the original calls it non-virtually on the base subobject. A small
@@ -212,7 +215,7 @@ extern "C" void* __fastcall RsU7MaterialCtor(void* self, void*, void* manager, i
     if (constructVirtualBases) {
         *reinterpret_cast<void**>(p + 4) = RsMatVbtableMaterial;
         const int offset = VbOffset(p);
-        *reinterpret_cast<void**>(p + 4 + offset) = OrigRva(0x6ebc4);  // ReferenceCount's vftable
+        *reinterpret_cast<void**>(p + 4 + offset) = ReferenceCountVtable();  // ReferenceCount's vftable
         *reinterpret_cast<int*>(p + 8 + offset) = 1;
     }
     PluginInstanceCtor()(p + 4, 0);
@@ -268,7 +271,7 @@ extern "C" void __fastcall RsU7MaterialVbaseDtor(void* self, void*)
     // the original's vbase destructor calls ReferenceCount's (non-virtual) destructor, which only replaces the
     // virtual base's vptr. Doing the write directly avoids a second virtual dispatch through the just-replaced
     // vftable, and keeps the primary vptr pointing at this module's mirror.
-    *reinterpret_cast<void**>(p + 0xa0) = OrigRva(0x6ebc4);
+    *reinterpret_cast<void**>(p + 0xa0) = ReferenceCountVtable();
     *reinterpret_cast<void**>(p) = RsMatVftableMaterial;
 }
 
@@ -298,7 +301,7 @@ extern "C" void* __fastcall RsU7NullMaterialCtor(void* self, void*, const void* 
     if (constructVirtualBases) {
         *reinterpret_cast<void**>(p + 4) = RsMatVbtableNullMaterial;
         const int offset = VbOffset(p);
-        *reinterpret_cast<void**>(p + 4 + offset) = OrigRva(0x6ebc4);
+        *reinterpret_cast<void**>(p + 4 + offset) = ReferenceCountVtable();
         *reinterpret_cast<int*>(p + 8 + offset) = 1;
     }
     RsU7MaterialCtor(p, nullptr, nullptr, 0);  // the original pushes 0 for Material's hidden flag
@@ -334,7 +337,7 @@ extern "C" void __fastcall RsU7NullMaterialVbaseDtor(void* self, void*)
     RsU7NullMaterialDtor(p + 0xa4, nullptr);
     // as in Material's vbase destructor, write ReferenceCount's vptr directly: the imported virtual destructor
     // would dispatch through the vftable we have just replaced and leave an original-module pointer here
-    *reinterpret_cast<void**>(p + 0xa4) = OrigRva(0x6ebc4);
+    *reinterpret_cast<void**>(p + 0xa4) = ReferenceCountVtable();
     *reinterpret_cast<void**>(p) = RsMatVftableNullMaterial;
 }
 
@@ -350,11 +353,9 @@ void* __cdecl RsU7NullCreateInstance(const void* self)
 bool __cdecl RsU7NullEquals(const void* self, const void* other)
 {
     if (!other) return false;
-    // __RTDynamicCast in the original accepts any NullMaterial; both our mirror table and the original's own
-    // table identify one (the latter is still what objects the original created carry)
+    // __RTDynamicCast in the original accepts any NullMaterial; only local objects exist now.
     const void* vptr = *static_cast<void* const*>(other);
-    const void* originalTable = OrigRva(0x717bc);  // the original's NullMaterial vftable
-    if (vptr != RsMatVftableNullMaterial && vptr != originalTable) return false;
+    if (vptr != RsMatVftableNullMaterial) return false;
     const auto* a = static_cast<const unsigned char*>(self);
     const auto* b = static_cast<const unsigned char*>(other);
     if (*reinterpret_cast<void* const*>(a + 0x9c) != *reinterpret_cast<void* const*>(b + 0x9c)) return false;

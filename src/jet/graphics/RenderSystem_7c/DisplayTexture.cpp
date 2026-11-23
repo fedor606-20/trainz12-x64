@@ -3,9 +3,11 @@
 // assembly, quirks included: Create refuses only volume textures (dimension 2); Load and SubLoad hand CheckFormat
 // one int for two (three) of its outputs, and Load carries on with the level Convert may have written there;
 // CreateInstance frees the source's kept bitmap after copying it (once per face for a cube map) and leaves the
-// pointer. The null display's format table (0x100b8228) and the statics stay the original's (U9).
+// pointer. The null display's format table is local (DisplayNull.cpp) and the statics are local too (U16).
 #include <jet/Texture.h>
 #include <jet/VCall.h>
+
+#include "DisplayNull.h"
 
 #include <windows.h>
 
@@ -37,21 +39,7 @@ void X87Copy(float* to, const float* from)
 // bits 0..2 of +0x2c are copied, the rest of the destination's byte stays
 void CopyFlags(unsigned char& to, unsigned char from) { to = static_cast<unsigned char>((to & ~7) | (from & 7)); }
 
-// the null display's format table (0x100b8228, 36 bytes per DFormatId, filled by DisplayNull)
-struct NullFormat {
-    unsigned int flags;  // bit 0 supported as is, bit 1 compressed
-    int unused[3];
-    int blockBits;       // +0x10 bits per 4x4 block (compressed)
-    NullFormat* link;    // +0x14 the format it is converted to
-    DisplayFormat format;  // +0x18
-};
-static_assert(sizeof(NullFormat) == 0x24 || sizeof(void*) != 4, "NULLFormat");
-
-NullFormat* Entry(unsigned char id)
-{
-    static unsigned char* const base = reinterpret_cast<unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll"));
-    return reinterpret_cast<NullFormat*>(base + 0xb8228) + id;
-}
+// the null display's format table is owned by DisplayNull.cpp
 
 int Mul(int a, int b) { return static_cast<int>(static_cast<unsigned int>(a) * static_cast<unsigned int>(b)); }
 
@@ -359,7 +347,7 @@ bool __cdecl DisplayTextureNull::Create(const Size& s, const DisplayFormat& form
     formatId = format.id;
     format.Classify();
     if (format.depthBits > 0) flag68 = false;
-    NullFormat* e = Entry(format.id);
+    NULLFormat* e = NullFormatEntry(format.id);
     if (!(e->flags & 1)) e = e->link;
     if (e->flags & 2) {
         memorySize = static_cast<unsigned int>(Mul(Mul(e->blockBits, s.w), s.h) / 16);
@@ -404,7 +392,7 @@ NULLFormat* __cdecl DisplayTextureNull::CheckFormat(DisplayFormat& format, void*
                                                     int width, int height)
 {
     format.Classify();
-    NullFormat* const e = Entry(format.id);
+    NULLFormat* const e = NullFormatEntry(format.id);
     if (e->flags & 1) return reinterpret_cast<NULLFormat*>(e);
     if (!data) return nullptr;
     if (!e->link) return nullptr;
@@ -421,18 +409,18 @@ bool __cdecl DisplayTextureNull::Load(unsigned int level, DisplayFormat& format,
     const Bitmap* volatile given = &bitmap;  // (TS12 tests the reference for null)
     const Bitmap* const bmp = given;
     void* data;
-    NullFormat* e;
+    NULLFormat* e;
     unsigned int lv = level;
     if (bmp) {
         data = bmp->GetPtr();
         int pitch = static_cast<int>(bmp->GetPitch() / (static_cast<unsigned int>(format.bits) >> 3));
         if (!pitch) pitch = bmp->width;
         int& l = reinterpret_cast<int&>(lv);
-        e = reinterpret_cast<NullFormat*>(CheckFormat(format, data, pitch, l, l, bmp->width, bmp->height));
+        e = reinterpret_cast<NULLFormat*>(CheckFormat(format, data, pitch, l, l, bmp->width, bmp->height));
     } else {
         data = nullptr;
         int zero = 0;
-        e = reinterpret_cast<NullFormat*>(CheckFormat(format, data, zero, zero, zero, 0, 0));
+        e = reinterpret_cast<NULLFormat*>(CheckFormat(format, data, zero, zero, zero, 0, 0));
     }
     if (!e || dimension == 2) return false;
     if (dirty) dirty = false;
@@ -462,7 +450,7 @@ bool __cdecl DisplayTextureNull::SubLoad(unsigned int level, const Rect& area, D
     void* data = bitmap.GetPtr();
     int pitch = static_cast<int>(bitmap.GetPitch() / (static_cast<unsigned int>(format.bits) >> 3));
     if (!pitch) pitch = bitmap.width;
-    NullFormat* const e = reinterpret_cast<NullFormat*>(CheckFormat(format, data, pitch, pitch, pitch, area.w, area.h));
+    NULLFormat* const e = reinterpret_cast<NULLFormat*>(CheckFormat(format, data, pitch, pitch, pitch, area.w, area.h));
     if (!e || (e->flags & 2) || dimension == 2) return false;
     flags &= ~4;
     return true;

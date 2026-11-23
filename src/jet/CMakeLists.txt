@@ -154,6 +154,13 @@ add_custom_command(
     COMMAND ${PY} -I "${TOOLS}/extract_vertex_recipes.py" "${ORIG_RS}" "${JET_DUMPBIN}" "${GEN}/rs_vertex_recipes.h"
     DEPENDS "${TOOLS}/extract_vertex_recipes.py" "${ORIG_RS}" VERBATIM)
 list(APPEND RS_TABLES "${GEN}/rs_vertex_recipes.h")
+# U16: local vtable slot maps. The rebuilt DLL resolves slot names in itself, so a missing
+# original no longer leaves the exported tables zero.
+add_custom_command(
+    OUTPUT "${GEN}/rs_local_tables.h"
+    COMMAND ${PY} -I "${TOOLS}/gen_local_tables.py" "${ORIG_RS}" "${GEN}/rs_local_tables.h"
+    DEPENDS "${TOOLS}/gen_local_tables.py" "${ORIG_RS}" VERBATIM)
+list(APPEND RS_TABLES "${GEN}/rs_local_tables.h")
 target_sources(RenderSystem_7c PRIVATE ${RS_TABLES})
 target_include_directories(RenderSystem_7c PRIVATE "${GEN}")
 target_compile_definitions(InputSystem_7c PRIVATE JET_IS_BUILD)

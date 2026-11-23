@@ -20,6 +20,8 @@ namespace Jet {
 extern const DCull DisplayInverseCull[3]{DCULL_NONE, static_cast<DCull>(2), static_cast<DCull>(1)};
 
 namespace {
+
+
 template<class T>
 const T& ReadState(const Display* display, unsigned offset)
 {
@@ -418,11 +420,23 @@ void __cdecl Display::SetGlobalAmbient(const Color& color)
     *reinterpret_cast<unsigned long*>(state + 0xb4) = ConvertColor(color);
 }
 
+namespace {
+DFormatId* FindRetailInternalColorFormat()
+{
+    const HMODULE module = GetModuleHandleA("RenderSystem_7c_orig.dll");
+    return module ? reinterpret_cast<DFormatId*>(GetProcAddress(module,
+        "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A")) : nullptr;
+}
+}
+
 DFormatId __cdecl Display::GetInternalColorFormat()
 {
-    // U16: the local data export. The retail image initialises it to 2 and never changes it.
+    // U16: `internalColorFormat` is a mirror. While the retail module is loaded, read its live static:
+    // renderer plugins and the differential probes change it at run time. Only fall back to the local
+    // copy when the original is absent (the stand-alone configuration).
     extern unsigned char RsRsD037[4];
-    return *reinterpret_cast<const DFormatId*>(RsRsD037);
+    static DFormatId* const retail = FindRetailInternalColorFormat();
+    return retail ? *retail : *reinterpret_cast<const DFormatId*>(RsRsD037);
 }
 
 namespace {
@@ -905,13 +919,14 @@ struct ContextStorage {
 
 FARPROC ContextVtable(const char* name)
 {
-    // U16: our own exported table first; the original is only a fallback while the cutover is incomplete.
-    if (HMODULE const self = GetModuleHandleA("RenderSystem_7c.dll")) {
-        if (FARPROC const local = GetProcAddress(self, name)) return local;
+    // Keep the retail table whenever the original module is loaded: these base contexts cross the DLL
+    // boundary, and the retail owners (renderer plugins, trainz.exe) call slots in it directly. The
+    // local table remains the stand-alone fallback.
+    if (HMODULE const original = GetModuleHandleA("RenderSystem_7c_orig.dll")) {
+        if (FARPROC const table = GetProcAddress(original, name)) return table;
     }
-    if (HMODULE const original = GetModuleHandleA("RenderSystem_7c_orig.dll"))
-        return GetProcAddress(original, name);
-    return nullptr;
+    HMODULE const self = GetModuleHandleA("RenderSystem_7c.dll");
+    return self ? GetProcAddress(self, name) : nullptr;
 }
 
 constexpr auto sharedContextVtable = "??_7SharedContext@Jet@@6B@";

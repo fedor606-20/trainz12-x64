@@ -84,18 +84,11 @@ void Assign(PString& dst, const PString& src)
     ::new (&dst) PString(src);
 }
 
-unsigned char* OrigBase()
-{
-    static unsigned char* const base = reinterpret_cast<unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll"));
-    return base;
-}
-
-// the original's statics that stay shared until U9
+// The decorated-name marker is local now (the retail static was a pointer only).
 const PString& DecoratedTypeToken()
 {
-    static const PString* const p = reinterpret_cast<const PString*>(
-        GetProcAddress(reinterpret_cast<HMODULE>(OrigBase()), "?DecoratedTypeToken@Material@Jet@@2VPString@2@A"));
-    return *p;
+    static const PString fallback("m.");
+    return fallback;
 }
 
 // the manager's vtable slots used here: 4 Add, 5 Remove, 6 Find (the virtuals are __cdecl with `this` first)

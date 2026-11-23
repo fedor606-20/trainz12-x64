@@ -107,13 +107,6 @@ void AppendMap(Array<VertexProgram::MatrixMap*, 128>& a, VertexProgram::MatrixMa
     ++a.count;
 }
 
-// the original's U5b2 entry points (looked up once)
-template <class F>
-F Orig(const char* name)
-{
-    return reinterpret_cast<F>(GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"), name));
-}
-
 }  // namespace
 
 // shared with the multi stream chunks (GeometryStreams.cpp)

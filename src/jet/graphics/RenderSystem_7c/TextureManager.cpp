@@ -1,10 +1,8 @@
 // Unit U6d1a of RenderSystem_7c: TextureManager's containers and lifetime (0x10041420..0x10042361, the helpers
 // 0x10042d00..0x10043187 and the folded getters 0x10004aa0 / 0x10004eb0 / 0x10004ec0). Behaviour follows the
 // TS12 assembly (addresses per function). U6d1b starts with queueing and cancelling texture downsizes.
-// Update and the async loader still call the original's exports. The manager's
-// statics, the TextureResource defaults Init sets, the format-name table (0x100b8780, built by the original's
-// initializer) and SharedTextureCollection's substitute texture and name (0x100b8708 / 0x100b8734) stay the
-// original's.
+// Update and the async loader still call the original's exports. The manager's format-name table, the default
+// format name and SharedTextureCollection's substitute texture and name are local (TextureData.cpp).
 #include <jet/KernelResources.h>
 #include <jet/Texture.h>
 #include <jet/VCall.h>
@@ -12,6 +10,8 @@
 #include <windows.h>
 
 #include <new>
+
+#include "TextureData.h"
 
 extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
@@ -37,12 +37,6 @@ namespace {
 
 using Node = PStringCache::Node;
 
-unsigned char* OrigBase()
-{
-    static unsigned char* const base = reinterpret_cast<unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll"));
-    return base;
-}
-
 // 0x100411a0: a copy of `a` with `text` appended
 PString Concat(const PString& a, const char* text)
 {
@@ -63,22 +57,9 @@ const void* NameKey(const Texture* t) { return t->GetName().node; }
 Display* KernelDisplay(const RenderKernel* k) { return *reinterpret_cast<Display* const*>(reinterpret_cast<const char*>(k) + 0x7c); }
 OS* KernelOS(const RenderKernel* k) { return *reinterpret_cast<OS* const*>(reinterpret_cast<const char*>(k) + 0x8c); }
 
-// Retail initialization at 0x1005e570 builds these 16 pairs, in this order.
-struct FormatName {
-    const char* name;
-    int id;
-};
-constexpr char kDefaultFormatName[] = "ARGB8888";
-constexpr FormatName kFormatNames[] = {
-    {"DXT1", 10}, {"DXT3", 11}, {"DXT5", 12}, {"ATC", 25},
-    {"ATCE", 26}, {"ATCI", 27}, {"ETC1", 28}, {kDefaultFormatName, 1},
-    {"ABGR8888", 2}, {"RGB0888", 3}, {"BGR0888", 4}, {"RGB888", 5},
-    {"BGR888", 6}, {"ARGB4444", 7}, {"RGB565", 8}, {"RGB555", 9},
-};
-
 // SharedTextureCollection::textureArray[2] (an AutoReference) and textureNameArray[2]
-Texture*& SubstituteTexture() { return *reinterpret_cast<Texture**>(OrigBase() + 0xb8708); }
-const PString& SubstituteName() { return *reinterpret_cast<const PString*>(OrigBase() + 0xb8734); }
+Texture*& SubstituteTexture() { return TextureData::SharedTextureSlot(2); }
+const PString& SubstituteName() { return TextureData::SharedTextureName(2); }
 
 // 0x1006b110 / 0x100b1bec
 const char* const kAutoMipNames[4] = {"none", "default", "fastest", "nicest"};
@@ -674,9 +655,9 @@ bool __cdecl TextureManager::Init(RenderKernel* k)
     if (!o) return true;
     o->Get("GlobalTextureResolution", globalSkipLevels, globalSkipLevels);
     o->Get("TextureResThreshold", globalSkipThreshold, globalSkipThreshold);
-    PString format(kDefaultFormatName);
+    PString format(TextureData::kDefaultFormatName);
     o->Get("DefaultTextureFormat", format, format);
-    for (const auto& entry : kFormatNames)
+    for (const auto& entry : TextureData::kFormatNames)
         if (!format.CompareIgnoreCase(entry.name)) {
             TextureResource::DISPLAYFORMATID_DEFAULT = static_cast<DFormatId>(entry.id);
             RsMirrorSync("?DISPLAYFORMATID_DEFAULT@TextureResource@Jet@@0W4DFormatId@2@A");

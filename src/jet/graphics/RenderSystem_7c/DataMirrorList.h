@@ -11,12 +11,12 @@
     X(RsRsD045, "?nextFreeId@VertexType@Jet@@1HA", 4) \
     X(RsRsD053, "?projectorCache@Projector@Jet@@1PAVProjectorCache@2@A", 4) \
     X(RsRsD059, "?results@TextureCombinerManager@Jet@@2QBUResultTable@2@B", 4) \
-    X(RsRsD060, "?results@VertexProgramManager@Jet@@2QBUResultTable@2@B", 4) \
-    X(RsRsD068, "?textureArray@SharedTextureCollection@Jet@@1PAV?$AutoReference@VTexture@Jet@@@2@A", 44) \
-    X(RsRsD069, "?textureNameArray@SharedTextureCollection@Jet@@1PAVPString@2@A", 44)
+    X(RsRsD060, "?results@VertexProgramManager@Jet@@2QBUResultTable@2@B", 4)
+// ?textureArray@... and ?textureNameArray@... are owned by TextureData.cpp: they are live local
+// storage, not snapshots of the original module's arrays.
 
 #define RS_VFTABLE_DATA(X) \
-    X(RsRsV001, "??_7Display@Jet@@6B01@@", 80) \
+    X(RsRsV001, "??_7Display@Jet@@6B01@@", 152) \
     X(RsRsV002, "??_7Display@Jet@@6BPluginInstance@1@@", 2) \
     X(RsRsV003, "??_7DisplayContext@Display@Jet@@6B@", 1) \
     X(RsRsV004, "??_7DisplaySaveBuffer@Jet@@6B@", 4) \

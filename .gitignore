@@ -15,6 +15,12 @@ log_names_trainz.txt
 
 __pycache__/
 
+# local CMake build trees
+/build32/
+/build32-*/
+/build64/
+/build-trainz32/
+
 # temp files the original File class leaves when a test is killed
 [0-9A-F]*.T[0-9A-F]*
 

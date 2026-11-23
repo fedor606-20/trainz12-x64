@@ -15,12 +15,15 @@
 #include <cstddef>
 #include <cstring>
 
+#include <jet/UId.h>
+
 // this initializer must run before any other unit in this DLL can publish one of these pointers
 #pragma warning(disable : 4073)  // initializers put in library initialization area
 #pragma init_seg(lib)
 
 void* __cdecl RsU7NullCreateInstance(const void*);
 bool __cdecl RsU7NullEquals(const void*, const void*);
+extern "C" bool RsFillLocalVtable(unsigned char*, void**, const char*);
 
 // exported data symbols (aliased to the original mangled names in implemented.txt); declared before the
 // initialiser below so its member bodies can see them. Their 4-byte storage mirrors the original statics,
@@ -94,7 +97,10 @@ void CopyStatic(void* destination, const char* name, std::size_t size)
 void CopyVftable(void* table, void* meta, const char* name, std::size_t slots)
 {
     void* const source = OrigSym(name);
-    if (!source) return;
+    if (!source) {
+        RsFillLocalVtable(static_cast<unsigned char*>(table), static_cast<void**>(meta), name);
+        return;
+    }
 
     auto* const src = static_cast<unsigned char*>(source);
     auto* const dst = static_cast<unsigned char*>(table);
@@ -133,6 +139,12 @@ struct MirrorStatics {
         CopyStatic(RsMatStringNotFound, "?STRING_NOT_FOUND@Material@Jet@@2VPString@2@A", 4);
         CopyStatic(RsMatPluginGroupName, "?PluginGroupName@MaterialPlugin@Jet@@2VPString@2@A", 4);
         CopyStatic(RsMatPluginGroupUid, "?PluginGroupUID@MaterialPlugin@Jet@@2VUId@2@A", 16);
+        if (!OrigSym("?PluginGroupUID@MaterialPlugin@Jet@@2VUId@2@A")) {
+            // Render3DCore registers its material plugins with this group UID; a zero mirror puts
+            // them in another group and every material lookup fails.
+            *reinterpret_cast<Jet::UId*>(RsMatPluginGroupUid) =
+                Jet::UId("C58F5BDE-D667-43f9-8ACE-86BF5B3EEA08");
+        }
         CopyStatic(RsMaterialResults, "?results@Material@Jet@@2QBUResultTable@2@B", 4);
         CopyStatic(RsMaterialManagerResults, "?results@MaterialManager@Jet@@2QBUResultTable@2@B", 4);
         CopyStatic(RsMatUniqueMatId, "?uniqueMatId@Material@Jet@@0KA", 4);
@@ -143,6 +155,10 @@ struct MirrorStatics {
                     "??_7Material@Jet@@6BPluginInstance@1@@",
                     sizeof RsMatVftableMaterialInstance / sizeof RsMatVftableMaterialInstance[0]);
         CopyStatic(RsMatVbtableMaterial, "??_8Material@Jet@@7B@", sizeof RsMatVbtableMaterial);
+        if (!OrigSym("??_8Material@Jet@@7B@")) {
+            RsMatVbtableMaterial[0] = 0;
+            RsMatVbtableMaterial[1] = 0x9c;
+        }
         CopyVftable(RsMatVftableMaterialPlugin, &RsMatVftableMaterialPluginMeta,
                     "??_7MaterialPlugin@Jet@@6B@",
                     sizeof RsMatVftableMaterialPlugin / sizeof RsMatVftableMaterialPlugin[0]);
@@ -159,6 +175,10 @@ struct MirrorStatics {
                     "??_7NullMaterial@Jet@@6BPluginInstance@1@@",
                     sizeof RsMatVftableNullMaterialInstance / sizeof RsMatVftableNullMaterialInstance[0]);
         CopyStatic(RsMatVbtableNullMaterial, "??_8NullMaterial@Jet@@7B@", sizeof RsMatVbtableNullMaterial);
+        if (!OrigSym("??_8NullMaterial@Jet@@7B@")) {
+            RsMatVbtableNullMaterial[0] = 0;
+            RsMatVbtableNullMaterial[1] = 0xa0;
+        }
 
         // the two NullMaterial virtuals of this unit now resolve into our code; compare_vtables still sees local
         // slots on both sides, and the rest of both tables is byte-for-byte the original's
@@ -175,9 +195,10 @@ struct MirrorStatics {
 extern "C" unsigned long RsMatNextUniqueId()
 {
     auto* const counter = static_cast<unsigned long*>(OrigSym("?uniqueMatId@Material@Jet@@0KA"));
-    if (!counter) return 0;
-    const unsigned long id = static_cast<unsigned long>(
-        InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(counter), 1));
+    static unsigned long localCounter = 1;
+    volatile LONG* const source = counter
+        ? reinterpret_cast<volatile LONG*>(counter) : reinterpret_cast<volatile LONG*>(&localCounter);
+    const unsigned long id = static_cast<unsigned long>(InterlockedExchangeAdd(source, 1));
     InterlockedExchange(reinterpret_cast<volatile LONG*>(RsMatUniqueMatId), static_cast<LONG>(id + 1));
     return id;
 }

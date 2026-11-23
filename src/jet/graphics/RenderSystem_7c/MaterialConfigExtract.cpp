@@ -151,8 +151,12 @@ ReferenceCount* MaterialRefs(void* material)
 
 void __cdecl RsMaterialConfigSetVtable(void* object)
 {
-    static void* const table = reinterpret_cast<void*>(GetProcAddress(
-        GetModuleHandleA("RenderSystem_7c_orig.dll"), "??_7MaterialConfig@Jet@@6B@"));
+    static void* const table = [] {
+        if (HMODULE self = GetModuleHandleA("RenderSystem_7c.dll"))
+            if (auto* local = reinterpret_cast<void*>(GetProcAddress(self, "??_7MaterialConfig@Jet@@6B@")))
+                return local;
+        return static_cast<void*>(nullptr);
+    }();
     *static_cast<void**>(object) = table;
 }
 

@@ -8,10 +8,10 @@
 #include <jet/Plugin.h>
 #include <jet/RenderSystem.h>
 #include <jet/Texture.h>
+
+
 #include <jet/UId.h>
 #include <jet/VCall.h>
-
-#include <windows.h>
 
 #include <cstring>
 #include <new>

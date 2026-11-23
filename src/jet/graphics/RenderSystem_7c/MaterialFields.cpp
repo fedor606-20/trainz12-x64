@@ -136,9 +136,8 @@ PString* __cdecl RsMatGetProperty(void* p, const PString* key, bool* found)
         } while (chunk != first);
     }
     if (found) *found = false;
-    static auto* const missing = reinterpret_cast<PString*>(GetProcAddress(
-        GetModuleHandleA("RenderSystem_7c_orig.dll"), "?STRING_NOT_FOUND@Material@Jet@@2VPString@2@A"));
-    return missing;
+    static PString fallback("string not found");
+    return &fallback;
 }
 PString* __cdecl RsMatGetPropertySimple(void* p, const PString* key) { return RsMatGetProperty(p, key, nullptr); }
 unsigned long __cdecl RsMatSortKey(void* p)

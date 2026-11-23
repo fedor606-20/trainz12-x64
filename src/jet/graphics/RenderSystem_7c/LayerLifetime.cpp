@@ -1,4 +1,6 @@
-// Win32 lifetime exports use compatibility tables with retail RTTI and local virtual methods.
+// Win32 lifetime exports use compatibility tables.  While the renamed original is loaded its slots and RTTI
+// locator are mirrored; without it the same slots are filled from local virtuals plus the generated class
+// hierarchy in LocalTables.cpp.
 // Fastcall adapters take the incoming this in ECX and ignore EDX, matching the exported thiscall stack.
 #include <jet/RenderSystem.h>
 
@@ -26,6 +28,12 @@ namespace Jet {
 LayerManager* SharedLayerManager();
 LayerGroup* LayerManagerRoot(LayerManager* manager);
 Size LayerTargetSize(const Display* display);
+
+// Local RTTI builder in LocalTables.cpp (generated class hierarchies).
+extern "C" const void* RsLocalRttiLocator(const char* tableName);
+
+// LayerGroup.cpp: install the retail base table while the renamed original is loaded.
+void UseRetailLayerTable(Layer& layer);
 
 namespace {
 enum class Table { Layer, Group, Overlay, Clear, Viewer, ResourceManager };
@@ -142,6 +150,8 @@ struct LayerLifetimeAccess {
             VDelete(child);
         }
         Drop(obj);
+        // The retail LayerManager destructor ends with the base Layer table in the object.
+        UseRetailLayerTable(obj);
     }
 
     static void InitViewer(SystemResourceViewer& obj, RenderKernel* kernel, const PString& name)
@@ -371,6 +381,20 @@ void __fastcall RsLayerManagerDrop(void*, void*);
 namespace {
 using Destructor = void (__fastcall*)(void*, void*);
 
+int __cdecl LocalNoop() { return 0; }
+
+template <class F>
+void FillMissingTable(void** table, size_t slots, void*& meta, const char* name,
+                      F deletingDestructor)
+{
+    for (size_t i = 0; i < slots; ++i) table[i] = reinterpret_cast<void*>(&LocalNoop);
+    table[0] = reinterpret_cast<void*>(deletingDestructor);
+    // Real MSVC class hierarchy built by LocalTables.cpp from the generated RTTI data.
+    const void* const locator = RsLocalRttiLocator(name);
+    meta = const_cast<void*>(locator);
+    if (locator) std::memcpy(reinterpret_cast<unsigned char*>(table) - sizeof meta, &locator, sizeof locator);
+}
+
 template <unsigned stride, Destructor drop>
 void* __fastcall DeletingDestructor(void* p, void*, unsigned flags)
 {
@@ -396,8 +420,12 @@ void* __fastcall DeletingDestructor(void* p, void*, unsigned flags)
 template <size_t n, class F>
 void MirrorTable(HMODULE original, void* (&table)[n], void*& meta, const char* name, F deletingDestructor)
 {
-    const auto* source = reinterpret_cast<void* const*>(GetProcAddress(original, name));
-    if (!source) return;  // no original at load: the table stays empty until its unit is ported
+    const auto* source = original ?
+        reinterpret_cast<void* const*>(GetProcAddress(original, name)) : nullptr;
+    if (!source) {
+        FillMissingTable(table, n, meta, name, deletingDestructor);
+        return;
+    }
     std::memcpy(table, source, sizeof table);
     meta = source[-1];
     std::memcpy(reinterpret_cast<unsigned char*>(table) - sizeof meta, &meta, sizeof meta);

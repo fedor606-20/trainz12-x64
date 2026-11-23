@@ -11,6 +11,7 @@ extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirr
 
 extern unsigned char RsRsD019[32];
 extern unsigned char RsRsD020[32];
+extern unsigned char RsRsD038[4];  // exported ?layerManager@Layer@Jet@@1PAVLayerManager@2@A mirror
 
 namespace Jet {
 
@@ -159,14 +160,43 @@ const IList<Layer>& __cdecl LayerGroup::GetLayerList() const
 const Rect& __cdecl LayerGroup::GetViewRect() const { return view; }
 void __cdecl LayerGroup::SetViewRect(const Rect& rect) { view = rect; }
 
+static constexpr const char* kLayerManagerSymbol = "?layerManager@Layer@Jet@@1PAVLayerManager@2@A";
+
 static LayerManager*& SharedLayerManagerSlot()
 {
-    // U16: local storage. LayerManager::Init sets it and Drop clears it, as the retail static did.
-    static LayerManager* manager;
-    return manager;
+    // When the renamed original is loaded it still owns the live Layer::layerManager slot: retail code
+    // and the differential probes write that address directly. Read and write the same slot so both
+    // modules observe one manager. Without the original the exported data mirror is the live slot, so
+    // readers of the exported symbol still see the manager.
+    static LayerManager** const live = reinterpret_cast<LayerManager**>(
+        GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"), kLayerManagerSymbol));
+    return live ? *live : *reinterpret_cast<LayerManager**>(RsRsD038);
 }
 
 LayerManager* SharedLayerManager() { return SharedLayerManagerSlot(); }
+
+namespace {
+void** RetailTable(const char* name)
+{
+    return reinterpret_cast<void**>(GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"), name));
+}
+}  // namespace
+
+// The exported layer tables are always local, but a retail-constructed object carries the retail
+// table address. While the renamed original is loaded, internal objects keep that address so they are
+// byte-identical to the original and dispatch stays with retail code, exactly as before the cutover.
+// The stand-alone build keeps the local table.
+void UseRetailGroupTable(LayerGroup& group)
+{
+    static void** const retail = RetailTable("??_7LayerGroup@Jet@@6B@");
+    if (retail) *reinterpret_cast<void***>(&group) = retail;
+}
+
+void UseRetailLayerTable(Layer& layer)
+{
+    static void** const retail = RetailTable("??_7Layer@Jet@@6B@");
+    if (retail) *reinterpret_cast<void***>(&layer) = retail;
+}
 
 Size LayerTargetSize(const Display* d)
 {
@@ -281,11 +311,6 @@ SystemResourceViewer* __cdecl LayerManager::FindSystemResourceViewer(const PStri
 }
 
 namespace {
-FARPROC LayerManagerSymbol(const char* name)
-{
-    return GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"), name);
-}
-
 void** LayerManagerTable()
 {
     return RsLayerManagerVftable;
@@ -323,8 +348,10 @@ void LayerManager::Init()
     vptr = LayerManagerTable();
     const PString name("LayerManager");
     RsGroupGrouped(&root, nullptr, nullptr, &name, 0, true);
+    UseRetailGroupTable(root);
     new (&viewers) SystemResourceViewerList();
     SharedLayerManagerSlot() = this;
+    RsMirrorSync(kLayerManagerSymbol);
 }
 
 void LayerManager::Copy(const LayerManager& source)
@@ -354,7 +381,10 @@ void LayerManager::Drop()
     for (auto i = viewers.First(); i != viewers.End(); ++i)
         if (auto* viewer = *i) VDelete(viewer);
     viewers.RemoveAll();
-    if (SharedLayerManagerSlot() == this) SharedLayerManagerSlot() = nullptr;
+    if (SharedLayerManagerSlot() == this) {
+        SharedLayerManagerSlot() = nullptr;
+        RsMirrorSync(kLayerManagerSymbol);
+    }
     viewers.~SystemResourceViewerList();
     RsGroupDrop(&root, nullptr);
 }

@@ -1063,3 +1063,53 @@ still mismatches, so the earlier green baseline for those three is not
 reproduced. Rebuild the fixture from a known-good retail set before trusting
 their results.
 
+
+### U16 progress: local tables and stand-alone fallbacks (2026-11-24)
+
+`tools/gen_local_tables.py` now emits `rs_local_tables.h` from the pristine DLL at build
+time. It maps each slot of the Display family, DisplayContext, Selector, RenderKernel and
+material tables to our own export names, and replaces the shared three-byte stubs with one
+local stub. `Display` is mirrored as 152 slots (the old mirror kept 80). The Display
+vbtable, DisplayContext deleting destructor, material vtables and vbtables, and the seven
+layer-family tables now have local fallbacks when the original is missing. Material
+statics (decorated token, `STRING_NOT_FOUND`), the ReferenceCount vtable used by materials,
+the material-config table, and TextureManager's substitute texture/name also have local
+fallbacks.
+
+This removes the load-time crash and the null-table calls for the base Display, layer and
+material families. It does not finish the bitmap factory, the private `DisplayNull`
+constructor/format table, the texture-manager format and shared-texture data, or the full
+RTTI hierarchies. The white menu background is pre-existing and also occurs with the
+original DLL present and with the pre-batch backup DLL.
+
+### U16 result: independent module (2026-11-24)
+
+The private `DisplayNull`, its 29-entry format table, the bitmap resource/factories, the
+shared texture arrays/format table and the local RTTI/vtable layer are now implemented.
+`DisplayTexture` reads the local null-format table. `RsLoadRenderSystem` no longer calls
+`image + 0x1e130`; `LayerGroup` and `GeometryChunk` lost their unused retail helper lookups.
+Material statics and the unique-material-id counter have local fallbacks.
+
+With zero `*_orig*` files in `bin`, the game reaches the route/session page and renders its
+background and route thumbnail. One optional `RenderSystem_7c_orig` literal remains for the
+data mirrors in `DataStatics`, `LayerLifetime` and `MaterialStatics`; those mirrors are
+bypassed when the module is absent.
+
+Still required before calling U16 finished: fix the pre-existing differential failures, then
+test OpenGL, DirectX 9 and NullRender, one driving session and clean shutdown. A freshly built
+fixture reports the same `diff_rs_u9` mismatch at entry 48353 with the pre-batch U16 DLL.
+
+### U16 material plugin group
+
+The exported `MaterialPlugin::PluginGroupUID` is not just a mirror: Render3DCore registers its
+material plugins with that UID. With no original it was zero, so `notex`/`onetex`/`tbumptex`
+lookups failed and materials were null. `MaterialStatics.cpp` now writes the local UID
+`C58F5BDE-D667-43f9-8ACE-86BF5B3EEA08` when the original is absent. Railyard renders the Acela
+car correctly again (texture, alpha windows, interior). Route loading/driving remain to be
+verified.
+
+### U16: bright train windows closed as an asset issue
+
+The Acela window/body overbright seen at some Railyard angles reproduces with the retail
+RenderSystem DLL on the same asset. It is an asset/alpha defect, not this module. Material fields
+and the alpha/depth setters match retail. The material-plugin UID fix remains valid.

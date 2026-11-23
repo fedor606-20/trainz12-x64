@@ -25,13 +25,31 @@ T Symbol(const char* module, const char* name)
     return reinterpret_cast<T>(GetProcAddress(GetModuleHandleA(module), name));
 }
 
+// The exported arrays in DataStatics already hold the retail slots while the renamed original is
+// loaded and the local tables otherwise, so reading them from this module is enough: no retail
+// module lookup is needed here.
+HMODULE SelfModule()
+{
+    HMODULE module = nullptr;
+    GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                       reinterpret_cast<LPCSTR>(&SelfModule), &module);
+    return module;
+}
+
+template<class T>
+T LocalSymbol(const char* name)
+{
+    HMODULE const self = SelfModule();
+    return self ? reinterpret_cast<T>(GetProcAddress(self, name)) : T();
+}
+
 void InstallDisplayTables(unsigned char* display)
 {
-    // Derived backends still use retail RTTI and virtual dispatch.
-    At<void*>(display, 0) = Symbol<void*>("RenderSystem_7c_orig.dll", "??_7Display@Jet@@6B01@@");
+    // Derived backends install their own primary table; this one is for the base/null display.
+    At<void*>(display, 0) = LocalSymbol<void*>("??_7Display@Jet@@6B01@@");
     const int offset = At<const int*>(display, 4)[1];
     At<void*>(display, offset + 4) =
-        Symbol<void*>("RenderSystem_7c_orig.dll", "??_7Display@Jet@@6BPluginInstance@1@@");
+        LocalSymbol<void*>("??_7Display@Jet@@6BPluginInstance@1@@");
     At<int>(display, offset) = offset - (DisplayReferenceBase - 4);
 }
 
@@ -44,7 +62,7 @@ void DestroyReferenceBase(void* base)
 void* __fastcall RsDisplayCtor(unsigned char* display, void*, bool createContext, int mostDerived)
 {
     if (mostDerived) {
-        At<const int*>(display, 4) = Symbol<const int*>("RenderSystem_7c_orig.dll", "??_8Display@Jet@@7B@");
+        At<const int*>(display, 4) = LocalSymbol<const int*>("??_8Display@Jet@@7B@");
         At<void*>(display, DisplayReferenceBase) =
             Symbol<void*>("KernelStandard_7c.dll", "??_7ReferenceCount@Jet@@6B@");
         At<unsigned>(display, DisplayReferenceBase + 4) = 1;

@@ -9,9 +9,7 @@
 #include <xmmintrin.h>
 
 #include "LegacyPower.h"
-
-extern unsigned char RsRsD068[44];
-extern unsigned char RsRsD069[44];
+#include "TextureData.h"
 
 namespace Jet {
 
@@ -456,15 +454,8 @@ static Texture** SharedTextures()
 
 static PString* SharedNames()
 {
-    auto* const names = reinterpret_cast<PString*>(::RsRsD069);
-    if (names[0].node) return names;  // a mirrored copy from the original
-    static const char* const texts[11] = {
-        "AuranJetTexture:Default", "AuranJetTexture:DefaultBump", "AuranJetTexture:SubstituteLoadTexture",
-        "AuranJetTexture:D2Attenuation", "AuranJetTexture:SpotCubeMap", "AuranJetTexture:NormCubeMap",
-        "AuranJetTexture:Pow8", "AuranJetTexture:Pow16", "AuranJetTexture:Pow32",
-        "AuranJetTexture:SpecPow16", "AuranJetTexture:SpecPow32"};
-    for (int i = 0; i < 11; ++i) ::new (names + i) PString(texts[i]);
-    return names;
+    TextureData::EnsureSharedNames();
+    return reinterpret_cast<PString*>(::RsRsD069);
 }
 
 bool __cdecl RsGenerateSharedTexture(int id, const PString& name, TextureManager* manager, Texture*& result,

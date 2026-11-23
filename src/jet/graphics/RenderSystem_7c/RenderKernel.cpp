@@ -8,6 +8,8 @@
 #include <memory>
 #include <new>
 
+#include "DisplayNull.h"
+
 namespace Jet {
 namespace {
 template<class T>
@@ -29,31 +31,6 @@ void ReleaseDisplay(Display*& display)
 struct DisplayPluginLookup : PluginBase {
     using PluginBase::LookupPluginType;
 };
-
-DisplayTexture* __cdecl CreateNullTexture(Display* display)
-{
-    std::unique_ptr<void, decltype(&Alloc::Delete)> memory(Alloc::New(sizeof(DisplayTextureNull)), &Alloc::Delete);
-    if (!memory) return nullptr;
-    auto* const texture = ::new (memory.get()) DisplayTextureNull(display);
-    memory.release();
-    return texture;
-}
-
-void InstallNullTextureFactory(Display* display)
-{
-    // Retail's primary DisplayNull table spans 0x6fea4..0x70103; the RTTI locator precedes it.
-    struct Table {
-        void* entries[1 + 0x260 / sizeof(void*)];
-    };
-    auto& table = *reinterpret_cast<void***>(display);
-    static Table mirror = [&] {
-        Table result;
-        std::memcpy(result.entries, table - 1, sizeof result.entries);
-        result.entries[1 + 0x98 / sizeof(void*)] = reinterpret_cast<void*>(&CreateNullTexture);
-        return result;
-    }();
-    table = mirror.entries + 1;
-}
 }
 
 void __cdecl RsDisplaySetSelector(Display*, void*);
@@ -79,16 +56,9 @@ bool __cdecl RsLoadRenderSystem(RenderKernel* kernel, DisplaySelector* selector)
         return VCall<bool>(display, 0, os) && VCall<bool>(display, 0x34, options, false);
     };
     if (options->Get("NullRender")) {
-        // DisplayNull is private. Keep its constructor and vtable in the original for now.
-        const auto image = reinterpret_cast<const unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll"));
-        // U16: without the original there is no DisplayNull code to call; skip the branch instead of jumping
-        // into unmapped low memory. A local DisplayNull is still to be ported.
-        const auto construct = image ? reinterpret_cast<Display*(__stdcall*)(void*)>(image + 0x1e130) : nullptr;
-        std::unique_ptr<void, decltype(&Alloc::Delete)> storage(construct ? Alloc::New(0xf28) : nullptr, &Alloc::Delete);
-        display = storage ? construct(storage.get()) : nullptr;
+        // U16: the null renderer is local (DisplayNull.h); it no longer calls the renamed original.
+        display = DisplayNull::Create();
         if (display) {
-            storage.release();
-            InstallNullTextureFactory(display);
             RsDisplaySetSelector(display, selector);
             if (open()) return true;
             ReleaseDisplay(display);

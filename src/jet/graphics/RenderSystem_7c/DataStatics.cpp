@@ -1,6 +1,7 @@
 // U11: local storage for every remaining data export. The original DLL still owns the live objects;
 // these byte-for-byte mirrors are filled at load. Owned writers call RsMirrorSync after changing a
 // mutable static; trainz.exe resolves six of these names at runtime, so a stale snapshot would be visible.
+// The two SharedTextureCollection arrays are not mirrors: TextureData.cpp owns their live storage.
 #include <windows.h>
 
 #include <cstddef>
@@ -23,7 +24,7 @@ RS_PLAIN_DATA(X)
 
 #pragma section("RsDsV01", read, write)
 __declspec(allocate("RsDsV01")) __declspec(align(4)) void* RsRsV001Meta;
-__declspec(allocate("RsDsV01")) __declspec(align(4)) unsigned char RsRsV001[80 * 4];
+__declspec(allocate("RsDsV01")) __declspec(align(4)) unsigned char RsRsV001[152 * 4];
 
 #pragma section("RsDsV02", read, write)
 __declspec(allocate("RsDsV02")) __declspec(align(4)) void* RsRsV002Meta;
