@@ -3359,3 +3359,13 @@ vtables/RTTI and private helpers, so the game still needs the original until
 the U16 inventory in `notes/RenderSystem.md` is ported. No test result changed
 with the original present.
 
+### RenderSystem U16: local vtable/RTTI prototype reverted
+
+Generated a slot map for the 24 exported tables (191 of 226 slots are our
+exports; 35 are compiler-generated; many retail slots are shared stub bodies).
+A prototype built the tables locally with a minimal RTTI locator. `u8`, `u9`,
+`u11`, `u12` and `u13` passed, but `u3`/`u6` hit heap corruption at exit and
+`u7` showed material-plugin differences, so the wiring was reverted. The test
+fixture also lost its original-DLL copies; the retail VC80 8.0.50608.0 manifest
+and CRT assembly must be restored for the differential tests. No in-game run.
+

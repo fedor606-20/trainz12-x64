@@ -1004,3 +1004,39 @@ Order for the cutover: Display + its vtables/RTTI first (nothing renders
 without it), then the null display and its format table, then the bitmap
 factory, then layer and material tables, then geometry interpolation, then the
 remaining data arrays.
+
+### U16 attempt: local vtables and RTTI (reverted)
+
+A prototype rebuilt all 24 exported tables from our own exports, using a slot
+map generated from the retail export table. Of 226 slots, 191 map to a single
+export; 35 are compiler-generated (deleting destructors, adjustors, pure-call
+thunks). Several slots point to shared stub bodies (`xor eax,eax; ret`,
+`xor al,al; ret`, bare `ret`) that dozens of exports share, so an RVA-to-name
+map is ambiguous; the prototype classified those by function bytes instead.
+
+The load-time copy was replaced by a local fill plus a minimal local RTTI
+locator (correct type name, empty class hierarchy). `u8`, `u9`, `u11`, `u12`
+and `u13` passed with the rebuilt tables after their checks were changed to
+require local ownership instead of byte equality with retail. However `u3` and
+`u6` then hit heap corruption at process exit and `u7` reported material-plugin
+state differences ("mp copy" bytes at +4). The wiring was reverted; the
+generated slot map and builder are not kept in the tree.
+
+Next for this unit: per-slot ABI and behaviour review (not just names), real
+class hierarchies for dynamic_cast, adjustor thunks for the secondary
+PluginInstance tables, and deleting destructors for each family. Shared stub
+slots must stay stubs, not exports.
+
+### Test fixture issue
+
+The differential fixture's `X_orig.dll` copies were lost with the temp folder.
+Retail modules from the analysis folder embed a VC80 8.0.50608.0 manifest; the
+test executables must carry the same `/MANIFESTDEPENDENCY`, and the matching
+`Microsoft.VC80.CRT` assembly (Trainz 2009 ships 8.0.50608.0; TS12 ships
+8.0.50727.6195) must sit next to them. After restoring the retail copies and
+that manifest, `u1`..`u2b`, `u4`, `u5`, `u6b`..`u6d`, `u8`..`u13` and both
+WaterSystem probes pass, but `u3`/`u6` still end in heap corruption and `u7`
+still mismatches, so the earlier green baseline for those three is not
+reproduced. Rebuild the fixture from a known-good retail set before trusting
+their results.
+
