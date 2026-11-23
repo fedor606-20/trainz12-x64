@@ -62,7 +62,11 @@ first caller; mark it in `implemented.txt` only when that unit compiles.
 - `Initialize` uses `opengl32!glGetString` and interface slot 0x58.
 - Verified with proxy + `_orig`; menu stable.
 
-### M2 — GL/WGL platform layer
+### M2 — GL/WGL platform layer (in progress)
+
+The base `DisplayInterfaceOpenGL` is local: constructor, extension-list test
+(`HasExtension`/`IsExtensionSupported`) and the retail stubs. The GL table and
+the WGL backend are next.
 
 Classes: `DisplayInterfaceOpenGL` (4), `DisplayInterfaceWGL` (22),
 `NonRenderContextWGL` (4), `DisplayLibraryWGL` (3),
