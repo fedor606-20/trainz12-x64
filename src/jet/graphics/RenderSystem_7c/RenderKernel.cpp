@@ -81,8 +81,10 @@ bool __cdecl RsLoadRenderSystem(RenderKernel* kernel, DisplaySelector* selector)
     if (options->Get("NullRender")) {
         // DisplayNull is private. Keep its constructor and vtable in the original for now.
         const auto image = reinterpret_cast<const unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll"));
-        const auto construct = reinterpret_cast<Display*(__stdcall*)(void*)>(image + 0x1e130);
-        std::unique_ptr<void, decltype(&Alloc::Delete)> storage(Alloc::New(0xf28), &Alloc::Delete);
+        // U16: without the original there is no DisplayNull code to call; skip the branch instead of jumping
+        // into unmapped low memory. A local DisplayNull is still to be ported.
+        const auto construct = image ? reinterpret_cast<Display*(__stdcall*)(void*)>(image + 0x1e130) : nullptr;
+        std::unique_ptr<void, decltype(&Alloc::Delete)> storage(construct ? Alloc::New(0xf28) : nullptr, &Alloc::Delete);
         display = storage ? construct(storage.get()) : nullptr;
         if (display) {
             storage.release();

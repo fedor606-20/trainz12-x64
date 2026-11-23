@@ -10,6 +10,9 @@
 
 #include "LegacyPower.h"
 
+extern unsigned char RsRsD068[44];
+extern unsigned char RsRsD069[44];
+
 namespace Jet {
 
 class SharedTextureCollection {
@@ -447,15 +450,20 @@ __declspec(noinline) DisplayTexture* __cdecl RsGenerateSpecPowerTexture(void* di
 
 static Texture** SharedTextures()
 {
-    static auto const textures = reinterpret_cast<Texture**>(GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"),
-        "?textureArray@SharedTextureCollection@Jet@@1PAV?$AutoReference@VTexture@Jet@@@2@A"));
-    return textures;
+    // U16: the export is the array itself (11 AutoReference-sized pointers), not a pointer to it.
+    return reinterpret_cast<Texture**>(::RsRsD068);
 }
 
 static PString* SharedNames()
 {
-    static auto const names = reinterpret_cast<PString*>(GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"),
-        "?textureNameArray@SharedTextureCollection@Jet@@1PAVPString@2@A"));
+    auto* const names = reinterpret_cast<PString*>(::RsRsD069);
+    if (names[0].node) return names;  // a mirrored copy from the original
+    static const char* const texts[11] = {
+        "AuranJetTexture:Default", "AuranJetTexture:DefaultBump", "AuranJetTexture:SubstituteLoadTexture",
+        "AuranJetTexture:D2Attenuation", "AuranJetTexture:SpotCubeMap", "AuranJetTexture:NormCubeMap",
+        "AuranJetTexture:Pow8", "AuranJetTexture:Pow16", "AuranJetTexture:Pow32",
+        "AuranJetTexture:SpecPow16", "AuranJetTexture:SpecPow32"};
+    for (int i = 0; i < 11; ++i) ::new (names + i) PString(texts[i]);
     return names;
 }
 

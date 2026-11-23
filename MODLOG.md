@@ -3369,3 +3369,22 @@ A prototype built the tables locally with a minimal RTTI locator. `u8`, `u9`,
 fixture also lost its original-DLL copies; the retail VC80 8.0.50608.0 manifest
 and CRT assembly must be restored for the differential tests. No in-game run.
 
+### RenderSystem U16: standalone launch without any original DLL
+
+With every `RenderSystem_7c_orig.dll` removed from the lab `bin`, the game now
+starts and reaches the Trainz main menu. The local tables in `LocalTables.cpp`
+fill the `DisplaySelector` and `RenderKernel` (`Task`/`LayerManager`) vtables,
+`internalColorFormat`, the LayerManager `Profile::Info` blocks, and the shared
+texture arrays/names. `DisplaySelector` is constructed by our own code, and
+its context tables are resolved from our module before any original fallback.
+TADDaemon no longer crashes: the `NullRender` branch used to call
+`DisplayNull` at `GetModuleHandle("RenderSystem_7c_orig.dll") + 0x1e130`, so
+with no original it jumped into low unmapped memory. The branch is skipped
+until a local `DisplayNull` is ported, and TADDaemon then runs the normal
+backend path.
+
+Verified in `build-trainz32/game-smoke`: `bin` contains zero `*_orig*` files,
+the process is responsive after 45 s, TADDaemon stays at one instance, and the
+main menu is visible. Known visual defect: the menu background is white and a
+band at the bottom stays unpainted; the UI itself works. The remaining runtime
+lookups listed in `notes/RenderSystem.md` are still to be cut over.

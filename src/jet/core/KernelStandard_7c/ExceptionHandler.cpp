@@ -15,6 +15,7 @@
 #include <windows.h>
 
 #include <cstdarg>
+#include <cstdio>
 #include <cstring>
 #include <new>
 
@@ -396,6 +397,45 @@ void __cdecl ExceptionHandler::LogLine(void* dialog, void* dc, const char* fmt, 
 }
 
 // ---- HardwareException
+
+// 0x1001cd60 (U16): a bounded x86 EBP walk for the crash report. The original also resolved each frame to a
+// module and offset through its own image helper; the frame address and a zero offset are enough here, and the
+// walk stops on any unreadable or non-increasing frame so a corrupt stack cannot loop.
+void __cdecl HardwareException::GetCallStack(void* p)
+{
+    char* const out = tmpDescription;
+    out[0] = '\0';
+    if (!p) return;
+    const auto* const ep = static_cast<const EXCEPTION_POINTERS*>(p);
+    const CONTEXT* const c = ep->ContextRecord;
+    if (!c) return;
+
+    std::snprintf(out, sizeof tmpDescription,
+                  " \r\nException @ %08X in %hs\r\n \r\nRecoverable exception: %hs\r\n \r\n"
+                  "  EAX: %08X     EBX: %08X     ECX: %08X     EDX: %08X\r\n"
+                  "  ESP: %08X     EBP: %08X     ESI: %08X     EDI: %08X\r\n \r\n"
+                  "   DS: %08X      FS: %08X\r\n   ES: %08X      GS: %08X\r\n"
+                  "   SS: %08X  CS:EIP: %04X:%08X\r\n \r\n"
+                  "Flags: %08X (CF:%d ZF:%d SF:%d)\r\n \r\nCall Stack:\r\n \r\n",
+                  c->Eip, "Hardware", reason, c->Eax, c->Ebx, c->Ecx, c->Edx, c->Esp, c->Ebp, c->Esi, c->Edi,
+                  c->SegDs, c->SegFs, c->SegEs, c->SegGs, c->SegSs, c->SegCs, c->Eip, c->EFlags,
+                  (c->EFlags >> 0) & 1, (c->EFlags >> 6) & 1, (c->EFlags >> 7) & 1);
+
+    const auto* frame = reinterpret_cast<const unsigned*>(c->Ebp);
+    for (unsigned depth = 0; depth < 50; ++depth) {
+        if (!frame || (reinterpret_cast<uintptr_t>(frame) & 3) || IsBadReadPtr(frame, 8)) break;
+        const unsigned ret = frame[1];
+        const auto* const next = reinterpret_cast<const unsigned*>(frame[0]);
+        if (!ret) break;
+        const size_t used = std::strlen(out);
+        if (used + 48 >= sizeof tmpDescription) break;
+        std::snprintf(out + used, sizeof tmpDescription - used, " %p - %08I64X(+%I64X) %hs\r\n",
+                      reinterpret_cast<const void*>(ret), static_cast<unsigned long long>(0),
+                      static_cast<unsigned long long>(0), "?");
+        if (next <= frame) break;
+        frame = next;
+    }
+}
 
 HardwareException::HardwareException(void* p) : Exception(), pointers(p)
 {

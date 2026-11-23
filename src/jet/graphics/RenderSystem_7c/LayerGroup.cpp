@@ -9,6 +9,9 @@
 extern void* RsLayerManagerVftable[2];
 extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 
+extern unsigned char RsRsD019[32];
+extern unsigned char RsRsD020[32];
+
 namespace Jet {
 
 int __cdecl Layer::operator<(const Layer& other) const { return priority < other.priority; }
@@ -158,10 +161,9 @@ void __cdecl LayerGroup::SetViewRect(const Rect& rect) { view = rect; }
 
 static LayerManager*& SharedLayerManagerSlot()
 {
-    // Still owned by the original; RenderKernel writes this pointer as well.
-    static auto* const manager = reinterpret_cast<LayerManager**>(
-        GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"), "?layerManager@Layer@Jet@@1PAVLayerManager@2@A"));
-    return *manager;
+    // U16: local storage. LayerManager::Init sets it and Drop clears it, as the retail static did.
+    static LayerManager* manager;
+    return manager;
 }
 
 LayerManager* SharedLayerManager() { return SharedLayerManagerSlot(); }
@@ -292,9 +294,8 @@ void** LayerManagerTable()
 
 void __cdecl LayerManager::Update(float dt)
 {
-    // The original callers still use these same counters.
-    static auto* const info = reinterpret_cast<Profile::Info*>(
-        LayerManagerSymbol("?__info@?1??Update@LayerManager@Jet@@QAAXM@Z@4UInfo@Profile@3@A"));
+    // U16: the mirrored info block, initialised locally like the retail static initialiser.
+    auto* const info = reinterpret_cast<Profile::Info*>(::RsRsD020);
     {
         Profile profile(info);
         VCall<void>(&root, 0x08, dt);
@@ -304,8 +305,7 @@ void __cdecl LayerManager::Update(float dt)
 
 void __cdecl LayerManager::Render()
 {
-    static auto* const info = reinterpret_cast<Profile::Info*>(
-        LayerManagerSymbol("?__info@?1??Render@LayerManager@Jet@@QAAXXZ@4UInfo@Profile@3@A"));
+    auto* const info = reinterpret_cast<Profile::Info*>(::RsRsD019);
     {
         Profile profile(info);
         VCall<void>(&root, 0x04, &viewers);

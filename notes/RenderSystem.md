@@ -1027,6 +1027,29 @@ class hierarchies for dynamic_cast, adjustor thunks for the secondary
 PluginInstance tables, and deleting destructors for each family. Shared stub
 slots must stay stubs, not exports.
 
+### U16 progress: standalone launch
+
+With no `RenderSystem_7c_orig.dll` in `bin`, the game reaches the main menu.
+`LocalTables.cpp` now fills the tables our own code constructs:
+`DisplaySelector` (including the virtual `DeleteThis` slot), the RenderKernel
+`Task` and `LayerManager` tables, `internalColorFormat` (2), the LayerManager
+`Profile::Info` blocks, and the shared texture arrays/names. The selector and
+context vtables resolve from our module first. `LayerManager::layerManager`,
+the material plugin group UID, and the shared texture arrays are local.
+
+TADDaemon used `NullRender` and called retail `DisplayNull` at
+`image + 0x1e130` without testing `image`; with no original that address is
+`0x1e130` and the daemon crashed, which in turn made Trainz report
+`TADDaemon failed to compile core script libraries`. The branch is now skipped
+when the original is absent. A local `DisplayNull` is still the proper fix.
+
+Known visual defect: the menu background renders white and the bottom band of
+the window is not painted. The main menu is interactive and the process stays
+responsive. Other runtime dependencies below (`DisplayLifetime` tables,
+`DisplayTexture`, material statics, geometry interpolation, layer tables,
+texture-manager format table) still fall back to the original when present and
+are skipped or approximated when it is absent.
+
 ### Test fixture issue
 
 The differential fixture's `X_orig.dll` copies were lost with the temp folder.

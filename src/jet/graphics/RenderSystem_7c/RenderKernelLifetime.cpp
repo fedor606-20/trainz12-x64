@@ -22,6 +22,10 @@ class SceneGraph;
 class SystemResourceManager;
 void __fastcall RsSceneGraphDefaultClosure(void*, void*);
 void RsDestroyScene(SceneGraph*);
+void* __fastcall RsLayerManagerCreate(void*, void*);
+void __fastcall RsLayerManagerDrop(void*, void*);
+void __cdecl RsClearSharedTextures();
+extern "C" void RsDestroyRenderingCacheManager(void*);
 
 // Only the imported methods are needed here. Including Bitmap.h would redefine IListNode from Task.h.
 class Bitmap {
@@ -33,19 +37,6 @@ public:
 namespace {
 
 using Byte = unsigned char;
-
-HMODULE Original()
-{
-    static HMODULE const module = GetModuleHandleA("RenderSystem_7c_orig.dll");
-    if (!module) std::abort();
-    return module;
-}
-
-template<class F>
-F At(unsigned rva)
-{
-    return reinterpret_cast<F>(reinterpret_cast<Byte*>(Original()) + rva);
-}
 
 enum class Dll { Kernel, Standard };
 
@@ -203,7 +194,7 @@ void* ConstructImpl(void* self, void* graph, float priority)
     *reinterpret_cast<unsigned*>(caches + 8) = 0;
     caches[0x0c] = 0;
 
-    At<VoidThis>(0x31df0)(base + 0x28);
+    RsLayerManagerCreate(base + 0x28, nullptr);
     *reinterpret_cast<void**>(base) = RsRsV009;
     *reinterpret_cast<void**>(base + 0x28) = RsRsV008;
 
@@ -255,7 +246,7 @@ void DestroyImpl(void* self)
     if (scene) RsDestroyScene(scene);
     scene = nullptr;
 
-    At<VoidCdecl>(0x3c040)();
+    RsClearSharedTextures();
 
     if (void* const material = *reinterpret_cast<void**>(base + 0x90))
         static_cast<ReferenceCount*>(material)->ReleaseReference();
@@ -277,8 +268,8 @@ void DestroyImpl(void* self)
     Queue(base)->~DumpQueue();
     reinterpret_cast<String*>(base + 0xac)->~String();
 
-    At<VoidThis>(0x31ec0)(base + 0x28);
-    At<VoidThis>(0x38dc0)(base + 0x6c);
+    RsLayerManagerDrop(base + 0x28, nullptr);
+    RsDestroyRenderingCacheManager(base + 0x6c);
     reinterpret_cast<Task*>(base)->~Task();
 }
 

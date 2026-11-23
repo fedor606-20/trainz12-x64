@@ -317,3 +317,10 @@ TerrainMorphChunkHint& TerrainMorphChunkHint::operator=(const TerrainMorphChunkH
 }
 
 }  // namespace Jet
+
+namespace Jet {
+extern "C" void RsDestroyRenderingCacheManager(void* manager)
+{
+    static_cast<RenderingCacheManager*>(manager)->~RenderingCacheManager();
+}
+}

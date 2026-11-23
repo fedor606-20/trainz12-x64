@@ -134,10 +134,9 @@ ReferenceCount* MaterialRefs(void* material)
 // the material plugin group (the original's shared static until U9)
 const UId& MaterialPluginGroupUID()
 {
-    static const UId* const uid = reinterpret_cast<const UId*>(
-        GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"),
-                       "?PluginGroupUID@MaterialPlugin@Jet@@2VUId@2@A"));
-    return *uid;
+    // U16: the retail static is UId("C58F5BDE-D667-43f9-8ACE-86BF5B3EEA08"), built by its CRT initialiser.
+    static const UId uid("C58F5BDE-D667-43f9-8ACE-86BF5B3EEA08");
+    return uid;
 }
 
 struct PluginAccess : PluginBase {

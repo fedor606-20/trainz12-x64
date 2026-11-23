@@ -1651,7 +1651,7 @@
 ??BString@Jet@@QBAPBDXZ
 
 # U14b the foundation (Memory.cpp, PString.cpp) and every data export (defined in the unit that uses it).
-# Only HardwareException::GetCallStack stays forwarded (an x86 stack walk, with the crash report writers).
+# Only the crash report writers stay forwarded; GetCallStack is local since U16.
 # results / file / reason: VS2005 mangled them differently, so they are exported from our own symbols.
 ??0Alloc@Jet@@QAE@XZ
 ??0KernelStandardInit@@QAE@XZ
@@ -1808,3 +1808,4 @@
 ?tracePoint@Profile@Jet@@0PAUTraceInfo@12@A
 ?unknownItem@ConfigData@Jet@@2V12@A
 ?writeLock@Log@Jet@@0PAVCriticalSection@2@A
+?GetCallStack@HardwareException@Jet@@AAAXPAX@Z

@@ -70,6 +70,8 @@ alignas(4) unsigned char RsRsVb001[2 * 4];
 
 namespace {
 
+extern "C" bool RsFillLocalVtable(unsigned char* table, void** meta, const char* name);
+
 HMODULE OrigRs()
 {
     static HMODULE const module = GetModuleHandleA("RenderSystem_7c_orig.dll");
@@ -114,7 +116,10 @@ struct MirrorAll {
     {
         for (const MirrorEntry& e : entries) {
             void* const source = OrigSym(e.name);
-            if (!source) continue;
+            if (!source) {
+                RsFillLocalVtable(e.local, e.meta, e.name);
+                continue;
+            }
             if (e.meta && reinterpret_cast<unsigned char*>(e.meta + 1) != e.local) std::abort();
             std::memcpy(e.local, source, e.size);
             if (e.meta) {

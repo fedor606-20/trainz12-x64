@@ -420,10 +420,9 @@ void __cdecl Display::SetGlobalAmbient(const Color& color)
 
 DFormatId __cdecl Display::GetInternalColorFormat()
 {
-    // The retail Display initialization still owns this shared data export.
-    static const auto* const format = reinterpret_cast<const DFormatId*>(
-        GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"), "?internalColorFormat@Display@Jet@@1W4DFormatId@2@A"));
-    return *format;
+    // U16: the local data export. The retail image initialises it to 2 and never changes it.
+    extern unsigned char RsRsD037[4];
+    return *reinterpret_cast<const DFormatId*>(RsRsD037);
 }
 
 namespace {
@@ -906,7 +905,13 @@ struct ContextStorage {
 
 FARPROC ContextVtable(const char* name)
 {
-    return GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"), name);
+    // U16: our own exported table first; the original is only a fallback while the cutover is incomplete.
+    if (HMODULE const self = GetModuleHandleA("RenderSystem_7c.dll")) {
+        if (FARPROC const local = GetProcAddress(self, name)) return local;
+    }
+    if (HMODULE const original = GetModuleHandleA("RenderSystem_7c_orig.dll"))
+        return GetProcAddress(original, name);
+    return nullptr;
 }
 
 constexpr auto sharedContextVtable = "??_7SharedContext@Jet@@6B@";
