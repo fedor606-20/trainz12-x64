@@ -1,18 +1,27 @@
 // Unit U5a of RenderSystem_7c: VertexType (0x100562b0..0x100572a0, with the accessors at 0x100106e0..0x10010940)
-// and its registry. Behaviour follows the TS12 assembly (addresses per function). The module statics (`display`,
-// the registry) stay the original's; the item-type defaults (0x100b8968, filled at module start) and the element
-// sizes (0x10062760) are this module's own copies.
+// and its registry. Behaviour follows the TS12 assembly (addresses per function). The display pointer and the
+// registry are local; the item-type defaults (0x100b8968, filled at module start) and the element sizes
+// (0x10062760) are this module's own copies.
 #include <jet/Geometry.h>
 #include <jet/VCall.h>
 
 #include <new>
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
-
-// VS2005 mangled `T const * const` statics with P..B, today's compilers with Q..B
-#pragma comment(linker, "/alternatename:__imp_?display@VertexType@Jet@@1QBVDisplay@2@B=__imp_?display@VertexType@Jet@@1PBVDisplay@2@B")
-
 namespace Jet {
+
+// The original exported a const object (`...@@1PBVDisplay@2@B`). Ours is mutable so the compiler cannot fold
+// reads to the initial nullptr; implemented.txt exports the original name as an alias of this symbol.
+const Display* VertexType::display = nullptr;
+
+HashTable<unsigned int, VertexType::RegistrationData*, VertexType::RegistrationDataOp, 13>
+    VertexType::registrations;
+
+struct VertexType::RegistryLifetime {
+    RegistryLifetime() { registrations.Init(); }
+    ~RegistryLifetime() { registrations.Destroy(); }
+};
+
+VertexType::RegistryLifetime VertexType::registryLifetime;
 
 namespace {
 
@@ -298,8 +307,7 @@ void __cdecl VertexType::SetApiData(const Display* d, unsigned long data)
 {
     if (apiData && d) VCall<void>(d, 0x40, &apiData);
     apiData = data;
-    *const_cast<const Display**>(&display) = d;
-    RsMirrorSync("?display@VertexType@Jet@@1PBVDisplay@2@B");
+    display = d;
 }
 
 unsigned long __cdecl VertexType::GetApiData() const { return apiData; }      // 0x10004aa0
@@ -408,7 +416,6 @@ bool __cdecl VertexType::RegisterName(const PString& name)
         AddReference();
     }
     registrations.Insert(r, r->name.node);
-    RsMirrorSync("?registrations@VertexType@Jet@@1V?$HashTable@IPAURegistrationData@VertexType@Jet@@URegistrationDataOp@23@$0N@@2@A");
     return true;
 }
 
@@ -436,7 +443,6 @@ void __cdecl VertexType::Shutdown()
         r = nullptr;
     });
     registrations.Clear();  // 0x10057180
-    RsMirrorSync("?registrations@VertexType@Jet@@1V?$HashTable@IPAURegistrationData@VertexType@Jet@@URegistrationDataOp@23@$0N@@2@A");
 }
 
 }  // namespace Jet

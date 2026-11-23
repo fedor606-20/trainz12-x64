@@ -297,6 +297,91 @@ static void Compare(const char* name)
     }
 }
 
+template <class T>
+static bool BindStatePair(T (&fn)[2], const char* name)
+{
+    fn[0] = reinterpret_cast<T>(GetProcAddress(mod[0], name));
+    fn[1] = reinterpret_cast<T>(GetProcAddress(mod[1], name));
+    Check(fn[0] && fn[1] && fn[0] != fn[1], name);
+    return fn[0] && fn[1];
+}
+
+static void CheckWaterMaterialState()
+{
+    using Read = const float* (__thiscall*)(const void*);
+    using Write = void (__thiscall*)(void*, const float*);
+    using ReadBool = bool (__thiscall*)(const void*);
+    using WriteBool = void (__thiscall*)(void*, bool);
+    using WriteFloat = void (__thiscall*)(void*, float);
+    using ReadPair = float* (__thiscall*)(const void*, float*);
+    using WritePair = void (__thiscall*)(void*, float, float);
+    alignas(float) unsigned char object[2][0xf0];
+    std::memset(object, 0xcd, sizeof object);
+    const uint32_t bits[] = {0x7f812345, 0x80000000, 0x00000001, 0x3f800000};
+    float values[4];
+    std::memcpy(values, bits, sizeof values);
+
+    const struct { unsigned offset; const char* get; const char* set; } fields[] = {
+        {0xa4, "?GetWaterColor@WaterMaterial@Jet@@UBEABVColor@2@XZ", "?SetWaterColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z"},
+        {0xb4, "?GetLightColor@WaterMaterial@Jet@@UBEABVColor@2@XZ", "?SetLightColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z"},
+        {0xc4, "?GetAmbientColor@WaterMaterial@Jet@@UBEABVColor@2@XZ", "?SetAmbientColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z"},
+        {0xd4, "?GetLightDir@WaterMaterial@Jet@@UBEABVVector3@2@XZ", "?SetLightDir@WaterMaterial@Jet@@UAEXABVVector3@2@@Z"},
+    };
+    for (const auto& field : fields) {
+        Read get[2];
+        Write set[2];
+        if (!BindStatePair(get, field.get) || !BindStatePair(set, field.set)) continue;
+        for (int s = 0; s < 2; ++s) {
+            set[s](object[s], values);
+            Check(static_cast<const void*>(get[s](object[s])) == object[s] + field.offset, field.get);
+        }
+        Check(std::memcmp(object[0], object[1], sizeof object[0]) == 0, field.set);
+    }
+
+    unsigned char before[2][0xf0];
+    std::memcpy(before, object, sizeof object);
+    for (const auto* name : {"?EnableDetailAnimInterpolation@WaterMaterial@Jet@@UAEX_N@Z",
+                             "?SetDetailAnim@WaterMaterial@Jet@@UAEX_N@Z"}) {
+        WriteBool fn[2];
+        if (BindStatePair(fn, name))
+            for (int s = 0; s < 2; ++s) fn[s](object[s], true);
+    }
+    for (const auto* name : {"?SetRefractiveIndex@WaterMaterial@Jet@@UAEXM@Z",
+                             "?Update@WaterMaterial@Jet@@UAEXM@Z"}) {
+        WriteFloat fn[2];
+        if (BindStatePair(fn, name))
+            for (int s = 0; s < 2; ++s) fn[s](object[s], 1.25f);
+    }
+    WritePair writePair[2];
+    if (BindStatePair(writePair, "?SetUVScrollVelocity@WaterMaterial@Jet@@UAEXVVector2@2@@Z"))
+        for (int s = 0; s < 2; ++s) writePair[s](object[s], 1.25f, -2.5f);
+    ReadPair readPair[2];
+    if (BindStatePair(readPair, "?GetUVScrollVelocity@WaterMaterial@Jet@@UBE?AVVector2@2@XZ")) {
+        float result[2][2] = {{1, 2}, {3, 4}};
+        for (int s = 0; s < 2; ++s) Check(readPair[s](object[s], result[s]) == result[s], "Vector2 return pointer");
+        Check(std::memcmp(result[0], result[1], sizeof result[0]) == 0, "Vector2 return bytes");
+    }
+    ReadBool detail[2], useVP[2];
+    if (BindStatePair(detail, "?GetDetailAnim@WaterMaterial@Jet@@UBE_NXZ"))
+        Check(detail[0](object[0]) == detail[1](object[1]), "detail animation default");
+    if (BindStatePair(useVP, "?GetUseVertexProgram@WaterMaterial@Jet@@UAE_NXZ"))
+        Check(useVP[0](object[0]) == useVP[1](object[1]), "vertex program default");
+    Check(std::memcmp(before, object, sizeof object) == 0, "default state methods leave object unchanged");
+
+    ReadBool reflect[2];
+    WriteBool setReflect[2];
+    if (BindStatePair(reflect, "?IsReflectEyeVector@WaterMaterial@Jet@@UBE_NXZ") &&
+        BindStatePair(setReflect, "?SetReflectEyeVector@WaterMaterial@Jet@@UAEX_N@Z")) {
+        for (bool value : {true, false}) {
+            for (int s = 0; s < 2; ++s) {
+                setReflect[s](object[s], value);
+                Check(reflect[s](object[s]) == value, "read reflection flag");
+            }
+            Check(std::memcmp(object[0], object[1], sizeof object[0]) == 0, "write reflection flag");
+        }
+    }
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 2) {
@@ -306,6 +391,7 @@ int main(int argc, char** argv)
     const std::string dir = argv[1];
     SetDllDirectoryA(dir.c_str());
     // the mirror initialiser in our DLL reads the original's vtables, so load the original first
+    LoadLibraryA((dir + "\\RenderSystem_7c_orig.dll").c_str());
     mod[1] = LoadLibraryA((dir + "\\WaterSystem_7c_orig.dll").c_str());
     const DWORD err1 = GetLastError();
     mod[0] = LoadLibraryA((dir + "\\WaterSystem_7c.dll").c_str());
@@ -325,6 +411,7 @@ int main(int argc, char** argv)
     CheckVtable("??_7WaterMaterialFresWavePlugin@Jet@@6B@", false);
     CheckVtable("??_7WaterMaterialOneTexPlugin@Jet@@6B@", true);
     CheckVtable("??_7WaterOceanMaterialPlugin@Jet@@6B@", true);
+    CheckWaterMaterialState();
 
     for (int s = 0; s < 2; ++s) {
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));

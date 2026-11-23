@@ -105,10 +105,11 @@ protected:
     mutable unsigned long user;   // +0x1c
     PString registeredName;       // +0x20
 
-    // the module statics stay the original's until U9 (the Display that sets them is the original's)
-    static __declspec(dllimport) const Display* const display;
+    static const Display* display;  // SetApiData replaces it; not const, so reads are not folded
     static __declspec(dllimport) int nextFreeId;
-    static __declspec(dllimport) HashTable<unsigned int, RegistrationData*, RegistrationDataOp, 13> registrations;
+    static HashTable<unsigned int, RegistrationData*, RegistrationDataOp, 13> registrations;
+    struct RegistryLifetime;
+    static RegistryLifetime registryLifetime;
 };
 JET_LAYOUT32(sizeof(VertexType) == 0x24);
 
@@ -604,7 +605,9 @@ protected:
     unsigned long userData;                             // +0x44
     ReferenceCount* referencedUserData;                 // +0x48
 
-    static __declspec(dllimport) HashTable<unsigned int, RegistrationData*, RegistrationDataOp, 13> registrations;
+    static HashTable<unsigned int, RegistrationData*, RegistrationDataOp, 13> registrations;
+    struct RegistryLifetime;
+    static RegistryLifetime registryLifetime;
 
 public:
     static const DPrimitive primitiveLookup[32];  // by the primitive bits (flags & 0x1f)

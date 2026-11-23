@@ -442,13 +442,20 @@ void __cdecl SceneGraph::SetModifierTask(ModifierUpdateTask* task) { modifierTas
 void __cdecl SceneGraph::Update(float dt) { if (modifierTask) VCall<void>(modifierTask, 0x2c, dt); }
 void __fastcall RsSceneGraphDefaultClosure(void* p, void*) { new (p) SceneGraph(nullptr); }
 
+void RsUpdateLayers(void* layers, float dt) { static_cast<LayerManager*>(layers)->Update(dt); }
+void RsRenderLayers(void* layers) { static_cast<LayerManager*>(layers)->Render(); }
+void RsUpdateScene(SceneGraph* scene, float dt) { scene->Update(dt); }
+void RsPurgeScene(SceneGraph* scene) { scene->PurgeDeathRow(); }
+void RsDestroyScene(SceneGraph* scene)
+{
+    scene->~SceneGraph();
+    Alloc::Delete(scene);
+}
+
 void __cdecl RenderKernel::SetSceneGraph(SceneGraph* graph)
 {
     auto& current = *reinterpret_cast<SceneGraph**>(reinterpret_cast<unsigned char*>(this) + 0x80);
-    if (auto* previous = current) {
-        previous->~SceneGraph();
-        Alloc::Delete(previous);
-    }
+    if (auto* previous = current) RsDestroyScene(previous);
     current = graph;
 }
 

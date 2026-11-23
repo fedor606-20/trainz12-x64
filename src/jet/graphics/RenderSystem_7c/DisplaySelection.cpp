@@ -1,6 +1,7 @@
 // U9: base display selector and the device-independent format negotiation step.
 #include <jet/RenderSystem.h>
 #include <jet/Window.h>
+#include <cstring>
 
 namespace Jet {
 namespace {
@@ -25,6 +26,116 @@ T DisplayValue(const Display* display, unsigned offset)
 }
 
 constexpr unsigned Any = ~0u;
+
+template<class T>
+T& DisplaySlot(Display* display, unsigned offset)
+{
+    return *reinterpret_cast<T*>(reinterpret_cast<unsigned char*>(display) + offset);
+}
+
+void CloseContextWindow(Window* window)
+{
+    window->SetContextOnly(true);
+    window->Close();
+}
+}
+
+void __cdecl RsDisplaySetSelector(Display*, void*);
+
+bool __cdecl RsDisplayPreOpen(Display* display, const Options* options)
+{
+    auto* window = DisplayValue<Window*>(display, 0x40);
+    if (!window) return false;
+    char title[260]{};
+    strcpy_s(title, window->GetInternalName());
+    if (options) {
+        PString custom;
+        if (options->Get("WindowTitle", custom)) {
+            const char* text = custom.Text();
+            if (text && custom.Length() <= 245) strcpy_s(title, text);
+        }
+        bool showApi;
+        options->Get("ShowRenderAPI", showApi, false);
+        if (showApi) {
+            strcat_s(title, " [");
+            strcat_s(title, VCall<const char*>(display, 0x18));
+            strcat_s(title, "]");
+        }
+    }
+    if (!window->Open(title, options)) return false;
+    if (!DisplayValue<void*>(display, 0x288)) RsDisplaySetSelector(display, nullptr);
+    if (!VCall<bool>(display, 0x24c) || !VCall<bool>(display, 0x250)) {
+        CloseContextWindow(window);
+        return false;
+    }
+    VCall<void>(DisplayValue<void*>(display, 0x288), 0x08, options, window,
+                &DisplaySlot<VideoMode>(display, 0x24c), &DisplaySlot<int>(display, 0x22c));
+    return true;
+}
+
+bool __cdecl RsDisplayOpen(Display* display, const Options* options, bool selectFormatFirst)
+{
+    if (!VCall<bool>(display, 0x244, options)) return false;
+    VideoFormat format{};
+    if (selectFormatFirst && !VCall<bool>(display, 0x248, options, &format)) return false;
+
+    auto* window = DisplayValue<Window*>(display, 0x40);
+    auto* selector = DisplayValue<void*>(display, 0x288);
+    const int mode = DisplayValue<int>(display, 0x22c);
+    auto& original = DisplaySlot<VideoMode>(display, 0x24c);
+    auto& selected = DisplaySlot<VideoMode>(display, 0x23c);
+    bool created;
+    if (mode == 2) {
+        VideoMode fullscreen{};
+        if (!VCall<bool>(selector, 0x14, options, &DisplaySlot<VideoList<VideoMode>>(display, 0x230), &fullscreen) ||
+            !VCall<bool>(display, 0x258, &fullscreen)) {
+            CloseContextWindow(window);
+            return false;
+        }
+        selected = fullscreen;
+        created = window->CreateFullscreenHost(fullscreen.width, fullscreen.height, const_cast<Options*>(options));
+    } else {
+        selected = original;
+        if (mode == 0) {
+            Rect area;
+            VCall<void>(selector, 0x10, options, window, &original, &area);
+            created = window->CreateWindowedHost(area.x, area.y, area.w, area.h, const_cast<Options*>(options));
+        } else {
+            created = window->CreateFullscreenHost(original.width, original.height, const_cast<Options*>(options));
+        }
+    }
+    if (!created) {
+        CloseContextWindow(window);
+        return false;
+    }
+    if (!selectFormatFirst && !VCall<bool>(display, 0x248, options, &format)) return false;
+    if (!VCall<bool>(display, 0x25c, &format)) {
+        CloseContextWindow(window);
+        if (DisplayValue<int>(display, 0x22c) == 2) VCall<bool>(display, 0x258, &original);
+        return false;
+    }
+
+    auto& selectedFormat = DisplaySlot<VideoFormat>(display, 0x268);
+    selectedFormat = format;
+    const auto capability = VCall<unsigned>(display, 0x8c, &selectedFormat, &format);
+    DisplaySlot<unsigned>(display, 0x280) = capability;
+    if (auto* state = DisplayValue<unsigned char*>(display, 0x54))
+        state[0xa1] = static_cast<unsigned char>((state[0xa1] & ~0x10) | (capability ? 0x10 : 0));
+    const Rect client = window->GetClientArea();
+    DisplaySlot<int>(display, 0x28c) = client.w;
+    DisplaySlot<int>(display, 0x290) = client.h;
+    options->Get("PhysicalScreenRatio", DisplaySlot<float>(display, 0x6c),
+                 static_cast<float>(client.w) / static_cast<float>(client.h));
+    return true;
+}
+
+bool __cdecl RsDisplayParseTextureStage(Display* display, void* stage, File* file)
+{
+    TextureArgs args;
+    char line[256];
+    if (!file->ReadLine(line, sizeof line, 0)) return false;
+    if (args.Decode(line)) VCall<void>(display, 0x17c, stage, &args);
+    return true;
 }
 
 void __cdecl RsSelectResolution(void*, const Options* options, unsigned& width, unsigned& height)

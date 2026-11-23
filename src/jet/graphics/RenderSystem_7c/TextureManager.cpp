@@ -43,12 +43,6 @@ unsigned char* OrigBase()
     return base;
 }
 
-template <class F>
-F Orig(const char* name)
-{
-    return reinterpret_cast<F>(GetProcAddress(reinterpret_cast<HMODULE>(OrigBase()), name));
-}
-
 // 0x100411a0: a copy of `a` with `text` appended
 PString Concat(const PString& a, const char* text)
 {
@@ -69,18 +63,18 @@ const void* NameKey(const Texture* t) { return t->GetName().node; }
 Display* KernelDisplay(const RenderKernel* k) { return *reinterpret_cast<Display* const*>(reinterpret_cast<const char*>(k) + 0x7c); }
 OS* KernelOS(const RenderKernel* k) { return *reinterpret_cast<OS* const*>(reinterpret_cast<const char*>(k) + 0x8c); }
 
-// the original's 16 {name, format} pairs (0x100b8780) and the PString holding the default format's name
-// (0x100351d0 builds it once; the name at +8)
+// Retail initialization at 0x1005e570 builds these 16 pairs, in this order.
 struct FormatName {
-    const PString* name;
-    DFormatId id;
+    const char* name;
+    int id;
 };
-const FormatName* FormatNames() { return reinterpret_cast<const FormatName*>(OrigBase() + 0xb8780); }
-const PString& DefaultFormatName()
-{
-    using F = unsigned char*(__cdecl*)();
-    return *reinterpret_cast<const PString*>(reinterpret_cast<F>(OrigBase() + 0x351d0)() + 8);
-}
+constexpr char kDefaultFormatName[] = "ARGB8888";
+constexpr FormatName kFormatNames[] = {
+    {"DXT1", 10}, {"DXT3", 11}, {"DXT5", 12}, {"ATC", 25},
+    {"ATCE", 26}, {"ATCI", 27}, {"ETC1", 28}, {kDefaultFormatName, 1},
+    {"ABGR8888", 2}, {"RGB0888", 3}, {"BGR0888", 4}, {"RGB888", 5},
+    {"BGR888", 6}, {"ARGB4444", 7}, {"RGB565", 8}, {"RGB555", 9},
+};
 
 // SharedTextureCollection::textureArray[2] (an AutoReference) and textureNameArray[2]
 Texture*& SubstituteTexture() { return *reinterpret_cast<Texture**>(OrigBase() + 0xb8708); }
@@ -143,27 +137,28 @@ TextureManager::ListHead::~ListHead()
 // ---------------------------------------------------------------------------------------------------------------
 // the static setters
 
+int TextureManager::MIN_STREAMING_TEXTURE_SIZE = 128;
+int TextureManager::MIN_STREAMING_TEXTURE_MIP_COUNT = 8;   // MipCount(128)
+int TextureManager::MAX_STREAMING_TEXTURE_MIP_COUNT = 12;  // MipCount(2048)
+int TextureManager::MAX_STREAMING_TEXTURE_SIZE = 2048;
+bool TextureManager::TEXTURE_STREAMING_ENABLED = true;
+
 void __cdecl TextureManager::SetMinSizeTextureStreaming(int size)  // 0x10041420
 {
     MIN_STREAMING_TEXTURE_SIZE = size;
     MIN_STREAMING_TEXTURE_MIP_COUNT = MipCount(size);
-    RsMirrorSync("?MIN_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA");
-    RsMirrorSync("?MIN_STREAMING_TEXTURE_MIP_COUNT@TextureManager@Jet@@2HA");
 }
 
 void __cdecl TextureManager::SetMaxSizeTextureStreaming(int size)  // 0x10041450
 {
     MAX_STREAMING_TEXTURE_SIZE = size;
     MAX_STREAMING_TEXTURE_MIP_COUNT = MipCount(size);
-    RsMirrorSync("?MAX_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA");
-    RsMirrorSync("?MAX_STREAMING_TEXTURE_MIP_COUNT@TextureManager@Jet@@2HA");
     BitmapResource::SetMaxSizeTextureStreaming(size);
 }
 
 void __cdecl TextureManager::SetEnableTextureStreaming(bool on)  // 0x10041490
 {
     TEXTURE_STREAMING_ENABLED = on;
-    RsMirrorSync("?TEXTURE_STREAMING_ENABLED@TextureManager@Jet@@2_NA");
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -667,6 +662,10 @@ Texture* __cdecl TextureManager::GetSubstituteTexture()
     return r;
 }
 
+// Retail's only accesses to these two fields are in TextureManager::Init.
+unsigned int TextureManager::globalSkipLevels = 0;       // 0x100b808c
+unsigned int TextureManager::globalSkipThreshold = 64;   // 0x100b1be8
+
 // 0x10041db0: the texture defaults from the OS options (always true)
 bool __cdecl TextureManager::Init(RenderKernel* k)
 {
@@ -674,14 +673,12 @@ bool __cdecl TextureManager::Init(RenderKernel* k)
     const Options* const o = KernelOS(k)->GetOptions();
     if (!o) return true;
     o->Get("GlobalTextureResolution", globalSkipLevels, globalSkipLevels);
-    RsMirrorSync("?globalSkipLevels@TextureManager@Jet@@1IA");
     o->Get("TextureResThreshold", globalSkipThreshold, globalSkipThreshold);
-    RsMirrorSync("?globalSkipThreshold@TextureManager@Jet@@1IA");
-    PString format(DefaultFormatName());
+    PString format(kDefaultFormatName);
     o->Get("DefaultTextureFormat", format, format);
-    for (int i = 0; i < 16; ++i)
-        if (!FormatNames()[i].name->CompareIgnoreCase(format)) {
-            TextureResource::DISPLAYFORMATID_DEFAULT = FormatNames()[i].id;
+    for (const auto& entry : kFormatNames)
+        if (!format.CompareIgnoreCase(entry.name)) {
+            TextureResource::DISPLAYFORMATID_DEFAULT = static_cast<DFormatId>(entry.id);
             RsMirrorSync("?DISPLAYFORMATID_DEFAULT@TextureResource@Jet@@0W4DFormatId@2@A");
             break;
         }

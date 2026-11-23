@@ -888,3 +888,82 @@ Do not group `Layer::GetLayerManager` with the local reads: it uses the original
   It takes ECX plus one stack argument. A zero-argument stand-in corrupts the
   stack. `diff_rs_u13` matched 71/71/30 checks; game check
   `game-20261123-022033` exited `0` with no non-heap JetLog diff.
+
+## U14: final ten export forwarders
+
+- `DisplayLifetime.cpp` implements the constructor, destructor and virtual-base
+  destructor. The constructor preserves the hidden most-derived flag and the
+  destructor's `this` points at the adjusted base. Both still install original
+  `Display` tables for Win32 ABI compatibility.
+- `DisplaySelection.cpp` implements `PreOpen`, `Open` and `ParseTextureStage`.
+  A texture line counts as consumed even if the decoder rejects it. Only
+  successfully decoded lines reach the backend callback.
+- `DisplayState.cpp` initializes or replays a `DisplayContext`. The built-in
+  vertex layout recipes in `DisplayVertexTypes.cpp` are extracted from the
+  user's pristine DLL at build time: 99 names, 103 streams and 517 attributes.
+  The generator emits descriptions, not instructions. Out-of-range IDs are
+  rejected before indexing the display table.
+- `RenderKernel.cpp` implements renderer selection and frame update. The local
+  Task mirror routes virtual updates to the reconstructed code. Null-display
+  construction, screenshot queue insertion and profile counters still use
+  private implementation or storage from the original DLL.
+- Release Win32 has 2687 local exports and zero forwarders. The DLL still imports
+  `RenderSystem_7c_orig.dll`. The differential tests exercise slot signatures,
+  the NullRender and failed-selection paths, and all 99 vertex layouts. A real
+  OpenGL/DirectX launch, driving and screenshot worker output remain unverified.
+
+## U15: remove the runtime dependency
+
+- `DisplayTextureNull` now calls the local scratch pixel converter. This removed
+  the last directly imported function from the original DLL.
+- The last 17 data imports became local: the texture defaults and streaming
+  size, `uniqueTexId`, `delayedLoading`, both `VertexType` statics, and the
+  modifier lock. Xrefs showed that every retail instruction touching them
+  belongs to a function the port already owns. Nothing is imported, forwarded
+  or delay-loaded from the retail DLL now (`--forbid-dll` passes).
+- Gamma and texture power calculations find the existing VC80 `_CIpow` directly,
+  including when Windows loads its CRT in a separate activation context.
+  RenderKernel frame profiling counters and display compression tokens now have
+  local storage.
+- The screenshot queue and worker now use local code for initialization,
+  enqueue, growth, dequeue, wake-up and destruction. RenderKernel also uses
+  the local SceneGraph lifetime and destroys its resource list locally.
+  The queue retains its Win32 layout at `RenderKernel + 0xb8`.
+- The anisotropy default token is a local data export. Retail stores the token
+  in zero-filled data, and the DirectX 9 and OpenGL backends only compare
+  against it. The mutable default anisotropy level is separate and still shared.
+- TextureManager's option parser owns its 16 format names and IDs. It no longer
+  reads the original format table or calls its private initializer by RVA.
+- `TextureManager::Init` now writes the locally exported skip level and
+  threshold. Their initial values are 0 and 64. `DisplayTexture::GetTextureStats`
+  returns the rebuilt DLL's own 48-byte statistics export. The probes compare
+  per-DLL option state and verify the statistics reference targets that export.
+- `VertexProgramBasic` now consumes the same writable exports that renderer
+  plugins fill, under the original symbol names and ordinals. The shader
+  capability caches and manager registries are local. The vertex-program and
+  texture-combiner factories create rebuilt resources to keep their virtual
+  methods on that state. Factory RTTI and the other factory slots are unchanged.
+- `DisplayNull` now creates local `DisplayTextureNull` objects through a
+  one-slot mirror of its primary vtable. The texture count, bound-unit table
+  and auto-mip flag are local. The display constructor and its format table
+  still come from retail.
+- The `.texture`, `.texture.txt` and material factories now create local
+  resources. The ASCII path flag, four streaming fields, and the element visit
+  counter have their own storage. The bitmap factory remains retail.
+- The `GeometryChunk` factory registry and legacy normal-map default now own
+  local storage. Geometry registration and binary texture probes ran against
+  both builds.
+- The DLL is still not stand-alone: data mirrors, copied vtables/RTTI, and
+  private helpers are read from `RenderSystem_7c_orig.dll` at load and run time
+  through `GetModuleHandle`/`GetProcAddress` and fixed RVAs. Those are dynamic
+  lookups, so the static import check cannot see them. The mirrors also make
+  the original a load-time prerequisite: the rebuilt DLL fails `DllMain`
+  (error 1114) when loaded before the renamed original. Tests load the original
+  first.
+- Deviation: `TextureCombiner::TrackConstant` and `SetConstantRegister` bound
+  the index to 16 slots. The original reads `constantTable[index]` before its
+  `index < 16` test; that read is unobservable (such an index returns false)
+  but faults when the table ends at a page boundary. The output is unchanged.
+- `tools/check_exports.py DLL TSV --forbid-dll RenderSystem_7c_orig.dll` is the
+  static link check; it passes now. It still does not prove that runtime
+  lookups are gone: run in a directory without the original DLL to test that.

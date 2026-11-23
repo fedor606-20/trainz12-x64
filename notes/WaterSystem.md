@@ -146,3 +146,14 @@ generated .def, like the other modules.
   methods, plugin-type thunks and bare `CreateInstance` in both modules, compares allocation logs and object
   bytes, calls virtuals through the real `__thiscall` convention, and checks the mirror words. 41 scenarios,
   0 mismatches. `CreateInstance` factories and the `WaterMaterial` base remain U7b work.
+
+## U7b: WaterMaterial state (2026-11-23)
+
+- 18 direct state exports are local (196/490). The water, light and ambient colors
+  start at `+0xa4`, `+0xb4` and `+0xc4`; the light direction starts at `+0xd4`;
+  the reflection flag is at `+0xe0`. The float setters preserve the original x87
+  copy behavior. The base UV getter zeroes its hidden Vector2 return buffer.
+- `diff_ws_u7` reported 83 checks with zero mismatches, including the U7a factory
+  tests. The new checks call the exports directly; the original still owns virtual
+  dispatch. Remaining: lifetime, vtables, `InitInstance`, geometry creation,
+  and the four factories' `CreateInstance` methods.

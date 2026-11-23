@@ -87,7 +87,7 @@ protected:
     void __cdecl InitInstance(Texture& to) const;
     void __cdecl SetRequiresUpdate(bool on);
 
-    static __declspec(dllimport) unsigned long uniqueTexId;  // stays the original's (U6d)
+    static unsigned long uniqueTexId;  // the next instance's number in a unique name
 
     int unused08;              // +0x08
     unsigned char flags;       // +0x0c bit 0 requires an update (the rest is not written)
@@ -134,7 +134,7 @@ public:
 
 protected:
     ~TextureRes() override;
-    static __declspec(dllimport) bool delayedLoading;
+    static bool delayedLoading;
     void __cdecl ForceTextureLoad() const;
     void __cdecl InitInstance(TextureRes& to) const;
     const TextureResource* __cdecl GetResource() const override;
@@ -265,7 +265,7 @@ public:
     static void __cdecl GetDefaultFileCompression(char* const out);
     static void __cdecl SetDefaultFileCompression(char* name);
 
-    static __declspec(dllimport) float ANISOTROPY_DEFAULT_TOKEN_VALUE;
+    static float ANISOTROPY_DEFAULT_TOKEN_VALUE;
 
 protected:
     unsigned int __cdecl CalculateSize() const override;      // 15: 100
@@ -281,20 +281,20 @@ private:
                             Display* display) const;
     static const Bitmap* __cdecl GetMip(unsigned int level, unsigned int face, const Size& size, TextureInfo* info);
 
-    // the defaults stay the original's until the RenderKernel (U9) moves; the TextureManager sets them in Init
+    // TextureManager::Init sets these from the OS options.
     friend class TextureManager;
-    static __declspec(dllimport) TextureWrap WRAP_S_DEFAULT;
-    static __declspec(dllimport) TextureWrap WRAP_T_DEFAULT;
-    static __declspec(dllimport) TextureFilter MIN_FILTER_DEFAULT;
-    static __declspec(dllimport) TextureFilter MAG_FILTER_DEFAULT;
-    static __declspec(dllimport) TextureFilter MIP_FILTER_DEFAULT;
-    static __declspec(dllimport) TextureAutoMip AUTO_MIP_DEFAULT;
-    static __declspec(dllimport) TextureAlpha ALPHA_HINT_DEFAULT;
-    static __declspec(dllimport) TextureHint HINT_DEFAULT;
-    static __declspec(dllimport) DFormatId DISPLAYFORMATID_DEFAULT;
-    static __declspec(dllimport) float ANISOTROPY_DEFAULT;
-    static __declspec(dllimport) char* FILE_COMPRESSION_DEFAULT;  // (its 8 bytes are used as a char[8])
-    static __declspec(dllimport) NormalMapHint NORMAL_MAP_HINT_DEFAULT;
+    static TextureWrap WRAP_S_DEFAULT;
+    static TextureWrap WRAP_T_DEFAULT;
+    static TextureFilter MIN_FILTER_DEFAULT;
+    static TextureFilter MAG_FILTER_DEFAULT;
+    static TextureFilter MIP_FILTER_DEFAULT;
+    static TextureAutoMip AUTO_MIP_DEFAULT;
+    static TextureAlpha ALPHA_HINT_DEFAULT;
+    static TextureHint HINT_DEFAULT;
+    static DFormatId DISPLAYFORMATID_DEFAULT;
+    static float ANISOTROPY_DEFAULT;
+    static char* FILE_COMPRESSION_DEFAULT;  // (its 8 bytes are used as a char[8])
+    static NormalMapHint NORMAL_MAP_HINT_DEFAULT;
 
 protected:
     TextureInfo* info;   // +0x5c
@@ -439,7 +439,7 @@ protected:
     void __cdecl InitInstance(DisplayTexture& to) const;
     void __cdecl LogInitFailure(const char* what) const;
 
-    static __declspec(dllimport) DisplayTextureStats textureStats;
+    static DisplayTextureStats textureStats;
     static __declspec(dllimport) DisplayTextureFrameStats frameStats;
 
     int state;                         // +0x04 1 when made (CheckInitialized)
@@ -504,11 +504,10 @@ protected:
     void __cdecl InitInstance(DisplayTextureNull& to) const;
     void __cdecl SetBasicState() const;
 
-    // the null display's statics stay the original's until the Display unit (U9)
     static __declspec(dllimport) bool anisotropySupport;
-    static __declspec(dllimport) bool canAutoMip;
-    static __declspec(dllimport) unsigned int numObjects;
-    static __declspec(dllimport) const DisplayTextureNull** bound;  // 1000 texture units
+    static bool canAutoMip;
+    static unsigned int numObjects;
+    static const DisplayTextureNull** bound;  // 1000 texture units
 
     int unused38;                  // +0x38 -1
     int renderContext;             // +0x3c
@@ -610,7 +609,7 @@ protected:
     void CopyFields(const AsciiTextureResource& o);  // (inlined by the original)
 
     // written by RenderKernel::Init (U9): stays the original's until then
-    static __declspec(dllimport) bool noPath;
+    static bool noPath;
 
     // flat {count, capacity, items} arrays growing in steps of 6 (0x10007a40 / 0x10007af0 / copy 0x10007a70)
     mutable Array<const BitmapResource*, 6> primary;  // +0x68 one per face
@@ -679,11 +678,11 @@ public:
     static void __cdecl SetEnableTextureStreaming(bool on);
 
     // the original's until the RenderKernel (U9) moves
-    static __declspec(dllimport) int MIN_STREAMING_TEXTURE_MIP_COUNT;
-    static __declspec(dllimport) int MAX_STREAMING_TEXTURE_MIP_COUNT;
-    static __declspec(dllimport) int MIN_STREAMING_TEXTURE_SIZE;
-    static __declspec(dllimport) int MAX_STREAMING_TEXTURE_SIZE;
-    static __declspec(dllimport) bool TEXTURE_STREAMING_ENABLED;
+    static int MIN_STREAMING_TEXTURE_MIP_COUNT;
+    static int MAX_STREAMING_TEXTURE_MIP_COUNT;
+    static int MIN_STREAMING_TEXTURE_SIZE;
+    static int MAX_STREAMING_TEXTURE_SIZE;
+    static bool TEXTURE_STREAMING_ENABLED;
 
     JET_HEAP_OBJECT
 
@@ -710,8 +709,8 @@ protected:
     void __cdecl DownSizeRemoveMips(TextureRes* texture, int levels);
     void AppendMips(TextureRes* texture, TextureResource::TextureInfo* info, int reverseLevel);
 
-    static __declspec(dllimport) unsigned int globalSkipLevels;
-    static __declspec(dllimport) unsigned int globalSkipThreshold;
+    static unsigned int globalSkipLevels;
+    static unsigned int globalSkipThreshold;
 
     struct TextureHash {};
     // the hash table by name node (0x10042d80 init, 0x10035db0 clear, its buckets freed last)

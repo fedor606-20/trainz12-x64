@@ -2,30 +2,33 @@
 // API modules' vertex programs: LoadSymbolTable sorts the parsed symbols into constant lists and register maps,
 // LoadInstructions writes each instruction as assembly text (macros for the opcodes the API has no name for) and
 // puts the API's header and the declarations in front. Behaviour follows the TS12 assembly (addresses per
-// function). Its statics (limits, symbol names, opcode tables) are set by the API module, so they stay the
-// original's; so does ApiDataBase's vftable use here (VPSymbol below derives from it).
+// function). The API module sets the exported limits, symbol names and opcode tables.
 #include <jet/GfxLanguage.h>
 #include <jet/VCall.h>
 
 #include <cstring>
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
-// VS2005 mangled the `T const * const` statics as P..B, today's compiler as Q..B: the imports take the old names
-#define JET_VPB_OLD_NAME(name, type) \
-    __pragma(comment(linker, "/alternatename:__imp_?" #name "@VertexProgramBasic@Jet@@1Q" type "B=__imp_?" #name \
-                             "@VertexProgramBasic@Jet@@1P" type "B"))
-JET_VPB_OLD_NAME(vertexSymbol, "BD")
-JET_VPB_OLD_NAME(resultSymbol, "BD")
-JET_VPB_OLD_NAME(addressSymbol, "BD")
-JET_VPB_OLD_NAME(tempSymbol, "BD")
-JET_VPB_OLD_NAME(instSeperator, "BD")
-JET_VPB_OLD_NAME(logInstr, "BD")
-JET_VPB_OLD_NAME(expInstr, "BD")
-JET_VPB_OLD_NAME(opcodeMap, "BUOpcodeMap@12@")
-JET_VPB_OLD_NAME(vertexMap, "BUVertexMap@12@")
-JET_VPB_OLD_NAME(resultMap, "BUResultMap@12@")
-
 namespace Jet {
+
+Vector4* VertexProgramBasic::envParameters;
+int VertexProgramBasic::staticParameterInit;
+int VertexProgramBasic::numTmpRegisters;
+int VertexProgramBasic::numEnvParameters;
+int VertexProgramBasic::numLocalParameters;
+int VertexProgramBasic::numTotalParameters;
+bool VertexProgramBasic::needsAlignedMatrix;
+bool VertexProgramBasic::supportsProgramMatrix;
+const char* VertexProgramBasic::vertexSymbol;
+const char* VertexProgramBasic::resultSymbol;
+const char* VertexProgramBasic::addressSymbol;
+const char* VertexProgramBasic::tempSymbol;
+const char* VertexProgramBasic::instSeperator;
+const char* VertexProgramBasic::logInstr;
+const char* VertexProgramBasic::expInstr;
+const char* VertexProgramBasic::apiName;
+const VertexProgramBasic::OpcodeMap* VertexProgramBasic::opcodeMap;
+const VertexProgramBasic::VertexMap* VertexProgramBasic::vertexMap;
+const VertexProgramBasic::ResultMap* VertexProgramBasic::resultMap;
 
 namespace {
 
@@ -134,9 +137,6 @@ VertexProgramBasic::~VertexProgramBasic()
         if (envParameters) Alloc::Delete(envParameters);
         envParameters = nullptr;
     }
-    RsMirrorSync("?staticParameterInit@VertexProgramBasic@Jet@@1HA");
-    RsMirrorSync("?numEnvParameters@VertexProgramBasic@Jet@@1HA");
-    RsMirrorSync("?envParameters@VertexProgramBasic@Jet@@1PAVVector4@2@A");
     // (the three arrays' blocks and the declarations go with the members, the last list first)
 }
 

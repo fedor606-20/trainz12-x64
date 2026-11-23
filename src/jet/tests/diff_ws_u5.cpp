@@ -339,6 +339,8 @@ int main(int argc, char** argv)
     }
     const std::string dir = argv[1];
     SetDllDirectoryA(dir.c_str());
+    // RenderSystem_7c's data mirrors read the renamed original at load: it must be in memory first.
+    LoadLibraryA((dir + "\\RenderSystem_7c_orig.dll").c_str());
     mod[0] = LoadLibraryA((dir + "\\WaterSystem_7c.dll").c_str());
     const DWORD err0 = GetLastError();
     mod[1] = LoadLibraryA((dir + "\\WaterSystem_7c_orig.dll").c_str());

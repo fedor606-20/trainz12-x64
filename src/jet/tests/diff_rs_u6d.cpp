@@ -252,19 +252,19 @@ static void*(__fastcall* optionsCtor)(void*, void*);
 static void(__cdecl* optionsRaw)(void*, const char*);
 
 // the original's statics (shared by both sides)
-static unsigned* skipLevels;
-static unsigned* skipThreshold;
-static int* formatDefault;
-static float* anisoDefault;
-static int* minFilter;
-static int* magFilter;
-static int* mipFilter;
-static int* autoMip;
-static int* minMips;
-static int* maxMips;
-static int* minSize;
-static int* maxSize;
-static bool* streaming;
+static unsigned* skipLevels[2];
+static unsigned* skipThreshold[2];
+static int* formatDefault[2];
+static float* anisoDefault[2];
+static int* minFilter[2];
+static int* magFilter[2];
+static int* mipFilter[2];
+static int* autoMip[2];
+static int* minMips[2];
+static int* maxMips[2];
+static int* minSize[2];
+static int* maxSize[2];
+static bool* streaming[2];
 static int* bitmapMaxSize;  // KernelResources' BitmapResource streaming size (set by SetMaxSizeTextureStreaming)
 static void** substituteCache;  // SharedTextureCollection::textureArray[2]
 static void** substituteName;   // textureNameArray[2] (a PString)
@@ -563,7 +563,7 @@ static void ExerciseTextureResAccessors(const Api& api)
     api.setAsync(texture, nullptr);
     At<void*>(resObj, 8) = nullptr;
     Log("  cleared %d owner %s\n", api.getAsync(texture) == nullptr, Name(api.resourceDatabase(texture)).c_str());
-    bool* delayed = static_cast<bool*>(Proc(mod[1], "?delayedLoading@TextureRes@Jet@@1_NA"));
+    bool* delayed = static_cast<bool*>(Proc(mod[cur], "?delayedLoading@TextureRes@Jet@@1_NA"));
     bool const old = *delayed;
     api.setDelayed(true);
     Log("  delayed %d\n", *delayed);
@@ -706,7 +706,7 @@ static void ExerciseTextureResLifetime(const Api&)
     using Ctor = void*(__fastcall*)(void*, void*, const void*, void*, const void*);
     auto ctor = As<Ctor>(Proc(mod[cur], "??0TextureRes@Jet@@QAE@ABVPString@1@PAVTextureManager@1@PBVTextureResource@1@@Z"));
     auto instance = As<void*(__cdecl*)(const void*)>(Proc(mod[cur], "?CreateInstance@TextureRes@Jet@@UBAPAVTexture@2@XZ"));
-    auto* uniqueId = static_cast<unsigned*>(Proc(mod[1], "?uniqueTexId@Texture@Jet@@1KA"));
+    auto* uniqueId = static_cast<unsigned*>(Proc(mod[cur], "?uniqueTexId@Texture@Jet@@1KA"));
     const unsigned savedId = *uniqueId;
     *uniqueId = 1;
     unsigned char managerData[0xd8]{};
@@ -2502,8 +2502,9 @@ static void DumpStatics()
 {
     Log("  statics: skip %u threshold %u format %d aniso %08x filters %d %d %d automip %d mips %d..%d size %d..%d "
         "streaming %d bitmap max %d\n",
-        *skipLevels, *skipThreshold, *formatDefault, Bits(*anisoDefault), *minFilter, *magFilter, *mipFilter,
-        *autoMip, *minMips, *maxMips, *minSize, *maxSize, *streaming, *bitmapMaxSize);
+        *skipLevels[cur], *skipThreshold[cur], *formatDefault[cur], Bits(*anisoDefault[cur]), *minFilter[cur],
+        *magFilter[cur], *mipFilter[cur], *autoMip[cur], *minMips[cur], *maxMips[cur], *minSize[cur], *maxSize[cur],
+        *streaming[cur], *bitmapMaxSize);
 }
 
 // ---- the scenario
@@ -2516,26 +2517,27 @@ struct Statics {
     bool streaming;
     int bitmapMax;
 };
-static Statics Save()
+static Statics Save(int side)
 {
-    return {*skipLevels, *skipThreshold, *formatDefault, *anisoDefault, *minFilter, *magFilter, *mipFilter, *autoMip,
-            *minMips, *maxMips, *minSize, *maxSize, *streaming, *bitmapMaxSize};
+    return {*skipLevels[side], *skipThreshold[side], *formatDefault[side], *anisoDefault[side], *minFilter[side],
+            *magFilter[side], *mipFilter[side], *autoMip[side], *minMips[side], *maxMips[side], *minSize[side],
+            *maxSize[side], *streaming[side], *bitmapMaxSize};
 }
 static void Restore(const Statics& s)
 {
-    *skipLevels = s.skip;
-    *skipThreshold = s.threshold;
-    *formatDefault = s.format;
-    *anisoDefault = s.aniso;
-    *minFilter = s.minF;
-    *magFilter = s.magF;
-    *mipFilter = s.mipF;
-    *autoMip = s.automip;
-    *minMips = s.minM;
-    *maxMips = s.maxM;
-    *minSize = s.minS;
-    *maxSize = s.maxS;
-    *streaming = s.streaming;
+    *skipLevels[cur] = s.skip;
+    *skipThreshold[cur] = s.threshold;
+    *formatDefault[cur] = s.format;
+    *anisoDefault[cur] = s.aniso;
+    *minFilter[cur] = s.minF;
+    *magFilter[cur] = s.magF;
+    *mipFilter[cur] = s.mipF;
+    *autoMip[cur] = s.automip;
+    *minMips[cur] = s.minM;
+    *maxMips[cur] = s.maxM;
+    *minSize[cur] = s.minS;
+    *maxSize[cur] = s.maxS;
+    *streaming[cur] = s.streaming;
     *bitmapMaxSize = s.bitmapMax;
 }
 
@@ -2794,6 +2796,7 @@ int main(int argc, char** argv)
     }
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 500;
     const std::string binDir = argv[1];
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     SetDllDirectoryA(argv[1]);
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
@@ -2814,19 +2817,24 @@ int main(int argc, char** argv)
     optionsCtor = As<decltype(optionsCtor)>(Proc(ks, "??0Options@Jet@@QAE@XZ"));
     optionsRaw = As<decltype(optionsRaw)>(Proc(ks, "?ProcessRaw@Options@Jet@@QAAXPBD@Z"));
     HMODULE o = mod[1];
-    skipLevels = static_cast<unsigned*>(Proc(o, "?globalSkipLevels@" TM "1IA"));
-    skipThreshold = static_cast<unsigned*>(Proc(o, "?globalSkipThreshold@" TM "1IA"));
-    formatDefault = static_cast<int*>(Proc(o, "?DISPLAYFORMATID_DEFAULT@TextureResource@Jet@@0W4DFormatId@2@A"));
-    anisoDefault = static_cast<float*>(Proc(o, "?ANISOTROPY_DEFAULT@TextureResource@Jet@@0MA"));
-    minFilter = static_cast<int*>(Proc(o, "?MIN_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"));
-    magFilter = static_cast<int*>(Proc(o, "?MAG_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"));
-    mipFilter = static_cast<int*>(Proc(o, "?MIP_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"));
-    autoMip = static_cast<int*>(Proc(o, "?AUTO_MIP_DEFAULT@TextureResource@Jet@@0W4TextureAutoMip@2@A"));
-    minMips = static_cast<int*>(Proc(o, "?MIN_STREAMING_TEXTURE_MIP_COUNT@" TM "2HA"));
-    maxMips = static_cast<int*>(Proc(o, "?MAX_STREAMING_TEXTURE_MIP_COUNT@" TM "2HA"));
-    minSize = static_cast<int*>(Proc(o, "?MIN_STREAMING_TEXTURE_SIZE@" TM "2HA"));
-    maxSize = static_cast<int*>(Proc(o, "?MAX_STREAMING_TEXTURE_SIZE@" TM "2HA"));
-    streaming = static_cast<bool*>(Proc(o, "?TEXTURE_STREAMING_ENABLED@" TM "2_NA"));
+    for (int s = 0; s < 2; ++s) {
+        skipLevels[s] = static_cast<unsigned*>(Proc(mod[s], "?globalSkipLevels@" TM "1IA"));
+        skipThreshold[s] = static_cast<unsigned*>(Proc(mod[s], "?globalSkipThreshold@" TM "1IA"));
+    }
+    for (int s = 0; s < 2; ++s) {
+        formatDefault[s] = static_cast<int*>(Proc(mod[s], "?DISPLAYFORMATID_DEFAULT@TextureResource@Jet@@0W4DFormatId@2@A"));
+        anisoDefault[s] = static_cast<float*>(Proc(mod[s], "?ANISOTROPY_DEFAULT@TextureResource@Jet@@0MA"));
+        minFilter[s] = static_cast<int*>(Proc(mod[s], "?MIN_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"));
+        magFilter[s] = static_cast<int*>(Proc(mod[s], "?MAG_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"));
+        mipFilter[s] = static_cast<int*>(Proc(mod[s], "?MIP_FILTER_DEFAULT@TextureResource@Jet@@0W4TextureFilter@2@A"));
+        autoMip[s] = static_cast<int*>(Proc(mod[s], "?AUTO_MIP_DEFAULT@TextureResource@Jet@@0W4TextureAutoMip@2@A"));
+        minMips[s] = static_cast<int*>(Proc(mod[s], "?MIN_STREAMING_TEXTURE_MIP_COUNT@" TM "2HA"));
+        maxMips[s] = static_cast<int*>(Proc(mod[s], "?MAX_STREAMING_TEXTURE_MIP_COUNT@" TM "2HA"));
+        minSize[s] = static_cast<int*>(Proc(mod[s], "?MIN_STREAMING_TEXTURE_SIZE@" TM "2HA"));
+        streaming[s] = static_cast<bool*>(Proc(mod[s], "?TEXTURE_STREAMING_ENABLED@" TM "2_NA"));
+    }
+    for (int s = 0; s < 2; ++s)
+        maxSize[s] = static_cast<int*>(Proc(mod[s], "?MAX_STREAMING_TEXTURE_SIZE@" TM "2HA"));
     bitmapMaxSize = static_cast<int*>(Proc(krs, "?MAX_STREAMING_TEXTURE_SIZE@BitmapResource@Jet@@1HA"));
     substituteCache = static_cast<void**>(Proc(o, "?textureArray@SharedTextureCollection@Jet@@1PAV?$AutoReference@VTexture@Jet@@@2@A")) + 2;
     substituteName = static_cast<void**>(Proc(o, "?textureNameArray@SharedTextureCollection@Jet@@1PAVPString@2@A")) + 2;
@@ -2881,7 +2889,7 @@ int main(int argc, char** argv)
         PatchImport(mod[s], "?SetScrambleKey@Resource@Jet@@QBAXABVString@2@@Z", reinterpret_cast<void*>(&SetScrambleKey));
         PatchImport(mod[s], "?ReleaseReference@Resource@Jet@@QBA_NXZ", reinterpret_cast<void*>(&ResRelease));
     }
-    const Statics initial = Save();
+    const Statics initial = Save(1);
     for (int round = 0; round < rounds; ++round) {
         const unsigned seed = rng();
         // the round's options (KernelStandard's heap; made once, shared by both sides)

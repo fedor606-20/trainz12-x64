@@ -387,8 +387,8 @@ protected:
     bool bumpChanged;                      // +0x5c
     TextureCombinerManager* manager;       // +0x60
 
-    static __declspec(dllimport) bool supportChecked;  // the original's until U9
-    static __declspec(dllimport) bool supported;
+    static bool supportChecked;
+    static bool supported;
 };
 JET_LAYOUT32(sizeof(TextureCombiner) == 0x6c);
 
@@ -477,11 +477,11 @@ protected:
     bool field40;                    // +0x40
     VertexProgramManager* manager;   // +0x44
 
-    static __declspec(dllimport) int maxLocalRegs;  // the original's until U9
-    static __declspec(dllimport) int maxEnvRegs;
-    static __declspec(dllimport) int maxTotalRegs;
-    static __declspec(dllimport) bool supportChecked[4];  // by generation - 1
-    static __declspec(dllimport) bool supported[4];
+    static int maxLocalRegs;
+    static int maxEnvRegs;
+    static int maxTotalRegs;
+    static bool supportChecked[4];  // by generation - 1
+    static bool supported[4];
 };
 JET_LAYOUT32(sizeof(VertexProgram) == 0x50);
 
@@ -559,8 +559,7 @@ void HashTable<K, T, H, SIZ>::Insert(T item, const void* key)
 }
 
 // Hands out the vertex programs: shared by their registered name (file:program + defines), made from the built-in
-// program texts (RegisterBuiltInPrograms) or from `.vtx` resources (0x18 bytes). Only the original's Display makes
-// one until U9, so the statics stay the original's.
+// program texts (RegisterBuiltInPrograms) or from `.vtx` resources (0x18 bytes).
 class VertexProgramManager : public ReferenceCount {
 public:
     enum Results {};
@@ -611,9 +610,11 @@ protected:
     Display* display;                                                  // +8
     HashTable<const PString&, VertexProgram*, NameHash, 13> programs;  // +0xc by registered name
 
-    static __declspec(dllimport) VertexProgramManager* theManager;  // the original's until U9
-    static __declspec(dllimport) Array<ProgramItem, 128> builtInProgramList;
-    static __declspec(dllimport) HashTable<const PString&, RegisteredName*, NameHash, 13> registeredProgramList;
+    static VertexProgramManager* theManager;
+    static Array<ProgramItem, 128> builtInProgramList;
+    static HashTable<const PString&, RegisteredName*, NameHash, 13> registeredProgramList;
+    struct RegisteredProgramListLifetime;
+    static RegisteredProgramListLifetime registeredProgramListLifetime;
 };
 JET_LAYOUT32(sizeof(VertexProgramManager) == 0x18);
 
@@ -646,8 +647,8 @@ protected:
     Display* display;                                                // +8
     HashTable<const PString&, TextureCombiner*, int, 13> combiners;  // +0xc by program name
 
-    static __declspec(dllimport) TextureCombinerManager* theManager;  // the original's until U9
-    static __declspec(dllimport) Array<ProgramItem, 128> builtInProgramList;
+    static TextureCombinerManager* theManager;
+    static Array<ProgramItem, 128> builtInProgramList;
 };
 JET_LAYOUT32(sizeof(TextureCombinerManager) == 0x18);
 
@@ -816,26 +817,26 @@ protected:
     bool* used;                                // +0x58 registers taken (numEnvParameters bytes)
     bool field5c;                              // +0x5c the program writes output 0x2e
 
-    // set by the API module (the original's, written there)
-    static __declspec(dllimport) Vector4* envParameters;
-    static __declspec(dllimport) int staticParameterInit;
-    static __declspec(dllimport) int numTmpRegisters;
-    static __declspec(dllimport) int numEnvParameters;
-    static __declspec(dllimport) int numLocalParameters;
-    static __declspec(dllimport) int numTotalParameters;
-    static __declspec(dllimport) bool needsAlignedMatrix;
-    static __declspec(dllimport) bool supportsProgramMatrix;
-    static __declspec(dllimport) const char* const vertexSymbol;
-    static __declspec(dllimport) const char* const resultSymbol;
-    static __declspec(dllimport) const char* const addressSymbol;
-    static __declspec(dllimport) const char* const tempSymbol;
-    static __declspec(dllimport) const char* const instSeperator;
-    static __declspec(dllimport) const char* const logInstr;
-    static __declspec(dllimport) const char* const expInstr;
-    static __declspec(dllimport) const char* const apiName;
-    static __declspec(dllimport) const OpcodeMap* const opcodeMap;
-    static __declspec(dllimport) const VertexMap* const vertexMap;
-    static __declspec(dllimport) const ResultMap* const resultMap;
+    // Renderer plugins write these exports under the legacy decorated names.
+    static Vector4* envParameters;
+    static int staticParameterInit;
+    static int numTmpRegisters;
+    static int numEnvParameters;
+    static int numLocalParameters;
+    static int numTotalParameters;
+    static bool needsAlignedMatrix;
+    static bool supportsProgramMatrix;
+    static const char* vertexSymbol;
+    static const char* resultSymbol;
+    static const char* addressSymbol;
+    static const char* tempSymbol;
+    static const char* instSeperator;
+    static const char* logInstr;
+    static const char* expInstr;
+    static const char* apiName;
+    static const OpcodeMap* opcodeMap;
+    static const VertexMap* vertexMap;
+    static const ResultMap* resultMap;
 };
 JET_LAYOUT32(sizeof(VertexProgramBasic) == 0xb4);
 

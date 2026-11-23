@@ -210,9 +210,9 @@ static void LoadApi(int s)
 }
 
 // the original's statics both sides use
-static int* maxStreamSize;
-static void(__cdecl* setDefault[6])(int);  // wrap s, wrap t, hint, automip, alpha hint, display format
-static void(__cdecl* setDefaultCompression)(char*);
+static int* maxStreamSize[2];
+static void(__cdecl* setDefault[2][6])(int);  // wrap s, wrap t, hint, automip, alpha hint, display format
+static void(__cdecl* setDefaultCompression[2])(char*);
 
 // KernelStandard
 static void*(__fastcall* bitmapCtor)(void*, void*, const int* size, int format, unsigned char* data);
@@ -611,18 +611,18 @@ static void RunAscii(int s, unsigned seed)
     int made = 0, saved = 0;
 
     // the statics, the same on both sides
-    *maxStreamSize = 16 << (r() % 8);
-    setDefault[0](static_cast<int>(r() % 3));
-    setDefault[1](static_cast<int>(r() % 3));
-    setDefault[2](static_cast<int>(r() % 2));
-    setDefault[3](static_cast<int>(r() % 4));
-    setDefault[4](r() % 3 ? 3 : static_cast<int>(r() % 3));
-    setDefault[5](1);
+    *maxStreamSize[s] = 16 << (r() % 8);
+    setDefault[s][0](static_cast<int>(r() % 3));
+    setDefault[s][1](static_cast<int>(r() % 3));
+    setDefault[s][2](static_cast<int>(r() % 2));
+    setDefault[s][3](static_cast<int>(r() % 4));
+    setDefault[s][4](r() % 3 ? 3 : static_cast<int>(r() % 3));
+    setDefault[s][5](1);
     char comp[9] = "lzss";
     if (r() % 3 == 0) comp[0] = 0;
-    setDefaultCompression(comp);
+    setDefaultCompression[s](comp);
     a.setUsePath(r() % 2 != 0);
-    Log("statics: max size %d\n", *maxStreamSize);
+    Log("statics: max size %d\n", *maxStreamSize[s]);
 
     std::vector<void*> res;
     auto newResource = [&]() {
@@ -908,6 +908,7 @@ int main(int argc, char** argv)
     }
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 300;
     const std::string binDir = argv[1];
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     const std::string root = argc > 3 ? argv[3] : binDir + "\\..\\UserData";
     SetDllDirectoryA(argv[1]);
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
@@ -947,14 +948,16 @@ int main(int argc, char** argv)
     bitmapCtor0 = As<decltype(bitmapCtor0)>(Proc(ks, "??0Bitmap@Jet@@QAE@XZ"));
     bitmapDtor = As<decltype(bitmapDtor)>(Proc(ks, "??1Bitmap@Jet@@QAE@XZ"));
     bitmapLoad = As<decltype(bitmapLoad)>(Proc(ks, "?Load@Bitmap@Jet@@QAA_NABVPString@2@0_N@Z"));
-    maxStreamSize = static_cast<int*>(Proc(mod[1], "?MAX_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA"));
-    setDefault[0] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultWrapS@" TR "SAXW4TextureWrap@2@@Z"));
-    setDefault[1] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultWrapT@" TR "SAXW4TextureWrap@2@@Z"));
-    setDefault[2] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultTextureHint@" TR "SAXW4TextureHint@2@@Z"));
-    setDefault[3] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultAutoMip@" TR "SAXW4TextureAutoMip@2@@Z"));
-    setDefault[4] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultAlphaHint@" TR "SAXW4TextureAlpha@2@@Z"));
-    setDefault[5] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultDisplayFormatId@" TR "SAXW4DFormatId@2@@Z"));
-    setDefaultCompression = As<decltype(setDefaultCompression)>(Proc(mod[1], "?SetDefaultFileCompression@" TR "SAXPAD@Z"));
+    for (int s = 0; s < 2; ++s) {
+        maxStreamSize[s] = static_cast<int*>(Proc(mod[s], "?MAX_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA"));
+        setDefault[s][0] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultWrapS@" TR "SAXW4TextureWrap@2@@Z"));
+        setDefault[s][1] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultWrapT@" TR "SAXW4TextureWrap@2@@Z"));
+        setDefault[s][2] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultTextureHint@" TR "SAXW4TextureHint@2@@Z"));
+        setDefault[s][3] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultAutoMip@" TR "SAXW4TextureAutoMip@2@@Z"));
+        setDefault[s][4] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultAlphaHint@" TR "SAXW4TextureAlpha@2@@Z"));
+        setDefault[s][5] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultDisplayFormatId@" TR "SAXW4DFormatId@2@@Z"));
+        setDefaultCompression[s] = As<decltype(setDefaultCompression[0])>(Proc(mod[s], "?SetDefaultFileCompression@" TR "SAXPAD@Z"));
+    }
     // KernelResource's Resource reads the resource system's time: a zeroed stand-in (as in diff_rs_u3)
     static unsigned char fakeSystem[0x400];
     As<void(__cdecl*)(void*)>(Proc(GetModuleHandleA("KernelResource_7c.dll"), "?InitRS@Resource@Jet@@CAXPAVResourceSystem@2@@Z"))(fakeSystem);

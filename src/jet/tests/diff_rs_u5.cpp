@@ -403,14 +403,14 @@ static void LoadApi(int s)
 }
 
 // the original's VertexType statics both sides use
-static void** displayStatic;
-static void (*origShutdown)();
-static void ClearChunkRegistry();
-static void FreshStatics()
+static void** displayStatic[2];
+static void (*origShutdown[2])();
+static void ClearChunkRegistry(int side);
+static void FreshStatics(int side)
 {
-    origShutdown();
-    *displayStatic = nullptr;
-    ClearChunkRegistry();
+    origShutdown[side]();
+    *displayStatic[side] = nullptr;
+    ClearChunkRegistry(side);
 }
 
 // ---- vertex types
@@ -572,7 +572,7 @@ static void RunTypes(int s, unsigned seed)
             const unsigned long v = r() % 3 ? r() % 4 : 0;
             Log("op api data %s %s %lx\n", Name(t).c_str(), Name(d).c_str(), v);
             a.setApiData(t, d, v);
-            Log("  -> %lx display %s\n", a.getApiData(t), Name(*displayStatic).c_str());
+            Log("  -> %lx display %s\n", a.getApiData(t), Name(*displayStatic[cur]).c_str());
             break;
         }
         case 3: {
@@ -1198,13 +1198,13 @@ static void LoadApiC(int s)
 #undef F
 }
 
-// the chunk registry (the original's static): emptied between sides, its bucket chunks freed outside the logs
-static void ClearChunkRegistry()
+// Each module owns its chunk registry; free its bucket chunks outside the trace.
+static void ClearChunkRegistry(int side)
 {
     struct Table {
         void** buckets;
         unsigned count, size;
-    }* t = static_cast<Table*>(Proc(mod[1], "?registrations@" GC "1V?$HashTable@IPAURegistrationData@" GC
+    }* t = static_cast<Table*>(Proc(mod[side], "?registrations@" GC "1V?$HashTable@IPAURegistrationData@" GC
                                                 "URegistrationDataOp@23@$0N@@2@A"));
     for (unsigned k = 0; k < t->size; ++k) {
         void** head = static_cast<void**>(t->buckets[k]);
@@ -3043,6 +3043,7 @@ int main(int argc, char** argv)
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 300;
     SetDllDirectoryA(argv[1]);
     const std::string binDir = argv[1];
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
     ks = GetModuleHandleA("KernelStandard_7c.dll");
@@ -3111,8 +3112,10 @@ int main(int argc, char** argv)
     *reinterpret_cast<void**>(programObj + 8) = programRcVt;
     fixedNames[streamDisplay] = "SD";
     fixedNames[bufferManager] = "BM";
-    displayStatic = static_cast<void**>(Proc(mod[1], "?display@VertexType@Jet@@1PBVDisplay@2@B"));
-    origShutdown = As<void (*)()>(Proc(mod[1], "?Shutdown@VertexType@Jet@@SAXXZ"));
+    for (int s = 0; s < 2; ++s) {
+        displayStatic[s] = static_cast<void**>(Proc(mod[s], "?display@VertexType@Jet@@1PBVDisplay@2@B"));
+        origShutdown[s] = As<void (*)()>(Proc(mod[s], "?Shutdown@VertexType@Jet@@SAXXZ"));
+    }
     for (int s = 0; s < 2; ++s) {
         LoadApi(s);
         MakeCacheVtables(s);
@@ -3135,7 +3138,7 @@ int main(int argc, char** argv)
         for (int round = 0; round < rounds; ++round) {
             const unsigned seed = rng();
             for (int s = 0; s < 2; ++s) {
-                FreshStatics();
+                FreshStatics(s);
                 cur = s;
                 logText[s].clear();
                 names[s].clear();

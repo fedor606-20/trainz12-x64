@@ -16,6 +16,7 @@ static unsigned char objects[10][0x40];
 static unsigned objectCount;
 static unsigned char nodes[10][0x18];
 static unsigned nodeCount;
+static bool probeFactory;
 
 static void PatchImport(HMODULE m, const char* name, void* fn)
 {
@@ -63,6 +64,10 @@ static void* __stdcall FakeUId(const char* text)
 
 static void* __cdecl FakeNew(unsigned size)
 {
+    if (probeFactory) {
+        trace->insert(trace->end(), {7, static_cast<int>(size)});
+        return nullptr;
+    }
     if (objectCount >= 10 || size > sizeof objects[0]) std::exit(2);
     trace->insert(trace->end(), {2, static_cast<int>(size), static_cast<int>(objectCount)});
     return objects[objectCount++];
@@ -104,8 +109,26 @@ static void DumpVtables(HMODULE module)
         const auto* vtable = static_cast<const unsigned*>(*reinterpret_cast<void**>(objects[i]));
         const auto* vptr = reinterpret_cast<const unsigned char*>(vtable - 1);
         trace->insert(trace->end(), {6, static_cast<int>(i), vptr >= base && vptr < base + 0x100000});
-        for (int j = -1; j < kSlotCounts[i]; ++j)
-            trace->push_back(static_cast<int>(vtable[j]));
+        for (int j = -1; j < kSlotCounts[i]; ++j) {
+            if (i >= 5 && j == 3) {
+                const auto entry = reinterpret_cast<const char*>(vtable[j]);
+                HMODULE owner = nullptr;
+                if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                                           GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, entry, &owner) ||
+                    owner != module) {
+                    std::printf("factory %u does not create resources in its own module\n", i);
+                    std::exit(1);
+                }
+                using Create = void*(__cdecl*)(const void*, const void*, const void*);
+                const auto create = reinterpret_cast<Create>(vtable[j]);
+                void* name = nullptr;
+                probeFactory = true;
+                if (create(objects[i], &name, nullptr)) std::exit(1);
+                probeFactory = false;
+            } else {
+                trace->push_back(static_cast<int>(vtable[j]));
+            }
+        }
     }
 }
 

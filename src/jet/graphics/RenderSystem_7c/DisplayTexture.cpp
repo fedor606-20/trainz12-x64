@@ -12,11 +12,10 @@
 #include <cstring>
 #include <new>
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
 
-bool __cdecl Convert(const DisplayFormat& from, const DisplayFormat& to, void*& data, int& pitch, int& a, int& b,
-                     int width, int height);  // the original's (0x1000ed60, U9)
+bool __cdecl RsConvertScratch(const DisplayFormat& from, const DisplayFormat& to, void*& data,
+                              int& pitch, int& a, int& b, int width, int height);
 
 namespace {
 
@@ -169,6 +168,13 @@ bool __cdecl DisplayTexture::GetAutoMip() const { return autoMip != 0; }        
 TextureAutoMip __cdecl DisplayTexture::GetAutoMipHint() const { return static_cast<TextureAutoMip>(autoMip); }  // 0x10004a70
 float __cdecl DisplayTexture::GetAnisotropy() const { return anisotropy; }                    // 0x10004a80
 bool __cdecl DisplayTexture::CheckInitialized(const char*) const { return state == 1; }      // 0x10004a90
+// Retail returns the zero-initialized 48-byte record at 0x100b863c by reference.
+// Keep its ABI without assigning undocumented meanings to the fields.
+struct alignas(4) DisplayTexture::DisplayTextureStats {
+    unsigned char bytes[0x30];
+};
+DisplayTexture::DisplayTextureStats DisplayTexture::textureStats{};
+
 const DisplayTexture::DisplayTextureStats& __cdecl DisplayTexture::GetTextureStats() { return textureStats; }  // 0x1001f6a0
 
 void __cdecl DisplayTexture::SetDataLost(bool lost)  // 0x10004a30
@@ -257,6 +263,10 @@ void __cdecl DisplayTexture::InitInstance(DisplayTexture& to) const
 // ---------------------------------------------------------------------------------------------------------------
 // DisplayTextureNull
 
+bool DisplayTextureNull::canAutoMip;
+unsigned int DisplayTextureNull::numObjects;
+const DisplayTextureNull** DisplayTextureNull::bound;
+
 // 0x1001f6b0: the first one asks the display about automatic mips and makes the 1000 texture units
 DisplayTextureNull::DisplayTextureNull(Display* d) : DisplayTexture(d)
 {
@@ -274,9 +284,6 @@ DisplayTextureNull::DisplayTextureNull(Display* d) : DisplayTexture(d)
         canAutoMip = Query(d, 5);
         bound = static_cast<const DisplayTextureNull**>(Alloc::New(1000 * sizeof(void*)));
         for (int i = 0; i < 1000; ++i) bound[i] = nullptr;
-        RsMirrorSync("?numObjects@DisplayTextureNull@Jet@@1IA");
-        RsMirrorSync("?canAutoMip@DisplayTextureNull@Jet@@1_NA");
-        RsMirrorSync("?bound@DisplayTextureNull@Jet@@1PAPBV12@A");
     }
     image = nullptr;
 }
@@ -326,9 +333,6 @@ DisplayTextureNull::~DisplayTextureNull()
         if (bound) Alloc::Delete(bound);
         bound = nullptr;
     }
-    RsMirrorSync("?numObjects@DisplayTextureNull@Jet@@1IA");
-    RsMirrorSync("?canAutoMip@DisplayTextureNull@Jet@@1_NA");
-    RsMirrorSync("?bound@DisplayTextureNull@Jet@@1PAPBV12@A");
 }
 
 // 0x1001f8c0: the settings only (no API object); refuses a volume texture, and a render target that is not 2D or
@@ -404,7 +408,7 @@ NULLFormat* __cdecl DisplayTextureNull::CheckFormat(DisplayFormat& format, void*
     if (e->flags & 1) return reinterpret_cast<NULLFormat*>(e);
     if (!data) return nullptr;
     if (!e->link) return nullptr;
-    if (!Convert(format, e->format, data, pitch, a, b, width, height)) return nullptr;
+    if (!RsConvertScratch(format, e->format, data, pitch, a, b, width, height)) return nullptr;
     return reinterpret_cast<NULLFormat*>(e->link);
 }
 

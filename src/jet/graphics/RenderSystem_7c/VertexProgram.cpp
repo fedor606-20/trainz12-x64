@@ -1,7 +1,7 @@
 // Unit U3a of RenderSystem_7c: VertexProgram, the base of the API modules' vertex programs (0x100492c0..0x1004a510,
 // its small members at 0x10021840..0x100219b0 and in shared bodies elsewhere). Behaviour follows the TS12 assembly
 // (addresses per function); the float code keeps the original's order of operations, so the constants come out
-// bit for bit. The register limits and the support flags stay the original's statics until U9.
+// bit for bit.
 #include <jet/GfxLanguage.h>
 #include <jet/VCall.h>
 
@@ -9,8 +9,13 @@
 
 #include "GfxParse.h"
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
+
+int VertexProgram::maxLocalRegs;
+int VertexProgram::maxEnvRegs;
+int VertexProgram::maxTotalRegs;
+bool VertexProgram::supportChecked[4];
+bool VertexProgram::supported[4];
 
 namespace {
 
@@ -126,8 +131,6 @@ bool __cdecl VertexProgram::SupportedByPlatform(Display* d, float generation)
     if (!supportChecked[i]) {
         supported[i] = VCall<bool>(d, 0x1c, i + 0x12);
         supportChecked[i] = true;
-        RsMirrorSync("?supportChecked@VertexProgram@Jet@@1PA_NA");
-        RsMirrorSync("?supported@VertexProgram@Jet@@1PA_NA");
     }
     return supported[i];
 }

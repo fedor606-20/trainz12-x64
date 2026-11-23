@@ -13,6 +13,8 @@ static const ResultTable kModifierResults = {"RES_UNKNOWN"};
 const ResultTable* const Modifier::results = &kModifierResults;
 const ResultTable* const ModifierHost::results = &kModifierResults;
 
+CriticalSection ModifierList::modifierListLock;
+
 // ---------------------------------------------------------------------------------------------------------------
 // the VC8 list<Modifier*> (0x1000d470 head, 0x1000dd00 node, 0x1000dc10 erase, 0x1000d490 destructor)
 

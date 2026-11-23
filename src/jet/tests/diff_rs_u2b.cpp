@@ -2236,6 +2236,7 @@ int main(int argc, char** argv)
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 400;
     SetDllDirectoryA(argv[1]);
     std::string dir = argv[1];
+    LoadLibraryA((dir + "\\RenderSystem_7c_orig.dll").c_str());
     binDir = dir;
     if (argc > 3) dumpPart = argv[3];
     mod[0] = LoadLibraryA((dir + "\\RenderSystem_7c.dll").c_str());

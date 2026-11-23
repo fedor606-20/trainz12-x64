@@ -3206,3 +3206,146 @@ game check reached the offline main menu and exited with code `0`; the 17-line
 JetLog matched. Screenshot capture timed out after 20 seconds. Artifact:
 `game-20261123-042743`. DLLs were restored and hash-checked. No driving session
 was run.
+
+### WaterSystem U7b: direct WaterMaterial state exports (2026-11-23)
+
+18 state exports are local, bringing WaterSystem to **196/490**, with 294
+forwarders. The original retains the vtables and lifetime. `diff_ws_u7`
+reported 83 checks with zero mismatches. Export names and ordinals matched,
+and the thunk check found no unintended imports among the 196 local exports.
+The new DLL was not run in the game. The RenderSystem U13 probe was also
+rerun: 71 constructor/destructor, 71 closure and 30 dump checks matched.
+
+### RenderSystem U14: zero export forwarders
+
+The last ten exports are local: Display lifetime, pre-open, open, texture-stage
+parser, context initialization and built-in vertex layouts, plus RenderKernel
+renderer selection and frame update. All 2687 export names and ordinals match.
+The thunk check found no unintended import thunks. The Win32 DLL still requires
+the original for private helpers, tables and shared state.
+
+`diff_rs_u9` matched 209704 trace entries, including all 99 vertex layouts,
+the context replay, NullRender initialization, and frame updates through the
+local Task vtable. `diff_rs_u13` matched 71 constructor/destructor, 71 closure
+and 30 dump checks. `diff_ws_u7` matched all 83 checks. U14 was not run in game.
+
+### RenderSystem U15: first runtime dependency cut
+
+The null texture converter now uses local pixel code and scratch storage.
+Normal imports from `RenderSystem_7c_orig.dll` dropped from 63 to 62; all
+remaining normal imports are data. Gamma and generated texture power samples
+resolve the legacy CRT directly, with no read from the original import table.
+Frame profiling and the nine compression token pointers also moved to local
+storage. The original DLL is still required for other data and private code.
+
+Release Win32 passed `diff_rs_u6c` (500 cases), `diff_rs_u6d` (100 cases),
+`diff_rs_u9` (209800 entries), `diff_rs_u10` (1969 entries) and `diff_rs_u13`.
+The PE dependency gate rejects the current import of `RenderSystem_7c_orig.dll`.
+No changes were made to the game installation.
+
+### RenderSystem U15: screenshot and SceneGraph lifetime
+
+RenderKernel's queue no longer invokes the original queue routines by RVA.
+It owns synchronization, buffer growth, push and pop, and its dump thread.
+RenderKernel also constructs and destroys its SceneGraph and destroys owned
+system resources without calling the original routines for those operations.
+
+Release Win32 passed `diff_rs_u8` (512 cases plus layer traces), `diff_rs_u9`
+(209802 entries), `diff_rs_u10` and `diff_rs_u13`. The queue test passed 250
+FIFO entries, including wraparound followed by growth from 128 to 256 slots.
+The worker was not exercised in game. The DLL still imports shared data from
+the original and uses original-backed vtables and other private helpers.
+
+### RenderSystem U15: texture option data
+
+The anisotropy default token is now defined and exported locally. Normal
+imports from `RenderSystem_7c_orig.dll` fell from 62 to 61. TextureManager also
+owns the case-insensitive option mapping for all 16 texture formats and its
+`ARGB8888` default. This removes an original data lookup and a private call by
+RVA without changing the shared, mutable texture defaults.
+
+Release Win32 matched all 2687 export names and ordinals, with no import
+thunks among the local exports. `diff_rs_u6c` and `diff_rs_u6d` matched 500
+scenarios each. `diff_rs_u9` matched 209802 trace entries, `diff_rs_u11` passed
+119 checks, and `diff_rs_u13` matched all probes, including 250 FIFO entries.
+The original DLL is still required. No in-game run was performed.
+
+### RenderSystem U15: texture controls and statistics
+
+The two texture resolution options and the 48-byte display texture statistics
+record are local data exports. `dumpbin` reports 58 normal imports from
+`RenderSystem_7c_orig.dll`, down from 61. No shared texture resource defaults
+or counters changed ownership in this batch.
+
+Release Win32 matched all 2687 export names and ordinals and reported no
+accidental import thunks. `diff_rs_u6c` and `diff_rs_u6d` matched 500 scenarios
+each, `diff_rs_u9` matched 209802 trace entries, `diff_rs_u11` passed 119
+checks, and `diff_rs_u13` matched all probes. No in-game run was performed.
+
+### RenderSystem U15: shader state and resource creation
+
+The renderer-facing vertex-program data, capability caches, and both shader
+manager registries now live in the rebuilt DLL. The two shader factories use
+rebuilt resource constructors rather than producing objects with retail shader
+virtual methods. This removes 30 normal imports, leaving 28 data imports from
+`RenderSystem_7c_orig.dll`. Other resource factories and the private null
+renderer still need the original DLL.
+
+Release Win32 matched all 2687 export names and ordinals, with no accidental
+import thunks. `diff_rs_u3` matched 1000 scenarios; the texture, display, data,
+factory, and RenderKernel probes also passed (`u6c`, `u6d`, `u9`, `u11`, `u12`,
+`u13`). The factory probe checks registration, dispatch ownership, allocation
+sizes, and allocation failure. No in-game run was performed.
+
+### RenderSystem U15: texture factories, null-texture state, and visit counter
+
+The binary texture, ASCII texture, and material factories create rebuilt
+resources. `DisplayNull` dispatches texture creation to the rebuilt texture
+constructor. The ASCII path flag, three null-texture fields, four streaming
+fields, and the element visit counter became local. `dumpbin` reports 19
+normal data imports from `RenderSystem_7c_orig.dll`, down from 28. The bitmap
+factory and other retail runtime paths remain.
+
+Release Win32 matched all 2687 export names and ordinals, with zero accidental
+import thunks. Nine differential probes passed (`u3`, `u6`, `u6b`, `u6c`, `u6d`,
+`u9`, `u11`, `u12`, `u13`), including the binary texture probe with 400 retail
+texture files and the null-display create/destroy probe. The forbidden-DLL
+check still fails on the 19 imports. No in-game run was performed.
+
+### RenderSystem U15: chunk registry and normal-map default
+
+`GeometryChunk` now initializes and destroys its own factory registry. Binary
+texture headers read the local normal-map default. Win32 Release imports 17
+data symbols from `RenderSystem_7c_orig.dll`, down from 19, and still needs the
+original DLL.
+
+All 2687 export names and ordinals matched, with no accidental import thunks.
+`diff_rs_u5` matched 600 scenarios. `diff_rs_u6` matched 100 scenarios using
+400 retail texture files, and `diff_rs_u9`, `diff_rs_u11`, `diff_rs_u12`, and
+`diff_rs_u13` also passed. No in-game run or public upload was performed.
+
+### RenderSystem U15: zero static imports from the retail DLL
+
+The last 17 data imports are local: texture defaults, maximum streaming size,
+`uniqueTexId`, `delayedLoading`, the `VertexType` display pointer and registry,
+and the modifier lock. An xref pass over the retail image showed every read or
+write of those symbols belongs to a function the port already owns. Win32
+Release now has no normal, delay, or forwarded imports from
+`RenderSystem_7c_orig.dll`; `check_exports.py --forbid-dll` passes.
+
+This does not make the DLL standalone. Mirrors, copied vtables/RTTI and private
+helpers are still fetched from the renamed original at load or by RVA. The
+mirrors read it during static initialization, so it must be loaded first;
+loading the rebuilt DLL alone fails `DllMain` with 1114.
+
+`TextureCombiner::TrackConstant` and `SetConstantRegister` now bound their
+index: the original reads `constantTable[index]` before rejecting `index >= 16`,
+a read that changes no result but faults at a page boundary. The test no longer
+drives that out-of-bounds path.
+
+Release Win32 matched all 2687 names and ordinals with no accidental import
+thunks. Twenty probes passed: `u1` 280713 checks, `u2` 1254 and `u2b` 2410
+scenarios, `u3` 1000, `u4` 2000, `u5` 600, `u6` 200 with 400 retail texture
+files, `u6b`/`u6c`/`u6c2`/`u6d` 300 each, `u7` 10000 checks, `u8` 5446 entries,
+`u9` 209802 entries, `u10` 1969, `u11` 33 data checks, `u12` 1183, `u13`, and
+the WaterSystem `u5`/`u7` probes. No in-game run was performed.

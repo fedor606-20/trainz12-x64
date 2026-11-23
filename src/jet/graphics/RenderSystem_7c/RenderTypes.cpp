@@ -2,7 +2,6 @@
 // RenderTextureConstruct, TextureArgs/TextureStage, DisplayDescriptor, Element, Projector). Behaviour follows the TS12
 // assembly (addresses per function); several share one body in the original (identical-code folding).
 #include <jet/RenderTypes.h>
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 #include <jet/VCall.h>
 
 #include <cstdio>
@@ -283,6 +282,8 @@ void DisplayLight::SetRange(float v) { range = v; }
 // ---------------------------------------------------------------------------------------------------------------
 // Element (0x1000c9a0..0x1000cacb, 0x1000f5e0); Display +0x3c is its frame counter
 
+unsigned int Element::currentVisited;
+
 Element::Element() : visited(0), lastCulledFrame(0) {}
 Element::Element(const Element& o) : visited(o.visited), lastCulledFrame(o.lastCulledFrame) {}
 Element::~Element() {}
@@ -306,7 +307,6 @@ unsigned int Element::GetLastCulledFrame() const { return lastCulledFrame; }
 void Element::ResetVisited()
 {
     ++currentVisited;
-    RsMirrorSync("?currentVisited@Element@Jet@@0IA");
 }
 
 // ---------------------------------------------------------------------------------------------------------------

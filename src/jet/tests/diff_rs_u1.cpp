@@ -715,6 +715,8 @@ static void TestElementProjector(int rounds)
     using Slot = int(__cdecl*)(const void*);
     for (int r = 0; r < rounds; ++r) {
         unsigned char e[2][12], f[2][12];
+        // Each module owns its Element::currentVisited counter; keep them in step.
+        for (int s = 0; s < 2; ++s) reinterpret_cast<Reset>(Proc(s, "?ResetVisited@Element@Jet@@SAXXZ"))();
         unsigned frame = static_cast<unsigned>(Pick(0, 5));
         struct {
             unsigned char pad[0x3c];
@@ -740,9 +742,11 @@ static void TestElementProjector(int rounds)
         }
         Check(v[0] == v[1] && c[0] == c[1] && l[0] == l[1], "Element getters");
         Same(f[0] + 4, f[1] + 4, 8, "Element(copy)");
-        if (Pick(0, 2) == 0) {  // both sides share the original's counter: once from each side
-            reinterpret_cast<Reset>(Proc(Pick(0, 1), "?ResetVisited@Element@Jet@@SAXXZ"))();
-            for (int s = 0; s < 2; ++s) v[s] = reinterpret_cast<Get>(Proc(s, "?IsVisited@Element@Jet@@QBA_NXZ"))(e[s]) & 0xff;
+        if (Pick(0, 2) == 0) {  // a new visit round leaves each side's elements unvisited
+            for (int s = 0; s < 2; ++s) {
+                reinterpret_cast<Reset>(Proc(s, "?ResetVisited@Element@Jet@@SAXXZ"))();
+                v[s] = reinterpret_cast<Get>(Proc(s, "?IsVisited@Element@Jet@@QBA_NXZ"))(e[s]) & 0xff;
+            }
             Check(v[0] == v[1], "Element after ResetVisited");
         }
         unsigned char p[2][4], q[2][4];
@@ -764,6 +768,7 @@ int main(int argc, char** argv)
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 200;
     SetDllDirectoryA(argv[1]);
     std::string dir = argv[1];
+    LoadLibraryA((dir + "\\RenderSystem_7c_orig.dll").c_str());
     mod[0] = LoadLibraryA((dir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
     ks = GetModuleHandleA("KernelStandard_7c.dll");

@@ -188,7 +188,7 @@ private:
     mutable unsigned int visited;  // +4
     unsigned int lastCulledFrame;  // +8
 
-    static __declspec(dllimport) unsigned int currentVisited;  // the original's until U9
+    static unsigned int currentVisited;
 };
 JET_LAYOUT32(sizeof(Element) == 0xc);
 

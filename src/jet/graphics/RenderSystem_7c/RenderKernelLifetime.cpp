@@ -6,15 +6,22 @@
 #include <cstdlib>
 #include <cstring>
 #include <new>
+#include <memory>
 
 #include <jet/KernelStandard.h>
 #include <jet/PString.h>
 #include <jet/Task.h>
+#include <jet/VCall.h>
 
 extern unsigned char RsRsV008[8];  // LayerManager vftable, slot 0
 extern unsigned char RsRsV009[24]; // Task vftable, slot 0
 
 namespace Jet {
+
+class SceneGraph;
+class SystemResourceManager;
+void __fastcall RsSceneGraphDefaultClosure(void*, void*);
+void RsDestroyScene(SceneGraph*);
 
 // Only the imported methods are needed here. Including Bitmap.h would redefine IListNode from Task.h.
 class Bitmap {
@@ -55,20 +62,126 @@ F Import(Dll dll, const char* name)
 
 using VoidThis = void(__thiscall*)(void*);
 using VoidCdecl = void(__cdecl*)();
-using VoidCdeclArg = void(__cdecl*)(void*);
-using VoidStdArg = void(__stdcall*)(void*);
-using SceneCtor = void(__thiscall*)(void*, void*);
+using ResourceList = FastDynamicArray<SystemResourceManager*>;
 
-void WakeQueue(void* queue)
+struct DumpEntry {
+    Bitmap* bitmap;
+    String name;
+};
+static_assert(sizeof(DumpEntry) == 8);
+
+void DeleteDumpBitmap(Bitmap* bitmap)
 {
-    void (*fn)() = At<void(*)()>(0x3a520);
-    void* saved;
-    __asm {
-        mov saved, esi
-        mov esi, queue
-        call fn
-        mov esi, saved
+    if (!bitmap) return;
+    bitmap->~Bitmap();
+    Alloc::Delete(bitmap);
+}
+
+class QueueLock {
+public:
+    explicit QueueLock(CriticalSection& lock) : lock_(lock), held_(VCall<bool>(&lock, 8, INFINITE)) {}
+    ~QueueLock() { Release(); }
+    void Release()
+    {
+        if (held_) {
+            VCall<bool>(&lock_, 0x10);
+            held_ = false;
+        }
     }
+private:
+    CriticalSection& lock_;
+    bool held_;
+};
+
+struct DumpQueue {
+    CriticalSection lock;
+    WEvent available{false, true, nullptr};
+    unsigned count = 0, capacity = 0;
+    DumpEntry* entries = nullptr;
+    unsigned write = 0, read = 0;
+    bool open = true;
+
+    ~DumpQueue()
+    {
+        for (unsigned i = 0; i < count; ++i) {
+            auto& entry = entries[(read + i) % capacity];
+            DeleteDumpBitmap(entry.bitmap);
+            entry.~DumpEntry();
+        }
+        if (entries) Alloc::Delete(entries);
+    }
+
+    bool Grow()
+    {
+        constexpr unsigned block = 128;
+        const unsigned next = capacity + block;
+        auto* storage = static_cast<DumpEntry*>(Alloc::New(next * sizeof(DumpEntry)));
+        if (!storage) return false;
+        unsigned copied = 0;
+        try {
+            for (; copied < count; ++copied)
+                ::new (storage + copied) DumpEntry(entries[(read + copied) % capacity]);
+        } catch (...) {
+            while (copied > 0) storage[--copied].~DumpEntry();
+            Alloc::Delete(storage);
+            throw;
+        }
+        for (unsigned i = 0; i < count; ++i) entries[(read + i) % capacity].~DumpEntry();
+        if (entries) Alloc::Delete(entries);
+        entries = storage;
+        read = 0;
+        write = count;
+        capacity = next;
+        return true;
+    }
+
+    bool Push(Bitmap* bitmap, const AnsiString& name)
+    {
+        QueueLock guard(lock);
+        if (!open || (count == capacity && !Grow())) return false;
+        ::new (entries + write) DumpEntry{bitmap, String(name)};
+        if (++write == capacity) write = 0;
+        ++count;
+        available.Set();
+        return true;
+    }
+
+    bool Pop(DumpEntry* output, bool wait)
+    {
+        for (;;) {
+            QueueLock guard(lock);
+            if (count) {
+                String name;
+                auto& entry = entries[read];
+                auto* bitmap = entry.bitmap;
+                static_cast<AnsiString&>(name) = static_cast<const AnsiString&>(entry.name);
+                entry.~DumpEntry();
+                if (++read == capacity) read = 0;
+                if (--count) available.Set();
+                ::new (output) DumpEntry{bitmap, String(static_cast<const AnsiString&>(name))};
+                return true;
+            }
+            if (!open || !wait) return false;
+            guard.Release();
+            available.Wait(INFINITE);
+        }
+    }
+
+    void Close()
+    {
+        {
+            QueueLock guard(lock);
+            open = false;
+        }
+        available.Set();
+    }
+};
+static_assert(sizeof(DumpQueue) == 0x2c);
+static_assert(offsetof(DumpQueue, count) == 0x14 && offsetof(DumpQueue, open) == 0x28);
+
+DumpQueue* Queue(void* kernel)
+{
+    return reinterpret_cast<DumpQueue*>(static_cast<Byte*>(kernel) + 0xb8);
 }
 
 void* ConstructImpl(void* self, void* graph, float priority)
@@ -95,16 +208,16 @@ void* ConstructImpl(void* self, void* graph, float priority)
     *reinterpret_cast<void**>(base + 0x28) = RsRsV008;
 
     base[0x84] = 1;
-    *reinterpret_cast<unsigned*>(base + 0x88) = 0;
+    ::new (base + 0x88) ResourceList;
     ::new (base + 0xac) String;
     *reinterpret_cast<unsigned*>(base + 0xb4) = 0;
-    At<VoidStdArg>(0x3a1a0)(base + 0xb8);
+    ::new (Queue(base)) DumpQueue;
 
     *reinterpret_cast<void**>(base + 0x7c) = nullptr;
     void* scene = graph;
     if (!scene) {
         scene = Alloc::New(0x0c);
-        if (scene) At<SceneCtor>(0x3bc90)(scene, nullptr);
+        if (scene) RsSceneGraphDefaultClosure(scene, nullptr);
     }
     *reinterpret_cast<void**>(base + 0x80) = scene;
     *reinterpret_cast<unsigned*>(base + 0x8c) = 0;
@@ -128,8 +241,8 @@ void DestroyImpl(void* self)
     *reinterpret_cast<void**>(base + 0x28) = RsRsV008;
     base[0x84] = 0;
 
-    if (void* const thread = *reinterpret_cast<void**>(base + 0xb4)) {
-        WakeQueue(base + 0xb8);
+    if (*reinterpret_cast<void**>(base + 0xb4)) {
+        Queue(base)->Close();
         if (void* const live = *reinterpret_cast<void**>(base + 0xb4)) {
             using Stop = void(__thiscall*)(void*, int);
             const auto table = *reinterpret_cast<Stop**>(live);
@@ -138,11 +251,9 @@ void DestroyImpl(void* self)
         *reinterpret_cast<void**>(base + 0xb4) = nullptr;
     }
 
-    if (void* const scene = *reinterpret_cast<void**>(base + 0x80)) {
-        At<VoidThis>(0x3bd30)(scene);
-        Alloc::Delete(scene);
-    }
-    *reinterpret_cast<void**>(base + 0x80) = nullptr;
+    auto& scene = *reinterpret_cast<SceneGraph**>(base + 0x80);
+    if (scene) RsDestroyScene(scene);
+    scene = nullptr;
 
     At<VoidCdecl>(0x3c040)();
 
@@ -151,7 +262,10 @@ void DestroyImpl(void* self)
     if (void* const texture = *reinterpret_cast<void**>(base + 0x94))
         static_cast<ReferenceCount*>(texture)->ReleaseReference();
 
-    At<VoidCdeclArg>(0x31fd0)(base + 0x88);
+    auto& resources = *reinterpret_cast<ResourceList*>(base + 0x88);
+    for (auto it = resources.First(); it != resources.End(); ++it)
+        if (auto* resource = *it) VDelete(resource);
+    resources.~ResourceList();
 
     if (void* const display = *reinterpret_cast<void**>(base + 0x7c)) {
         Byte* const displayBytes = static_cast<Byte*>(display);
@@ -160,68 +274,28 @@ void DestroyImpl(void* self)
         static_cast<ReferenceCount*>(static_cast<void*>(displayBytes + 4 + offset))->ReleaseReference();
     }
 
-    At<VoidStdArg>(0x3a210)(base + 0xb8);
+    Queue(base)->~DumpQueue();
     reinterpret_cast<String*>(base + 0xac)->~String();
-
-    // FUN_10031fd0 already freed the list. The original dtor repeats the walk on the now-empty head.
-    void*& head = *reinterpret_cast<void**>(base + 0x88);
-    if (void* first = head) {
-        void* node = *reinterpret_cast<void**>(first);
-        void* last = node;
-        if (node != first) {
-            do {
-                void* const next = *reinterpret_cast<void**>(node);
-                Alloc::Delete(node);
-                node = next;
-                last = node;
-            } while (node != first);
-        }
-        if (last) Alloc::Delete(last);
-        head = nullptr;
-    }
 
     At<VoidThis>(0x31ec0)(base + 0x28);
     At<VoidThis>(0x38dc0)(base + 0x6c);
     reinterpret_cast<Task*>(base)->~Task();
 }
 
-// 0x1003a350 pops one {Bitmap*, String} record. The queue arrives in ESI and the output pointer on the stack.
-// The helper constructs the String in place, so the output storage must stay unconstructed until the call.
-struct DumpEntry {
-    Bitmap* bitmap;                  // +0x00
-    unsigned char name[sizeof(String)];  // +0x04
-};
-static_assert(sizeof(DumpEntry) == 8, "dump queue entry layout");
-
-void PopOne(void* queue, DumpEntry* result)
-{
-    void (*fn)(DumpEntry*) = At<void (*)(DumpEntry*)>(0x3a350);
-    void* saved;
-    __asm {
-        mov     eax, result
-        mov     saved, esi
-        mov     esi, queue
-        push    eax
-        call    fn
-        add     esp, 4
-        mov     esi, saved
-    }
-}
-
 unsigned DumpMemberImpl(void* self)
 {
     Byte* const base = static_cast<Byte*>(self);
-    while (base[0x84] != 0 || *reinterpret_cast<unsigned*>(base + 0xcc) != 0) {
-        DumpEntry entry;
-        PopOne(base + 0xb8, &entry);
-        String* const name = reinterpret_cast<String*>(entry.name);
-        if (entry.bitmap) {
-            const char* const fileName = static_cast<const char*>(*name);
-            entry.bitmap->Save(fileName);
-            entry.bitmap->~Bitmap();
-            Alloc::Delete(entry.bitmap);
+    auto* const queue = Queue(base);
+    const bool wait = base[0x84] != 0;
+    for (;;) {
+        alignas(DumpEntry) unsigned char storage[sizeof(DumpEntry)];
+        auto* entry = reinterpret_cast<DumpEntry*>(storage);
+        if (!queue->Pop(entry, wait)) break;
+        if (entry->bitmap) {
+            entry->bitmap->Save(static_cast<const char*>(entry->name));
+            DeleteDumpBitmap(entry->bitmap);
         }
-        name->~String();
+        entry->~DumpEntry();
     }
     return 0;
 }
@@ -236,6 +310,29 @@ unsigned __cdecl RsRenderKernelDumpMember(void* self)
 unsigned __stdcall RsRenderKernelDumpThread(void* self)
 {
     return DumpMemberImpl(self);
+}
+
+void RsQueueScreenDump(void* self, Bitmap* bitmap, const AnsiString& name)
+{
+    std::unique_ptr<Bitmap, decltype(&DeleteDumpBitmap)> capture(bitmap, &DeleteDumpBitmap);
+    class Worker final : public Thread {
+    public:
+        explicit Worker(void* kernel) : Thread(RsRenderKernelDumpThread, kernel, true) {}
+    };
+    static_assert(sizeof(Worker) == sizeof(Thread));
+    auto& worker = *reinterpret_cast<Thread**>(static_cast<Byte*>(self) + 0xb4);
+    if (!worker) {
+        std::unique_ptr<void, decltype(&Alloc::Delete)> storage(Alloc::New(sizeof(Worker)), &Alloc::Delete);
+        if (!storage) return;
+        auto* started = ::new (storage.get()) Worker(self);
+        if (!started->StartedOk()) {
+            started->~Worker();
+            return;
+        }
+        worker = started;
+        storage.release();
+    }
+    if (Queue(self)->Push(bitmap, name)) capture.release();
 }
 
 void* RsRenderKernelCtorImpl(void* self, void* graph, float priority)

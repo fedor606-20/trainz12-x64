@@ -1,9 +1,11 @@
 // U12: resource factory registration performed by JetGetPluginsRenderSystem.
-// The factories' virtual methods still belong to the original module; their vtables are copied into this module
-// so the registered objects point at local data. All calls to other Jet modules stay ordinary imports.
+// The mirrors preserve retail RTTI. Ported factories create rebuilt resource objects.
+#include <jet/GfxLanguage.h>
 #include <jet/KernelStandard.h>
+#include <jet/Material.h>
 #include <jet/PString.h>
 #include <jet/Resource.h>
+#include <jet/Texture.h>
 #include <jet/UId.h>
 #include <windows.h>
 
@@ -32,6 +34,19 @@ struct ConcreteResourceType : Jet::ResourceTypeBase {
     unsigned int __cdecl GetResourceSize() const override { return 0; }
 };
 
+template<class T>
+Jet::Resource* __cdecl CreateResource(const void*, const Jet::PString& name, const Jet::ResourceDatabase* owner)
+{
+    void* const memory = Jet::Alloc::New(sizeof(T));
+    if (!memory) return nullptr;
+    try {
+        return ::new (memory) T(name, owner);
+    } catch (...) {
+        Jet::Alloc::Delete(memory);
+        throw;
+    }
+}
+
 void InitTables()
 {
     if (tablesReady) return;
@@ -39,6 +54,11 @@ void InitTables()
     if (!original) std::abort();
     for (unsigned i = 0; i < 6; ++i)
         std::memcpy(tables[i], original + kTables[i].rva - 4, (kTables[i].slots + 1) * sizeof(void*));
+    tables[Texture][1 + 3] = reinterpret_cast<void*>(&CreateResource<Jet::TextureResource>);
+    tables[AsciiTexture][1 + 3] = reinterpret_cast<void*>(&CreateResource<Jet::AsciiTextureResource>);
+    tables[VertexProgram][1 + 3] = reinterpret_cast<void*>(&CreateResource<Jet::VertexProgramResource>);
+    tables[TextureCombiner][1 + 3] = reinterpret_cast<void*>(&CreateResource<Jet::TextureCombinerResource>);
+    tables[Material][1 + 3] = reinterpret_cast<void*>(&CreateResource<Jet::MaterialResource>);
     tablesReady = true;
 }
 

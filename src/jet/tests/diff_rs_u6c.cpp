@@ -88,18 +88,10 @@ static std::string Name(const void* p)
     return "?";
 }
 
-// the original's Convert (0x1000e600..0x1000ef00) keeps a scratch buffer of its own across calls, shared by the
-// two sides: its allocations are not logged
-static bool FromConvert(void* ret)
-{
-    const auto o = reinterpret_cast<uintptr_t>(ret) - reinterpret_cast<uintptr_t>(mod[1]);
-    return o >= 0xe600 && o < 0xef00;
-}
-
+// Each side owns its scratch buffer; compare its allocations as part of the trace.
 static void* __cdecl HookNew(unsigned n)
 {
     void* p = RealNew(n);
-    if (FromConvert(_ReturnAddress())) return p;
     if (p && n < 0x4000000) std::memset(p, 0xcd, n);
     if (cur >= 0 && p) {
         blockSize[cur][p] = n;
@@ -112,7 +104,7 @@ static void* __cdecl HookNew(unsigned n)
 }
 static void __cdecl HookDelete(void* p)
 {
-    if (cur >= 0 && p && !FromConvert(_ReturnAddress())) {
+    if (cur >= 0 && p) {
         Log("  free %s\n", Name(p).c_str());
         names[cur].erase(p);
         blockSize[cur].erase(p);
@@ -420,6 +412,8 @@ static void MakeFormat(std::mt19937& r, unsigned char* f)
 
 static void RunNull(int s, unsigned seed)
 {
+    bound = static_cast<const void***>(Proc(mod[s], "?bound@" DN "1PAPBV12@A"));
+    numObjects = static_cast<unsigned*>(Proc(mod[s], "?numObjects@" DN "1IA"));
     std::mt19937 r(seed);
     standRng.seed(seed ^ 0x6c6c);
     const Api& a = api[s];
@@ -733,6 +727,7 @@ int main(int argc, char** argv)
     }
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 500;
     const std::string binDir = argv[1];
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     SetDllDirectoryA(argv[1]);
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
@@ -746,13 +741,10 @@ int main(int argc, char** argv)
     RealDelete = static_cast<DeleteFn>(Proc(ks, "?Delete@Alloc@Jet@@SAXPAX@Z"));
     bitmapCtor = As<decltype(bitmapCtor)>(Proc(ks, "??0Bitmap@Jet@@QAE@ABUSize@1@W4Format@01@PAE@Z"));
     bitmapDtor = As<decltype(bitmapDtor)>(Proc(ks, "??1Bitmap@Jet@@QAE@XZ"));
-    bound = static_cast<const void***>(Proc(mod[1], "?bound@" DN "1PAPBV12@A"));
-    numObjects = static_cast<unsigned*>(Proc(mod[1], "?numObjects@" DN "1IA"));
     nullTable = reinterpret_cast<unsigned char*>(mod[1]) + 0xb8228;
     formatCtor = As<decltype(formatCtor)>(Proc(mod[1], "??0DisplayFormat@Jet@@QAE@W4DFormatId@1@@Z"));
     rtcCtor = As<decltype(rtcCtor)>(Proc(mod[1], "??0RenderTextureConstruct@Jet@@QAE@W4TextureTarget@1@_N11PBVSharedContext@1@@Z"));
     rtcDtor = As<decltype(rtcDtor)>(Proc(mod[1], "??1RenderTextureConstruct@Jet@@QAE@XZ"));
-    fixedNames[Proc(mod[1], "?textureStats@" DT "1UDisplayTextureStats@12@A")] = "STATS";
     for (void*& p : displayVt) p = reinterpret_cast<void*>(&DisplaySlot);
     displayVt[0x1c / 4] = reinterpret_cast<void*>(&DisplayQuery);
     displayVt[0x28 / 4] = reinterpret_cast<void*>(&DisplayMaxAniso);
@@ -762,12 +754,22 @@ int main(int argc, char** argv)
     fixedNames[displayObj] = "D";
     for (int s = 0; s < 2; ++s) {
         LoadApi(s);
+        void* const stats = Proc(mod[s], "?textureStats@" DT "1UDisplayTextureStats@12@A");
+        if (!stats || api[s].stats() != stats) {
+            std::printf("side %d: GetTextureStats did not return its module's data export\n", s);
+            return 1;
+        }
+        fixedNames[stats] = "STATS";
         PatchImport(mod[s], "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(&HookNew));
         PatchImport(mod[s], "?Delete@Alloc@Jet@@SAXPAX@Z", reinterpret_cast<void*>(&HookDelete));
     }
+    using Flush = void(__cdecl*)();
+    const Flush flush[]{As<Flush>(Proc(mod[0], "?FlushScratchBuffer@Jet@@YAXXZ")),
+                        As<Flush>(Proc(mod[1], "?FlushScratchBuffer@Jet@@YAXXZ"))};
     for (int round = 0; round < rounds; ++round) {
         const unsigned seed = rng();
         for (int s = 0; s < 2; ++s) {
+            flush[s]();
             cur = s;
             logText[s].clear();
             names[s].clear();
@@ -778,6 +780,7 @@ int main(int argc, char** argv)
         }
         Compare(round);
     }
+    for (auto reset : flush) reset();
     std::printf("%llu scenarios, %llu mismatches\n", checks, bad);
     return bad ? 1 : 0;
 }

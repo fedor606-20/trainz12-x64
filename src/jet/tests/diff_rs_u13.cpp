@@ -1,4 +1,4 @@
-// Usage: diff_rs_u13.exe <bin dir>. Compare RenderKernel lifetime and dump-screen exports of
+// Usage: diff_rs_u13.exe <bin dir with RenderSystem_7c.map>. Compare RenderKernel lifetime and dump-screen exports of
 // RenderSystem_7c.dll against RenderSystem_7c_orig.dll with all external collaborators replaced by stand-ins.
 #include <windows.h>
 
@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <vector>
 
 using Trace = std::vector<int>;
@@ -16,6 +17,8 @@ static unsigned char nodes[8][0x20];
 static unsigned nodeCount;
 static unsigned char bitmaps[4][0x40];
 static unsigned bitmapCount;
+static std::vector<std::string>* savedNames;
+static void (__cdecl* queueFree)(void*);
 
 static void Text(const char* s)
 {
@@ -114,6 +117,7 @@ static void __stdcall FakeStringDtor()
 static void __cdecl FakeDelete(void* p)
 {
     trace->insert(trace->end(), {9, PtrId(p)});
+    if (queueFree && PtrId(p) == 99) queueFree(p);
 }
 
 static bool __stdcall FakeRelease()
@@ -148,6 +152,7 @@ static bool __cdecl FakeBitmapSave(void* self, const char* fileName)
 {
     trace->insert(trace->end(), {13, PtrId(self)});
     Text(fileName);
+    if (savedNames) savedNames->emplace_back(fileName);
     return true;
 }
 
@@ -357,6 +362,60 @@ static Trace RunDump(HMODULE original, F dump, Snapshot& after)
     return *trace;
 }
 
+static bool CheckQueueGrowth(const char* dir, HMODULE original, DumpMemberFn dump)
+{
+    constexpr char symbol[] = "?RsQueueScreenDump@Jet@@YAXPAXPAVBitmap@1@ABVAnsiString@1@@Z";
+    FILE* map = std::fopen((std::string(dir) + "\\RenderSystem_7c.map").c_str(), "r");
+    if (!map) {
+        std::puts("RenderSystem_7c.map missing next to the DLL");
+        return false;
+    }
+    char line[1024], name[512];
+    unsigned section, offset, address = 0;
+    while (std::fgets(line, sizeof line, map)) {
+        unsigned value;
+        if (std::sscanf(line, " %x:%x %511s %x", &section, &offset, name, &value) == 4 &&
+            std::strcmp(name, symbol) == 0) {
+            address = value;
+            break;
+        }
+    }
+    std::fclose(map);
+    if (!address) return false;
+    using Push = void(__cdecl*)(void*, void*, const char* const*);
+    const auto push = reinterpret_cast<Push>(reinterpret_cast<uintptr_t>(rebuiltModule) + address - 0x10000000);
+    const auto ks = GetModuleHandleA("KernelStandard_7c.dll");
+    const auto alloc = GetProcAddress(ks, "?New@Alloc@Jet@@SAPAXI@Z");
+    const auto freeBlock = reinterpret_cast<void(__cdecl*)(void*)>(GetProcAddress(ks, "?Delete@Alloc@Jet@@SAXPAX@Z"));
+    if (!alloc || !freeBlock) return false;
+    PatchImport(rebuiltModule, "?New@Alloc@Jet@@SAPAXI@Z", reinterpret_cast<void*>(alloc));
+    PatchImport(rebuiltModule, "??0String@Jet@@QAE@ABV01@@Z", reinterpret_cast<void*>(FakeAnsiCopyCtor));
+
+    std::memset(object, 0, sizeof object);
+    InitQueue(original);
+    *reinterpret_cast<void**>(object + 0xb4) = object;  // Stand-in worker; consume synchronously.
+    std::vector<std::string> expected, actual;
+    expected.reserve(250);
+    savedNames = &actual;
+    queueFree = freeBlock;
+    for (int i = 0; i < 250; ++i) {
+        expected.push_back("dump-" + std::to_string(i) + ".tga");
+        const char* filename = expected.back().c_str();
+        push(object, bitmaps[0], &filename);
+        if (i == 99) dump(object); // Next push starts away from slot zero; the ring wraps before it grows.
+    }
+    const unsigned capacity = *reinterpret_cast<const unsigned*>(object + 0xd0);
+    dump(object);
+    savedNames = nullptr;
+    queueFree = nullptr;
+    auto*& memory = *reinterpret_cast<void**>(object + 0xd4);
+    freeBlock(memory);
+    memory = nullptr;
+    const auto close = reinterpret_cast<void(__stdcall*)(void*)>(reinterpret_cast<uintptr_t>(original) + 0x3a210);
+    close(object + 0xb8);
+    return capacity == 256 && expected == actual;
+}
+
 static bool VtableMatches(const unsigned* local, const unsigned* original, unsigned slots)
 {
     if (!local || !original) return false;
@@ -401,7 +460,8 @@ int main(int argc, char** argv)
         // The local destructor calls the mirrored Task vtable slot, not this IAT entry.
         PatchImport(rebuilt, lifetimeImports[i], lifetimeFakes[i], i != 7);
     }
-    // These are consumed by the original's internal queue helpers, which both modules call.
+    // The original queue uses the AnsiString ABI directly. The rebuilt queue
+    // constructs a real String around that same payload.
     PatchImport(original, "??0AnsiString@Jet@@QAE@ABV01@@Z", reinterpret_cast<void*>(FakeAnsiCopyCtor));
     PatchImport(original, "??4AnsiString@Jet@@QAAABV01@ABV01@@Z", reinterpret_cast<void*>(FakeAnsiCopyAssign));
     PatchImport(original, "??BString@Jet@@QBAPBDXZ", reinterpret_cast<void*>(FakeStringText));
@@ -413,6 +473,10 @@ int main(int argc, char** argv)
     PatchImport(rebuilt, "??BString@Jet@@QBAPBDXZ", reinterpret_cast<void*>(FakeStringText));
     PatchImport(rebuilt, "?Save@Bitmap@Jet@@QBA_NPBD@Z", reinterpret_cast<void*>(FakeBitmapSave));
     PatchImport(rebuilt, "??1Bitmap@Jet@@QAE@XZ", reinterpret_cast<void*>(FakeBitmapDtor));
+    PatchImport(rebuilt, "??0String@Jet@@QAE@ABVAnsiString@1@@Z", reinterpret_cast<void*>(FakeAnsiCopyCtor));
+    PatchImport(rebuilt, "??4AnsiString@Jet@@QAAABV01@ABV01@@Z", reinterpret_cast<void*>(FakeAnsiCopyAssign));
+    PatchImport(rebuilt, "?Wait@SyncObject@Jet@@QBA_NK@Z", reinterpret_cast<void*>(FakeWait));
+    PatchImport(rebuilt, "?Set@WEvent@Jet@@QAAXXZ", reinterpret_cast<void*>(FakeWEventSet));
 
     const auto origCtor = reinterpret_cast<CtorFn>(GetProcAddress(original, "??0RenderKernel@Jet@@QAE@PAVSceneGraph@1@M@Z"));
     const auto origDtor = reinterpret_cast<DtorFn>(GetProcAddress(original, "??1RenderKernel@Jet@@UAE@XZ"));
@@ -488,7 +552,11 @@ int main(int argc, char** argv)
     Check("dump thread", expectedThread, actualThread);
     CheckSnap("dump thread queue", origDumpSnap, newDumpSnap);
 
-    if (!VtableMatches(newCtorSnap.taskVtable, taskVtable, 6)) {
+    unsigned expectedTaskTable[6];
+    std::memcpy(expectedTaskTable, taskVtable, sizeof expectedTaskTable);
+    expectedTaskTable[4] = reinterpret_cast<uintptr_t>(GetProcAddress(
+        rebuilt, "?Update@RenderKernel@Jet@@UAA?AW4UpdateCode@Task@2@M@Z"));
+    if (!expectedTaskTable[4] || !VtableMatches(newCtorSnap.taskVtable, expectedTaskTable, 6)) {
         std::puts("local Task vtable mirror differs");
         ++failures;
     }
@@ -496,12 +564,16 @@ int main(int argc, char** argv)
         std::puts("local LayerManager vtable mirror differs");
         ++failures;
     }
+    if (!CheckQueueGrowth(argv[1], original, dumpMember)) {
+        std::puts("screenshot queue wrap, growth or FIFO order differs");
+        ++failures;
+    }
 
     if (failures) {
         std::printf("diff_rs_u13: %d failure(s)\n", failures);
         return 1;
     }
-    std::printf("diff_rs_u13: %zu ctor/dtor, %zu closure, %zu dump checks matching\n",
+    std::printf("diff_rs_u13: %zu ctor/dtor, %zu closure, %zu dump checks matching; 250 FIFO entries\n",
                 expectedCtor.size(), expectedClosure.size(), expectedDump.size());
     return 0;
 }

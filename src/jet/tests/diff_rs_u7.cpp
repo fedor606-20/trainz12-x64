@@ -1790,6 +1790,7 @@ int main(int argc, char** argv)
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 500;
     const std::string binDir = argv[1];
     SetDllDirectoryA(argv[1]);
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
     ks = GetModuleHandleA("KernelStandard_7c.dll");

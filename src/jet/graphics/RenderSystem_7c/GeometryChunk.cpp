@@ -13,7 +13,6 @@
 #include <cstring>
 #include <new>
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 
 // The original's _purecall answers 0 (its pure slots are `xor eax, eax; ret`); so does ours
 extern "C" int __cdecl _purecall() { return 0; }
@@ -1019,7 +1018,17 @@ bool __cdecl GeometryChunk::LoadChunkData(const Array<GeometryStreamType, 1>& st
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// the registry of chunk classes (the original's static)
+// The registry of chunk classes.
+
+HashTable<unsigned int, GeometryChunk::RegistrationData*, GeometryChunk::RegistrationDataOp, 13>
+    GeometryChunk::registrations;
+
+struct GeometryChunk::RegistryLifetime {
+    RegistryLifetime() { registrations.Init(); }
+    ~RegistryLifetime() { registrations.Destroy(); }
+};
+
+GeometryChunk::RegistryLifetime GeometryChunk::registryLifetime;
 
 namespace {
 
@@ -1037,7 +1046,6 @@ bool __cdecl GeometryChunk::RegisterName(const PString& name, GeometryChunk*(__c
         r->create = create;
     }
     registrations.Insert(r, r->name.node);
-    RsMirrorSync("?registrations@GeometryChunk@Jet@@1V?$HashTable@IPAURegistrationData@GeometryChunk@Jet@@URegistrationDataOp@23@$0N@@2@A");
     return true;
 }
 
@@ -1059,7 +1067,6 @@ void __cdecl GeometryChunk::ReleaseRegistrationData()
         }
         r = nullptr;
     });
-    RsMirrorSync("?registrations@GeometryChunk@Jet@@1V?$HashTable@IPAURegistrationData@GeometryChunk@Jet@@URegistrationDataOp@23@$0N@@2@A");
 }
 
 // ---------------------------------------------------------------------------------------------------------------

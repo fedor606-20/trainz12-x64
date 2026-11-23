@@ -143,7 +143,7 @@ protected:
     // Exported under the original's name, std::list<Modifier*>::_Iterator<1> (implemented.txt alias).
     ModifierIterator QuickRemove(ModifierIterator it);
 
-    static __declspec(dllimport) CriticalSection modifierListLock;  // the original's until U9
+    static CriticalSection modifierListLock;
 
 private:
     ModifierNode* InsertNode(ModifierNode* before, Modifier* m);  // before `before`, then m's host is us

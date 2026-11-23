@@ -9,6 +9,8 @@
 #include <cstring>
 #include <limits>
 #include <random>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 struct Rect { int x, y, w, h; };
@@ -1089,12 +1091,16 @@ static void CheckDisplayFrameAndBuffers(HMODULE m)
         "?ConvertTexCompressionString@Display@Jet@@QBAPBDW4DTexCompression@2@@Z");
     const auto findCompression = Proc<int(__cdecl*)(void*, const char*)>(m,
         "?ConvertTexCompressionString@Display@Jet@@QBA?AW4DTexCompression@2@PBD@Z");
-    const auto retail = GetModuleHandleA("RenderSystem_7c_orig.dll");
-    const auto retailCompression = Proc<decltype(getCompression)>(retail,
-        "?ConvertTexCompressionString@Display@Jet@@QBAPBDW4DTexCompression@2@@Z");
     for (unsigned i = 0; i <= 9; ++i) {
         const auto* token = getCompression(display, i);
-        trace->insert(trace->end(), {token == retailCompression(display, i), findCompression(display, token)});
+        trace->insert(trace->end(), {token != nullptr, findCompression(display, token)});
+        if (token) {
+            char copy[24];
+            strcpy_s(copy, token);
+            for (const char* ch = copy; *ch; ++ch) trace->push_back(*ch);
+            trace->push_back(0);
+            trace->push_back(findCompression(display, copy));
+        }
     }
     trace->push_back(findCompression(display, "not a compression token"));
     const auto* lookup = reinterpret_cast<const int*>(GetProcAddress(m, "?primitiveLookup@GeometryChunk@Jet@@2QBW4DPrimitive@2@B"));
@@ -1303,8 +1309,11 @@ static void CheckRenderKernelInit(HMODULE m)
     const auto multiple = Proc<void(__cdecl*)(void*, unsigned, unsigned, unsigned)>(m,
         "?MultipleScreenDump@RenderKernel@Jet@@QAAXIII@Z");
     const auto ppi = Proc<int(__cdecl*)(void*)>(m, "?GetTargetPPI@Display@Jet@@QBAHXZ");
-    auto* noPath = reinterpret_cast<bool*>(GetProcAddress(GetModuleHandleA("RenderSystem_7c_orig.dll"),
-        "?noPath@AsciiTextureResource@Jet@@1_NA"));
+    auto* noPath = Proc<bool*>(m, "?noPath@AsciiTextureResource@Jet@@1_NA");
+    auto* numTextures = Proc<unsigned*>(m, "?numObjects@DisplayTextureNull@Jet@@1IA");
+    auto* bound = Proc<void**>(m, "?bound@DisplayTextureNull@Jet@@1PAPBV12@A");
+    const auto destroyTexture = Proc<void(__thiscall*)(void*)>(m, "??1DisplayTextureNull@Jet@@UAE@XZ");
+    const auto freeMemory = Proc<void(__cdecl*)(void*)>(ks, "?Delete@Alloc@Jet@@SAXPAX@Z");
     const bool savedNoPath = *noPath;
     for (unsigned scenario : {0, 1, 2}) {
         const bool loadRenderer = scenario != 0;
@@ -1332,6 +1341,20 @@ static void CheckRenderKernelInit(HMODULE m)
         }
         trace->insert(trace->end(), {initialized, *noPath, kernel[0x24],
             *reinterpret_cast<void**>(kernel + 0x8c) == os});
+        if (rendering) {
+            const unsigned before = *numTextures;
+            auto* const oldBindings = *bound;
+            using CreateTexture = void*(__cdecl*)(void*);
+            const auto create = (*reinterpret_cast<CreateTexture**>(rendering))[0x98 / 4];
+            void* const texture = create(rendering);
+            if (!texture || *numTextures != before + 1 || !*bound) {
+                std::puts("DisplayNull did not create a texture in the active module");
+                std::exit(1);
+            }
+            destroyTexture(texture);
+            freeMemory(texture);
+            if (*numTextures != before || *bound != oldBindings) std::exit(1);
+        }
         if (hasManagers) textures = materials = nullptr;
         void* const savedDisplay = rendering;
         rendering = display;
@@ -1629,6 +1652,270 @@ static void CheckKernelOwnership(HMODULE m)
     list();
 }
 
+static void __cdecl ParsedStage(void*, void* stage, const unsigned char* args)
+{
+    trace->push_back(stage != nullptr);
+    trace->push_back(ReadField<int>(args, 0));
+    trace->push_back(ReadField<int>(args, 0x3c));
+}
+
+static bool __cdecl DenyPreOpen(void*, const void*) { return false; }
+static bool __cdecl AllowPreOpen(void*, const void*) { return true; }
+static bool __cdecl DenyFormat(void*, const void*, void*) { return false; }
+
+static void CheckDisplayLifecycle(HMODULE m)
+{
+    const auto preOpen = Proc<bool(__cdecl*)(void*, const void*)>(
+        m, "?PreOpen@Display@Jet@@MAA_NPBVOptions@2@@Z");
+    const auto open = Proc<bool(__cdecl*)(void*, const void*, bool)>(
+        m, "?Open@Display@Jet@@UAA_NPBVOptions@2@_N@Z");
+    const auto parse = Proc<bool(__cdecl*)(void*, void*, void*)>(
+        m, "?ParseTextureStage@Display@Jet@@MAA_NPAXAAVFile@2@@Z");
+    const auto construct = Proc<void*(__thiscall*)(void*, bool, int)>(m, "??0Display@Jet@@IAE@_N@Z");
+    const auto destroy = Proc<void(__thiscall*)(void*)>(m, "??1Display@Jet@@MAE@XZ");
+    const auto destroyVbase = Proc<void(__thiscall*)(void*)>(m, "??_DDisplay@Jet@@IAEXXZ");
+
+    alignas(4) unsigned char display[0xf20]{};
+    trace->push_back(preOpen(display, nullptr));
+    FARPROC table[0x260 / 4]{};
+    table[0x244 / 4] = reinterpret_cast<FARPROC>(DenyPreOpen);
+    table[0x248 / 4] = reinterpret_cast<FARPROC>(DenyFormat);
+    table[0x17c / 4] = reinterpret_cast<FARPROC>(ParsedStage);
+    *reinterpret_cast<FARPROC**>(display) = table;
+    trace->push_back(open(display, nullptr, false));
+    table[0x244 / 4] = reinterpret_cast<FARPROC>(AllowPreOpen);
+    trace->push_back(open(display, nullptr, true));
+
+    const auto ks = GetModuleHandleA("KernelStandard_7c.dll");
+    const auto fileCtor = Proc<void*(__thiscall*)(void*)>(ks, "??0File@Jet@@QAE@XZ");
+    const auto fileDtor = Proc<void(__thiscall*)(void*)>(ks, "??1File@Jet@@QAE@XZ");
+    const auto fileOpen = Proc<int*(__cdecl*)(void*, int*, const char*, unsigned long, int)>(
+        ks, "?Open@File@Jet@@QAA?AV?$ResultClass@$1?results@File@Jet@@2QBUResultTable@2@BW4Results@File@Jet@@@2@PBDKH@Z");
+    alignas(4) unsigned char file[0x200]{};
+    const char text[] = "stage 3\nunrecognized\nstage 27\n";
+    char temp[MAX_PATH], path[MAX_PATH];
+    if (GetTempPathA(MAX_PATH, temp) >= MAX_PATH || !GetTempFileNameA(temp, "rs", 0, path)) std::exit(2);
+    const auto handle = CreateFileA(path, GENERIC_WRITE, 0, nullptr, TRUNCATE_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    DWORD written = 0;
+    if (handle != INVALID_HANDLE_VALUE) {
+        WriteFile(handle, text, sizeof text - 1, &written, nullptr);
+        CloseHandle(handle);
+    }
+    fileCtor(file);
+    int status = -1;
+    if (written == sizeof text - 1) fileOpen(file, &status, path, 0x10, 0);
+    if (status == 0) {
+        for (int i = 0; i < 4; ++i) trace->push_back(parse(display, display + 4, file));
+    }
+    fileDtor(file);
+    DeleteFileA(path);
+    if (status != 0) {
+        std::printf("failed to open texture-stage fixture: %d\n", status);
+        std::exit(2);
+    }
+
+    const auto snapshot = [&] {
+        const bool hasContext = ReadField<void*>(display, 0x58) != nullptr;
+        trace->push_back(hasContext);
+        trace->push_back(ReadField<void*>(display, 0x54) == ReadField<void*>(display, 0x58));
+        for (unsigned i = 0; i < sizeof display; ++i) {
+            // Ignore addresses, but not surrounding padding or the adjusted vtordisp.
+            if (i < 8 || (i >= 0xf04 && i < 0xf08) || (hasContext && i >= 0x54 && i < 0x5c)) continue;
+            trace->push_back(display[i]);
+        }
+    };
+    for (bool withContext : {false, true}) {
+        std::memset(display, 0xcd, sizeof display);
+        trace->push_back(construct(display, withContext, 1) == display);
+        snapshot();
+        if (withContext) destroy(display + 0xf04);
+        else destroyVbase(display);
+        // Base destruction leaves a stale non-owning pointer at +0x54.
+        std::memset(display + 0x54, 0, sizeof(void*));
+        snapshot();
+    }
+}
+
+static const unsigned char* observedContext;
+
+template<unsigned slot, size_t... I>
+static void __cdecl StateCall(void*, std::conditional_t<(I >= 0), unsigned, int>... values)
+{
+    [[maybe_unused]] const auto observe = [](unsigned value) {
+        const auto address = reinterpret_cast<uintptr_t>(observedContext);
+        if (observedContext && value >= address && value < address + 0x158) value -= address;
+        trace->push_back(static_cast<int>(value));
+    };
+    trace->push_back(slot);
+    (observe(values), ...);
+}
+
+template<unsigned slot, size_t... I>
+static FARPROC StateCallFor(std::index_sequence<I...>)
+{
+    return reinterpret_cast<FARPROC>(StateCall<slot, I...>);
+}
+
+static bool __cdecl YesExtension(void*, unsigned extension)
+{
+    trace->push_back(extension);
+    return true;
+}
+
+static void __cdecl ObserveDeviceOptions(void*, const void*) { trace->push_back(0x23c); }
+
+static void CheckInitializeDisplayState(HMODULE m)
+{
+    const auto init = Ordinal<bool(__cdecl*)(void*, void*, bool, bool, const void*)>(m, 1897);
+    const auto ks = GetModuleHandleA("KernelStandard_7c.dll");
+    const auto osCtor = Proc<void*(__thiscall*)(void*, const char*, const char*, void*, HWND)>(
+        ks, "??0OS@Jet@@QAE@PBD0PAXPAUHWND__@@@Z");
+    const auto osDtor = Proc<void(__thiscall*)(void*)>(ks, "??1OS@Jet@@QAE@XZ");
+    const auto getOptions = Proc<void*(__cdecl*)(const void*)>(ks, "?GetOptions@OS@Jet@@QBAPAVOptions@2@XZ");
+    const auto raw = Proc<void(__cdecl*)(void*, const char*)>(ks, "?ProcessRaw@Options@Jet@@QAAXPBD@Z");
+    const auto freeMemory = Proc<void(__cdecl*)(void*)>(ks, "?Delete@Alloc@Jet@@SAXPAX@Z");
+    alignas(4) unsigned char display[0x300]{}, context[0x158]{}, os[0x18]{};
+    FARPROC table[0x244 / 4]{};
+    *reinterpret_cast<FARPROC**>(display) = table;
+    *reinterpret_cast<int*>(display + 0x50) = 2;
+    table[0x1c / 4] = reinterpret_cast<FARPROC>(YesExtension);
+    table[0x23c / 4] = reinterpret_cast<FARPROC>(ObserveDeviceOptions);
+#define STATE_SLOT(slot, args) table[slot / 4] = StateCallFor<slot>(std::make_index_sequence<args>{})
+    STATE_SLOT(0x1ac, 2); STATE_SLOT(0x1e0, 1); STATE_SLOT(0x1b4, 1); STATE_SLOT(0x1b0, 1);
+    STATE_SLOT(0x198, 1); STATE_SLOT(0x1d8, 1); STATE_SLOT(0x1e4, 1); STATE_SLOT(0x1e8, 2);
+    STATE_SLOT(0x1ec, 1); STATE_SLOT(0x1dc, 2); STATE_SLOT(0x1f0, 1); STATE_SLOT(0x1f4, 1);
+    STATE_SLOT(0x1f8, 1); STATE_SLOT(0x214, 1); STATE_SLOT(0x1bc, 2); STATE_SLOT(0x1a8, 1);
+    STATE_SLOT(0x1a0, 1); STATE_SLOT(0x1a4, 1); STATE_SLOT(0x1b8, 1); STATE_SLOT(0x240, 3);
+    STATE_SLOT(0x230, 1); STATE_SLOT(0x234, 2); STATE_SLOT(0x238, 2); STATE_SLOT(0x180, 6);
+    STATE_SLOT(0x188, 4); STATE_SLOT(0x190, 1); STATE_SLOT(0x194, 1); STATE_SLOT(0x1fc, 1);
+    STATE_SLOT(0x208, 1); STATE_SLOT(0x200, 1); STATE_SLOT(0x204, 2); STATE_SLOT(0x20c, 1);
+    STATE_SLOT(0x18c, 1); STATE_SLOT(0x1c0, 2); STATE_SLOT(0x1cc, 7); STATE_SLOT(0x224, 2);
+    STATE_SLOT(0x21c, 1); STATE_SLOT(0x1d4, 1); STATE_SLOT(0x220, 1);
+#undef STATE_SLOT
+    osCtor(os, "rs-probe", "", nullptr, nullptr);
+    auto* options = getOptions(os);
+    raw(options, "-SwapAtEnd");
+    observedContext = context;
+    for (unsigned mode = 0; mode < 6; ++mode) {
+        unsigned char lightFlags[]{1, 0};
+        std::memset(context, 0, sizeof context);
+        *reinterpret_cast<unsigned*>(context + 4) = mode;
+        *reinterpret_cast<float*>(context + 0x10) = 2.0f;
+        *reinterpret_cast<float*>(context + 0x18) = 3.0f;
+        *reinterpret_cast<int*>(context + 0x44) = 42;
+        *reinterpret_cast<unsigned char**>(context + 0x110) = lightFlags;
+        context[0xa0] = 0xe7;
+        context[0xa1] = 0xff;
+        display[0x294] = 1;
+        trace->push_back(init(display, context, mode == 5, mode == 2, options));
+        auto*& flags = *reinterpret_cast<unsigned char**>(context + 0x110);
+        trace->insert(trace->end(), {flags[0], flags[1], display[0x294]});
+        if (flags != lightFlags) freeMemory(flags);
+        flags = nullptr;
+        trace->insert(trace->end(), context, context + sizeof context);
+    }
+    observedContext = nullptr;
+    osDtor(os);
+}
+
+static void __cdecl BindVertexRecipe(void*, const void* vertex, unsigned a, unsigned b)
+{
+    trace->insert(trace->end(), {ReadField<int>(static_cast<const unsigned char*>(vertex), 8),
+                                 static_cast<int>(a), static_cast<int>(b)});
+}
+
+static void CheckBuiltInVertexRecipes(HMODULE m)
+{
+    const auto create = Ordinal<void(__cdecl*)(void*, int)>(m, 862);
+    const auto shutdown = Proc<void(__cdecl*)()>(m, "?Shutdown@VertexType@Jet@@SAXXZ");
+    const auto release = Proc<bool(__thiscall*)(void*)>(GetModuleHandleA("KernelStandard_7c.dll"),
+        "?ReleaseReference@ReferenceCount@Jet@@QBE_NXZ");
+    FARPROC table[0x3c / 4]{};
+    table[0x38 / 4] = reinterpret_cast<FARPROC>(BindVertexRecipe);
+    alignas(4) unsigned char display[0x220]{};
+    *reinterpret_cast<FARPROC**>(display) = table;
+    const auto name = [](const unsigned char* node) {
+        if (node) {
+            const auto* text = reinterpret_cast<const char*>(node + 0x18);
+            while (*text) trace->push_back(*text++);
+        }
+        trace->push_back(0);
+    };
+    for (int id = 0; id < 99; ++id) {
+        create(display, id);
+        auto* vertex = ReadField<unsigned char*>(display, 0x80 + id * 4);
+        const unsigned streamCount = ReadField<unsigned>(vertex, 0xc);
+        const auto* streams = ReadField<unsigned char*>(vertex, 0x10);
+        trace->push_back(streamCount);
+        name(ReadField<unsigned char*>(vertex, 0x20));
+        for (unsigned stream = 0; stream < streamCount; ++stream) {
+            const auto* bytes = streams + stream * 0x10;
+            const unsigned count = ReadField<unsigned>(bytes, 8);
+            trace->insert(trace->end(), {ReadField<int>(bytes, 0), ReadField<int>(bytes, 4), static_cast<int>(count)});
+            const auto* items = ReadField<unsigned char*>(bytes, 0xc);
+            for (unsigned item = 0; item < count; ++item) {
+                const auto* entry = items + item * 0x20;
+                for (unsigned offset : {0u, 8u, 0xcu, 0x10u, 0x14u, 0x18u}) trace->push_back(ReadField<int>(entry, offset));
+                trace->push_back(entry[0x1c]);
+                name(ReadField<unsigned char*>(entry, 4));
+            }
+        }
+        release(vertex);
+    }
+    create(display, 99);
+    shutdown();
+}
+
+static bool __cdecl TickMessages(void*, float dt)
+{
+    trace->insert(trace->end(), {0x4c, std::bit_cast<int>(dt)});
+    return dt > 0.0f;
+}
+
+static void* __fastcall DeleteKernelResource(void* resource, void*, unsigned flags)
+{
+    trace->insert(trace->end(), {0x90, static_cast<int>(flags)});
+    return resource;
+}
+
+static void CheckRenderKernelUpdate(HMODULE m)
+{
+    const auto ctor = Ordinal<void*(__thiscall*)(void*, void*, float)>(m, 162);
+    const auto dtor = Ordinal<void(__thiscall*)(void*)>(m, 291);
+    const auto update = Ordinal<int(__cdecl*)(void*, float)>(m, 2428);
+    const auto add = Proc<void(__cdecl*)(void*, void*)>(m, "?AddSystemResource@RenderKernel@Jet@@QAAXPAVSystemResourceManager@2@@Z");
+    FARPROC displayTable[0x50 / 4]{}, textureTable[0x2c / 4]{}, resourceTable[0x14 / 4]{};
+    displayTable[0x44 / 4] = StateCallFor<0x44>(std::make_index_sequence<1>{});
+    displayTable[0x48 / 4] = StateCallFor<0x48>(std::make_index_sequence<1>{});
+    displayTable[0x4c / 4] = reinterpret_cast<FARPROC>(TickMessages);
+    textureTable[0x20 / 4] = StateCallFor<0x20>(std::make_index_sequence<0>{});
+    textureTable[0x28 / 4] = StateCallFor<0x28>(std::make_index_sequence<1>{});
+    resourceTable[0x0c / 4] = StateCallFor<0x0c>(std::make_index_sequence<0>{});
+    resourceTable[0x10 / 4] = StateCallFor<0x10>(std::make_index_sequence<0>{});
+    resourceTable[0] = reinterpret_cast<FARPROC>(DeleteKernelResource);
+    auto* texture = textureTable;
+    auto* resource = resourceTable;
+    alignas(4) unsigned char kernel[0xe8]{}, display[0x48]{};
+    ctor(kernel, nullptr, 0.0f);
+    const auto tick = reinterpret_cast<int(__cdecl*)(void*, float)>(ReadField<FARPROC*>(kernel, 0)[4]);
+    trace->push_back(tick == update);
+    auto*& displayMember = *reinterpret_cast<void**>(kernel + 0x7c);
+    auto*& texturesMember = *reinterpret_cast<void**>(kernel + 0x94);
+    *reinterpret_cast<FARPROC**>(display) = displayTable;
+    displayMember = display;
+    texturesMember = &texture;
+    add(kernel, &resource);
+    trace->push_back(tick(kernel, 0.5f));
+    *reinterpret_cast<unsigned*>(display + 0x3c) = 40;
+    *reinterpret_cast<unsigned*>(kernel + 0x9c) = 10;
+    *reinterpret_cast<unsigned*>(kernel + 0xa4) = 20;
+    kernel[0x99] = 1;
+    trace->push_back(tick(kernel, -0.5f));
+    trace->push_back(kernel[0x99]);
+    displayMember = texturesMember = nullptr;
+    dtor(kernel);
+}
+
 static Trace Run(HMODULE m)
 {
     using SetRect = void(__cdecl*)(void*, const Rect*);
@@ -1759,6 +2046,10 @@ static Trace Run(HMODULE m)
     CheckDisplayGamma(m);
     CheckRenderKernelInit(m);
     CheckDisplaySelection(m);
+    CheckDisplayLifecycle(m);
+    CheckInitializeDisplayState(m);
+    CheckBuiltInVertexRecipes(m);
+    CheckRenderKernelUpdate(m);
     return result;
 }
 

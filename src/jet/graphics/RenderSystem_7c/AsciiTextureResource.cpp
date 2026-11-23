@@ -3,7 +3,7 @@
 // 0x1005dbd0). A texture made of bitmap resources named by a .texture.txt. Behaviour follows the TS12 assembly,
 // quirks included (noted per function): Save's roll-back unlocks by the wrong index, IsAllLoaded reads the primary
 // bitmap's flag for the alpha one, GetImage reads one past the alpha list, the first row of GetImage's merge loops
-// runs once even for a zero width. noPath stays the original's static (RenderKernel, U9).
+// runs once even for a zero width.
 #include <jet/Config.h>
 #include <jet/KernelResources.h>
 #include <jet/Texture.h>
@@ -12,7 +12,6 @@
 #include <cstring>
 #include <new>
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 struct EnumCheck {
     const char* name;
     int value;
@@ -265,10 +264,11 @@ unsigned int __cdecl AsciiTextureResource::GetDepth() const { return depth; }   
 bool __cdecl AsciiTextureResource::GetMustResetWhenFinished() const { return false; }       // 0x10009500 (folded)
 unsigned int __cdecl AsciiTextureResource::CalculateSize() const { return 0xd8; }          // 0x10001e30
 unsigned int __cdecl AsciiTextureResource::CalculateDataSize() const { return 0; }         // 0x1001dec0 (folded)
+bool AsciiTextureResource::noPath;
+
 void __cdecl AsciiTextureResource::SetUsePath(bool on)
 {
     noPath = on;
-    RsMirrorSync("?noPath@AsciiTextureResource@Jet@@1_NA");
 }  // 0x10004ed0
 
 // ---------------------------------------------------------------------------------------------------------------

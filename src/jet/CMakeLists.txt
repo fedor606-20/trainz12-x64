@@ -94,7 +94,8 @@ endforeach()
 target_link_libraries(KernelResources_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib")
 target_link_libraries(Render2DCore_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib" "${IMPLIB}/RenderSystem_7c.lib")
 target_link_libraries(InputWin32_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib")
-# RenderSystem_7c: replaced unit by unit (notes/RenderSystem.md); its module state stays the original's until U9
+# RenderSystem_7c: replaced unit by unit (notes/RenderSystem.md); no static imports from the original remain,
+# but mirrors, vtables/RTTI and private helpers are still reached dynamically
 target_compile_definitions(RenderSystem_7c PRIVATE JET_RS_BUILD)
 target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.lib" "${IMPLIB}/KernelResource_7c.lib"
                       "${IMPLIB}/KernelResources_7c.lib")
@@ -144,6 +145,13 @@ foreach(t "gfxqk;100b5de0;32;100b5fc8;19;" "gfxpp;100b66c0;95;100b6c28;54;" "gfx
         DEPENDS "${TOOLS}/extract_lemon.py" "${ORIG_RS}" VERBATIM)
     list(APPEND RS_TABLES "${GEN}/${n}_lemon.h")
 endforeach()
+get_filename_component(MSVC_BIN "${CMAKE_CXX_COMPILER}" DIRECTORY)
+find_program(JET_DUMPBIN dumpbin HINTS "${MSVC_BIN}" REQUIRED)
+add_custom_command(
+    OUTPUT "${GEN}/rs_vertex_recipes.h"
+    COMMAND ${PY} -I "${TOOLS}/extract_vertex_recipes.py" "${ORIG_RS}" "${JET_DUMPBIN}" "${GEN}/rs_vertex_recipes.h"
+    DEPENDS "${TOOLS}/extract_vertex_recipes.py" "${ORIG_RS}" VERBATIM)
+list(APPEND RS_TABLES "${GEN}/rs_vertex_recipes.h")
 target_sources(RenderSystem_7c PRIVATE ${RS_TABLES})
 target_include_directories(RenderSystem_7c PRIVATE "${GEN}")
 target_compile_definitions(InputSystem_7c PRIVATE JET_IS_BUILD)

@@ -6,7 +6,7 @@
 // 9 activate; DeleteThis) and carries the current frame at +0x28; both modules' TextureManager::SetTextureUpdate
 // get a jump to a logging stand-in. The API textures are DisplayTextureNull objects
 // of the side under test on a stand-in Display (the null format table filled with supported formats). The
-// original's uniqueTexId is the same at the start of each side.
+// each side's uniqueTexId starts at the same value.
 //
 // usage: diff_rs_u6c2.exe <bin dir> [rounds]
 //   env RS_U6C2_ECHO (echo the log), RS_U6C2_DUMP=<prefix> (both logs of the first mismatch)
@@ -220,7 +220,7 @@ static void LoadApi(int s)
 #undef A
 }
 
-static unsigned long* uniqueTexId;
+static unsigned long* uniqueTexId[2];
 static void*(__fastcall* formatCtor)(void*, void*, int id);
 static void*(__fastcall* rtcCtor)(void*, void*, int target, bool, bool, bool, const void* shared);
 static void(__fastcall* rtcDtor)(void*, void*);
@@ -316,7 +316,7 @@ static void RunTex(int s, unsigned seed, unsigned long startId)
     standRng.seed(seed ^ 0x6d6d);
     const Api& a = api[s];
     made = 0;
-    *uniqueTexId = startId;
+    *uniqueTexId[s] = startId;
     At<int>(managerObj, 4) = 1000;
     At<unsigned>(managerObj, 0x28) = r() % 4;
     std::vector<void*> tex;
@@ -364,7 +364,7 @@ static void RunTex(int s, unsigned seed, unsigned long startId)
             void* out2 = nullptr;
             a.nonUnique(t, &out2);
             Log("op names %s: unique of %s %s, non-unique %s, id %lu\n", Name(t).c_str(), Text(n), Text(out),
-                Text(out2), *uniqueTexId - startId);
+                Text(out2), *uniqueTexId[s] - startId);
             DestroyNode(*cache, n);
             if (out) DestroyNode(*cache, out);
             if (out2) DestroyNode(*cache, out2);
@@ -446,7 +446,7 @@ static void RunTex(int s, unsigned seed, unsigned long startId)
         Log("op release %s\n", Name(t).c_str());
         Release(t);
     }
-    Log("manager refs %d, id %lu\n", At<int>(managerObj, 4), *uniqueTexId - startId);
+    Log("manager refs %d, id %lu\n", At<int>(managerObj, 4), *uniqueTexId[s] - startId);
 }
 
 // ---- running
@@ -497,6 +497,7 @@ int main(int argc, char** argv)
     }
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 500;
     const std::string binDir = argv[1];
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     SetDllDirectoryA(argv[1]);
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
@@ -514,7 +515,8 @@ int main(int argc, char** argv)
     releaseRef = As<decltype(releaseRef)>(Proc(ks, "?ReleaseReference@ReferenceCount@Jet@@QBE_NXZ"));
     bitmapCtor = As<decltype(bitmapCtor)>(Proc(ks, "??0Bitmap@Jet@@QAE@ABUSize@1@W4Format@01@PAE@Z"));
     bitmapDtor = As<decltype(bitmapDtor)>(Proc(ks, "??1Bitmap@Jet@@QAE@XZ"));
-    uniqueTexId = static_cast<unsigned long*>(Proc(mod[1], "?uniqueTexId@" TX "1KA"));
+    for (int s = 0; s < 2; ++s)
+        uniqueTexId[s] = static_cast<unsigned long*>(Proc(mod[s], "?uniqueTexId@" TX "1KA"));
     formatCtor = As<decltype(formatCtor)>(Proc(mod[1], "??0DisplayFormat@Jet@@QAE@W4DFormatId@1@@Z"));
     rtcCtor = As<decltype(rtcCtor)>(Proc(mod[1], "??0RenderTextureConstruct@Jet@@QAE@W4TextureTarget@1@_N11PBVSharedContext@1@@Z"));
     rtcDtor = As<decltype(rtcDtor)>(Proc(mod[1], "??1RenderTextureConstruct@Jet@@QAE@XZ"));

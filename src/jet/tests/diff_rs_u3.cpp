@@ -227,12 +227,14 @@ static void ResetLexStatics(int s)
     std::memcpy(OrigAt(0xb80a0), keep3, 0x74);
 }
 
-// the original's statics both sides use: VertexProgram supported[4] 0xb80bc, supportChecked[4] 0xb80c0, register
-// limits 0xb80c4..0xb80cc; TextureCombiner supported 0xb8065, supportChecked 0xb8066
-static void ResetStatics()
+static void ResetStatics(int side)
 {
-    std::memset(OrigAt(0xb80bc), 0, 0x14);
-    std::memset(OrigAt(0xb8065), 0, 2);
+    for (const char* name : {"?supported@VertexProgram@Jet@@1PA_NA", "?supportChecked@VertexProgram@Jet@@1PA_NA",
+                             "?maxLocalRegs@VertexProgram@Jet@@1HA", "?maxEnvRegs@VertexProgram@Jet@@1HA",
+                             "?maxTotalRegs@VertexProgram@Jet@@1HA"})
+        std::memset(Proc(mod[side], name), 0, 4);
+    for (const char* name : {"?supported@TextureCombiner@Jet@@1_NA", "?supportChecked@TextureCombiner@Jet@@1_NA"})
+        std::memset(Proc(mod[side], name), 0, 1);
 }
 
 // ---- the corpus: every embedded program text of the render modules
@@ -631,7 +633,7 @@ static void RunPrograms(int s, unsigned seed)
     std::mt19937 r(seed);
     auto P = [&](int lo, int hi) { return lo + static_cast<int>(r() % static_cast<unsigned>(hi - lo + 1)); };
     Api& a = api[s];
-    ResetStatics();
+    ResetStatics(s);
     scenarioSeed = seed;
     apiValue[s] = P(0, 2);
     regsLimits[0] = P(0, 3) ? P(1, 300) : 0;
@@ -837,7 +839,7 @@ static void RunCombiners(int s, unsigned seed)
     std::mt19937 r(seed);
     auto P = [&](int lo, int hi) { return lo + static_cast<int>(r() % static_cast<unsigned>(hi - lo + 1)); };
     Api& a = api[s];
-    ResetStatics();
+    ResetStatics(s);
     scenarioSeed = seed;
     apiValue[s] = P(0, 2);
     names[s][displayObj] = "Display";
@@ -864,7 +866,9 @@ static void RunCombiners(int s, unsigned seed)
         case 2: {
             void* name = RealNew(4);
             AnsiFromText(name, nullptr, kConstNames[P(0, 3)]);
-            const int index = P(0, 9) ? P(0, 15) : P(16, 40);
+            // index > 15 makes the original read constantTable out of bounds; both versions reject it, and the
+            // read itself can fault there, so only in-range slots are exercised.
+            const int index = P(0, 15);
             Log("  track %d -> %d\n", index, a.track(c, index, name, v));
             AnsiDtor(name, nullptr);
             RealDelete(name);
@@ -1046,17 +1050,26 @@ static void WriteCorpusFiles()
     }
 }
 
-// the original's statics, emptied before each run (what they held is left behind)
+static constexpr const char* kVpManager = "?theManager@VertexProgramManager@Jet@@1PAV12@A";
+static constexpr const char* kTcManager = "?theManager@TextureCombinerManager@Jet@@1PAV12@A";
+static constexpr const char* kVpBuiltIn =
+    "?builtInProgramList@VertexProgramManager@Jet@@1V?$Array@UProgramItem@VertexProgramManager@Jet@@$0IA@@2@A";
+static constexpr const char* kTcBuiltIn =
+    "?builtInProgramList@TextureCombinerManager@Jet@@1V?$Array@UProgramItem@TextureCombinerManager@Jet@@$0IA@@2@A";
+static constexpr const char* kRegistered =
+    "?registeredProgramList@VertexProgramManager@Jet@@1V?$HashTable@ABVPString@Jet@@PAURegisteredName@VertexProgramManager@2@UNameHash@42@$0N@@2@A";
+
+// Each side's exports are emptied before its run (what they held is left behind).
 static void ResetManagerStatics()
 {
-    *static_cast<void**>(OrigAt(0xb8128)) = nullptr;  // VertexProgramManager::theManager
-    std::memset(OrigAt(0xb8808), 0, 12);              // VertexProgramManager::builtInProgramList
-    auto* reg = static_cast<unsigned*>(OrigAt(0xb8814));  // registeredProgramList {buckets, count, size}
+    *static_cast<void**>(Proc(mod[cur], kVpManager)) = nullptr;
+    std::memset(Proc(mod[cur], kVpBuiltIn), 0, 12);
+    auto* reg = static_cast<unsigned*>(Proc(mod[cur], kRegistered));  // {buckets, count, size}
     if (reg[0])
         for (unsigned k = 0; k < reg[2]; ++k) reinterpret_cast<void**>(reg[0])[k] = nullptr;
     reg[1] = 0;
-    *static_cast<void**>(OrigAt(0xb8088)) = nullptr;  // TextureCombinerManager::theManager
-    std::memset(OrigAt(0xb876c), 0, 12);              // TextureCombinerManager::builtInProgramList
+    *static_cast<void**>(Proc(mod[cur], kTcManager)) = nullptr;
+    std::memset(Proc(mod[cur], kTcBuiltIn), 0, 12);
 }
 
 static int madeCount;
@@ -1119,18 +1132,18 @@ static bool __cdecl FakeRestore(const void* self)
 
 static void DumpStatics()
 {
-    const auto* vl = static_cast<const unsigned*>(OrigAt(0xb8808));
+    const auto* vl = static_cast<const unsigned*>(Proc(mod[cur], kVpBuiltIn));
     Log("  vp built-in %u/%u:", vl[0], vl[1]);
     for (unsigned i = 0; i < vl[0]; ++i) {
         const auto* it = reinterpret_cast<void* const*>(vl[2] + 12 * i);
         Log(" %s/%s", NameOfNode(it[0]).c_str(), NameOfNode(it[1]).c_str());
     }
-    const auto* reg = static_cast<const unsigned*>(OrigAt(0xb8814));
-    const auto* tl = static_cast<const unsigned*>(OrigAt(0xb876c));
+    const auto* reg = static_cast<const unsigned*>(Proc(mod[cur], kRegistered));
+    const auto* tl = static_cast<const unsigned*>(Proc(mod[cur], kTcBuiltIn));
     Log("\n  registered %u, tc built-in %u/%u:", reg[1], tl[0], tl[1]);
     for (unsigned i = 0; i < tl[0]; ++i) Log(" %s", NameOfNode(*reinterpret_cast<void* const*>(tl[2] + 8 * i)).c_str());
-    Log("\n  managers %s %s\n", Name(*static_cast<void* const*>(OrigAt(0xb8128))).c_str(),
-        Name(*static_cast<void* const*>(OrigAt(0xb8088))).c_str());
+    Log("\n  managers %s %s\n", Name(*static_cast<void* const*>(Proc(mod[cur], kVpManager))).c_str(),
+        Name(*static_cast<void* const*>(Proc(mod[cur], kTcManager))).c_str());
 }
 
 static void DumpVpr(const char* tag, const void* r)
@@ -1207,7 +1220,7 @@ static void RunManagers(int s, unsigned seed)
     auto P = [&](int lo, int hi) { return lo + static_cast<int>(r() % static_cast<unsigned>(hi - lo + 1)); };
     Api& a = api[s];
     ApiM& m = apiM[s];
-    ResetStatics();
+    ResetStatics(s);
     ResetManagerStatics();
     scenarioSeed = seed;
     apiValue[s] = P(0, 2);
@@ -1436,9 +1449,9 @@ static void RunManagers(int s, unsigned seed)
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// VertexProgramBasic (U3b1): built by each side's constructor; the API module's statics (limits, names, opcode
-// tables) are the original's on both sides and set here; the API slots 0, 5 and 6 and the matrix slots of the
-// display are stand-ins
+// VertexProgramBasic (U3b1): built by each side's constructor. The test writes the renderer API's
+// statics (limits, names, opcode tables) through each DLL's own exports. API slots 0, 5 and 6 and
+// the display's matrix slots are stand-ins.
 
 #define VPB "VertexProgramBasic@Jet@@"
 #define DECODE "_NAAVAnsiString@2@PBUVertexInstruction@2@@Z"
@@ -1481,7 +1494,7 @@ static void LoadApiB(int s)
     }
 }
 
-// the API module's statics (the original's, shared by both sides)
+// The active side's API module statics.
 struct VpbStatics {
     void** envParameters;
     int *staticInit, *numTmp, *numEnv, *numLocal, *numTotal;
@@ -1491,9 +1504,9 @@ struct VpbStatics {
 } vs;
 static const char* kStrNames[8] = {"vertexSymbol", "resultSymbol", "addressSymbol", "tempSymbol", "instSeperator",
                                    "logInstr", "expInstr", "apiName"};
-static void LoadVpbStatics()
+static void LoadVpbStatics(int side)
 {
-    auto G = [](const char* n) { return Proc(mod[1], n); };
+    auto G = [side](const char* n) { return Proc(mod[side], n); };
     vs.envParameters = static_cast<void**>(G("?envParameters@" VPB "1PAVVector4@2@A"));
     vs.staticInit = static_cast<int*>(G("?staticParameterInit@" VPB "1HA"));
     vs.numTmp = static_cast<int*>(G("?numTmpRegisters@" VPB "1HA"));
@@ -1723,10 +1736,11 @@ static char* SwizzleText(std::mt19937& r, bool swz)
 
 static void RunBasic(int s, unsigned seed)
 {
+    LoadVpbStatics(s);
     std::mt19937 r(seed);
     auto P = [&](int lo, int hi) { return lo + static_cast<int>(r() % static_cast<unsigned>(hi - lo + 1)); };
     ApiB& a = apiB[s];
-    ResetStatics();
+    ResetStatics(s);
     scenarioSeed = seed;
     matrixCalls = 0;
     vpbMade = 0;
@@ -2256,6 +2270,7 @@ int main(int argc, char** argv)
     const int rounds = argc > 2 ? std::atoi(argv[2]) : 200;
     SetDllDirectoryA(argv[1]);
     binDir = argv[1];
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
     ks = GetModuleHandleA("KernelStandard_7c.dll");
@@ -2302,7 +2317,6 @@ int main(int argc, char** argv)
     dbVtM[3] = reinterpret_cast<void*>(&FakeFileName);
     *reinterpret_cast<void**>(fakeDbM) = dbVtM;
     AnsiAppend = As<decltype(AnsiAppend)>(Proc(ks, "??YAnsiString@Jet@@QAAAAV01@PBD@Z"));
-    LoadVpbStatics();
     for (int s = 0; s < 2; ++s) {
         LoadApi(s);
         MakeVtables(s);
@@ -2335,6 +2349,10 @@ int main(int argc, char** argv)
                 cur = -1;
             }
             Compare(p.name, round);
+        }
+        if (!HeapValidate(GetProcessHeap(), 0, nullptr)) {
+            std::printf("heap invalid after %s\n", p.name);
+            return 4;
         }
         std::printf("-- %s done (display capability calls %d, loads %d, ok %d, that fault %d)\n", p.name, capsCalls,
                     loadsTried, loadsOk, faults);

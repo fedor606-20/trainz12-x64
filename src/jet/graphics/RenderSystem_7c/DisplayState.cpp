@@ -2,6 +2,7 @@
 #include <jet/RenderSystem.h>
 #include <jet/Bitmap.h>
 #include <jet/Geometry.h>
+#include <jet/GfxLanguage.h>
 #include <jet/Window.h>
 
 #include <windows.h>
@@ -11,6 +12,8 @@
 #include <initializer_list>
 #include <memory>
 #include <new>
+
+#include "LegacyPower.h"
 
 namespace Jet {
 
@@ -1216,6 +1219,112 @@ void __cdecl RsDisplaySetSelector(Display* display, void* selector)
     previous->AddReference();
 }
 
+bool __cdecl RsDisplayInitializeState(Display* display, unsigned char* context,
+                                      bool initializeDevice, bool resetContext, const Options* options)
+{
+    auto* const device = reinterpret_cast<unsigned char*>(display);
+    const auto word = [context](unsigned offset) -> unsigned& {
+        return *reinterpret_cast<unsigned*>(context + offset);
+    };
+    const auto lights = [device] { return *reinterpret_cast<int*>(device + 0x50); };
+    auto& lightFlags = *reinterpret_cast<unsigned char**>(context + 0x110);
+    auto* const color = reinterpret_cast<Color*>(context + 0xa4);
+    if (initializeDevice) {
+        for (int id = 0; id < 99; ++id) VCall<void>(display, 0x220, id);
+        VCall<void>(display, 0x23c, options);
+        if (device[0x211]) *reinterpret_cast<VertexProgramManager**>(device + 0x224) = new VertexProgramManager(display);
+        if (device[0x212]) *reinterpret_cast<TextureCombinerManager**>(device + 0x228) = new TextureCombinerManager(display);
+        if (options->Get("SwapAtStart")) device[0x294] = 1;
+        else if (options->Get("SwapAtEnd")) device[0x294] = 0;
+    }
+    if (initializeDevice || resetContext) {
+        lightFlags = static_cast<unsigned char*>(Alloc::New(lights()));
+        for (int i = 0; i < lights(); ++i) lightFlags[i] = 0;
+        context[0xa1] &= 0xfa;
+        context[0xa0] = (context[0xa0] & 0x9f) | 4;
+        context[0x64] = context[0x65] = context[0x74] = 1;
+        context[0x75] = context[0xc0] = context[0xc1] = context[0xc2] = 0;
+        for (unsigned offset : {0x70, 0xcc, 0x6c, 0x40, 0x2c, 0x30, 0x34, 0x38, 0xb8, 0xc4, 0xc8,
+                                0xdc, 0xe0, 0xe8, 0xec, 0xf0, 0xf8, 0xfc, 0x104, 0x108, 0x10c})
+            word(offset) = 0;
+        word(0x9c) = 0xf;
+        word(0xd0) = word(0xd8) = word(0xf4) = 7;
+        word(0x28) = word(0x68) = 1;
+        word(0xd4) = word(0xbc) = 2;
+        word(0x3c) = word(0xa4) = word(0xa8) = word(0xac) = word(0xb0) = 0x3f800000;
+        word(0xb4) = Display::ConvertColor(*color);
+        word(0xe4) = word(0x100) = ~0u;
+        if (context[0xa1] & 0x10) context[0xa1] |= 8;
+        word(4) = 5;
+    }
+
+    const auto flag = [context](unsigned offset, unsigned bit) {
+        return (context[offset] >> bit) & 1;
+    };
+    VCall<void>(display, 0x1ac, 1, word(0x9c));
+    if (VCall<bool>(display, 0x1c, 0x20)) VCall<void>(display, 0x1e0, word(0x70));
+    VCall<void>(display, 0x1b4, flag(0xa0, 2));
+    VCall<void>(display, 0x1b0, word(0xd4));
+    VCall<void>(display, 0x198, context[0x64]);
+    VCall<void>(display, 0x1d8, word(0x28));
+    VCall<void>(display, 0x1e4, flag(0xa0, 5));
+    VCall<void>(display, 0x1e8, word(0xd0), word(0xcc));
+    VCall<void>(display, 0x1ec, flag(0xa1, 0));
+    VCall<void>(display, 0x1dc, word(0x68), word(0x6c));
+    VCall<void>(display, 0x1f0, flag(0xa1, 2));
+    VCall<void>(display, 0x1f4, context[0x74]);
+    VCall<void>(display, 0x1f8, context[0x75]);
+    VCall<void>(display, 0x214, context[0x65]);
+    VCall<void>(display, 0x1bc, flag(0xa0, 3), flag(0xa0, 4));
+    VCall<void>(display, 0x1a8, word(0x40));
+    VCall<void>(display, 0x1a0, context + 0x2c);
+    VCall<void>(display, 0x1a4, word(0x3c));
+    if (VCall<bool>(display, 0x1c, 0x10)) VCall<void>(display, 0x1b8, flag(0xa0, 6));
+    VCall<void>(display, 0x240, 0, word(0xb8), word(0xbc));
+    VCall<void>(display, 0x230, color);
+    VCall<void>(display, 0x234, word(0xc4), word(0xc8));
+    for (unsigned i = 0; i < 3; ++i) VCall<void>(display, 0x238, i, context[0xc0 + i]);
+
+    switch (word(4)) {
+    case 0: case 1:
+        VCall<void>(display, 0x180, word(8), word(0xc), word(0x10), word(0x14), word(0x18), word(0x1c));
+        break;
+    case 3:
+        VCall<void>(display, 0x188, word(8), word(0xc), word(0x10), word(0x14));
+        break;
+    case 4: {
+        const float farPlane = *reinterpret_cast<float*>(context + 0x18) + *reinterpret_cast<float*>(context + 0x10);
+        VCall<void>(display, 0x188, word(8), word(0xc), farPlane, word(0x14));
+        break;
+    }
+    }
+    if (word(0x44) || word(0x48) || word(0x4c) || word(0x50)) {
+        VCall<void>(display, 0x190, context + 0x44);
+        VCall<void>(display, 0x194, context + 0x54);
+    }
+    context[0x66] = 0;
+    VCall<void>(display, 0x1fc, word(0x78));
+    VCall<void>(display, 0x208, context + 0x7c);
+    VCall<void>(display, 0x200, word(0x8c));
+    VCall<void>(display, 0x204, word(0x90), word(0x94));
+    VCall<void>(display, 0x20c, word(0x98));
+    VCall<void>(display, 0x18c, flag(0xa0, 0));
+    VCall<void>(display, 0x1ac, 2, flag(0xa0, 1));
+    VCall<void>(display, 0x230, color);
+    word(0xb4) = Display::ConvertColor(*color);
+    const auto stencil = [&](unsigned side, unsigned offset) {
+        VCall<void>(display, 0x1c0, side, word(offset + 0xc));
+        VCall<void>(display, 0x1cc, side, word(offset), word(offset + 4), word(offset + 8),
+                    word(offset + 0x10), word(offset + 0x14), word(offset + 0x18));
+    };
+    stencil(0, 0xd8);
+    if (VCall<bool>(display, 0x1c, 0xc)) stencil(1, 0xf4);
+    for (int i = 0; i < lights(); ++i) VCall<void>(display, 0x224, i, lightFlags[i]);
+    VCall<void>(display, 0x21c, context + 0x114);
+    VCall<void>(display, 0x1d4, flag(0xa1, 3));
+    return true;
+}
+
 namespace {
 constexpr const char* extensions[] = {
     "D_MULTI_TEXTURE", "D_MULTI_TEX_COMBINE", "D_MULTI_TEX_COMBINE4", "D_MULTI_TEX_MULTIPLY_ADD",
@@ -1238,22 +1347,20 @@ bool __cdecl RsDisplayCheckExtension(const Display* display, const PString& name
 }
 
 namespace {
-const char* const* CompressionTokens()
-{
-    // These are interned pointer keys. Original initialization still owns the table.
-    const auto* retail = reinterpret_cast<const unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll"));
-    return reinterpret_cast<const char* const*>(retail + 0xb817c);
-}
+// Each token is a stable pointer key from this module, not a text lookup.
+constexpr const char* compressionTokens[] = {
+    "TC_S3TC", "TC_DXT1", "TC_ETC1_RGB8", "TC_PAL_TEX", "TC_AMD_3DC",
+    "TC_AMD_ATC", "TC_LATC", "TC_PVRTC", "TC_ETC1",
+};
 }
 const char* __cdecl RsDisplayCompressionName(const Display*, unsigned id)
 {
-    return id < 9 ? CompressionTokens()[id] : nullptr;
+    return id < std::size(compressionTokens) ? compressionTokens[id] : nullptr;
 }
 int __cdecl RsDisplayCompressionId(const Display*, const char* name)
 {
-    const auto* tokens = CompressionTokens();
-    for (int i = 0; i < 9; ++i)
-        if (tokens[i] == name) return i;
+    for (unsigned i = 0; i < std::size(compressionTokens); ++i)
+        if (compressionTokens[i] == name) return static_cast<int>(i);
     return -1;
 }
 
@@ -1262,9 +1369,13 @@ namespace {
 __declspec(noinline) unsigned short GammaSample(int sample, float power)
 {
     constexpr double step = 1.0 / 256.0, limit = 65535.0, half = 0.5;
+    const auto fallback = [=] {
+        const auto rounded = std::pow(sample * step, power) * limit + half;
+        return static_cast<unsigned short>(!(rounded > 0) ? 0 : rounded >= limit ? 65535 : rounded);
+    };
 #if defined(_M_IX86)
-    static const auto ciPow = *reinterpret_cast<const FARPROC*>(
-        reinterpret_cast<const unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll")) + 0x62470);
+    static const auto ciPow = FindLegacyCiPow();
+    if (!ciPow) return fallback();
     unsigned short control, truncate;
     int converted;
     __asm {
@@ -1300,8 +1411,7 @@ __declspec(noinline) unsigned short GammaSample(int sample, float power)
     }
     return static_cast<unsigned short>(converted);
 #else
-    const auto rounded = std::pow(sample * step, power) * limit + half;
-    return !(rounded > 0) ? 0 : rounded >= limit ? 65535 : static_cast<unsigned short>(rounded);
+    return fallback();
 #endif
 }
 }

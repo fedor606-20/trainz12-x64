@@ -1,16 +1,16 @@
 // Unit U6c2 of RenderSystem_7c: Texture (0x10004aa0..0x10004ead, 0x1003f4f0..0x1003f9b8, folded getters). Behaviour
 // follows the TS12 assembly: SetDisplayTexture frees the old API texture even when it is the new one; an instance
-// is named "%08x%%name" from the original's uniqueTexId; the update flag goes through the original's
+// is named "%08x%%name" from the static uniqueTexId; the update flag goes through
 // TextureManager::SetTextureUpdate (U6d).
 #include <jet/Texture.h>
 #include <jet/VCall.h>
 
 #include <cstdio>
 #include <new>
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
-
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
+
+unsigned long Texture::uniqueTexId;
+bool TextureRes::delayedLoading;
 
 namespace { void X87Copy(float* to, const float* from); }
 
@@ -99,7 +99,6 @@ const ResourceDatabase* __cdecl TextureRes::GetResourceDatabase() const
 void __cdecl TextureRes::SetDelayedLoading(bool enabled)
 {
     delayedLoading = enabled;
-    RsMirrorSync("?delayedLoading@TextureRes@Jet@@1_NA");
 }
 
 void __cdecl TextureRes::TestUnloadingMips(int size)
@@ -513,7 +512,7 @@ PString __cdecl Texture::GenerateUniqueName(const PString& n) const
         const unsigned int id = static_cast<unsigned int>(uniqueTexId++);
         s.Setf("%08x%%%%%s", id, n.Text());
     }
-    RsMirrorSync("?uniqueTexId@Texture@Jet@@1KA");
+
     return PString(static_cast<const char*>(s));
 }
 

@@ -1,6 +1,5 @@
 // Unit U3a of RenderSystem_7c: TextureCombiner, the base of the API modules' texture combiners (0x100401f0..0x100407f0,
-// the bump settings at 0x100102b0..0x100106c0). Behaviour follows the TS12 assembly (addresses per function). The
-// support flags stay the original's statics until U9.
+// the bump settings at 0x100102b0..0x100106c0). Behaviour follows the TS12 assembly (addresses per function).
 #include <jet/GfxLanguage.h>
 #include <jet/VCall.h>
 
@@ -8,8 +7,10 @@
 
 #include "GfxParse.h"
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 namespace Jet {
+
+bool TextureCombiner::supportChecked;
+bool TextureCombiner::supported;
 
 namespace {
 
@@ -53,8 +54,6 @@ bool __cdecl TextureCombiner::SupportedByPlatform(Display* d, float)
     if (!supportChecked) {
         supported = VCall<bool>(d, 0x1c, 0x15);
         supportChecked = true;
-        RsMirrorSync("?supportChecked@TextureCombiner@Jet@@1_NA");
-        RsMirrorSync("?supported@TextureCombiner@Jet@@1_NA");
     }
     return supported;
 }
@@ -73,10 +72,11 @@ bool __cdecl TextureCombiner::Load(MemoryFile& file, const PString&, const PStri
     return TextureProgramParse(&file, GetApi(), fileName, this);
 }
 
-// 0x10040680 (the table is read before the index is checked, as in the original)
+// 0x10040680. The original reads constantTable[index] before checking index < 16; that out-of-bounds read is
+// not observable (such an index returns false either way), so it is bounded here.
 bool __cdecl TextureCombiner::TrackConstant(int index, const AnsiString& name, const Vector4& v)
 {
-    if (constantTable[index] || static_cast<unsigned int>(index) > 15) return false;
+    if (static_cast<unsigned int>(index) > 15 || constantTable[index]) return false;
     Constant* const c = static_cast<Constant*>(Alloc::New(sizeof(Constant)));
     if (c) {
         c->index = index;
@@ -91,9 +91,10 @@ bool __cdecl TextureCombiner::TrackConstant(int index, const AnsiString& name, c
     return true;
 }
 
-// 0x100407b0
+// 0x100407b0 (the original indexes the table unchecked; values past its 16 slots are rejected here)
 bool __cdecl TextureCombiner::SetConstantRegister(int index, const Vector4& v)
 {
+    if (static_cast<unsigned int>(index) > 15) return false;
     Constant* const c = constantTable[index];
     if (!c) return false;
     c->value = v;

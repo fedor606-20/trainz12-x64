@@ -12,6 +12,11 @@
 #pragma warning(disable : 4073)
 #pragma init_seg(lib)
 
+namespace Jet {
+class RenderKernel;
+int __cdecl RsRenderKernelUpdate(RenderKernel*, float);
+}
+
 #define X(var, name, size) alignas(4) unsigned char var[size];
 RS_PLAIN_DATA(X)
 #undef X
@@ -84,6 +89,14 @@ struct MirrorEntry {
     void** meta;
 };
 
+void WireLocalSlots(unsigned char* table)
+{
+    if (table == RsRsV009) {
+        const auto update = &Jet::RsRenderKernelUpdate;
+        std::memcpy(table + 0x10, &update, sizeof update);
+    }
+}
+
 MirrorEntry entries[] = {
 #define X(var, name, size) { var, name, size, nullptr },
 RS_PLAIN_DATA(X)
@@ -109,6 +122,7 @@ struct MirrorAll {
                 *e.meta = locator;
                 std::memcpy(e.local - 4, &locator, sizeof locator);
             }
+            WireLocalSlots(e.local);
         }
     }
 } mirrorAll;
@@ -129,6 +143,7 @@ extern "C" void RsMirrorSync(const char* name)
             std::memcpy(e.local - 4, &locator, sizeof locator);
         }
         std::memcpy(e.local, source, e.size);
+        WireLocalSlots(e.local);
         return;
     }
 }

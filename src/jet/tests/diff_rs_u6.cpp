@@ -268,12 +268,12 @@ static void LoadApi(int s)
 #undef F
 }
 
-// the original's statics both sides use
-static int* minStreamMips;
-static int* maxStreamSize;
-static void(__cdecl* setDefault[5])(int);  // min, mag, mip filter, display format, alpha hint
-static void(__cdecl* setDefaultCompression)(char*);
-static void(__cdecl* getDefaultCompression)(char*);
+// each side's own statics
+static int* minStreamMips[2];
+static int* maxStreamSize[2];
+static void(__cdecl* setDefault[2][5])(int);  // min, mag, mip filter, display format, alpha hint
+static void(__cdecl* setDefaultCompression[2])(char*);
+static void(__cdecl* getDefaultCompression[2])(char*);
 
 // KernelStandard
 static void*(__fastcall* bitmapCtor)(void*, void*, const int* size, int format, unsigned char* data);
@@ -470,18 +470,18 @@ static void RunTex(int s, unsigned seed)
     int made = 0;
 
     // the statics, the same on both sides
-    for (int k = 0; k < 9; ++k) api[1].defSet[k](startDefaults[k]);
-    api[1].defSetAniso(startAniso);
-    api[1].defSetComp(const_cast<char*>(""));
+    for (int k = 0; k < 9; ++k) api[s].defSet[k](startDefaults[k]);
+    api[s].defSetAniso(startAniso);
+    api[s].defSetComp(const_cast<char*>(""));
     kept[s].clear();
-    *minStreamMips = 1 + static_cast<int>(r() % 14);
-    *maxStreamSize = 16 << (r() % 9);
+    *minStreamMips[s] = 1 + static_cast<int>(r() % 14);
+    *maxStreamSize[s] = 16 << (r() % 9);
     static const int filters[] = {0, 1, 2, 3};
-    for (int k = 0; k < 3; ++k) setDefault[k](filters[r() % 4]);
+    for (int k = 0; k < 3; ++k) setDefault[s][k](filters[r() % 4]);
     static const int displayFormats[] = {1, 1, 3, 5, 10, 11, 12, 0x19, 0x1a, 0x1b, 0x1c, 2};
-    setDefault[3](displayFormats[r() % 12]);
-    setDefault[4](static_cast<int>(r() % 4));
-    Log("statics: min mips %d max size %d\n", *minStreamMips, *maxStreamSize);
+    setDefault[s][3](displayFormats[r() % 12]);
+    setDefault[s][4](static_cast<int>(r() % 4));
+    Log("statics: min mips %d max size %d\n", *minStreamMips[s], *maxStreamSize[s]);
 
     std::vector<Resource> res;
     auto makeName = [&](const char* text) {
@@ -879,6 +879,7 @@ int main(int argc, char** argv)
     const std::string binDir = argv[1];
     const std::string root = argc > 3 ? argv[3] : binDir + "\\..\\UserData\\local";
     SetDllDirectoryA(argv[1]);
+    LoadLibraryA((binDir + "\\RenderSystem_7c_orig.dll").c_str());
     mod[0] = LoadLibraryA((binDir + "\\RenderSystem_7c.dll").c_str());
     mod[1] = GetModuleHandleA("RenderSystem_7c_orig.dll");
     ks = GetModuleHandleA("KernelStandard_7c.dll");
@@ -913,15 +914,18 @@ int main(int argc, char** argv)
     ansiDtor = As<decltype(ansiDtor)>(Proc(ks, "??1AnsiString@Jet@@QAE@XZ"));
     stringCtor = As<decltype(stringCtor)>(Proc(ks, "??0String@Jet@@QAE@XZ"));
     stringDtor = As<decltype(stringDtor)>(Proc(ks, "??1String@Jet@@QAE@XZ"));
-    minStreamMips = static_cast<int*>(Proc(mod[1], "?MIN_STREAMING_TEXTURE_MIP_COUNT@TextureManager@Jet@@2HA"));
-    maxStreamSize = static_cast<int*>(Proc(mod[1], "?MAX_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA"));
-    setDefault[0] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultMinFilter@" TR "SAXW4TextureFilter@2@@Z"));
-    setDefault[1] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultMagFilter@" TR "SAXW4TextureFilter@2@@Z"));
-    setDefault[2] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultMipFilter@" TR "SAXW4TextureFilter@2@@Z"));
-    setDefault[3] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultDisplayFormatId@" TR "SAXW4DFormatId@2@@Z"));
-    setDefault[4] = As<void(__cdecl*)(int)>(Proc(mod[1], "?SetDefaultAlphaHint@" TR "SAXW4TextureAlpha@2@@Z"));
-    setDefaultCompression = As<decltype(setDefaultCompression)>(Proc(mod[1], "?SetDefaultFileCompression@" TR "SAXPAD@Z"));
-    getDefaultCompression = As<decltype(getDefaultCompression)>(Proc(mod[1], "?GetDefaultFileCompression@" TR "SAXQAD@Z"));
+    for (int s = 0; s < 2; ++s)
+        minStreamMips[s] = static_cast<int*>(Proc(mod[s], "?MIN_STREAMING_TEXTURE_MIP_COUNT@TextureManager@Jet@@2HA"));
+    for (int s = 0; s < 2; ++s) {
+        maxStreamSize[s] = static_cast<int*>(Proc(mod[s], "?MAX_STREAMING_TEXTURE_SIZE@TextureManager@Jet@@2HA"));
+        setDefault[s][0] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultMinFilter@" TR "SAXW4TextureFilter@2@@Z"));
+        setDefault[s][1] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultMagFilter@" TR "SAXW4TextureFilter@2@@Z"));
+        setDefault[s][2] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultMipFilter@" TR "SAXW4TextureFilter@2@@Z"));
+        setDefault[s][3] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultDisplayFormatId@" TR "SAXW4DFormatId@2@@Z"));
+        setDefault[s][4] = As<void(__cdecl*)(int)>(Proc(mod[s], "?SetDefaultAlphaHint@" TR "SAXW4TextureAlpha@2@@Z"));
+        setDefaultCompression[s] = As<decltype(setDefaultCompression[0])>(Proc(mod[s], "?SetDefaultFileCompression@" TR "SAXPAD@Z"));
+        getDefaultCompression[s] = As<decltype(getDefaultCompression[0])>(Proc(mod[s], "?GetDefaultFileCompression@" TR "SAXQAD@Z"));
+    }
     // KernelResource's Resource reads the resource system's time: a zeroed stand-in (as in diff_rs_u3)
     static unsigned char fakeSystem[0x400];
     As<void(__cdecl*)(void*)>(Proc(GetModuleHandleA("KernelResource_7c.dll"), "?InitRS@Resource@Jet@@CAXPAVResourceSystem@2@@Z"))(fakeSystem);

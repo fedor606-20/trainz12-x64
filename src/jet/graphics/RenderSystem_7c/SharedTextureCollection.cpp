@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <xmmintrin.h>
 
+#include "LegacyPower.h"
+
 namespace Jet {
 
 class SharedTextureCollection {
@@ -345,10 +347,14 @@ namespace {
 
 uint32_t PowerSample(unsigned index, float inverse, float power, bool specular)
 {
+    const auto fallback = [=] {
+        const double value = std::pow(static_cast<double>(index) * inverse, power);
+        return static_cast<uint32_t>(
+            static_cast<int64_t>(specular ? (value - 0.75) * 4.0 * 255.0 : value * 65535.0));
+    };
 #if defined(_M_IX86)
-    // The original imports the VC80 x87 helper through this IAT slot. Its CRT is loaded via SxS.
-    static FARPROC const ciPow = *reinterpret_cast<FARPROC*>(
-        reinterpret_cast<unsigned char*>(GetModuleHandleA("RenderSystem_7c_orig.dll")) + 0x62470);
+    static FARPROC const ciPow = FindLegacyCiPow();
+    if (!ciPow) return fallback();
     const float bias = 0.75f, four = 4.0f, fullByte = 255.0f, fullWord = 65535.0f;
     unsigned short originalControl, truncateControl;
     int64_t converted;
@@ -387,8 +393,7 @@ uint32_t PowerSample(unsigned index, float inverse, float power, bool specular)
     }
     return static_cast<uint32_t>(converted);
 #else
-    const double value = std::pow(static_cast<double>(index) * inverse, power);
-    return static_cast<uint32_t>(static_cast<int64_t>(specular ? (value - 0.75) * 4.0 * 255.0 : value * 65535.0));
+    return fallback();
 #endif
 }
 

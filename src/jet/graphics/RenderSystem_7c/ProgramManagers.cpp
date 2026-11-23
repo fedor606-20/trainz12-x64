@@ -1,17 +1,27 @@
 // Unit U3a2 of RenderSystem_7c: VertexProgramManager (0x10053b70..0x10054880) and TextureCombinerManager
 // (0x10040850..0x10041200), with their HashTable helpers. Behaviour follows the TS12 assembly (addresses per
-// function). The original's Display makes both managers until U9, so their statics (the manager, the built-in
-// lists, the registered program lists) stay the original's; RegisterBuiltInPrograms, called by the other modules,
-// fills the original's lists and loads into the original's managers.
+// function). RegisterBuiltInPrograms and Display::InitializeState share the local manager storage.
 #include <jet/GfxLanguage.h>
 #include <jet/VCall.h>
 
 #include <cstring>
 
-extern "C" void RsMirrorSync(const char* name);  // U11: keep exported data mirrors in step
 #include "GfxParse.h"
 
 namespace Jet {
+
+VertexProgramManager* VertexProgramManager::theManager;
+Array<VertexProgramManager::ProgramItem, 128> VertexProgramManager::builtInProgramList;
+HashTable<const PString&, VertexProgramManager::RegisteredName*, VertexProgramManager::NameHash, 13>
+    VertexProgramManager::registeredProgramList;
+TextureCombinerManager* TextureCombinerManager::theManager;
+Array<TextureCombinerManager::ProgramItem, 128> TextureCombinerManager::builtInProgramList;
+
+struct VertexProgramManager::RegisteredProgramListLifetime {
+    RegisteredProgramListLifetime() { registeredProgramList.Init(); }
+    ~RegisteredProgramListLifetime() { registeredProgramList.Destroy(); }
+};
+VertexProgramManager::RegisteredProgramListLifetime VertexProgramManager::registeredProgramListLifetime;
 
 namespace {
 
@@ -53,7 +63,6 @@ VertexProgramManager::VertexProgramManager(Display* d) : display(d)
     programs.Init();
     if (!theManager) {
         theManager = this;
-        RsMirrorSync("?theManager@VertexProgramManager@Jet@@1PAV12@A");
     }
 }
 
@@ -63,13 +72,11 @@ VertexProgramManager::~VertexProgramManager()
     programs.ForEach([](VertexProgram* p) { p->ReleaseReference(); });
     if (this == theManager) {
         theManager = nullptr;
-        RsMirrorSync("?theManager@VertexProgramManager@Jet@@1PAV12@A");
         registeredProgramList.ForEach([](RegisteredName*& r) {
             delete r;
             r = nullptr;
         });
         registeredProgramList.Clear();
-        RsMirrorSync("?registeredProgramList@VertexProgramManager@Jet@@1V?$HashTable@ABVPString@Jet@@PAURegisteredName@VertexProgramManager@2@UNameHash@42@$0N@@2@A");
     }
     programs.Destroy();
 }
@@ -216,7 +223,6 @@ void __cdecl VertexProgramManager::RegisterBuiltInPrograms(const PString& name, 
                       const Ctx& c = *static_cast<Ctx*>(p);
                       RegisteredName* const r = new RegisteredName{*c.name};
                       registeredProgramList.Insert(r, r->name.node);
-                      RsMirrorSync("?registeredProgramList@VertexProgramManager@Jet@@1V?$HashTable@ABVPString@Jet@@PAURegisteredName@VertexProgramManager@2@UNameHash@42@$0N@@2@A");
                       const GfxNameList::Chunk* const head = names.head;
                       if (!head) return;
                       const GfxNameList::Chunk* chunk = head;
@@ -225,7 +231,6 @@ void __cdecl VertexProgramManager::RegisterBuiltInPrograms(const PString& name, 
                               const ProgramItem item{*c.name, *reinterpret_cast<const PString*>(&chunk->names[i]),
                                                      c.text};
                               builtInProgramList.Add(item);
-                              RsMirrorSync("?builtInProgramList@VertexProgramManager@Jet@@1V?$Array@UProgramItem@VertexProgramManager@Jet@@$0IA@@2@A");
                           }
                           chunk = chunk->next;
                       } while (chunk != head);
@@ -241,7 +246,6 @@ TextureCombinerManager::TextureCombinerManager(Display* d) : display(d)
 {
     combiners.Init();
     theManager = this;
-    RsMirrorSync("?theManager@TextureCombinerManager@Jet@@1PAV12@A");
     for (unsigned int i = 0; i < builtInProgramList.count; ++i)
         LoadBuiltInPrograms(builtInProgramList.data[i].name, builtInProgramList.data[i].text);
 }
@@ -262,7 +266,6 @@ void __cdecl TextureCombinerManager::RegisterBuiltInPrograms(const PString& name
     }
     const ProgramItem item{name, text};
     builtInProgramList.Add(item);
-    RsMirrorSync("?builtInProgramList@TextureCombinerManager@Jet@@1V?$Array@UProgramItem@TextureCombinerManager@Jet@@$0IA@@2@A");
 }
 
 // 0x10040b20: once per name; the display's combiner keeps the manager's reference

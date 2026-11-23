@@ -2,9 +2,8 @@
 
 Code size and function counts come from ghidra_maps/*/[<group>/]<module>.functions.tsv (non-thunk functions),
 exports we own from src/jet/<group>/<module>/implemented.txt, export totals from tools/progress_exports.tsv.
-A module with all exports ours counts whole; a partial one counts the code of the functions behind its exports that
-are ours (cached in tools/progress_exports.tsv, recomputed with --exports from the export dumps, which hold the
-addresses). Modules with no src/ directory count as 0.
+A finished module counts whole; a partial one counts the code of the functions behind its exports that are ours
+(cached in tools/progress_exports.tsv, recomputed with --exports). Modules with no src/ directory count as 0.
 
 usage: python -I tools/progress.py                 print the README block
        python -I tools/progress.py --write         put it between the progress markers in README.md
@@ -49,6 +48,7 @@ EMOJI = {"Engine core": "🔧", "Input": "🎮", "Graphics": "🎨", "User inter
          "Game": "🚂", "Not seen loaded": "💤"}
 STATUS_ICON = {"done": "✅", "done*": "✅", "partial": "🟡", "not started": "⬜"}
 FOLDER = {n: FOLDERS[label] for label, _, g, names in GROUPS if g == "jet" for n in names}
+ORIGINAL_REQUIRED = {"RenderSystem_7c"}
 
 
 def map_path(group, fname):
@@ -131,11 +131,12 @@ def block():
             # a module with one or no export (a plugin entry only) is ours when its entry point is
             share = (mine / total if total > 1 else float(mine > 0)) if group == "jet" else 0.0
             # partial modules: the code behind our exports, not their count (many exports are tiny accessors)
-            code_share = share if share >= 0.999 or share == 0 else min(owned_bytes.get(name, 0) / size, share)
+            finished = share >= 0.999 and name not in ORIGINAL_REQUIRED
+            code_share = share if finished or share == 0 else min(owned_bytes.get(name, 0) / size, share)
             g[3] += size * code_share
             g[4] += size
-            g[5] += share >= 0.999
-            status = ("done" if share >= 1 else "done*" if share >= 0.999 else
+            g[5] += finished
+            status = ("done" if finished and share >= 1 else "done*" if finished else
                       "partial" if share > 0 else "not started")
             exp = f"{mine}/{total}" if group == "jet" else "-"
             rows.append(f"| {name} | {size / 1024:,.0f} KB | {funcs:,} | {exp} | {STATUS_ICON[status]} {status} |")
@@ -185,6 +186,8 @@ def block():
         "",
         "`done*`: KernelStandard_7c keeps one export, `HardwareException::GetCallStack` (an x86 stack walk), "
         "forwarded to the original until the x64 rewrite.",
+        "RenderSystem_7c has no export forwarders, but still requires the original DLL for private helpers, "
+        "RTTI, and shared state.",
         "",
         "</details>",
         END,

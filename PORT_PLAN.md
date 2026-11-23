@@ -187,8 +187,25 @@ After each step, refresh the README progress block: `python -I tools/progress.py
            Test vtable slots and RTTI against the original, then run the module
            with the original DLL removed. Keep shared writable data in original
            storage until its readers and writers move together.
-           A fixed driving session remains unverified.
-   8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
+            U10–U13 brought the count to 2677/2687. U14 closed the last ten export
+            forwarders: **2687/2687 local, zero forwarded**. This is not standalone
+            coverage: local code still calls private helpers by RVA and uses
+            original-backed vtables, RTTI and shared state. The U13 build reached the
+            offline menu and exited with code 0. U14 passed differential tests but
+            still needs an in-game menu and driving-session check. Removing
+            `RenderSystem_7c_orig.dll` requires a separate dependency cutover.
+            Standalone cutover (U15): replace private helpers and virtual dispatch,
+            then move each group of shared state with its remaining readers and
+            writers. Remove the original import library last. Acceptance: no import,
+            delayed import, or forwarder to the original; game loads without it in
+            NullRender, OpenGL and DirectX 9, then passes an offline driving session
+            and clean shutdown. Build-time parser tables and vertex recipes still
+            use a pristine DLL; removing that input is a separate build milestone.
+    8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
+        WaterSystem is already in progress alongside RenderSystem. U7b moved 18 direct
+        `WaterMaterial` state exports, bringing it to **196/490**. Continue with
+        `WaterMaterial` lifetime and vtables, geometry creation, and the factory
+        `CreateInstance` methods. See `notes/WaterSystem.md`.
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
        picked in the launcher.
    8g. InputDirectX_7c, the DirectInput driver (joysticks, wheels, force feedback through InputSystem's
