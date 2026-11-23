@@ -3388,3 +3388,21 @@ the process is responsive after 45 s, TADDaemon stays at one instance, and the
 main menu is visible. Known visual defect: the menu background is white and a
 band at the bottom stays unpainted; the UI itself works. The remaining runtime
 lookups listed in `notes/RenderSystem.md` are still to be cut over.
+
+### U16: export stub audit (nine rebuilt modules)
+
+Compared every `.text` export body with the retail DLL of the same name and
+separated "empty in both" from "empty here, real code in retail". Across
+InputSystem, InputWin32, Kernel, KernelResource, KernelResources,
+KernelStandard, Render2DCore, RenderSystem and WaterSystem there are **no real
+stub holes**: 199 exports are intentionally empty in both, and every other
+export has a body in both. `check_thunks.py` finds no accidental `_orig`
+re-exports; KernelStandard has three `jmp [api-ms-win-crt-*]` CRT wrappers.
+
+The only code differences are the five
+`TerrainBlend*Vertex::GetReadDataOffset` functions: retail reads a `const int`
+at `0xB8758..0xB8760`, ours returns 0. Those statics lie past the `.data`
+section's `SizeOfRawData` (raw `0xD000`, virtual `0xDCE4`), so the loader
+zero-fills them. Reading the live retail module confirmed all three are 0 at
+runtime, which is exactly our return value. The apparent difference is a
+file-image artifact, not a missing implementation.
