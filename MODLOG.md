@@ -3406,3 +3406,19 @@ section's `SizeOfRawData` (raw `0xD000`, virtual `0xDCE4`), so the loader
 zero-fills them. Reading the live retail module confirmed all three are 0 at
 runtime, which is exactly our return value. The apparent difference is a
 file-image artifact, not a missing implementation.
+
+### InputDirectX_7c complete (2026-11-24)
+
+The DirectInput driver is now ours as a drop-in module: 1/1 export (`JetGetPluginsInputDirectX`), no
+`InputDirectX_7c_orig` import. The reconstructed classes and their exact layouts are in
+`notes/InputDirectX.md`: `ForceEffectDirectX` (0x9c), `InputDeviceDirectX` (0x23c), `DirectXKeyboard` (0xa40),
+`DirectXMouse` (0x27c), `DirectXJoystick` (0x2cc), `InputDriverDirectX` (0x20) and the plugin factory. The whole
+0x10001000..0x10005c50 range was transcribed, including the static scan-code table initializer at 0x100053c0,
+the DirectInput keyboard/mouse/joystick state and buffered-event paths, the old 0x38-byte DIEFFECT builder,
+and the original quirks (enumeration's zero axis mask, the trigger bits, the 10..12 property fall-through).
+
+Verification: Win32 Release builds and exports ordinal 1 by name. In the game copy, with the retail
+`InputDirectX_7c.dll` renamed to `InputDirectX_7c_orig.dll`, the game reached the main menu and exited cleanly;
+the normalized JetLog diff against the baseline was 0 lines. A 32-bit PowerShell module list showed the running
+game loaded our `InputDirectX_7c.dll`; the same probe called `JetGetPluginsInputDirectX` without a crash. A real
+joystick/wheel and force feedback still need a hardware check (the G27 in the device list is not connected).

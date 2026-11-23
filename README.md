@@ -29,11 +29,11 @@ https://discord.gg/DmqMJGtCZ
 Measured by code size: a finished module counts whole, a partial one by the code behind the exports that are already ours (`tools/progress.py`, 2026-11-24).
 
 ```
-🌍 Whole game         ████░░░░░░░░░░░░░░░░░░░░░░░░░░  12.1 %   6,787 KB left of 7,719
+🌍 Whole game         ████░░░░░░░░░░░░░░░░░░░░░░░░░░  12.4 %   6,768 KB left of 7,719
 
-🧩 Jet engine         █████████████░░░░░░░░░░░░░░░░░  42.2 %   1,277 KB left of 2,208  8/19 modules
+🧩 Jet engine         █████████████░░░░░░░░░░░░░░░░░  43.1 %   1,258 KB left of 2,208  9/19 modules
   🔧 Engine core      ██████████████████████████████ 100.0 %       0 KB left of   378  4/4 modules
-  🎮 Input            ████████████████████████░░░░░░  81.2 %      19 KB left of   103  2/3 modules
+  🎮 Input            ██████████████████████████████ 100.0 %       0 KB left of   103  3/3 modules
   🎨 Graphics         ██████████░░░░░░░░░░░░░░░░░░░░  34.7 %     885 KB left of 1,355  2/8 modules
   🪟 User interface   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %     354 KB left of   354  0/2 modules
   🐞 Debug            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %      18 KB left of    18  0/2 modules
@@ -68,7 +68,7 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 | 🎮 **Input** | | | | |
 | InputWin32_7c | 12 KB | 100 | 1/1 | ✅ done |
 | InputSystem_7c | 71 KB | 560 | 327/327 | ✅ done |
-| InputDirectX_7c | 19 KB | 122 | 0/1 | ⬜ not started |
+| InputDirectX_7c | 19 KB | 122 | 1/1 | ✅ done |
 | 🎨 **Graphics** | | | | |
 | Render2DCore_7c | 17 KB | 167 | 85/85 | ✅ done |
 | RenderSystem_7c | 351 KB | 3,628 | 2687/2687 | ✅ done |
@@ -109,7 +109,7 @@ RenderSystem_7c has no export forwarders and no private-code dependency on the r
   - ⚙️ `core/`: `Kernel_7c` (all exports ours), `KernelStandard_7c` (1761 of 1762 exports ours;
     `HardwareException::GetCallStack` still forwards to the renamed original), `KernelResource_7c`,
     `KernelResources_7c`.
-  - 🎮 `input/`: `InputSystem_7c`, `InputWin32_7c`.
+  - 🎮 `input/`: `InputSystem_7c`, `InputWin32_7c`, `InputDirectX_7c`.
   - 🎨 `graphics/`: `Render2DCore_7c`, `RenderSystem_7c` (done; optional retail-data mirrors remain).
   - `ui/`, `debug/` and `not_loaded/` appear when their first module is started.
   - 📐 `include/jet/`: our declarations of the Jet classes with their binary layouts.

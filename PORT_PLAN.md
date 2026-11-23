@@ -208,8 +208,14 @@ After each step, refresh the README progress block: `python -I tools/progress.py
         `CreateInstance` methods. See `notes/WaterSystem.md`.
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
        picked in the launcher.
-   8g. InputDirectX_7c, the DirectInput driver (joysticks, wheels, force feedback through InputSystem's
-       ForceEffect). Loaded at the menu but keyboard and mouse come from InputWin32; left out of step 5.
+   8g. ~~InputDirectX_7c, the DirectInput driver (joysticks, wheels, force feedback through InputSystem's
+       ForceEffect). Loaded at the menu but keyboard and mouse come from InputWin32; left out of step 5.~~
+       Done 2026-11-24: the whole module is ours (1/1 export, `JetGetPluginsInputDirectX`); the game reaches the
+       menu and exits cleanly with the retail `InputDirectX_7c.dll` renamed, JetLog identical to the baseline.
+       The driver, keyboard / mouse / joystick devices and the DirectInput force-effect class are reconstructed
+       from 0x10001000..0x10005c50, including the original's kept quirks (the scan-code table's static
+       initializer, the zero axis mask in device enumeration, the property 10..12 fall-through). A real
+       joystick/wheel and force feedback still need a hardware check.
 9. trainz.exe subsystems through the loader DLL: asset DB, GS compiler/VM, physics, world.
 
 ## Honest scale

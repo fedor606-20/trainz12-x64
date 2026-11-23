@@ -85,7 +85,7 @@ endforeach()
 target_sources(KernelStandard_7c PRIVATE ${SCFG_TABLES})
 
 # step 5, small Jet modules: drop-in proxies, replaced module by module (the rest forwards to <module>_orig.dll)
-foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c WaterSystem_7c RenderOpenGL_7c)
+foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c WaterSystem_7c RenderOpenGL_7c InputDirectX_7c)
     jet_module(${m})
     target_compile_definitions(${m} PRIVATE _CRT_SECURE_NO_WARNINGS)
     # each calls the other Jet modules by their original names (our proxies or the originals)
@@ -94,6 +94,8 @@ endforeach()
 target_link_libraries(KernelResources_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib")
 target_link_libraries(Render2DCore_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib" "${IMPLIB}/RenderSystem_7c.lib")
 target_link_libraries(InputWin32_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib")
+# InputDirectX_7c: the DirectInput driver (keyboard, mouse, joysticks, force feedback)
+target_link_libraries(InputDirectX_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib" dinput8 dxguid)
 # RenderSystem_7c: replaced unit by unit (notes/RenderSystem.md); no static imports from the original remain,
 # but mirrors, vtables/RTTI and private helpers are still reached dynamically
 target_compile_definitions(RenderSystem_7c PRIVATE JET_RS_BUILD)
