@@ -1,3 +1,19 @@
 # RenderOpenGL_7c: the OpenGL backend (DisplayOpenGL/XTerm, WGL interfaces, texture/vertex
 # buffer/shader backends). Every export still forwards to RenderOpenGL_7c_orig.dll; names move
 # here unit by unit. The decompiled reference is D:\trainz12-decomp\decomp\RenderOpenGL_7c.dll.c.
+??0ContextDescriptorOpenGL@Jet@@IAE@W4PlatformType@01@@Z
+??0ContextDescriptorOpenGLWGL@Jet@@QAE@XZ
+??0DisplayDescriptorOpenGL@Jet@@QAE@ABV01@@Z
+??0DisplayDescriptorOpenGL@Jet@@QAE@XZ
+??1DisplayDescriptorOpenGL@Jet@@UAE@XZ
+??4ContextDescriptorOpenGL@Jet@@QAEAAV01@ABV01@@Z
+??4ContextDescriptorOpenGLWGL@Jet@@QAEAAV01@ABV01@@Z
+??4DisplayDescriptorOpenGL@Jet@@QAEAAV01@ABV01@@Z
+??_7DisplayDescriptorOpenGL@Jet@@6B@
+?GetContext@DisplayDescriptorOpenGL@Jet@@QBAABVContextDescriptorOpenGL@2@XZ
+?GetDeviceContext@ContextDescriptorOpenGLWGL@Jet@@QBAPAXXZ
+?GetPlatform@ContextDescriptorOpenGL@Jet@@QBA?AW4PlatformType@12@XZ
+?GetPlatform@DisplayDescriptorOpenGL@Jet@@QBA?AW4PlatformType@ContextDescriptorOpenGL@2@XZ
+?GetRenderContext@ContextDescriptorOpenGLWGL@Jet@@QBAPAXXZ
+?Initialize@DisplayDescriptorOpenGL@Jet@@QAAXPAVDisplayInterfaceOpenGL@2@@Z
+?SetContext@ContextDescriptorOpenGLWGL@Jet@@QAAXPAX0@Z

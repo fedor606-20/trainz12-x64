@@ -30,23 +30,30 @@ Function/vtable inventory:
 
 ## Current state
 
-The source folder is a **proxy**: `implemented.txt` is empty and
-`gen_def.py` forwards all 51 exports to `RenderOpenGL_7c_orig.dll`.
-`build-trainz32\game-smoke` ran with that proxy plus the renamed original and
+The source folder started as a **proxy**. Unit 1 is now local: the
+`ContextDescriptorOpenGL(WGL)` and `DisplayDescriptorOpenGL` classes (16
+exports, `RenderOpenGLTypes.*`). `Initialize` reads the GL strings from
+`opengl32!glGetString` and takes the context from interface slot 0x58. The
+remaining exports still forward to `RenderOpenGL_7c_orig.dll`.
+`build-trainz32\game-smoke` ran with the proxy plus the renamed original and
 stayed in the main menu, so the build/link/forwarding path is proven.
 
 ## Port order
 
-1. `DisplayDescriptorOpenGL`, `ContextDescriptorOpenGL(WGL)`.
-2. `DisplayTextureOpenGL` (GL texture object, format table, static bound list).
-3. `DisplayInterfaceOpenGL/WGL` + `NonRenderContextWGL` (WGL context and GL
-   function table; the texture class calls through `display + 0xf00`).
+1. `DisplayDescriptorOpenGL`, `ContextDescriptorOpenGL(WGL)` — done.
+2. `DisplayInterfaceOpenGL/WGL` + `NonRenderContextWGL` (WGL context and GL
+   function table). This must come before the texture class: the retail
+   `DisplayTextureOpenGL::Create` calls module-level GL pointers
+   (`DAT_1003c100` etc.), which `DisplayLibraryOpenGL` fills in. Our copy needs
+   its own table.
+3. `DisplayTextureOpenGL` (GL texture object, format table, static bound
+   list).
 4. `DisplayOpenGL` then `DisplayOpenGLXTerm` (the 146-slot windowed backend).
 5. Vertex buffers, then vertex programs/combiners/Cg.
 
 The retail `DisplayTextureOpenGL::Create` is 1174 bytes and needs the GL
-function table from the interface, so unit 2 cannot be tested in isolation
-before unit 3 exists; keep the proxy until then.
+function table from the interface, so unit 3 cannot be tested in isolation
+before unit 2 exists; keep the proxy until then.
 
 ## In-game window facts
 
