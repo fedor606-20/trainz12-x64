@@ -397,6 +397,7 @@ template <size_t n, class F>
 void MirrorTable(HMODULE original, void* (&table)[n], void*& meta, const char* name, F deletingDestructor)
 {
     const auto* source = reinterpret_cast<void* const*>(GetProcAddress(original, name));
+    if (!source) return;  // no original at load: the table stays empty until its unit is ported
     std::memcpy(table, source, sizeof table);
     meta = source[-1];
     std::memcpy(reinterpret_cast<unsigned char*>(table) - sizeof meta, &meta, sizeof meta);

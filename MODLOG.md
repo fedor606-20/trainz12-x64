@@ -3349,3 +3349,13 @@ scenarios, `u3` 1000, `u4` 2000, `u5` 600, `u6` 200 with 400 retail texture
 files, `u6b`/`u6c`/`u6c2`/`u6d` 300 each, `u7` 10000 checks, `u8` 5446 entries,
 `u9` 209802 entries, `u10` 1969, `u11` 33 data checks, `u12` 1183, `u13`, and
 the WaterSystem `u5`/`u7` probes. No in-game run was performed.
+
+### RenderSystem U16 start: load without the original
+
+The layer vtable initialiser no longer copies from a missing module; the
+rebuilt DLL now loads with no `RenderSystem_7c_orig.dll` present (error 1114
+gone). This is load-only: its runtime paths still read retail data, copied
+vtables/RTTI and private helpers, so the game still needs the original until
+the U16 inventory in `notes/RenderSystem.md` is ported. No test result changed
+with the original present.
+

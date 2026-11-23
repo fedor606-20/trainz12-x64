@@ -967,3 +967,40 @@ Do not group `Layer::GetLayerManager` with the local reads: it uses the original
 - `tools/check_exports.py DLL TSV --forbid-dll RenderSystem_7c_orig.dll` is the
   static link check; it passes now. It still does not prove that runtime
   lookups are gone: run in a directory without the original DLL to test that.
+
+## U16: standalone cutover (remaining)
+
+Status: the DLL now loads without `RenderSystem_7c_orig.dll` (the layer
+initialiser skips a missing source table), and every static import is gone.
+It still uses the original for the following; while any remain, the game
+cannot run without the renamed original in the directory.
+
+- Copied tables (zero without the original): the `DataMirrorList` data and
+  the Display/RenderKernel/selector/context vtables and vbptr; the material
+  statics and vtables; the seven layer-family vtables; plugin factory tables.
+  Each needs a local vtable with local RTTI, or an equivalent table built from
+  our own exported virtuals.
+- Display creation: `DisplayLifetime` takes the Display and PluginInstance
+  vtables and the vbptr from retail; `RenderKernel` runs retail's `DisplayNull`
+  constructor at 0x1e130; `DisplayTextureNull` reads retail's null-format table
+  at 0xb8228.
+- Factories: the bitmap factory still creates retail `BitmapTextureResource`
+  objects (`bmp-tex`, `tga-tex`, `bmframe-tex`, `pcx-tex`, `jpg-tex`), so those
+  resources use retail virtuals and read retail texture defaults. The other
+  factory slots (delete, size, CreateOnTheFly) are retail code too.
+- Geometry: `GeometryChunk` vftable slots 61..70 (interpolation and copies)
+  call retail exports by name; U5b2 is not ported.
+- Layers: `LayerGroup` reads retail's `Layer::layerManager` and calls private
+  layer helpers by name.
+- Material: config vtable, `STRING_NOT_FOUND`, decorated type token,
+  `uniqueMatId`, ReferenceCount vtable, NullMaterial vtable and manager
+  helpers.
+- Texture manager: the 16-format table, default format name, substitute texture
+  cache and name still come from retail data (the option parser no longer does).
+- Shared textures: `textureArray`/`textureNameArray` still point at retail's
+  arrays.
+
+Order for the cutover: Display + its vtables/RTTI first (nothing renders
+without it), then the null display and its format table, then the bitmap
+factory, then layer and material tables, then geometry interpolation, then the
+remaining data arrays.
