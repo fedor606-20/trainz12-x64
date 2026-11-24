@@ -3644,14 +3644,17 @@ Two RenderSystem cutovers: `Display::CreateTexture` now dispatches through slot 
 (`RsDisplayCreateTexture`) instead of the null factory, and the render kernel can probe a display
 without a renamed original.
 
-Verified: Win32 Release, `51/51` exports, no `_orig` reference. The main menu renders through
-this backend, and Railyard renders its 3D scene (shed, Acela car, ground); the Railyard side list
-is still blank. Two display bugs were fixed on the way: the WGL context must be created in
-`PreOpen` on the main JET window (after the windowed host it landed on a second, invisible JET
-window), and `EndFrame` must always swap. The white-UI cause was in RenderSystem:
-`Texture::Bind` now resolves `GetDisplayTexture()` so a lazy `TextureRes` is forced on first bind.
-A clean window close works. Remaining: full route load/driving, Cg, vertex programs and texture
-combiners. The lab install was restored to the retail `RenderOpenGL_7c.dll`.
+Verified: Win32 Release, `51/51` exports, no `_orig` reference. The local backend opens the main
+JET window and presents frames, but its UI is still white: no `Display::CreateTexture` call is
+reached, so all sprites sample an unbound texture. Draws themselves are valid (types, positions,
+colours and indices were checked). The WGL context is created in `PreOpen` on the main JET window
+(after the windowed host it landed on a second, invisible JET window), `EndFrame` always swaps,
+and `Texture::Bind` resolves `GetDisplayTexture()`; those are real fixes, but the texture path
+still bypasses them. A later lab run with the retail `RenderOpenGL_7c.dll` (only RenderSystem
+rebuilt) produced the menu and Railyard screenshots; they are the retail renderer's, not this
+module's. Remaining: the Render2D/TextureManager path that skips `Display::CreateTexture`, then Cg,
+vertex programs, texture combiners and a route/driving check. The lab install was restored to the
+retail `RenderOpenGL_7c.dll`.
 ### WaterSystem_7c: complete, 490/490 local (2026-11-24, agent wave)
 
 The whole module is now ours. `src/jet/graphics/WaterSystem_7c/implemented.d/u8a.txt`, `u8b.txt`,

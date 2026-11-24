@@ -63,17 +63,20 @@ Two RenderSystem cutovers were needed and are in the tree:
 Verification in this pass:
 
 - Win32 Release builds, `51/51` exports, no `_orig` import or forwarder.
-- The game reaches the JET window, `Init -> PreOpen -> Finish -> Open`, frames are presented and
-  the main menu renders through this backend (background, buttons, fonts).
-- Railyard renders the 3D scene (shed, Acela car, ground) through this backend; the side selection
-  list is still blank/black.
-- The WGL context is created in `PreOpen` on the main JET window; creating it after the windowed
-  host made a second, invisible JET window. `EndFrame` always swaps and makes the context current.
-- `Texture::Bind` now goes through `GetDisplayTexture()`, so a lazily loaded `TextureRes` is forced
-  on first bind (previously the null field was sampled, which made every UI quad white).
-- Railyard/route entry and a clean window close work. Full route load, a driving session, Cg
-  shaders, vertex programs and texture combiners remain open. The lab install was restored to the
-  retail `RenderOpenGL_7c.dll` after the test.
+- The game reaches the JET window, `Init -> PreOpen -> Finish -> Open`, frames are presented.
+- Current local backend: the window stays white. Draws execute (static/dynamic batches with valid
+  vertex types, positions, colours and indices), but **no `Display::CreateTexture` call is made**,
+  so every UI quad samples an unbound texture and the menu is white. Railyard was not verified
+  with this module.
+- The WGL context is created in `PreOpen` on the main JET window (after the windowed host it
+  landed on a second, invisible JET window); `EndFrame` always swaps and makes the context current.
+- `Texture::Bind` now goes through `GetDisplayTexture()`; this is the correct lazy-load path, but
+  the UI still does not reach it. A committed run with the retail `RenderOpenGL_7c.dll` next to the
+  rebuilt RenderSystem showed the full menu and Railyard 3D scene; those screenshots belong to the
+  retail renderer, not to this module.
+- Remaining: find which Render2D/TextureManager path bypasses `Display::CreateTexture`, then Cg,
+  vertex programs, texture combiners and a route/driving session. The lab install was restored to
+  the retail `RenderOpenGL_7c.dll`.
 
 
 ## Port order
