@@ -1141,6 +1141,10 @@ void __cdecl RsDisplayIgnoreResources(Display*) {}
 void __cdecl RsDisplayIgnoreVertex(const Display*, void*, const void*, const char*) {}
 void* __cdecl RsDisplayNullFactory(Display*) { return nullptr; }
 
+// The exported non-virtual factory: a renderer overrides vtable slot 0x98, so the base export must
+// dispatch there instead of answering null (the texture manager uses this export).
+void* __cdecl RsDisplayCreateTexture(Display* display) { return VCall<void*>(display, 0x98); }
+
 void __cdecl RsDisplayBeginFrame(Display* display, float)
 {
     ++*reinterpret_cast<unsigned*>(DisplayBytes(display) + 0x3c);

@@ -1,78 +1,104 @@
-// RenderOpenGL_7c: a minimal WGL context for the local backend (unit 2).
+// RenderOpenGL_7c: WGL context creation.
 #include "DisplayInterfaceWGL.h"
 
-#include <windows.h>
+#include "OpenGLExtensions.h"
+
+#include <cstring>
 
 namespace Jet {
 
 DisplayInterfaceWGL::DisplayInterfaceWGL()
-    : window(nullptr), pixelFormat(0), deviceContext(nullptr), renderContext(nullptr)
+    : vtable(nullptr), referenceCount(1), flags(0), owner(nullptr), window(nullptr), os(nullptr), library(nullptr),
+      deviceContext(nullptr), renderContext(nullptr), sharedContext(nullptr), savedDc(nullptr), savedPixelFormat(0),
+      pbuffer(nullptr), pixelFormat(0), stateFlags(0), samples(0), width(0), height(0)
 {
+    memset(pad, 0, sizeof pad);
+    memset(pad2, 0, sizeof pad2);
 }
 
 DisplayInterfaceWGL::~DisplayInterfaceWGL() { Destroy(); }
 
-bool __cdecl DisplayInterfaceWGL::Create(void* rawWindow, void*)
+bool DisplayInterfaceWGL::Create(HWND window_, int colorBits, int depthBits, int stencilBits, int alphaBits,
+                                 bool stereo)
 {
     Destroy();
-    window = static_cast<Window*>(rawWindow);
-    if (!window || !window->Handle()) return false;
-
-    HWND const hwnd = window->Handle();
-    HDC const dc = GetDC(hwnd);
-    if (!dc) return false;
+    window = window_;
+    if (!window) return false;
+    deviceContext = GetDC(window);
+    if (!deviceContext) return false;
 
     PIXELFORMATDESCRIPTOR want{};
     want.nSize = sizeof want;
     want.nVersion = 1;
     want.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    if (stereo) want.dwFlags |= PFD_STEREO;
     want.iPixelType = PFD_TYPE_RGBA;
-    want.cColorBits = 32;
-    want.cDepthBits = 24;
-    want.cStencilBits = 8;
+    want.cColorBits = static_cast<BYTE>(colorBits);
+    want.cDepthBits = static_cast<BYTE>(depthBits);
+    want.cStencilBits = static_cast<BYTE>(stencilBits);
+    want.cAlphaBits = static_cast<BYTE>(alphaBits);
     want.iLayerType = PFD_MAIN_PLANE;
 
-    const int format = ChoosePixelFormat(dc, &want);
-    if (!format || !SetPixelFormat(dc, format, &want)) {
-        ReleaseDC(hwnd, dc);
+    pixelFormat = ChoosePixelFormat(deviceContext, &want);
+    if (!pixelFormat || !SetPixelFormat(deviceContext, pixelFormat, &want)) {
+        Destroy();
         return false;
     }
-    HGLRC const rc = wglCreateContext(dc);
-    if (!rc || !wglMakeCurrent(dc, rc)) {
-        if (rc) wglDeleteContext(rc);
-        ReleaseDC(hwnd, dc);
+    renderContext = wglCreateContext(deviceContext);
+    if (!renderContext || !wglMakeCurrent(deviceContext, renderContext)) {
+        Destroy();
         return false;
     }
-    pixelFormat = format;
-    deviceContext = dc;
-    renderContext = rc;
+    GL::LoadExtensions();
+    GLint vp[4] = {0, 0, 0, 0};
+    glGetIntegerv(GL_VIEWPORT, vp);
+    width = vp[2];
+    height = vp[3];
     return true;
 }
 
-void __cdecl DisplayInterfaceWGL::Destroy()
+void DisplayInterfaceWGL::Destroy()
 {
     if (renderContext) {
-        wglMakeCurrent(nullptr, nullptr);
-        wglDeleteContext(static_cast<HGLRC>(renderContext));
+        if (wglGetCurrentContext() == renderContext) wglMakeCurrent(nullptr, nullptr);
+        wglDeleteContext(renderContext);
         renderContext = nullptr;
     }
-    if (deviceContext && window && window->Handle()) {
-        ReleaseDC(window->Handle(), static_cast<HDC>(deviceContext));
-    }
+    sharedContext = nullptr;
+    if (deviceContext && window) ReleaseDC(window, deviceContext);
     deviceContext = nullptr;
-    pixelFormat = 0;
     window = nullptr;
+    pixelFormat = 0;
+    pbuffer = nullptr;
 }
 
-void* __cdecl DisplayInterfaceWGL::GetDeviceContext() const { return deviceContext; }
-void* __cdecl DisplayInterfaceWGL::GetRenderContext() const { return renderContext; }
-
-void __cdecl DisplayInterfaceWGL::SwapBuffers()
+void DisplayInterfaceWGL::SwapBuffers()
 {
-    if (deviceContext) ::SwapBuffers(static_cast<HDC>(deviceContext));
+    if (deviceContext) ::SwapBuffers(deviceContext);
 }
 
-Window* __cdecl DisplayInterfaceWGL::GetWindow() const { return window; }
-int __cdecl DisplayInterfaceWGL::GetPixelFormat() const { return pixelFormat; }
+void DisplayInterfaceWGL::MakeCurrent()
+{
+    if (deviceContext && renderContext) wglMakeCurrent(deviceContext, renderContext);
+}
+
+void DisplayInterfaceWGL::SetVsync(bool on)
+{
+    if (GL::ext.SwapInterval) GL::ext.SwapInterval(on ? 1 : 0);
+}
+
+const char* DisplayInterfaceWGL::Extensions() const
+{
+    if (GL::ext.GetExtensionsStringARB && deviceContext)
+        return GL::ext.GetExtensionsStringARB(deviceContext);
+    return GL::ExtensionString();
+}
+
+bool DisplayInterfaceWGL::HasExtension(const char* list, const char* name) { return GL::HasExtension(list, name); }
+
+bool DisplayInterfaceWGL::IsExtensionSupported(const char* name) const
+{
+    return HasExtension(Extensions(), name) || GL::IsSupported(name);
+}
 
 }  // namespace Jet

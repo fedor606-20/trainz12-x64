@@ -32,13 +32,49 @@ Function/vtable inventory:
 
 ## Current state
 
-The source folder started as a **proxy**. Unit 1 is now local: the
-`ContextDescriptorOpenGL(WGL)` and `DisplayDescriptorOpenGL` classes (16
-exports, `RenderOpenGLTypes.*`). `Initialize` reads the GL strings from
-`opengl32!glGetString` and takes the context from interface slot 0x58. The
-remaining exports still forward to `RenderOpenGL_7c_orig.dll`.
-`build-trainz32\game-smoke` ran with the proxy plus the renamed original and
-stayed in the main menu, so the build/link/forwarding path is proven.
+The module still builds as a standalone 51/51 export drop-in and the local display opens in the
+game. This pass replaced the hand-built slot table with the module's own 152-slot `Display` table
+from `RenderSystem_7c.dll`, then filled the renderer slots by byte offset:
+
+- `0x00` init, `0x04` the local render-kernel's pre-open probe, `0x18` name, `0x1c` extension
+  support, `0x28` max anisotropy, `0x30` shutdown, `0x34` open;
+- `0x50`/`0x54`/`0x58`/`0x5c`/`0x68`/`0x6c`/`0x70` matrix stack and projection;
+- `0x80` texel offset, `0x98` texture factory, `0xa0` active texture unit;
+- `0xd0` clear, `0xd4`/`0xd8` colour/depth readback, `0xe4`/`0xec`/`0xf0`/`0xf4` draws;
+- `0x104`/`0x108` static vertex/index buffers, `0x150` descriptor;
+- `0x180`..`0x240` the whole render-state block: viewport/scissor, clear values and masks,
+  depth/stencil/cull/blend/alpha, fog, materials, lights, polygon offset, texture modes and
+  texgen, plus `0x244`..`0x25c` pre-open, video-format reset/select and finish;
+- `0x260`..`0x280` the XTerm extension slots.
+
+The display object uses the retail layout: PluginInstance at `+0xf98` (base) / `+0xfa0`
+(XTerm), factory at `+4`, ReferenceCount at `+0xfa0` / `+0xfa4`, descriptor at `+0xf78`.
+Draws use client vertex arrays built from `VertexType` items (position/normal/colour/fog and
+`Texture0..7`), with single-stream and multi-stream entry lists; static buffers keep CPU data and
+the buffer manager uploads/copies through the RenderSystem geometry slots.
+
+Two RenderSystem cutovers were needed and are in the tree:
+
+- the exported `Display::CreateTexture` now dispatches to vtable slot `0x98` instead of the null
+  factory (`RsDisplayCreateTexture` in `DisplayState.cpp`);
+- `RenderKernel::LoadRenderSystem` probes vtable slot `0x04`; the display answers true, so the
+  kernel proceeds to `Init`/`Open`.
+
+Verification in this pass:
+
+- Win32 Release builds, `51/51` exports, no `_orig` import or forwarder.
+- The game reaches the JET window, `Init -> PreOpen -> Finish -> Open`, frames are presented and
+  the main menu renders through this backend (background, buttons, fonts).
+- Railyard renders the 3D scene (shed, Acela car, ground) through this backend; the side selection
+  list is still blank/black.
+- The WGL context is created in `PreOpen` on the main JET window; creating it after the windowed
+  host made a second, invisible JET window. `EndFrame` always swaps and makes the context current.
+- `Texture::Bind` now goes through `GetDisplayTexture()`, so a lazily loaded `TextureRes` is forced
+  on first bind (previously the null field was sampled, which made every UI quad white).
+- Railyard/route entry and a clean window close work. Full route load, a driving session, Cg
+  shaders, vertex programs and texture combiners remain open. The lab install was restored to the
+  retail `RenderOpenGL_7c.dll` after the test.
+
 
 ## Port order
 

@@ -2603,7 +2603,7 @@
 ?SetMaxAnisotropy@Display@Jet@@UAAXM@Z=?RsDisplayIgnoreFloat@Jet@@YAXPAVDisplay@1@M@Z
 ?UnreferenceResources@Display@Jet@@UAAXXZ=?RsDisplayIgnoreResources@Jet@@YAXPAVDisplay@1@@Z
 ?InitializeVertexTypeForAPI@Display@Jet@@UBAXAAVVertexType@2@PBXPBD@Z=?RsDisplayIgnoreVertex@Jet@@YAXPBVDisplay@1@PAXPBXPBD@Z
-?CreateTexture@Display@Jet@@UAAPAVDisplayTexture@2@XZ=?RsDisplayNullFactory@Jet@@YAPAXPAVDisplay@1@@Z
+?CreateTexture@Display@Jet@@UAAPAVDisplayTexture@2@XZ=?RsDisplayCreateTexture@Jet@@YAPAXPAVDisplay@1@@Z
 ?CreateTextureCombiner@Display@Jet@@UAAPAVTextureCombiner@2@XZ=?RsDisplayNullFactory@Jet@@YAPAXPAVDisplay@1@@Z
 ?BeginFrame@Display@Jet@@UAAXM@Z=?RsDisplayBeginFrame@Jet@@YAXPAVDisplay@1@M@Z
 ?EndFrame@Display@Jet@@UAAXM@Z=?RsDisplayEndFrame@Jet@@YAXPAVDisplay@1@M@Z

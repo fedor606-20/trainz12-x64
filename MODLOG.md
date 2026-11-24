@@ -3407,6 +3407,208 @@ zero-fills them. Reading the live retail module confirmed all three are 0 at
 runtime, which is exactly our return value. The apparent difference is a
 file-image artifact, not a missing implementation.
 
+
+### RenderOpenGL M2/M3: WGL context and display texture (2026-11-24)
+
+The OpenGL backend has a local WGL context wrapper and a local `DisplayTextureOpenGL`. The texture class implements the
+retail 17-slot `DisplayTexture` vtable over fixed-function GL 1.1: texture object lifetime, format-to-GL mapping for
+the 28 Jet formats, mip allocation, load/sub-load, frame copy, sampler attributes, API texture and bitmap readback.
+The GL 1.2+ compressed-texture and anisotropic-filter entry points are resolved by `OpenGLExtensions`; `opengl32` and
+`glu32` are linked normally.
+
+The 34 texture exports are local, so the module now has 50 of 51 exports without a forwarder; only
+`JetGetPluginsRenderOpenGL` still comes from `RenderOpenGL_7c_orig.dll`. `tests/rogl_texture_smoke.cpp` creates a
+hidden WGL context, makes a 16x16 ARGB texture, uploads pixels, binds it and reads the level back: API texture 1,
+load/bind true, 16x16 readback, `glGetError` 0. The texture class has not yet been compared with the retail class in
+one process and has not been used by the game (the original display still creates its own textures). The
+interface/display cutover is the remaining M2/M4 work.
+
+
+### RenderOpenGL local display: standalone load and first frame (2026-11-24)
+
+All 51 exports are local; `check_exports.py --forbid-dll RenderOpenGL_7c_orig.dll` passes and the module no longer imports
+or forwards to the renamed original. A local 161-slot `DisplayOpenGLXTerm` object is built in `DisplayObject.cpp`:
+WGL context creation, plugin factories (`StdOpenGL`/`XTermOpenGL`, retail UIDs), `Display::Init`/`PreOpen`/`Open`,
+windowed host format slot, begin/end frame, viewport/scissor/clear/matrix and the basic state slots. The display factory
+is selected by the plugin system and the game opens a `JET [OpenGL]` window and reaches `BeginFrame`/`EndFrame`.
+
+The first 3D path still fails. Static vertex/index buffers are now non-null software `StaticBuffer` objects and the
+single-stream draw slots 0xec/0xf0 feed client arrays, but `VertexBufferManager` uploads are stubs, `VertexType` API
+data/vertex declarations are only a raw `VertexType*`, and vertex program/combiner/Cg slots still answer zero. A
+shutdown path also crashes in the original RenderSystem's `RenderKernel` destructor while releasing the display's
+virtual base (`Kernel_7c!PluginInstance::DeleteThis`, access at address 4); the local `PluginInstance` vbtable/factory
+layout needs the retail +0xf98/+0xfa4 layout finished before the display can outlive the frame loop. Game install was
+restored to the retail DLL after the test.
+
+### RenderSystem U16: local tables and stand-alone fallbacks (2026-11-24)
+
+The module now builds its exported and private virtual tables from its own exports when
+`RenderSystem_7c_orig.dll` is absent. `tools/gen_local_tables.py` reads the pristine DLL at
+build time and emits `rs_local_tables.h`: one slot-to-export map per table, with the shared
+three-byte stubs (`xor eax,eax; ret` / `ret`) replaced by one local stub. This is data, not
+code; no retail bytes are linked into the module.
+
+Local fallbacks added:
+- `Display` (152 slots) and its `PluginInstance` secondary table, plus the Display vbtable
+  `{0, 0xf00}`. `DataStatics` used to mirror only 80 slots; the array is now the full 152.
+- `DisplayContext`, with a local deleting destructor so `VDelete` no longer calls a zero slot.
+- `Material`, `NullMaterial`, `MaterialPlugin`, `MaterialConfig` and the material plugin
+  factory. Material/NullMaterial vbtables `{0, 0x9c}` and `{0, 0xa0}` are local too.
+- The seven layer-family tables are filled from local exports when the original is absent;
+  slot 0 gets the local deleting destructor and the whole table gets a local RTTI locator.
+- Material statics fall back to local PStrings (`STRING_NOT_FOUND`, decorated type token),
+  a local ReferenceCount vtable, and a local material-config table.
+- TextureManager's substitute texture/name no longer dereference a null module base.
+
+Still not stand-alone-complete:
+- The bitmap texture factory and its retail `BitmapTextureResource` virtuals.
+- The private `DisplayNull` constructor and its 29-entry null format table.
+- The texture-manager 16-format table, substitute textures, and shared texture arrays.
+- Some material/layer private helpers and the remaining RTTI hierarchies.
+
+Build: Win32 Release, all 2687 exports, zero forwarders. `diff_rs_u11` passes. The current
+`build-trainz32/Release` fixture is stale: `diff_rs_u8`, `diff_rs_u9`, `diff_rs_u12` and
+`diff_rs_u13` also fail against the older pre-U16 backup DLL, so their failures are not
+attributed to this batch. The game reaches the main menu with no `*_orig*` file present.
+The white menu background is pre-existing: it also appears with the original DLL present
+and with the older backup, so it is not caused by this cutover.
+
+
+### RenderOpenGL local display: final state for this pass (2026-11-24)
+
+The module is a standalone 51/51 export drop-in with no import or forwarder to `RenderOpenGL_7c_orig.dll`. It builds a
+local 161-slot XTerm object, registers `StdOpenGL`/`XTermOpenGL` with the retail UIDs, creates the WGL context, opens
+the `JET [OpenGL]` window, runs `Init`/`PreOpen`/`Open`, and reaches `BeginFrame`/`EndFrame` with the windowed host
+format. Textures are the local `DisplayTextureOpenGL` class (smoke-tested in a real GL context). The static buffer
+slots 0x104/0x108 return software `StaticBuffer` objects, and single-stream draw slots 0xec/0xf0 feed client arrays
+from the `VertexType` item table.
+
+Not a closed renderer: the window stays black, the game exits after the first frame, and `VertexBufferManager` upload
+slots, real `VertexType` API declarations, vertex programs, texture combiners and Cg remain stubs. The next unit is the
+vertex declaration/manager pair (0x20/0x2c/0xec), then programs/combiners; only after that is a 3D route load possible.
+The laboratory install was restored to the retail DLL and its hash is unchanged.
+
+### Render3DCore U1a: AxisAlignedBox (2026-11-24)
+
+Render3DCore_7c has its proxy target and the first class. `src/jet/graphics/Render3DCore_7c/` builds a 2,500-export
+drop-in replacement; 25 exports are local (`AxisAlignedBox`), 2,475 still forward to
+`Render3DCore_7c_orig.dll` through the generated `.def`. See `notes/Render3DCore.md` for the unit plan.
+
+The module imports `KernelStandard_7c`, `Kernel_7c`, `KernelResource_7c`, `RenderSystem_7c` (320 exports),
+`DebugInterface_7c` (3 data flags) and `MSVCR80`/`KERNEL32`; 3,360 Ghidra functions, 458 KB of code, 802 unnamed
+globals (48.9 KB). Downstream imports: trainz.exe 431, Render3DExtension 134, Render3DFoundation 108, WaterSystem 80,
+RenderSystem 22.
+
+`AxisAlignedBox` is 0x18 bytes (`min`, `max`), no vftable. Facts confirmed from the assembly and kept in the source:
+- An ordinary member is **`__cdecl`** (`QAA`): `this` is at `[esp+4]`, not in ECX. Constructors and the
+  compiler-generated assignment are `__thiscall` (`QAE`). A by-value `Vector3` return adds the hidden return slot
+  after `this`; a differential test must call those exports through a member-function pointer.
+- NaN behaviour follows `COMISS` + `JBE`: the left operand survives. `Clamp` therefore clamps a NaN coordinate to
+  `min`, and `TestCollision(Sphere)` treats a NaN centre as distance 0. `Maximize`/`Minimize`/`CalcBoxLimits` keep
+  the accumulator on NaN.
+- `CalcCorners` order is the min-z face in `min, max-x, max-xy, max-y` order, then the same on max-z.
+- `IsWithin(box)` and `TestCollision(box)` are strict overlap (touching faces do not collide). `IsWithin(Plane*)`
+  reads six `{normal, d}` planes (0x10 each) and rejects only when the farthest corner is strictly behind a plane.
+- `Sphere` is polymorphic: vftable +0, centre +4, radius +0x10; the SDK header's field order is not the TS12 layout.
+
+Not local yet (still forwarded): the `OrientedBox` constructor/maximise/test, the `Cylinder`/`Ellipsoid` tests, the
+`Line`/`Ray`/`LineSegment` tests and `GetMinMaxCollision`. They are U1b, together with `Plane`.
+
+Build: Win32 Release, `diff_r3d_u1` 29,000 checks, 0 mismatches over 1,000 rounds (every 7th round uses signed zero,
+infinities and quiet/signalling NaNs). No game check was run for this unit; it is not on the menu path.
+
+### RenderSystem U16: independent module (2026-11-24, agent batch)
+
+Four parallel units landed and were merged:
+- `DisplayNull.cpp/.h`: local NullRender display (0xf28, local 152-slot table, plugin/refcount
+  subobjects, descriptor, null vertex-buffer manager) and the 29-entry null format table.
+  `RsLoadRenderSystem` constructs it locally; the retail `image + 0x1e130` call is gone.
+- `BitmapTextureResource.cpp/.h`: local bitmap resource (0x84, 46 slots, observer table) and
+  local factories for `bmp-tex`, `tga-tex`, `bmframe-tex`, `pcx-tex`, `jpg-tex`.
+- `TextureData.cpp/.h`: local `textureArray`/`textureNameArray` (11 slots each), the 16-format
+  table and `ARGB8888` default. `TextureManager`/`SharedTextureCollection` no longer do
+  null-base arithmetic into the retail module.
+- Local vtable/RTTI generator: 28 type descriptors, 51 base descriptors, 20 hierarchies,
+  24 complete-object locators; Display, contexts, material, layer and RenderKernel tables are
+  filled from local exports with local adjustors and deleting destructors.
+
+`DisplayTexture.cpp` now reads `Jet::NullFormatEntry` from `DisplayNull.cpp`; the retail
+`0xb8228` read is gone. `LayerGroup`'s unused retail helper lookup and `GeometryChunk`'s
+unused retail template were removed. Material statics now use local `STRING_NOT_FOUND`,
+decorated token, ReferenceCount vtable, material-config table and a local unique-id counter.
+
+Verification:
+- Win32 Release builds. 2687/2687 exports, 0 missing/extra. `--forbid-dll` passes; the import
+  table has only KernelStandard_7c, Kernel_7c and system DLLs.
+- One `RenderSystem_7c_orig` literal remains in the DLL for the optional data mirrors in
+  `DataStatics`, `LayerLifetime` and `MaterialStatics`; `GetModuleHandle` returns null and the
+  local fallbacks run when the retail DLL is absent.
+- No-orig game run: `bin` had zero `*_orig*` files, the game reached the route/session page
+  and rendered the full background and route thumbnail. The earlier white main-menu background
+  did not reproduce on that page.
+- `diff_rs_u11` passes. `diff_rs_u9` still reports one mismatch at trace entry 48353 in a
+  freshly built clean fixture; the pre-batch U16 DLL shows the same mismatch, so it is a
+  pre-existing U16 issue, not caused by this batch. `diff_rs_u8`, `diff_rs_u12` and
+  `diff_rs_u13` also fail in that fixture and need a separate pass.
+
+Remaining for "finished": fix the pre-existing `diff_rs_*` failures, explicit OpenGL/
+DirectX9/NullRender launches, a driving session and clean exit, plus the optional data mirrors
+removed once their local storage is proven.
+
+### RenderSystem U16: material plugin group UID and textured 3D (2026-11-24)
+
+The first route/3D load crashed in `Material::SetAmbientColor` with a null material. The caller
+was `trainz.exe+0x313e9c` (a `Ground` at `+0x8044`). `MaterialManager::Create` was failing every
+lookup for `notex`, `onetex`, `tbumptex`, ... because the exported
+`MaterialPlugin::PluginGroupUID` mirror was zero when the retail DLL was absent. Render3DCore
+registers its material plugins into that group, so every material lookup missed.
+
+`MaterialStatics` now initialises the exported 16-byte UID to
+`C58F5BDE-D667-43f9-8ACE-86BF5B3EEA08` when the original is absent. With that value the group
+contains the Render3DCore material plugins in the main process. Railyard now renders the Acela
+car with its normal grey livery, logo, transparent windows and interior; the earlier high-key /
+washed-out body was the failed-material path. The same scene with the retail RenderSystem is the
+reference.
+
+This also removes the null-material crash on the tested Railyard path. The remaining route-load
+and full driving-session checks are still open.
+
+### Render3DCore wave 1: Plane, OrientedBox, primitives, splines (2026-11-24)
+
+Five parallel workstreams merged into the main tree. The module is now **505/2500 local exports**, all other exports
+forward to `Render3DCore_7c_orig.dll`; `check_exports.py` reports 2500/2500 with 0 missing/wrong. Each unit has its own
+differential test; U1a/U1b/U1c/U1d2/U2 run green, U1d1 reports 0 mismatches with NaN-payload-only differences.
+
+- U1b `Plane` (41/44): 90,320 checks, 0 mismatches. `Clip`/`Split` forward (Polygon is U1d2); `Intersect(Plane)` forwards
+  (returns `Line`, U1d1). `Normalize` uses the module's approximate table-seeded length; `Intersect(bool...)` accepts
+  `dir�n <= -FLT_EPSILON` (or `>= +FLT_EPSILON` when two-sided), writes `t` before the ray/segment checks, and the
+  segment test is `t? <= |point-end|?`.
+- U1c `OrientedBox` + AAB tail (42/46): 54,000 checks, 0 mismatches. OBB is 0x3c: centre +0, axes +0xc, extents +0x30.
+  `Init` stores the eigenvector matrix transposed and uses the embedded 512-entry sqrt LUT; the SAT cross term c6 is
+  `|TB1*R02 - TB0*R12|`. Both `MakeBestFit`, `Volume` and `MinimalBoxForAngles` forward to the unnamed iterative helpers.
+- U1d1 lines/2D (164/175): 171,977 checks, 0 mismatches, 3,402 NaN-payload-only field differences. Line/Ray 0x1c
+  (vftable, direction +4, point +0x10), LineSegment 0x28, 2D shapes 0xc/0x10. Vtables, three solids tests, `GrahamScan`,
+  two `Polygon2D` separations and two `LineSegment2D`-vs-`Line2D` separations forward.
+- U1d2 solids (113/129): 172,848 checks, 0 mismatches. Sphere is 0x14 (no `radiusXY`); Polygon `Reset` normal is
+  `(v1-v0)?(v2-v1)` and RemoveDuplicates/Reduce remove `verts[off]`, not `off-1`. 10 local virtual wrappers call the
+  original's same export; 16 matrix/line/plane-dependent tests forward.
+- U2 splines (120/131): 16,345,338 checks, 0 mismatches. Spline 8, SplineSegment 0x34, SplineDefinition 0x24; members
+  `__cdecl`, ctors/virtuals `__thiscall`; explicit x87/SSE helpers keep two-NaN payload order. `SplineSegment::GetRatio`
+  forwards (1-2 ulp extended-precision residual); the local virtual slot calls the original body so virtual dispatch is
+  bit-exact. `SplineResource` and the four `SplineDefinition` file/config methods forward.
+
+Infrastructure for parallel work: `implemented.d/<unit>.txt` fragments merged by `tools/merge_implemented.py`, isolated
+agent workspaces under `D:\universal modder\r3d-agents\<unit>`, pre-decompiled listings in
+`notes/agents/r3d_workstreams/`, and `Render3DCore_7c_orig.lib` generated for cross-unit calls.
+
+### RenderSystem U16: bright train windows are the asset, not the port (2026-11-24)
+
+The washed-out Acela body/seat/window interior at some Railyard camera angles also occurs with
+the retail `RenderSystem_7c.dll`; the same asset and angle show the same overbright glass. It is
+a rolling-stock asset/alpha issue, not a RenderSystem state, mip or material bug. Material fields
+and the alpha/depth setter disassembly match retail. Do not spend another pass on this symptom
+unless it reproduces with a different asset or with the retail module.
+
 ### InputDirectX_7c complete (2026-11-24)
 
 The DirectInput driver is now ours as a drop-in module: 1/1 export (`JetGetPluginsInputDirectX`), no
@@ -3419,6 +3621,104 @@ and the original quirks (enumeration's zero axis mask, the trigger bits, the 10.
 
 Verification: Win32 Release builds and exports ordinal 1 by name. In the game copy, with the retail
 `InputDirectX_7c.dll` renamed to `InputDirectX_7c_orig.dll`, the game reached the main menu and exited cleanly;
-the normalized JetLog diff against the baseline was 0 lines. A 32-bit PowerShell module list showed the running
-game loaded our `InputDirectX_7c.dll`; the same probe called `JetGetPluginsInputDirectX` without a crash. A real
-joystick/wheel and force feedback still need a hardware check (the G27 in the device list is not connected).
+the normalized JetLog diff against the baseline was 0 lines. The 32-bit PowerShell probe `LoadLibrary` +
+`JetGetPluginsInputDirectX` executes the export without a crash. A real joystick/wheel and force feedback still
+need a hardware check (the G27 in the device list is not connected).
+
+### RenderOpenGL: full local display state and GL backend (2026-11-24)
+
+The display now uses RenderSystem_7c's own 152-slot `Display` table as its base and fills every
+renderer slot by byte offset. The 161-slot layout, PluginInstance/ReferenceCount placement and
+the XTerm/base object sizes were recovered from the retail constructor. `Init`, `PreOpen`,
+`Finish` and `Open` complete, the local render kernel's slot-4 probe answers true, and the game
+opens the JET window and runs `BeginFrame`/`EndFrame`.
+
+Implemented in `DisplayObject.cpp`: matrix stack/projection, viewport/scissor, clear values and
+masks, depth/stencil/cull/blend/alpha, fog, material and lights, polygon offset, texture modes
+and texgen, colour/depth readback, the descriptor and the whole XTerm extension tail. Draws feed
+client arrays from `VertexType` items, including `Texture0..7`, and use single- or multi-stream
+entry lists. A local `VertexBufferManager`-compatible object owns the static vertex/index buffers
+and uploads through RenderSystem's geometry slots.
+
+Two RenderSystem cutovers: `Display::CreateTexture` now dispatches through slot `0x98`
+(`RsDisplayCreateTexture`) instead of the null factory, and the render kernel can probe a display
+without a renamed original.
+
+Verified: Win32 Release, `51/51` exports, no `_orig` reference. The main menu renders through
+this backend, and Railyard renders its 3D scene (shed, Acela car, ground); the Railyard side list
+is still blank. Two display bugs were fixed on the way: the WGL context must be created in
+`PreOpen` on the main JET window (after the windowed host it landed on a second, invisible JET
+window), and `EndFrame` must always swap. The white-UI cause was in RenderSystem:
+`Texture::Bind` now resolves `GetDisplayTexture()` so a lazy `TextureRes` is forced on first bind.
+A clean window close works. Remaining: full route load/driving, Cg, vertex programs and texture
+combiners. The lab install was restored to the retail `RenderOpenGL_7c.dll`.
+### WaterSystem_7c: complete, 490/490 local (2026-11-24, agent wave)
+
+The whole module is now ours. `src/jet/graphics/WaterSystem_7c/implemented.d/u8a.txt`, `u8b.txt`,
+`u9.txt` and `u10.txt` merged with the existing `implemented.txt` give **490 implemented, 0 forwarded**
+exports. The clean Win32 Release build `build32-final\Release\WaterSystem_7c.dll` passes
+`check_exports.py --forbid-dll WaterSystem_7c_orig.dll`: 490/490 names and ordinals, and neither an
+import, a delay import nor an export forwarder reaches the original. The literal
+`WaterSystem_7c_orig.dll` no longer occurs in the DLL.
+
+What landed:
+- **U7b** (`WaterMaterial.cpp`, `WaterMaterialTables.cpp`, `WaterMaterialStatics.cpp`,
+  `WaterBumpOceanPlugin.cpp`): the base lifetime/state, the 48-slot table (rotated for VS 2026's
+  overload placement), local hand-built factory vtables, `InitInstance`, geometry creation and the
+  two factory `CreateInstance` bodies.
+- **U8a** (`WaterBumpMaterial.cpp/.h`, `WaterOceanMaterial.cpp/.h`): both materials, their vertex
+  types, chunk templates, display-state paths, lerp/detail textures and statics.
+- **U8b** (`WaterMaterialFresWave.cpp/.h`, `WaterMaterialOneTex.cpp/.h`,
+  `WaterMaterialFresWavePlugin.cpp/.h`): the FresWave/OneTex materials, their 0x60-byte chunk
+  templates, vertex programs/combiners, off-screen textures, factory resources and lifetime.
+- **U9** (`WaterTile.cpp`, `Water.cpp`, `WaterTiled.cpp`, `WaterSurface.cpp`): 43 exports; the
+  RTTI proves `WaterTiled` derives `Particle`, not `Water`.
+- **U10** (`WaterManager.cpp/.h`, `WaterManagerGeneric.cpp/.h`, `WaterManagerOceanSim.cpp/.h`,
+  `WaterManagerEntry.cpp`): 50 exports, including `JetGetPluginsWaterSystem` with the retail UIDs and
+  registration order.
+
+Cross-unit fix: `WaterAnimation`/`WaterAnimationPN` had the retail vtable order rotated
+(`Initialize, GetFrame, GetXYFrame`); the base now declares all three in that order, so U6's
+`GetFrame` slot and U10's factory path agree.
+
+Verification:
+- `diff_ws_u1`: 140,001 checks, 0 mismatches; PNoise ctor tables byte-identical
+  the PNoise tables. The only allowed difference is the table bytes themselves: the original builds
+  them from msvcr80's `rand()`, our module from the UCRT's independent state.
+- `diff_ws_u5` 4 scenarios, `diff_ws_u7` 71 scenarios, `diff_ws_u8a` 78 checks, `diff_ws_u9`
+  35 checks, `diff_ws_u10` 66 normalized checks - all 0 mismatches.
+- No-original lab run (`build-trainz32\game-smoke`): `WaterSystem_7c.dll` loads, the plugin entry
+  runs, the main menu and Railyard 3D scene render; the lab DLL was restored to retail afterwards.
+- The chunk buffer path in Bump/Ocean now allocates through Display slot 0x104/0x108 and uploads
+  through the buffer manager slots 0x20/0x2c; the previous "set type and return true" stubs are gone.
+
+U8a final exactness pass: `CalculateLerpTexture` (0x10006840/0x10015060), the full
+`SetupVertexProgramConstants` chain (including the shifted 0x100064b4 copy) and
+`Set/ClearDisplayState` now follow retail; Ocean `RenderChunk` gained its missing frame gate,
+display 0x54 and Setup call. `diff_ws_u8a` is 447 checks, 0 mismatches. The only remaining
+difference is one uninitialised stack float the retail build uploads as the first 0x2b
+component (locally zero; the other eight components and all 0x14 floats are bit-exact).
+
+### Render3DCore wave 3/4 and the IAT-thunk audit (2026-11-24)
+
+Wave 3 (U7 lights, U8 camera/viewport, U9b scene, U10 primitives, U3 bounds) and wave 4 (U3b bounds tail, U6
+geometry templates, U9b2 modifiers, U5a2 materials, U11 background) are merged. The module is **1662/2500 local
+exports**, all tests green (`diff_r3d_u1`..`u11`; the U1d1 test still reports NaN-payload-only differences, no
+non-NaN mismatch).
+
+`tools/check_thunks.py` on the merged DLL found **14 implemented names that were only `jmp [__imp_Render3DCore_7c_orig]`
+thunks**: `ReferencePoint` accessors/assignment, `ParallelLight` closure, `RenderPrimitive::CalculateBoxVolume`/
+`CalculatePrimitiveVolume`/`GetGeometryCenter`, `MaterialChunkCache::FlushPipe`, `Polygon2D::GetApproxSeparation`,
+`ViewPort::Initialize`. They were listed in fragments but had no local definition, so the linker resolved them from
+`Render3DCore_7c_orig.lib`. Removed from the fragments; the `.def` now forwards them explicitly. Re-run the scan after
+every merge:
+
+`python tools/check_thunks.py build32/Release/Render3DCore_7c.dll build32/Render3DCore_7c_implemented.txt`
+
+- U3b: 12/12 view/renderable exports; found and fixed the U8 `Camera::Clip3D` NaN-radius case (`!(radius > Neg(d))`).
+- U6: 13/13 `Geometry`/`TriangleGeometry` plus 58 header-only chunk-template instantiations, 293,480 checks.
+- U9b2: 55/64 bone/skeleton modifier exports; the 9 forwards need cross-module RTTI/ModifierList.
+- U5a2: 105 new material exports (ctors, plugins, RTTI `operator==`, `CreateInstance`); found the texture-record
+  stride bug (`/0x34`, not `/0x68`) in U5a's `Equals`, fixed.
+- U11: 49/167 background/thread/state exports; `Facility`, the plugin entry and 109 orphan global/template data
+  exports still forward.

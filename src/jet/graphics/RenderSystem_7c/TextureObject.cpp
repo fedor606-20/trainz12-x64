@@ -443,7 +443,8 @@ void __cdecl Texture::Activate(int how) { VCall<void>(manager, 0x24, this, how);
 // 0x1003f9a0
 void __cdecl Texture::Bind(unsigned int unit) const
 {
-    if (texture) texture->Bind(unit);
+    DisplayTexture* const api = GetDisplayTexture();
+    if (api) api->Bind(unit);
 }
 
 // 0x1003f8b0: the bitmap at (x, y) of level 0 (and the smaller levels, see DisplayTexture::SubLoad)

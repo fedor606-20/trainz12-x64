@@ -1,35 +1,55 @@
-// RenderOpenGL_7c: a minimal WGL context for the local backend (unit 2).
-// The retail class also carries pbuffer/shared-context paths; those are added when
-// the display port needs them.
+// RenderOpenGL_7c: the WGL context wrapper used by the OpenGL display and its textures.
 #pragma once
 
-#include "DisplayInterface.h"
+#include <jet/RenderTypes.h>
 
-#include <jet/Window.h>
+#include <windows.h>
 
 namespace Jet {
 
-class DisplayInterfaceWGL : public DisplayInterfaceOpenGL {
+class DisplayInterfaceWGL {
 public:
     DisplayInterfaceWGL();
-    ~DisplayInterfaceWGL() override;
+    ~DisplayInterfaceWGL();
 
-    bool __cdecl Create(void* window, void* options) override;
-    void __cdecl Destroy();
+    bool Create(HWND window, int colorBits, int depthBits, int stencilBits, int alphaBits, bool stereo);
+    void Destroy();
+    void SwapBuffers();
+    void SetVsync(bool on);
+    void MakeCurrent();
 
-    void* __cdecl GetDeviceContext() const;
-    void* __cdecl GetRenderContext() const;
-    void __cdecl SwapBuffers();
+    bool IsExtensionSupported(const char* name) const;
+    static bool HasExtension(const char* list, const char* name);
 
-    Window* __cdecl GetWindow() const;
-    int __cdecl GetPixelFormat() const;
+    HWND Window() const { return window; }
+    HDC DeviceContext() const { return deviceContext; }
+    HGLRC RenderContext() const { return renderContext; }
+    int PixelFormat() const { return pixelFormat; }
+    const char* Extensions() const;
 
-private:
-    Window* window;       // +0x10
-    int pixelFormat;      // +0x34
-    void* deviceContext;  // HDC
-    void* renderContext;  // HGLRC
+    // retail layout ("DisplayInterfaceWGL", 0x48 bytes): the public prefix is enough for our own use;
+    // the remaining bytes are kept so a display object made by us has the retail footprint.
+    void* vtable;  // +0x00
+    int referenceCount;  // +0x04
+    unsigned char flags;  // +0x08
+    unsigned char pad[3];
+    void* owner;          // +0x0c
+    HWND window;           // +0x10
+    void* os;              // +0x14
+    void* library;         // +0x18
+    HDC deviceContext;     // +0x1c
+    HGLRC renderContext;   // +0x20
+    HGLRC sharedContext;   // +0x24
+    void* savedDc;         // +0x28
+    int savedPixelFormat;  // +0x2c
+    void* pbuffer;         // +0x30
+    int pixelFormat;       // +0x34
+    unsigned char stateFlags;  // +0x38
+    unsigned char pad2[3];
+    int samples;           // +0x3c
+    int width;             // +0x40
+    int height;            // +0x44
 };
-JET_LAYOUT32(sizeof(DisplayInterfaceWGL) == 0x24);
+JET_LAYOUT32(sizeof(DisplayInterfaceWGL) == 0x48);
 
 }  // namespace Jet
