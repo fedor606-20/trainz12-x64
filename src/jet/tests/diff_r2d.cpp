@@ -763,8 +763,10 @@ int main(int argc, char** argv)
     const std::string dir = argv[1];
     const int cases = argc > 2 ? std::atoi(argv[2]) : 2000;
     SetDllDirectoryA(dir.c_str());
-    ks = LoadLibraryA((dir + "\\KernelStandard_7c.dll").c_str());
+    // the original first: its import table pulls msvcr80.dll, which our KernelStandardInit's Crt80::setlocale
+    // call needs (see diff_r3d_u6; ours loaded first in a bare process answers ERROR_DLL_INIT_FAILED)
     orig = LoadLibraryA((dir + "\\Render2DCore_7c_orig.dll").c_str());
+    ks = LoadLibraryA((dir + "\\KernelStandard_7c.dll").c_str());
     ours = LoadLibraryA((dir + "\\Render2DCore_7c.dll").c_str());
     if (!ks || !ours || !orig) {
         std::printf("cannot load the modules from %s\n", dir.c_str());

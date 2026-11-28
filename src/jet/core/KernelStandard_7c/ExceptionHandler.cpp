@@ -94,13 +94,22 @@ struct HandlerWork {
     static bool& InStartup() { return inStartup; }
     static LogClient* Client() { return handlerClient; }
 
-    // the original's crash report for a hardware fault (the filter of Main; 1: handled, 0: continue the search)
+    // the original's crash report for a hardware fault (the filter of Main; 1: handled, 0: continue the search).
+    // With no original module there is no reporter: returning 0 lets the OS record the real fault instead of
+    // calling into an unmapped low address and recursing through Main until the stack is gone.
     static int CrashFilter(void* pointers)
     {
-        return reinterpret_cast<int(__cdecl*)(void*)>(Base() + 0x1e920)(pointers);
+        char* const base = Base();
+        if (!base) return 0;
+        return reinterpret_cast<int(__cdecl*)(void*)>(base + 0x1e920)(pointers);
     }
     // the original's report of an Exception (ERRORLOG.TXT and XCrashReport.exe -assert); 1: ignore from now on
-    static int Report(Exception& e) { return reinterpret_cast<int(__fastcall*)(Exception*)>(Base() + 0x1ee20)(&e); }
+    static int Report(Exception& e)
+    {
+        char* const base = Base();
+        if (!base) return 0;
+        return reinterpret_cast<int(__fastcall*)(Exception*)>(base + 0x1ee20)(&e);
+    }
 
     static const char*& File() { return ExceptionHandlerFile; }
     static const char*& Reason() { return ExceptionHandlerReason; }

@@ -326,8 +326,11 @@ int main(int argc, char** argv)
         return EXCEPTION_EXECUTE_HANDLER;
     });
     SetDllDirectoryA(argv[1]);
-    ours = LoadLibraryA((std::string(argv[1]) + "\\KernelStandard_7c.dll").c_str());
+    // the original first: our KernelStandardInit calls the msvcr80 setlocale through Crt80, and only the
+    // original module's import table pulls msvcr80.dll into the process (loading ours first in a bare
+    // process answers ERROR_DLL_INIT_FAILED, same quirk as diff_r3d_u6)
     orig = LoadLibraryA((std::string(argv[1]) + "\\KernelStandard_7c_orig.dll").c_str());
+    ours = LoadLibraryA((std::string(argv[1]) + "\\KernelStandard_7c.dll").c_str());
     if (!ours || !orig || ours == orig) return 2;
     Scenario({orig, "orig"});
     const std::vector<long long> a = logv;
