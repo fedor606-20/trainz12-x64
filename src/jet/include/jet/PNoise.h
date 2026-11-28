@@ -29,13 +29,15 @@ public:
     float __cdecl TurbulenceLoopingTiled(float x, float y, float z, float period, float loopPeriod);
 
 private:
-    // byte-exact TS12 layout; the hash chains index the permutation 1-based (perm[1..256]) and wrap into the
-    // -Wrapped copies, and perm[0] is this very field -- the original reads numOctaves there
+    // byte-exact TS12 layout; the permutation helpers use 1-based entries (entry 1 is perm[0]); numOctaves sits
+    // immediately before perm, so a zero entry would read it. Each wrapped copy duplicates its base table entry
+    // for entry and then repeats the first two entries (the ctor's copy loop runs two entries past the source,
+    // into the copy itself).
     int numOctaves;                 // +0
     int perm[256];                  // +4
     int permWrapped[258];           // +1028
     float grad3D[768];              // +2060  256 unit vectors, 3 components
-    float grad3DWrapped[774];       // +5120
+    float grad3DWrapped[774];       // +5132
     float grad2D[512];              // +8228  256 unit vectors, 2 components
     float grad2DWrapped[516];       // +10276
     float grad1D[256];              // +12340 256 unit scalars

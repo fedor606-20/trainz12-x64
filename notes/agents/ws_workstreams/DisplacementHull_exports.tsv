@@ -1,0 +1,6 @@
+7	0x1030	??0DisplacementHull@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::DisplacementHull::DisplacementHull(class Jet::DisplacementHull const &)	LOCAL
+8	0x1070	??0DisplacementHull@Jet@@QAE@XZ	public: __thiscall Jet::DisplacementHull::DisplacementHull(void)	LOCAL
+58	0x15ce0	??1DisplacementHull@Jet@@QAE@XZ	public: __thiscall Jet::DisplacementHull::~DisplacementHull(void)	LOCAL
+89	0x1050	??4DisplacementHull@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::DisplacementHull & __thiscall Jet::DisplacementHull::operator=(class Jet::DisplacementHull const &)	LOCAL
+112	0x1d78c	??_7DisplacementHull@Jet@@6B@	const Jet::DisplacementHull::`vftable'	LOCAL
+324	0x1080	?Initialize@DisplacementHull@Jet@@QAA_NABVPString@2@PBVResourceDatabase@2@@Z	public: bool __cdecl Jet::DisplacementHull::Initialize(class Jet::PString const &,class Jet::ResourceDatabase const *)	LOCAL

@@ -1,0 +1,8 @@
+22	0x7300	??0WaterBumpMaterialPlugin@Jet@@IAE@ABVPString@1@ABVUId@1@@Z	protected: __thiscall Jet::WaterBumpMaterialPlugin::WaterBumpMaterialPlugin(class Jet::PString const &,class Jet::UId const &)	LOCAL
+23	0x7240	??0WaterBumpMaterialPlugin@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterBumpMaterialPlugin::WaterBumpMaterialPlugin(class Jet::WaterBumpMaterialPlugin const &)	LOCAL
+24	0x72e0	??0WaterBumpMaterialPlugin@Jet@@QAE@XZ	public: __thiscall Jet::WaterBumpMaterialPlugin::WaterBumpMaterialPlugin(void)	LOCAL
+68	0x7330	??1WaterBumpMaterialPlugin@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterBumpMaterialPlugin::~WaterBumpMaterialPlugin(void)	LOCAL
+96	0x7260	??4WaterBumpMaterialPlugin@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterBumpMaterialPlugin & __thiscall Jet::WaterBumpMaterialPlugin::operator=(class Jet::WaterBumpMaterialPlugin const &)	LOCAL
+121	0x1dbfc	??_7WaterBumpMaterialPlugin@Jet@@6B@	const Jet::WaterBumpMaterialPlugin::`vftable'	LOCAL
+201	0x7340	?CreateInstance@WaterBumpMaterialPlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterBumpMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 	TODO
+348	0x15a70	?IsSupported@WaterBumpMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z	public: virtual bool __cdecl Jet::WaterBumpMaterialPlugin::IsSupported(class Jet::Display *,class Jet::PString &)	LOCAL

@@ -1,0 +1,9 @@
+36	0x12a50	??0WaterMaterialFresWavePlugin@Jet@@IAE@ABVPString@1@ABVUId@1@@Z	protected: __thiscall Jet::WaterMaterialFresWavePlugin::WaterMaterialFresWavePlugin(class Jet::PString const &,class Jet::UId const &)	TODO
+37	0x12900	??0WaterMaterialFresWavePlugin@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterMaterialFresWavePlugin::WaterMaterialFresWavePlugin(class Jet::WaterMaterialFresWavePlugin const &)	TODO
+38	0x12a00	??0WaterMaterialFresWavePlugin@Jet@@QAE@XZ	public: __thiscall Jet::WaterMaterialFresWavePlugin::WaterMaterialFresWavePlugin(void)	TODO
+78	0x12a80	??1WaterMaterialFresWavePlugin@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterMaterialFresWavePlugin::~WaterMaterialFresWavePlugin(void)	TODO
+99	0x12940	??4WaterMaterialFresWavePlugin@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterMaterialFresWavePlugin & __thiscall Jet::WaterMaterialFresWavePlugin::operator=(class Jet::WaterMaterialFresWavePlugin const &)	TODO
+135	0x1e9fc	??_7WaterMaterialFresWavePlugin@Jet@@6B@	const Jet::WaterMaterialFresWavePlugin::`vftable'	LOCAL
+204	0x12f00	?CreateInstance@WaterMaterialFresWavePlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterMaterialFresWavePlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 	TODO
+209	0x12b20	?CreatePluginResources@WaterMaterialFresWavePlugin@Jet@@IBEXPAVRenderKernel@2@@Z	protected: void __thiscall Jet::WaterMaterialFresWavePlugin::CreatePluginResources(class Jet::RenderKernel *)const 	TODO
+349	0x13f10	?IsSupported@WaterMaterialFresWavePlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z	public: virtual bool __cdecl Jet::WaterMaterialFresWavePlugin::IsSupported(class Jet::Display *,class Jet::PString &)	LOCAL

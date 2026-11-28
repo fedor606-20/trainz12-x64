@@ -1,0 +1,12 @@
+20	0x4a90	??0WaterAnimationPN@Jet@@QAE@XZ	public: __thiscall Jet::WaterAnimationPN::WaterAnimationPN(void)	LOCAL
+66	0x4b70	??1WaterAnimationPN@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterAnimationPN::~WaterAnimationPN(void)	LOCAL
+117	0x1d960	??_7WaterAnimationPN@Jet@@6BPluginInstance@1@@	const Jet::WaterAnimationPN::`vftable'{for `Jet::PluginInstance'}	LOCAL
+118	0x1d950	??_7WaterAnimationPN@Jet@@6BWaterAnimation@1@@	const Jet::WaterAnimationPN::`vftable'{for `Jet::WaterAnimation'}	LOCAL
+147	0x1d968	??_8WaterAnimationPN@Jet@@7B@	const Jet::WaterAnimationPN::`vbtable'	LOCAL
+157	0x4a60	??_DWaterAnimationPN@Jet@@QAEXXZ	public: void __thiscall Jet::WaterAnimationPN::`vbase destructor'(void)	LOCAL
+166	0x38fd8	?ANIM_NAME@WaterAnimationPN@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterAnimationPN::ANIM_NAME	LOCAL
+180	0x4fe0	?CalcAnimation@WaterAnimationPN@Jet@@IAAXXZ	protected: void __cdecl Jet::WaterAnimationPN::CalcAnimation(void)	LOCAL
+252	0x4a80	?GetFrame@WaterAnimationPN@Jet@@UAAPAV?$WaterGrid@M@2@I@Z	public: virtual class Jet::WaterGrid<float> * __cdecl Jet::WaterAnimationPN::GetFrame(unsigned int)	LOCAL
+326	0x4c50	?Initialize@WaterAnimationPN@Jet@@UAA_NPBVFrameAnimation@2@ABUSize@2@ABUAnimProp@2@@Z	public: virtual bool __cdecl Jet::WaterAnimationPN::Initialize(class Jet::FrameAnimation const *,struct Jet::Size const &,struct Jet::AnimProp const &)	LOCAL
+385	0x4f60	?RescaleFrame@WaterAnimationPN@Jet@@IAAXHMM@Z	protected: void __cdecl Jet::WaterAnimationPN::RescaleFrame(int,float,float)	LOCAL
+386	0x4dc0	?SampleFrame@WaterAnimationPN@Jet@@IAAXMHAAM0@Z	protected: void __cdecl Jet::WaterAnimationPN::SampleFrame(float,int,float &,float &)	LOCAL

@@ -1,7 +1,7 @@
-// U7a's published factory vtables. The original module stays the owner of the shared statics; these arrays are
-// filled from its exported tables at load, keep its RTTI locator in the word before slot 0, and replace only
-// the virtuals that are local in this unit (the deleting destructor and IsSupported). CreateInstance stays the
-// original slot until U7b.
+// U7a/U7b/U8b: the four water material factories' published vtables. Slots 0, 1 and 3 are the imported
+// PluginType/MaterialPlugin base methods (AddReference, ReleaseReference, bare CreateInstance), slot 2 the
+// local deleting destructor, slot 4 the local IsSupported and slot 5 the local factory CreateInstance.
+// The tables are built locally; no WaterSystem_7c_orig.dll is read.
 #include <windows.h>
 
 #include <cstddef>
@@ -28,32 +28,16 @@ __declspec(allocate("WsVtOne")) void* WsOneTexVftable[6];
 __declspec(allocate("WsVtOcean")) void* WsOceanVftableMeta;
 __declspec(allocate("WsVtOcean")) void* WsOceanVftable[6];
 
+// the three base methods the original's vtable slots 0, 1 and 3 jump to; each import slot holds the address
+extern "C" void* WsPluginTypeAddImport;
+extern "C" void* WsPluginTypeReleaseImport;
+extern "C" void* WsMaterialPluginBareCreateImport;
+#pragma comment(linker, "/alternatename:_WsPluginTypeAddImport=__imp_?AddReference@PluginType@Jet@@UBAXXZ")
+#pragma comment(linker, "/alternatename:_WsPluginTypeReleaseImport=__imp_?ReleaseReference@PluginType@Jet@@UBAXXZ")
+#pragma comment(linker, \
+                "/alternatename:_WsMaterialPluginBareCreateImport=__imp_?CreateInstance@MaterialPlugin@Jet@@MBAPAVMaterial@2@XZ")
+
 namespace {
-
-HMODULE OrigWs()
-{
-    return GetModuleHandleA("WaterSystem_7c_orig.dll");
-}
-
-void* OrigSym(const char* name)
-{
-    HMODULE const module = OrigWs();
-    return module ? reinterpret_cast<void*>(GetProcAddress(module, name)) : nullptr;
-}
-
-void CopyVftable(void* table, void* meta, const char* name, std::size_t slots)
-{
-    void* const source = OrigSym(name);
-    if (!source) return;
-
-    auto* const src = static_cast<unsigned char*>(source);
-    auto* const dst = static_cast<unsigned char*>(table);
-    std::memcpy(dst, src, slots * sizeof(void*));
-
-    void* const locator = *reinterpret_cast<void**>(src - sizeof(void*));
-    *static_cast<void**>(meta) = locator;
-    std::memcpy(dst - sizeof(void*), &locator, sizeof locator);
-}
 
 template <class Fn>
 void* SlotAddress(Fn fn)
@@ -68,32 +52,51 @@ bool mirrorsReady;
 void FillMirrors()
 {
     if (mirrorsReady) return;
-    CopyVftable(WsBumpVftable, &WsBumpVftableMeta, "??_7WaterBumpMaterialPlugin@Jet@@6B@", 6);
-    CopyVftable(WsFresWaveVftable, &WsFresWaveVftableMeta, "??_7WaterMaterialFresWavePlugin@Jet@@6B@", 6);
-    CopyVftable(WsOneTexVftable, &WsOneTexVftableMeta, "??_7WaterMaterialOneTexPlugin@Jet@@6B@", 6);
-    CopyVftable(WsOceanVftable, &WsOceanVftableMeta, "??_7WaterOceanMaterialPlugin@Jet@@6B@", 6);
+
+    void* const addRef = *reinterpret_cast<void**>(WsPluginTypeAddImport);
+    void* const releaseRef = *reinterpret_cast<void**>(WsPluginTypeReleaseImport);
+    void* const bareCreate = *reinterpret_cast<void**>(WsMaterialPluginBareCreateImport);
+
+    // The hand-written factory tables have no generated RTTI. Point the locator word at RenderSystem's
+    // MaterialPlugin locator so a dynamic_cast to the plugin base still finds a valid hierarchy; the concrete
+    // factory type has no local RTTI by design.
+    void* locator = nullptr;
+    if (HMODULE const rs = GetModuleHandleA("RenderSystem_7c.dll")) {
+        if (void* const pluginVtable = reinterpret_cast<void*>(
+                GetProcAddress(rs, "??_7MaterialPlugin@Jet@@6B@"))) {
+            locator = static_cast<void**>(pluginVtable)[-1];
+        }
+    }
+
+    void* const tables[] = {WsBumpVftable, WsFresWaveVftable, WsOneTexVftable, WsOceanVftable};
+    for (void* const table : tables) {
+        auto* const slots = static_cast<void**>(table);
+        slots[-1] = locator;
+        slots[0] = addRef;
+        slots[1] = releaseRef;
+        slots[3] = bareCreate;
+    }
 
     WsBumpVftable[2] = SlotAddress(&WsVfThunks::BumpVectorDtor);
-    // FresWave's lifetime stays the original's in this batch; only its IsSupported slot is local.
-    WsOneTexVftable[2] = SlotAddress(&WsVfThunks::OneTexVectorDtor);
+    WsBumpVftable[4] = SlotAddress(&WsVfThunks::SupportedByDisplay);
     WsOceanVftable[2] = SlotAddress(&WsVfThunks::OceanVectorDtor);
-    WsBumpVftable[4] = WsOceanVftable[4] = SlotAddress(&WsVfThunks::SupportedByDisplay);
-    WsFresWaveVftable[4] = WsOneTexVftable[4] = SlotAddress(&WsVfThunks::SupportedAlways);
+    WsOceanVftable[4] = SlotAddress(&WsVfThunks::SupportedByDisplay);
+    WsOneTexVftable[2] = SlotAddress(&WsVfThunks::OneTexVectorDtor);
+    WsOneTexVftable[4] = SlotAddress(&WsVfThunks::SupportedAlways);
+    // FresWave's deleting destructor is installed by WaterMaterialFresWavePlugin.cpp
+    WsFresWaveVftable[4] = SlotAddress(&WsVfThunks::SupportedAlways);
+
+    WsInstallFactoryCreate();
     mirrorsReady = true;
 }
 
 struct MirrorStatics {
-    MirrorStatics()
-    {
-        if (OrigWs()) FillMirrors();
-    }
+    MirrorStatics() { FillMirrors(); }
 } mirrorStatics;
 
 }  // namespace
 
 void WsEnsureMirrors()
 {
-    if (mirrorsReady) return;
-    if (!OrigWs()) LoadLibraryA("WaterSystem_7c_orig.dll");
     FillMirrors();
 }

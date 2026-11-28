@@ -1,0 +1,60 @@
+# U10: WaterManager, WaterManagerGeneric, WaterManagerOceanSim and JetGetPluginsWaterSystem
+# (WaterManager.cpp, WaterManagerGeneric.cpp, WaterManagerOceanSim.cpp, WaterManagerEntry.cpp)
+
+# ---- WaterManager (11)
+??0WaterManager@Jet@@QAE@XZ
+??1WaterManager@Jet@@UAE@XZ
+??_7WaterManager@Jet@@6B01@@
+??_7WaterManager@Jet@@6BPluginInstance@1@@
+??_8WaterManager@Jet@@7B@
+??_DWaterManager@Jet@@QAEXXZ
+?CreateInstance@WaterManager@Jet@@SAPAV12@ABVPString@2@@Z
+?GetConfig@WaterManager@Jet@@QBEABVWaterManagerConfig@2@XZ
+?Init@WaterManager@Jet@@QAE_NXZ
+?Initialize@WaterManager@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z
+?groupUid@WaterManager@Jet@@2VUId@2@B
+
+# ---- WaterManagerGeneric (18)
+??0WaterManagerGeneric@Jet@@QAE@XZ
+??1WaterManagerGeneric@Jet@@UAE@XZ
+??_7WaterManagerGeneric@Jet@@6BPluginInstance@1@@
+??_7WaterManagerGeneric@Jet@@6BWaterManager@1@@
+??_8WaterManagerGeneric@Jet@@7B@
+??_DWaterManagerGeneric@Jet@@QAEXXZ
+?CreateCubeMapTexture@WaterManagerGeneric@Jet@@IAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@QBV52@AAPAVTexture@2@@Z
+?GetMaterial@WaterManagerGeneric@Jet@@UAEPAVWaterMaterial@2@XZ
+?GetReflectionType@WaterManagerGeneric@Jet@@UBEHXZ
+?GetScaleNormXY@WaterManagerGeneric@Jet@@UBEMXZ
+?GetTextureAnimation@WaterManagerGeneric@Jet@@QAEPAVWaterTextureAnimation@2@XZ
+?Initialize@WaterManagerGeneric@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z
+?Initialize@WaterManagerGeneric@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@PBVWaterManagerConfig@2@ABVPString@2@H@Z
+?MANAGER_NAME@WaterManagerGeneric@Jet@@2VPString@2@B
+?SetReflectionType@WaterManagerGeneric@Jet@@UAE_NH@Z
+?SetScaleNormXY@WaterManagerGeneric@Jet@@UAEXM@Z
+?Update@WaterManagerGeneric@Jet@@UAEXM@Z
+?instance@WaterManagerGeneric@Jet@@1HA
+
+# ---- WaterManagerOceanSim (20)
+??0WaterManagerOceanSim@Jet@@QAE@XZ
+??1WaterManagerOceanSim@Jet@@UAE@XZ
+??_7WaterManagerOceanSim@Jet@@6BPluginInstance@1@@
+??_7WaterManagerOceanSim@Jet@@6BWaterManager@1@@
+??_8WaterManagerOceanSim@Jet@@7B@
+??_DWaterManagerOceanSim@Jet@@QAEXXZ
+?CreateCubeMapTexture@WaterManagerOceanSim@Jet@@IAE_NPAVRenderKernel@2@PBVResourceDatabase@2@QBVPString@2@AAPAVTexture@2@@Z
+?GetGeometryAnimation@WaterManagerOceanSim@Jet@@QAEPAVWaterGeometryAnimation@2@XZ
+?GetMaterial@WaterManagerOceanSim@Jet@@UAEPAVWaterMaterial@2@XZ
+?GetReflectionType@WaterManagerOceanSim@Jet@@UBEHXZ
+?GetScaleNormXY@WaterManagerOceanSim@Jet@@UBEMXZ
+?GetTextureAnimation@WaterManagerOceanSim@Jet@@QAEPAVWaterTextureAnimation@2@XZ
+?GetTileScale@WaterManagerOceanSim@Jet@@QBEABVVector3@2@XZ
+?GetTileSize@WaterManagerOceanSim@Jet@@QBEABUSize@2@XZ
+?Initialize@WaterManagerOceanSim@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z
+?Initialize@WaterManagerOceanSim@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@PBVWaterManagerConfig@2@ABVPString@2@H@Z
+?MANAGER_NAME@WaterManagerOceanSim@Jet@@2VPString@2@B
+?SetReflectionType@WaterManagerOceanSim@Jet@@UAE_NH@Z
+?SetScaleNormXY@WaterManagerOceanSim@Jet@@UAEXM@Z
+?Update@WaterManagerOceanSim@Jet@@UAEXM@Z
+
+# ---- module entry (1)
+JetGetPluginsWaterSystem=WsJetGetPluginsWaterSystem

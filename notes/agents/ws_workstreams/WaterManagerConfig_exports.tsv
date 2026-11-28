@@ -1,0 +1,15 @@
+30	0x3180	??0WaterManagerConfig@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterManagerConfig::WaterManagerConfig(class Jet::WaterManagerConfig const &)	LOCAL
+31	0x99b0	??0WaterManagerConfig@Jet@@QAE@XZ	public: __thiscall Jet::WaterManagerConfig::WaterManagerConfig(void)	LOCAL
+73	0x3050	??1WaterManagerConfig@Jet@@QAE@XZ	public: __thiscall Jet::WaterManagerConfig::~WaterManagerConfig(void)	LOCAL
+98	0x32a0	??4WaterManagerConfig@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterManagerConfig & __thiscall Jet::WaterManagerConfig::operator=(class Jet::WaterManagerConfig const &)	LOCAL
+126	0x1d7bc	??_7WaterManagerConfig@Jet@@6B@	const Jet::WaterManagerConfig::`vftable'	LOCAL
+243	0x3400	?GetCubeTextures@WaterManagerConfig@Jet@@QBEPBVPString@2@XZ	public: class Jet::PString const * __thiscall Jet::WaterManagerConfig::GetCubeTextures(void)const 	LOCAL
+250	0x33f0	?GetDetailAnimation@WaterManagerConfig@Jet@@QAEAAUAnimProp@2@XZ	public: struct Jet::AnimProp & __thiscall Jet::WaterManagerConfig::GetDetailAnimation(void)	LOCAL
+251	0x33f0	?GetDetailAnimation@WaterManagerConfig@Jet@@QBEABUAnimProp@2@XZ	public: struct Jet::AnimProp const & __thiscall Jet::WaterManagerConfig::GetDetailAnimation(void)const 	LOCAL
+260	0x33d0	?GetManagerName@WaterManagerConfig@Jet@@QBEABVPString@2@XZ	public: class Jet::PString const & __thiscall Jet::WaterManagerConfig::GetManagerName(void)const 	LOCAL
+265	0x3410	?GetMaterialProperties@WaterManagerConfig@Jet@@QBEABUMaterialProp@2@XZ	public: struct Jet::MaterialProp const & __thiscall Jet::WaterManagerConfig::GetMaterialProperties(void)const 	LOCAL
+270	0x3430	?GetPhysicsProperties@WaterManagerConfig@Jet@@QBEABUPhysicsProp@2@XZ	public: struct Jet::PhysicsProp const & __thiscall Jet::WaterManagerConfig::GetPhysicsProperties(void)const 	LOCAL
+290	0x33e0	?GetSurfaceAnimation@WaterManagerConfig@Jet@@QBEABUAnimProp@2@XZ	public: struct Jet::AnimProp const & __thiscall Jet::WaterManagerConfig::GetSurfaceAnimation(void)const 	LOCAL
+303	0x3420	?GetTileProperties@WaterManagerConfig@Jet@@QBEABUTileProp@2@XZ	public: struct Jet::TileProp const & __thiscall Jet::WaterManagerConfig::GetTileProperties(void)const 	LOCAL
+356	0xaa70	?Load@WaterManagerConfig@Jet@@UAE_NABVConfigData@2@PBVResourceDatabase@2@ABVPString@2@@Z	public: virtual bool __thiscall Jet::WaterManagerConfig::Load(class Jet::ConfigData const &,class Jet::ResourceDatabase const *,class Jet::PString const &)	LOCAL
+357	0xa7d0	?Load@WaterManagerConfig@Jet@@UAE_NABVPString@2@PBVResourceDatabase@2@@Z	public: virtual bool __thiscall Jet::WaterManagerConfig::Load(class Jet::PString const &,class Jet::ResourceDatabase const *)	LOCAL

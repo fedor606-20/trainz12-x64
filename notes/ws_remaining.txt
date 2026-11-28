@@ -1,0 +1,312 @@
+==== ? (1)
+490	0x162f0	JetGetPluginsWaterSystem	JetGetPluginsWaterSystem
+==== Material (15)
+224	0x14500	?DuplicateTexture@WaterBumpMaterial@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@H@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterBumpMaterial::DuplicateTexture(int)
+225	0xeaa0	?DuplicateTexture@WaterMaterialFresWave@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@H@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterMaterialFresWave::DuplicateTexture(int)
+226	0x13430	?DuplicateTexture@WaterMaterialOneTex@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@H@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterMaterialOneTex::DuplicateTexture(int)
+227	0x14500	?DuplicateTexture@WaterOceanMaterial@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@H@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterOceanMaterial::DuplicateTexture(int)
+344	0x5870	?IsLoaded@WaterBumpMaterial@Jet@@UBA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@XZ	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterBumpMaterial::IsLoaded(void)const 
+345	0xd450	?IsLoaded@WaterMaterialFresWave@Jet@@UBA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@XZ	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterMaterialFresWave::IsLoaded(void)const 
+346	0x5870	?IsLoaded@WaterOceanMaterial@Jet@@UBA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@XZ	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterOceanMaterial::IsLoaded(void)const 
+426	0x5eb0	?SetTexture@WaterBumpMaterial@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HABV?$AutoReference@VTexture@Jet@@@2@M@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterBumpMaterial::SetTexture(int,class Jet::AutoReference<class Jet::Texture> const &,float)
+427	0x5df0	?SetTexture@WaterBumpMaterial@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HPBVResourceDatabase@2@ABVPString@2@MABVString@2@@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterBumpMaterial::SetTexture(int,class Jet::ResourceDatabase const *,class Jet::PString const &,float,class Jet::String const &)
+428	0xee10	?SetTexture@WaterMaterialFresWave@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HABV?$AutoReference@VTexture@Jet@@@2@M@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterMaterialFresWave::SetTexture(int,class Jet::AutoReference<class Jet::Texture> const &,float)
+429	0xecd0	?SetTexture@WaterMaterialFresWave@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HPBVResourceDatabase@2@ABVPString@2@MABVString@2@@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterMaterialFresWave::SetTexture(int,class Jet::ResourceDatabase const *,class Jet::PString const &,float,class Jet::String const &)
+430	0x13390	?SetTexture@WaterMaterialOneTex@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HABV?$AutoReference@VTexture@Jet@@@2@M@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterMaterialOneTex::SetTexture(int,class Jet::AutoReference<class Jet::Texture> const &,float)
+431	0x132d0	?SetTexture@WaterMaterialOneTex@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HPBVResourceDatabase@2@ABVPString@2@MABVString@2@@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterMaterialOneTex::SetTexture(int,class Jet::ResourceDatabase const *,class Jet::PString const &,float,class Jet::String const &)
+432	0x5eb0	?SetTexture@WaterOceanMaterial@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HABV?$AutoReference@VTexture@Jet@@@2@M@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterOceanMaterial::SetTexture(int,class Jet::AutoReference<class Jet::Texture> const &,float)
+433	0x5df0	?SetTexture@WaterOceanMaterial@Jet@@UAA?AV?$ResultClass@$1?results@Material@Jet@@2QBUResultTable@2@BW4Results@Material@Jet@@@2@HPBVResourceDatabase@2@ABVPString@2@MABVString@2@@Z	public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> __cdecl Jet::WaterOceanMaterial::SetTexture(int,class Jet::ResourceDatabase const *,class Jet::PString const &,float,class Jet::String const &)
+==== Water (12)
+17	0x3a00	??0Water@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Water::Water(class Jet::Water const &)
+18	0x3b40	??0Water@Jet@@QAE@XZ	public: __thiscall Jet::Water::Water(void)
+64	0x3b70	??1Water@Jet@@UAE@XZ	public: virtual __thiscall Jet::Water::~Water(void)
+95	0x3a90	??4Water@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Water & __thiscall Jet::Water::operator=(class Jet::Water const &)
+114	0x1d80c	??_7Water@Jet@@6B@	const Jet::Water::`vftable'
+171	0x3cf0	?AddTile@Water@Jet@@UAAXPAVWaterTile@2@@Z	public: virtual void __cdecl Jet::Water::AddTile(class Jet::WaterTile *)
+212	0x3ea0	?Cull@Water@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::Water::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+239	0x3f20	?GetAxisAlignedBoundingBox@Water@Jet@@UAAXAAVVector3@2@0@Z	public: virtual void __cdecl Jet::Water::GetAxisAlignedBoundingBox(class Jet::Vector3 &,class Jet::Vector3 &)
+257	0x3e40	?GetLight@Water@Jet@@UAAPAVDisplayLight@2@XZ	public: virtual class Jet::DisplayLight * __cdecl Jet::Water::GetLight(void)
+343	0x3b30	?IsEmpty@Water@Jet@@QAE_NXZ	public: bool __thiscall Jet::Water::IsEmpty(void)
+365	0x3d50	?RemoveTile@Water@Jet@@UAAXPAVWaterTile@2@@Z	public: virtual void __cdecl Jet::Water::RemoveTile(class Jet::WaterTile *)
+398	0x3dd0	?SetLight@Water@Jet@@UAA_NPAVDisplayLight@2@@Z	public: virtual bool __cdecl Jet::Water::SetLight(class Jet::DisplayLight *)
+==== WaterBumpMaterial (38)
+21	0x58e0	??0WaterBumpMaterial@Jet@@QAE@PAVMaterialManager@1@@Z	public: __thiscall Jet::WaterBumpMaterial::WaterBumpMaterial(class Jet::MaterialManager *)
+67	0x5a10	??1WaterBumpMaterial@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterBumpMaterial::~WaterBumpMaterial(void)
+106	0x57e0	??8WaterBumpMaterial@Jet@@UBA_NABVMaterial@1@@Z	public: virtual bool __cdecl Jet::WaterBumpMaterial::operator==(class Jet::Material const &)const 
+119	0x1d9ec	??_7WaterBumpMaterial@Jet@@6BMaterial@1@@	const Jet::WaterBumpMaterial::`vftable'{for `Jet::Material'}
+120	0x1dac0	??_7WaterBumpMaterial@Jet@@6BPluginInstance@1@@	const Jet::WaterBumpMaterial::`vftable'{for `Jet::PluginInstance'}
+148	0x1dac8	??_8WaterBumpMaterial@Jet@@7B@	const Jet::WaterBumpMaterial::`vbtable'
+158	0x57c0	??_DWaterBumpMaterial@Jet@@QAEXXZ	public: void __thiscall Jet::WaterBumpMaterial::`vbase destructor'(void)
+167	0x14560	?Activate@WaterBumpMaterial@Jet@@UAAXH@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::Activate(int)
+172	0x14120	?Bind@WaterBumpMaterial@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::Bind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+176	0x91d0	?CacheChunk@WaterBumpMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::CacheChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)const 
+183	0x6840	?CalculateLerpTexture@WaterBumpMaterial@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterBumpMaterial::CalculateLerpTexture(class Jet::Display *)const 
+187	0x6160	?ClearDisplayState@WaterBumpMaterial@Jet@@MBEXPAVDisplay@2@@Z	protected: virtual void __thiscall Jet::WaterBumpMaterial::ClearDisplayState(class Jet::Display *)const 
+194	0x5b70	?CreateGeometryChunk@WaterBumpMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@_N@Z	public: virtual class Jet::GeometryChunk * __cdecl Jet::WaterBumpMaterial::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,enum Jet::Material::GeometryType,class Jet::GeometryChunkCreateHint *,bool)const 
+200	0x5b10	?CreateInstance@WaterBumpMaterial@Jet@@UBAPAVMaterial@2@XZ	public: virtual class Jet::Material * __cdecl Jet::WaterBumpMaterial::CreateInstance(void)const 
+210	0x5c30	?CreateVertexType@WaterBumpMaterial@Jet@@MAEXXZ	protected: virtual void __thiscall Jet::WaterBumpMaterial::CreateVertexType(void)
+215	0x38ff0	?DECORATED_TYPE@WaterBumpMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterBumpMaterial::DECORATED_TYPE
+230	0x58d0	?EnableTextureInterpolation@WaterBumpMaterial@Jet@@QAEX_N@Z	public: void __thiscall Jet::WaterBumpMaterial::EnableTextureInterpolation(bool)
+232	0x14100	?Equals@WaterBumpMaterial@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::WaterBumpMaterial::Equals(class Jet::WaterBumpMaterial const &)const 
+273	0x13fc0	?GetReflectionType@WaterBumpMaterial@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterBumpMaterial::GetReflectionType(void)const 
+282	0x5730	?GetScaleNormXY@WaterBumpMaterial@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterBumpMaterial::GetScaleNormXY(void)const 
+291	0x14810	?GetTexture@WaterBumpMaterial@Jet@@UAAPAVTexture@2@H@Z	public: virtual class Jet::Texture * __cdecl Jet::WaterBumpMaterial::GetTexture(int)
+292	0x14810	?GetTexture@WaterBumpMaterial@Jet@@UBAPBVTexture@2@H@Z	public: virtual class Jet::Texture const * __cdecl Jet::WaterBumpMaterial::GetTexture(int)const 
+306	0x5840	?GetType@WaterBumpMaterial@Jet@@UBAABVPString@2@XZ	public: virtual class Jet::PString const & __cdecl Jet::WaterBumpMaterial::GetType(void)const 
+317	0x144a0	?InitInstance@WaterBumpMaterial@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::WaterBumpMaterial::InitInstance(class Jet::WaterBumpMaterial &)const 
+327	0x144f0	?Initialize@WaterBumpMaterial@Jet@@UAE_NPBVResourceDatabase@2@PBVWaterManagerConfig@2@PAVFrameAnimation@2@PAVWaterTextureAnimation@2@H@Z	public: virtual bool __thiscall Jet::WaterBumpMaterial::Initialize(class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::FrameAnimation *,class Jet::WaterTextureAnimation *,int)
+370	0x5f60	?RenderChunk@WaterBumpMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@H@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::RenderChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,int)const 
+374	0x91d0	?RenderNumChunks@WaterBumpMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAPAVGeometryChunk@2@PAPBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PAPBVMatrix4@2@IH@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::RenderNumChunks(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk * *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const * *,class Jet::Matrix4 const * *,unsigned int,int)const 
+378	0x91d0	?RenderPrimitives@WaterBumpMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@IPBGIW4DPrimitive@2@H@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::RenderPrimitives(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,unsigned int,unsigned short const *,unsigned int,enum Jet::DPrimitive,int)const 
+382	0x6b20	?RenderSquare@WaterBumpMaterial@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterBumpMaterial::RenderSquare(class Jet::Display *)const 
+393	0x6070	?SetDisplayState@WaterBumpMaterial@Jet@@MBEXPAVDisplay@2@@Z	protected: virtual void __thiscall Jet::WaterBumpMaterial::SetDisplayState(class Jet::Display *)const 
+407	0x13fb0	?SetReflectionType@WaterBumpMaterial@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterBumpMaterial::SetReflectionType(int)
+413	0x58b0	?SetRefractiveIndex@WaterBumpMaterial@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterBumpMaterial::SetRefractiveIndex(float)
+417	0x5810	?SetResourcePriority@WaterBumpMaterial@Jet@@UBAXM@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::SetResourcePriority(float)const 
+420	0x5710	?SetScaleNormXY@WaterBumpMaterial@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterBumpMaterial::SetScaleNormXY(float)
+439	0x61d0	?SetupVertexProgramConstants@WaterBumpMaterial@Jet@@MBEXPAVDisplay@2@PAVCamera@2@PBVMatrix4@2@@Z	protected: virtual void __thiscall Jet::WaterBumpMaterial::SetupVertexProgramConstants(class Jet::Display *,class Jet::Camera *,class Jet::Matrix4 const *)const 
+449	0x38fec	?UNDECORATED_TYPE@WaterBumpMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterBumpMaterial::UNDECORATED_TYPE
+453	0x5850	?Unbind@WaterBumpMaterial@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterBumpMaterial::Unbind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+476	0x38fdc	?uid@WaterBumpMaterial@Jet@@2VUId@2@B	public: static class Jet::UId const Jet::WaterBumpMaterial::uid
+==== WaterBumpMaterialPlugin (1)
+201	0x7340	?CreateInstance@WaterBumpMaterialPlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterBumpMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 
+==== WaterManager (11)
+29	0x92a0	??0WaterManager@Jet@@QAE@XZ	public: __thiscall Jet::WaterManager::WaterManager(void)
+72	0x9360	??1WaterManager@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterManager::~WaterManager(void)
+124	0x1df20	??_7WaterManager@Jet@@6B01@@	const Jet::WaterManager::`vftable'{for `Jet::WaterManager'}
+125	0x1df44	??_7WaterManager@Jet@@6BPluginInstance@1@@	const Jet::WaterManager::`vftable'{for `Jet::PluginInstance'}
+149	0x1df4c	??_8WaterManager@Jet@@7B@	const Jet::WaterManager::`vbtable'
+159	0x56f0	??_DWaterManager@Jet@@QAEXXZ	public: void __thiscall Jet::WaterManager::`vbase destructor'(void)
+202	0x93e0	?CreateInstance@WaterManager@Jet@@SAPAV12@ABVPString@2@@Z	public: static class Jet::WaterManager * __cdecl Jet::WaterManager::CreateInstance(class Jet::PString const &)
+242	0x56e0	?GetConfig@WaterManager@Jet@@QBEABVWaterManagerConfig@2@XZ	public: class Jet::WaterManagerConfig const & __thiscall Jet::WaterManager::GetConfig(void)const 
+316	0x13f10	?Init@WaterManager@Jet@@QAE_NXZ	public: bool __thiscall Jet::WaterManager::Init(void)
+332	0x9460	?Initialize@WaterManager@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManager::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,int)
+468	0x38ff8	?groupUid@WaterManager@Jet@@2VUId@2@B	public: static class Jet::UId const Jet::WaterManager::groupUid
+==== WaterManagerGeneric (18)
+32	0xb270	??0WaterManagerGeneric@Jet@@QAE@XZ	public: __thiscall Jet::WaterManagerGeneric::WaterManagerGeneric(void)
+74	0xb370	??1WaterManagerGeneric@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterManagerGeneric::~WaterManagerGeneric(void)
+127	0x1e330	??_7WaterManagerGeneric@Jet@@6BPluginInstance@1@@	const Jet::WaterManagerGeneric::`vftable'{for `Jet::PluginInstance'}
+128	0x1e30c	??_7WaterManagerGeneric@Jet@@6BWaterManager@1@@	const Jet::WaterManagerGeneric::`vftable'{for `Jet::WaterManager'}
+150	0x1e338	??_8WaterManagerGeneric@Jet@@7B@	const Jet::WaterManagerGeneric::`vbtable'
+160	0xb1c0	??_DWaterManagerGeneric@Jet@@QAEXXZ	public: void __thiscall Jet::WaterManagerGeneric::`vbase destructor'(void)
+192	0xba00	?CreateCubeMapTexture@WaterManagerGeneric@Jet@@IAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@QBV52@AAPAVTexture@2@@Z	protected: bool __thiscall Jet::WaterManagerGeneric::CreateCubeMapTexture(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,class Jet::PString const * const,class Jet::Texture * &)
+262	0xb120	?GetMaterial@WaterManagerGeneric@Jet@@UAEPAVWaterMaterial@2@XZ	public: virtual class Jet::WaterMaterial * __thiscall Jet::WaterManagerGeneric::GetMaterial(void)
+274	0xb210	?GetReflectionType@WaterManagerGeneric@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterManagerGeneric::GetReflectionType(void)const 
+283	0xb260	?GetScaleNormXY@WaterManagerGeneric@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterManagerGeneric::GetScaleNormXY(void)const 
+300	0xb130	?GetTextureAnimation@WaterManagerGeneric@Jet@@QAEPAVWaterTextureAnimation@2@XZ	public: class Jet::WaterTextureAnimation * __thiscall Jet::WaterManagerGeneric::GetTextureAnimation(void)
+333	0xb1e0	?Initialize@WaterManagerGeneric@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerGeneric::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,int)
+334	0xb450	?Initialize@WaterManagerGeneric@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@PBVWaterManagerConfig@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerGeneric::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::PString const &,int)
+360	0x390c4	?MANAGER_NAME@WaterManagerGeneric@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterManagerGeneric::MANAGER_NAME
+408	0xb1f0	?SetReflectionType@WaterManagerGeneric@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterManagerGeneric::SetReflectionType(int)
+421	0xb230	?SetScaleNormXY@WaterManagerGeneric@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerGeneric::SetScaleNormXY(float)
+462	0xc060	?Update@WaterManagerGeneric@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerGeneric::Update(float)
+469	0x38fbc	?instance@WaterManagerGeneric@Jet@@1HA	protected: static int Jet::WaterManagerGeneric::instance
+==== WaterManagerOceanSim (20)
+33	0xc290	??0WaterManagerOceanSim@Jet@@QAE@XZ	public: __thiscall Jet::WaterManagerOceanSim::WaterManagerOceanSim(void)
+75	0xc3a0	??1WaterManagerOceanSim@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterManagerOceanSim::~WaterManagerOceanSim(void)
+129	0x1e388	??_7WaterManagerOceanSim@Jet@@6BPluginInstance@1@@	const Jet::WaterManagerOceanSim::`vftable'{for `Jet::PluginInstance'}
+130	0x1e364	??_7WaterManagerOceanSim@Jet@@6BWaterManager@1@@	const Jet::WaterManagerOceanSim::`vftable'{for `Jet::WaterManager'}
+151	0x1e390	??_8WaterManagerOceanSim@Jet@@7B@	const Jet::WaterManagerOceanSim::`vbtable'
+161	0xc200	??_DWaterManagerOceanSim@Jet@@QAEXXZ	public: void __thiscall Jet::WaterManagerOceanSim::`vbase destructor'(void)
+193	0xc7d0	?CreateCubeMapTexture@WaterManagerOceanSim@Jet@@IAE_NPAVRenderKernel@2@PBVResourceDatabase@2@QBVPString@2@AAPAVTexture@2@@Z	protected: bool __thiscall Jet::WaterManagerOceanSim::CreateCubeMapTexture(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const * const,class Jet::Texture * &)
+256	0xc150	?GetGeometryAnimation@WaterManagerOceanSim@Jet@@QAEPAVWaterGeometryAnimation@2@XZ	public: class Jet::WaterGeometryAnimation * __thiscall Jet::WaterManagerOceanSim::GetGeometryAnimation(void)
+263	0xc130	?GetMaterial@WaterManagerOceanSim@Jet@@UAEPAVWaterMaterial@2@XZ	public: virtual class Jet::WaterMaterial * __thiscall Jet::WaterManagerOceanSim::GetMaterial(void)
+275	0xc240	?GetReflectionType@WaterManagerOceanSim@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterManagerOceanSim::GetReflectionType(void)const 
+284	0xc280	?GetScaleNormXY@WaterManagerOceanSim@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterManagerOceanSim::GetScaleNormXY(void)const 
+301	0xc140	?GetTextureAnimation@WaterManagerOceanSim@Jet@@QAEPAVWaterTextureAnimation@2@XZ	public: class Jet::WaterTextureAnimation * __thiscall Jet::WaterManagerOceanSim::GetTextureAnimation(void)
+304	0xc160	?GetTileScale@WaterManagerOceanSim@Jet@@QBEABVVector3@2@XZ	public: class Jet::Vector3 const & __thiscall Jet::WaterManagerOceanSim::GetTileScale(void)const 
+305	0xc170	?GetTileSize@WaterManagerOceanSim@Jet@@QBEABUSize@2@XZ	public: struct Jet::Size const & __thiscall Jet::WaterManagerOceanSim::GetTileSize(void)const 
+335	0xb1e0	?Initialize@WaterManagerOceanSim@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerOceanSim::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,int)
+336	0xc4a0	?Initialize@WaterManagerOceanSim@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@PBVWaterManagerConfig@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerOceanSim::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::PString const &,int)
+361	0x390c8	?MANAGER_NAME@WaterManagerOceanSim@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterManagerOceanSim::MANAGER_NAME
+409	0xc220	?SetReflectionType@WaterManagerOceanSim@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterManagerOceanSim::SetReflectionType(int)
+422	0xc260	?SetScaleNormXY@WaterManagerOceanSim@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerOceanSim::SetScaleNormXY(float)
+463	0xcb90	?Update@WaterManagerOceanSim@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerOceanSim::Update(float)
+==== WaterMaterial (21)
+34	0xcd00	??0WaterMaterial@Jet@@QAE@PAVMaterialManager@1@@Z	public: __thiscall Jet::WaterMaterial::WaterMaterial(class Jet::MaterialManager *)
+76	0xcfc0	??1WaterMaterial@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterMaterial::~WaterMaterial(void)
+131	0x1e4b4	??_7WaterMaterial@Jet@@6BMaterial@1@@	const Jet::WaterMaterial::`vftable'{for `Jet::Material'}
+132	0x1e578	??_7WaterMaterial@Jet@@6BPluginInstance@1@@	const Jet::WaterMaterial::`vftable'{for `Jet::PluginInstance'}
+152	0x1e580	??_8WaterMaterial@Jet@@7B@	const Jet::WaterMaterial::`vbtable'
+162	0x36a0	??_DWaterMaterial@Jet@@QAEXXZ	public: void __thiscall Jet::WaterMaterial::`vbase destructor'(void)
+195	0x36c0	?CreateGeometryChunk@WaterMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@@Z	public: virtual class Jet::GeometryChunk * __cdecl Jet::WaterMaterial::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,enum Jet::Material::GeometryType,class Jet::GeometryChunkCreateHint *)const 
+318	0xd080	?InitInstance@WaterMaterial@Jet@@UBEXAAV12@@Z	public: virtual void __thiscall Jet::WaterMaterial::InitInstance(class Jet::WaterMaterial &)const 
+471	0x390d8	?psWaterMatInterp@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatInterp
+472	0x390dc	?psWaterMatInterpFull@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatInterpFull
+473	0x390cc	?psWaterMatWaveAnim@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatWaveAnim
+474	0x390d0	?psWaterMatWaveAnimRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatWaveAnimRefl
+475	0x390d4	?psWaterMatWaveRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatWaveRefl
+482	0x390e0	?vsWaterMat@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMat
+483	0x390f8	?vsWaterMatAnimRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatAnimRefl
+484	0x390fc	?vsWaterMatRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatRefl
+485	0x390f4	?vsWaterMatWave@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWave
+486	0x390f0	?vsWaterMatWaveAnim@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWaveAnim
+487	0x390e8	?vsWaterMatWaveAnimRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWaveAnimRefl
+488	0x390ec	?vsWaterMatWaveRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWaveRefl
+489	0x390e4	?vsWaterTexInterp@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterTexInterp
+==== WaterMaterialFresWave (48)
+35	0xd5c0	??0WaterMaterialFresWave@Jet@@QAE@PAVMaterialManager@1@PAPAX@Z	public: __thiscall Jet::WaterMaterialFresWave::WaterMaterialFresWave(class Jet::MaterialManager *,void * *)
+77	0xd7d0	??1WaterMaterialFresWave@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterMaterialFresWave::~WaterMaterialFresWave(void)
+107	0xd3c0	??8WaterMaterialFresWave@Jet@@UBA_NABVMaterial@1@@Z	public: virtual bool __cdecl Jet::WaterMaterialFresWave::operator==(class Jet::Material const &)const 
+133	0x1e6cc	??_7WaterMaterialFresWave@Jet@@6BMaterial@1@@	const Jet::WaterMaterialFresWave::`vftable'{for `Jet::Material'}
+134	0x1e798	??_7WaterMaterialFresWave@Jet@@6BPluginInstance@1@@	const Jet::WaterMaterialFresWave::`vftable'{for `Jet::PluginInstance'}
+153	0x1e7a0	??_8WaterMaterialFresWave@Jet@@7B@	const Jet::WaterMaterialFresWave::`vbtable'
+163	0xd3a0	??_DWaterMaterialFresWave@Jet@@QAEXXZ	public: void __thiscall Jet::WaterMaterialFresWave::`vbase destructor'(void)
+168	0xeb50	?Activate@WaterMaterialFresWave@Jet@@UAAXH@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::Activate(int)
+173	0x91d0	?Bind@WaterMaterialFresWave@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::Bind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+177	0x134f0	?CacheChunk@WaterMaterialFresWave@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::CacheChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)const 
+182	0x10f10	?CalculateDetailTexture@WaterMaterialFresWave@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterMaterialFresWave::CalculateDetailTexture(class Jet::Display *)const 
+185	0x11590	?CalculateLightAnimTexture@WaterMaterialFresWave@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterMaterialFresWave::CalculateLightAnimTexture(class Jet::Display *)const 
+186	0x112b0	?CalculateWaterColorTexture@WaterMaterialFresWave@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterMaterialFresWave::CalculateWaterColorTexture(class Jet::Display *)const 
+196	0xeb90	?CreateGeometryChunk@WaterMaterialFresWave@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@_N@Z	public: virtual class Jet::GeometryChunk * __cdecl Jet::WaterMaterialFresWave::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,enum Jet::Material::GeometryType,class Jet::GeometryChunkCreateHint *,bool)const 
+203	0xd990	?CreateInstance@WaterMaterialFresWave@Jet@@UBAPAVMaterial@2@XZ	public: virtual class Jet::Material * __cdecl Jet::WaterMaterialFresWave::CreateInstance(void)const 
+216	0x39114	?DECORATED_TYPE@WaterMaterialFresWave@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterialFresWave::DECORATED_TYPE
+229	0xd520	?EnableDetailAnimInterpolation@WaterMaterialFresWave@Jet@@UAEX_N@Z	public: virtual void __thiscall Jet::WaterMaterialFresWave::EnableDetailAnimInterpolation(bool)
+233	0x14100	?Equals@WaterMaterialFresWave@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::WaterMaterialFresWave::Equals(class Jet::WaterMaterialFresWave const &)const 
+249	0xd2a0	?GetDetailAnim@WaterMaterialFresWave@Jet@@UBE_NXZ	public: virtual bool __thiscall Jet::WaterMaterialFresWave::GetDetailAnim(void)const 
+276	0xd290	?GetReflectionType@WaterMaterialFresWave@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterMaterialFresWave::GetReflectionType(void)const 
+285	0xd2f0	?GetScaleNormXY@WaterMaterialFresWave@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterMaterialFresWave::GetScaleNormXY(void)const 
+293	0xef50	?GetTexture@WaterMaterialFresWave@Jet@@UAAPAVTexture@2@H@Z	public: virtual class Jet::Texture * __cdecl Jet::WaterMaterialFresWave::GetTexture(int)
+294	0xef50	?GetTexture@WaterMaterialFresWave@Jet@@UBAPBVTexture@2@H@Z	public: virtual class Jet::Texture const * __cdecl Jet::WaterMaterialFresWave::GetTexture(int)const 
+307	0xd440	?GetType@WaterMaterialFresWave@Jet@@UBAABVPString@2@XZ	public: virtual class Jet::PString const & __cdecl Jet::WaterMaterialFresWave::GetType(void)const 
+311	0xd2b0	?GetUVScrollVelocity@WaterMaterialFresWave@Jet@@UBE?AVVector2@2@XZ	public: virtual class Jet::Vector2 __thiscall Jet::WaterMaterialFresWave::GetUVScrollVelocity(void)const 
+319	0xd9c0	?InitInstance@WaterMaterialFresWave@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::WaterMaterialFresWave::InitInstance(class Jet::WaterMaterialFresWave &)const 
+321	0xe7b0	?InitVertexProgramms@WaterMaterialFresWave@Jet@@IAAXXZ	protected: void __cdecl Jet::WaterMaterialFresWave::InitVertexProgramms(void)
+337	0xdec0	?Initialize@WaterMaterialFresWave@Jet@@UAE_NPBVResourceDatabase@2@PBVWaterManagerConfig@2@PAVFrameAnimation@2@PAVWaterTextureAnimation@2@H@Z	public: virtual bool __thiscall Jet::WaterMaterialFresWave::Initialize(class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::FrameAnimation *,class Jet::WaterTextureAnimation *,int)
+371	0xef80	?RenderChunk@WaterMaterialFresWave@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@H@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::RenderChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,int)const 
+375	0xefb0	?RenderNumChunks@WaterMaterialFresWave@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAPAVGeometryChunk@2@PAPBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PAPBVMatrix4@2@IH@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::RenderNumChunks(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk * *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const * *,class Jet::Matrix4 const * *,unsigned int,int)const 
+379	0x91d0	?RenderPrimitives@WaterMaterialFresWave@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@IPBGIW4DPrimitive@2@H@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::RenderPrimitives(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,unsigned int,unsigned short const *,unsigned int,enum Jet::DPrimitive,int)const 
+383	0x11150	?RenderSquare@WaterMaterialFresWave@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterMaterialFresWave::RenderSquare(class Jet::Display *)const 
+392	0xe770	?SetDetailAnim@WaterMaterialFresWave@Jet@@UAEX_N@Z	public: virtual void __thiscall Jet::WaterMaterialFresWave::SetDetailAnim(bool)
+397	0xd300	?SetGridSpacing@WaterMaterialFresWave@Jet@@QAEXM@Z	public: void __thiscall Jet::WaterMaterialFresWave::SetGridSpacing(float)
+406	0xd590	?SetReflectionCamera@WaterMaterialFresWave@Jet@@UAAXPAVWaterReflectionCamera@2@@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::SetReflectionCamera(class Jet::WaterReflectionCamera *)
+410	0xe6c0	?SetReflectionType@WaterMaterialFresWave@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterMaterialFresWave::SetReflectionType(int)
+415	0xd4a0	?SetRefractiveIndex@WaterMaterialFresWave@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterMaterialFresWave::SetRefractiveIndex(float)
+418	0xd3f0	?SetResourcePriority@WaterMaterialFresWave@Jet@@UBAXM@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::SetResourcePriority(float)const 
+423	0xd2d0	?SetScaleNormXY@WaterMaterialFresWave@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterMaterialFresWave::SetScaleNormXY(float)
+435	0xd570	?SetUVScrollVelocity@WaterMaterialFresWave@Jet@@UAEXVVector2@2@@Z	public: virtual void __thiscall Jet::WaterMaterialFresWave::SetUVScrollVelocity(class Jet::Vector2)
+437	0xd4e0	?SetWaterColor@WaterMaterialFresWave@Jet@@UAEXABVColor@2@@Z	public: virtual void __thiscall Jet::WaterMaterialFresWave::SetWaterColor(class Jet::Color const &)
+440	0x10110	?SetupVertexProgramConstants@WaterMaterialFresWave@Jet@@MBAXPAVVertexProgram@2@PAVTextureCombiner@2@PAVDisplay@2@PAVCamera@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@ABV82@6_N@Z	protected: virtual void __cdecl Jet::WaterMaterialFresWave::SetupVertexProgramConstants(class Jet::VertexProgram *,class Jet::TextureCombiner *,class Jet::Display *,class Jet::Camera *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,class Jet::Matrix4 const &,class Jet::Matrix4 const &,bool)const 
+450	0x39110	?UNDECORATED_TYPE@WaterMaterialFresWave@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterialFresWave::UNDECORATED_TYPE
+454	0x91d0	?Unbind@WaterMaterialFresWave@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterMaterialFresWave::Unbind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+465	0x11930	?Update@WaterMaterialFresWave@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterMaterialFresWave::Update(float)
+477	0x39100	?uid@WaterMaterialFresWave@Jet@@2VUId@2@B	public: static class Jet::UId const Jet::WaterMaterialFresWave::uid
+480	0x39118	?vertexName@WaterMaterialFresWave@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterialFresWave::vertexName
+481	0x3911c	?vertexNamePTT@WaterMaterialFresWave@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterialFresWave::vertexNamePTT
+==== WaterMaterialFresWavePlugin (7)
+36	0x12a50	??0WaterMaterialFresWavePlugin@Jet@@IAE@ABVPString@1@ABVUId@1@@Z	protected: __thiscall Jet::WaterMaterialFresWavePlugin::WaterMaterialFresWavePlugin(class Jet::PString const &,class Jet::UId const &)
+37	0x12900	??0WaterMaterialFresWavePlugin@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterMaterialFresWavePlugin::WaterMaterialFresWavePlugin(class Jet::WaterMaterialFresWavePlugin const &)
+38	0x12a00	??0WaterMaterialFresWavePlugin@Jet@@QAE@XZ	public: __thiscall Jet::WaterMaterialFresWavePlugin::WaterMaterialFresWavePlugin(void)
+78	0x12a80	??1WaterMaterialFresWavePlugin@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterMaterialFresWavePlugin::~WaterMaterialFresWavePlugin(void)
+99	0x12940	??4WaterMaterialFresWavePlugin@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterMaterialFresWavePlugin & __thiscall Jet::WaterMaterialFresWavePlugin::operator=(class Jet::WaterMaterialFresWavePlugin const &)
+204	0x12f00	?CreateInstance@WaterMaterialFresWavePlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterMaterialFresWavePlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 
+209	0x12b20	?CreatePluginResources@WaterMaterialFresWavePlugin@Jet@@IBEXPAVRenderKernel@2@@Z	protected: void __thiscall Jet::WaterMaterialFresWavePlugin::CreatePluginResources(class Jet::RenderKernel *)const 
+==== WaterMaterialOneTex (29)
+39	0x130d0	??0WaterMaterialOneTex@Jet@@QAE@PAVMaterialManager@1@@Z	public: __thiscall Jet::WaterMaterialOneTex::WaterMaterialOneTex(class Jet::MaterialManager *)
+79	0x13190	??1WaterMaterialOneTex@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterMaterialOneTex::~WaterMaterialOneTex(void)
+108	0x13290	??8WaterMaterialOneTex@Jet@@UBA_NABVMaterial@1@@Z	public: virtual bool __cdecl Jet::WaterMaterialOneTex::operator==(class Jet::Material const &)const 
+136	0x1ea6c	??_7WaterMaterialOneTex@Jet@@6BMaterial@1@@	const Jet::WaterMaterialOneTex::`vftable'{for `Jet::Material'}
+137	0x1eb38	??_7WaterMaterialOneTex@Jet@@6BPluginInstance@1@@	const Jet::WaterMaterialOneTex::`vftable'{for `Jet::PluginInstance'}
+154	0x1eb40	??_8WaterMaterialOneTex@Jet@@7B@	const Jet::WaterMaterialOneTex::`vbtable'
+164	0x13020	??_DWaterMaterialOneTex@Jet@@QAEXXZ	public: void __thiscall Jet::WaterMaterialOneTex::`vbase destructor'(void)
+169	0x14560	?Activate@WaterMaterialOneTex@Jet@@UAAXH@Z	public: virtual void __cdecl Jet::WaterMaterialOneTex::Activate(int)
+174	0x134b0	?Bind@WaterMaterialOneTex@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterMaterialOneTex::Bind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+178	0x134f0	?CacheChunk@WaterMaterialOneTex@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterMaterialOneTex::CacheChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)const 
+188	0x130b0	?ClearDisplayState@WaterMaterialOneTex@Jet@@MBAXPAVDisplay@2@@Z	protected: virtual void __cdecl Jet::WaterMaterialOneTex::ClearDisplayState(class Jet::Display *)const 
+197	0x13800	?CreateGeometryChunk@WaterMaterialOneTex@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@_N@Z	public: virtual class Jet::GeometryChunk * __cdecl Jet::WaterMaterialOneTex::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,enum Jet::Material::GeometryType,class Jet::GeometryChunkCreateHint *,bool)const 
+205	0x13260	?CreateInstance@WaterMaterialOneTex@Jet@@UBAPAVMaterial@2@XZ	public: virtual class Jet::Material * __cdecl Jet::WaterMaterialOneTex::CreateInstance(void)const 
+217	0x396c4	?DECORATED_TYPE@WaterMaterialOneTex@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterialOneTex::DECORATED_TYPE
+277	0x15db0	?GetReflectionType@WaterMaterialOneTex@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterMaterialOneTex::GetReflectionType(void)const 
+286	0x13250	?GetScaleNormXY@WaterMaterialOneTex@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterMaterialOneTex::GetScaleNormXY(void)const 
+295	0x13490	?GetTexture@WaterMaterialOneTex@Jet@@UAAPAVTexture@2@H@Z	public: virtual class Jet::Texture * __cdecl Jet::WaterMaterialOneTex::GetTexture(int)
+296	0x13490	?GetTexture@WaterMaterialOneTex@Jet@@UBAPBVTexture@2@H@Z	public: virtual class Jet::Texture const * __cdecl Jet::WaterMaterialOneTex::GetTexture(int)const 
+308	0x132c0	?GetType@WaterMaterialOneTex@Jet@@UBAABVPString@2@XZ	public: virtual class Jet::PString const & __cdecl Jet::WaterMaterialOneTex::GetType(void)const 
+338	0x13230	?Initialize@WaterMaterialOneTex@Jet@@UAE_NPBVResourceDatabase@2@PBVWaterManagerConfig@2@PAVFrameAnimation@2@PAVWaterTextureAnimation@2@H@Z	public: virtual bool __thiscall Jet::WaterMaterialOneTex::Initialize(class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::FrameAnimation *,class Jet::WaterTextureAnimation *,int)
+372	0x13520	?RenderChunk@WaterMaterialOneTex@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@H@Z	public: virtual void __cdecl Jet::WaterMaterialOneTex::RenderChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,int)const 
+376	0x135f0	?RenderNumChunks@WaterMaterialOneTex@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAPAVGeometryChunk@2@PAPBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PAPBVMatrix4@2@IH@Z	public: virtual void __cdecl Jet::WaterMaterialOneTex::RenderNumChunks(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk * *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const * *,class Jet::Matrix4 const * *,unsigned int,int)const 
+380	0x13720	?RenderPrimitives@WaterMaterialOneTex@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@IPBGIW4DPrimitive@2@H@Z	public: virtual void __cdecl Jet::WaterMaterialOneTex::RenderPrimitives(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,unsigned int,unsigned short const *,unsigned int,enum Jet::DPrimitive,int)const 
+394	0x13040	?SetDisplayState@WaterMaterialOneTex@Jet@@MBAXPAVDisplay@2@@Z	protected: virtual void __cdecl Jet::WaterMaterialOneTex::SetDisplayState(class Jet::Display *)const 
+411	0x13240	?SetReflectionType@WaterMaterialOneTex@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterMaterialOneTex::SetReflectionType(int)
+424	0x3540	?SetScaleNormXY@WaterMaterialOneTex@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterMaterialOneTex::SetScaleNormXY(float)
+451	0x396c8	?UNDECORATED_TYPE@WaterMaterialOneTex@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterialOneTex::UNDECORATED_TYPE
+455	0x134d0	?Unbind@WaterMaterialOneTex@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterMaterialOneTex::Unbind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+478	0x396cc	?uid@WaterMaterialOneTex@Jet@@2VUId@2@B	public: static class Jet::UId const Jet::WaterMaterialOneTex::uid
+==== WaterMaterialOneTexPlugin (1)
+206	0x13f20	?CreateInstance@WaterMaterialOneTexPlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterMaterialOneTexPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 
+==== WaterOceanMaterial (40)
+42	0x14170	??0WaterOceanMaterial@Jet@@QAE@PAVMaterialManager@1@@Z	public: __thiscall Jet::WaterOceanMaterial::WaterOceanMaterial(class Jet::MaterialManager *)
+81	0x14330	??1WaterOceanMaterial@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterOceanMaterial::~WaterOceanMaterial(void)
+109	0x140d0	??8WaterOceanMaterial@Jet@@UBA_NABVMaterial@1@@Z	public: virtual bool __cdecl Jet::WaterOceanMaterial::operator==(class Jet::Material const &)const 
+139	0x1ece4	??_7WaterOceanMaterial@Jet@@6BMaterial@1@@	const Jet::WaterOceanMaterial::`vftable'{for `Jet::Material'}
+140	0x1edb8	??_7WaterOceanMaterial@Jet@@6BPluginInstance@1@@	const Jet::WaterOceanMaterial::`vftable'{for `Jet::PluginInstance'}
+155	0x1edc0	??_8WaterOceanMaterial@Jet@@7B@	const Jet::WaterOceanMaterial::`vbtable'
+165	0x140b0	??_DWaterOceanMaterial@Jet@@QAEXXZ	public: void __thiscall Jet::WaterOceanMaterial::`vbase destructor'(void)
+170	0x14560	?Activate@WaterOceanMaterial@Jet@@UAAXH@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::Activate(int)
+175	0x14120	?Bind@WaterOceanMaterial@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::Bind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+179	0x91d0	?CacheChunk@WaterOceanMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::CacheChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)const 
+184	0x15060	?CalculateLerpTexture@WaterOceanMaterial@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterOceanMaterial::CalculateLerpTexture(class Jet::Display *)const 
+189	0x3540	?ClearDisplayState@WaterOceanMaterial@Jet@@MBEXPAVDisplay@2@@Z	protected: virtual void __thiscall Jet::WaterOceanMaterial::ClearDisplayState(class Jet::Display *)const 
+198	0x14750	?CreateGeometryChunk@WaterOceanMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@_N@Z	public: virtual class Jet::GeometryChunk * __cdecl Jet::WaterOceanMaterial::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,enum Jet::Material::GeometryType,class Jet::GeometryChunkCreateHint *,bool)const 
+207	0x14440	?CreateInstance@WaterOceanMaterial@Jet@@UBAPAVMaterial@2@XZ	public: virtual class Jet::Material * __cdecl Jet::WaterOceanMaterial::CreateInstance(void)const 
+211	0x14580	?CreateVertexType@WaterOceanMaterial@Jet@@MAEXXZ	protected: virtual void __thiscall Jet::WaterOceanMaterial::CreateVertexType(void)
+218	0x396f0	?DECORATED_TYPE@WaterOceanMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterOceanMaterial::DECORATED_TYPE
+231	0x14160	?EnableTextureInterpolation@WaterOceanMaterial@Jet@@QAEX_N@Z	public: void __thiscall Jet::WaterOceanMaterial::EnableTextureInterpolation(bool)
+234	0x14100	?Equals@WaterOceanMaterial@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::WaterOceanMaterial::Equals(class Jet::WaterOceanMaterial const &)const 
+278	0x13fc0	?GetReflectionType@WaterOceanMaterial@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterOceanMaterial::GetReflectionType(void)const 
+287	0x13ff0	?GetScaleNormXY@WaterOceanMaterial@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterOceanMaterial::GetScaleNormXY(void)const 
+297	0x14810	?GetTexture@WaterOceanMaterial@Jet@@UAAPAVTexture@2@H@Z	public: virtual class Jet::Texture * __cdecl Jet::WaterOceanMaterial::GetTexture(int)
+298	0x14810	?GetTexture@WaterOceanMaterial@Jet@@UBAPBVTexture@2@H@Z	public: virtual class Jet::Texture const * __cdecl Jet::WaterOceanMaterial::GetTexture(int)const 
+309	0x14110	?GetType@WaterOceanMaterial@Jet@@UBAABVPString@2@XZ	public: virtual class Jet::PString const & __cdecl Jet::WaterOceanMaterial::GetType(void)const 
+320	0x144a0	?InitInstance@WaterOceanMaterial@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::WaterOceanMaterial::InitInstance(class Jet::WaterOceanMaterial &)const 
+339	0x144f0	?Initialize@WaterOceanMaterial@Jet@@UAE_NPBVResourceDatabase@2@PBVWaterManagerConfig@2@PAVFrameAnimation@2@PAVWaterTextureAnimation@2@H@Z	public: virtual bool __thiscall Jet::WaterOceanMaterial::Initialize(class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::FrameAnimation *,class Jet::WaterTextureAnimation *,int)
+373	0x14830	?RenderChunk@WaterOceanMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@H@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::RenderChunk(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,int)const 
+377	0x91d0	?RenderNumChunks@WaterOceanMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAPAVGeometryChunk@2@PAPBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PAPBVMatrix4@2@IH@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::RenderNumChunks(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk * *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const * *,class Jet::Matrix4 const * *,unsigned int,int)const 
+381	0x91d0	?RenderPrimitives@WaterOceanMaterial@Jet@@UBAXPAVDisplay@2@PAVViewPort@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@IPBGIW4DPrimitive@2@H@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::RenderPrimitives(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,unsigned int,unsigned short const *,unsigned int,enum Jet::DPrimitive,int)const 
+384	0x15340	?RenderSquare@WaterOceanMaterial@Jet@@IBEXPAVDisplay@2@@Z	protected: void __thiscall Jet::WaterOceanMaterial::RenderSquare(class Jet::Display *)const 
+395	0x3540	?SetDisplayState@WaterOceanMaterial@Jet@@MBEXPAVDisplay@2@@Z	protected: virtual void __thiscall Jet::WaterOceanMaterial::SetDisplayState(class Jet::Display *)const 
+412	0x13fb0	?SetReflectionType@WaterOceanMaterial@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterOceanMaterial::SetReflectionType(int)
+416	0x14140	?SetRefractiveIndex@WaterOceanMaterial@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterOceanMaterial::SetRefractiveIndex(float)
+419	0x5810	?SetResourcePriority@WaterOceanMaterial@Jet@@UBAXM@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::SetResourcePriority(float)const 
+425	0x13fd0	?SetScaleNormXY@WaterOceanMaterial@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterOceanMaterial::SetScaleNormXY(float)
+438	0x14000	?SetWaveAttributes@WaterOceanMaterial@Jet@@QAEXMMM@Z	public: void __thiscall Jet::WaterOceanMaterial::SetWaveAttributes(float,float,float)
+441	0x149e0	?SetupVertexProgramConstants@WaterOceanMaterial@Jet@@MBEXPAVDisplay@2@PAVCamera@2@PBVMatrix4@2@@Z	protected: virtual void __thiscall Jet::WaterOceanMaterial::SetupVertexProgramConstants(class Jet::Display *,class Jet::Camera *,class Jet::Matrix4 const *)const 
+452	0x396ec	?UNDECORATED_TYPE@WaterOceanMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterOceanMaterial::UNDECORATED_TYPE
+456	0x5850	?Unbind@WaterOceanMaterial@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@I@Z	public: virtual void __cdecl Jet::WaterOceanMaterial::Unbind(class Jet::Display *,class Jet::ViewPort *,unsigned int)
+466	0x15410	?Update@WaterOceanMaterial@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterOceanMaterial::Update(float)
+479	0x396dc	?uid@WaterOceanMaterial@Jet@@2VUId@2@B	public: static class Jet::UId const Jet::WaterOceanMaterial::uid
+==== WaterOceanMaterialPlugin (1)
+208	0x15ad0	?CreateInstance@WaterOceanMaterialPlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterOceanMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 
+==== WaterSurface (9)
+46	0x15c50	??0WaterSurface@Jet@@QAE@ABUSize@1@ABVVector2@1@@Z	public: __thiscall Jet::WaterSurface::WaterSurface(struct Jet::Size const &,class Jet::Vector2 const &)
+47	0x15c20	??0WaterSurface@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterSurface::WaterSurface(class Jet::WaterSurface const &)
+48	0x15c10	??0WaterSurface@Jet@@QAE@XZ	public: __thiscall Jet::WaterSurface::WaterSurface(void)
+83	0x15ce0	??1WaterSurface@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterSurface::~WaterSurface(void)
+102	0x15b60	??4WaterSurface@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterSurface & __thiscall Jet::WaterSurface::operator=(class Jet::WaterSurface const &)
+142	0x1ef28	??_7WaterSurface@Jet@@6B@	const Jet::WaterSurface::`vftable'
+267	0x15c00	?GetNormal@WaterSurface@Jet@@UAEXHHAAVVector3@2@@Z	public: virtual void __thiscall Jet::WaterSurface::GetNormal(int,int,class Jet::Vector3 &)
+281	0x2130	?GetScale@WaterSurface@Jet@@QAEABVVector2@2@XZ	public: class Jet::Vector2 const & __thiscall Jet::WaterSurface::GetScale(void)
+340	0x15d00	?Initialize@WaterSurface@Jet@@UAEXABUSize@2@ABVVector2@2@@Z	public: virtual void __thiscall Jet::WaterSurface::Initialize(struct Jet::Size const &,class Jet::Vector2 const &)
+==== WaterTile (14)
+51	0x3700	??0WaterTile@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterTile::WaterTile(class Jet::WaterTile const &)
+52	0x16ec0	??0WaterTile@Jet@@QAE@XZ	public: __thiscall Jet::WaterTile::WaterTile(void)
+85	0x16ef0	??1WaterTile@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterTile::~WaterTile(void)
+104	0x37b0	??4WaterTile@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterTile & __thiscall Jet::WaterTile::operator=(class Jet::WaterTile const &)
+144	0x1d7dc	??_7WaterTile@Jet@@6B@	const Jet::WaterTile::`vftable'
+214	0x16fa0	?CullTile@WaterTile@Jet@@UAEXAAVViewPoint@2@ABVMatrix4@2@ABVVector3@2@@Z	public: virtual void __thiscall Jet::WaterTile::CullTile(class Jet::ViewPoint &,class Jet::Matrix4 const &,class Jet::Vector3 const &)
+255	0x3930	?GetGeometry@WaterTile@Jet@@QAEPAVWaterGeometry@2@XZ	public: class Jet::WaterGeometry * __thiscall Jet::WaterTile::GetGeometry(void)
+264	0x39f0	?GetMaterial@WaterTile@Jet@@QAEPAVWaterMaterial@2@XZ	public: class Jet::WaterMaterial * __thiscall Jet::WaterTile::GetMaterial(void)
+271	0x56e0	?GetPosition@WaterTile@Jet@@QBEABVVector3@2@XZ	public: class Jet::Vector3 const & __thiscall Jet::WaterTile::GetPosition(void)const 
+368	0x17170	?Render@WaterTile@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterTile::Render(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &)
+396	0x38a0	?SetGeometry@WaterTile@Jet@@UAEXPAVWaterGeometry@2@@Z	public: virtual void __thiscall Jet::WaterTile::SetGeometry(class Jet::WaterGeometry *)
+399	0x16f90	?SetLight@WaterTile@Jet@@QAEXPBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@@Z	public: void __thiscall Jet::WaterTile::SetLight(class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *)
+402	0x3940	?SetMaterial@WaterTile@Jet@@UAEXPAVWaterMaterial@2@@Z	public: virtual void __thiscall Jet::WaterTile::SetMaterial(class Jet::WaterMaterial *)
+404	0x17150	?SetPosition@WaterTile@Jet@@UAEXABVVector3@2@@Z	public: virtual void __thiscall Jet::WaterTile::SetPosition(class Jet::Vector3 const &)
+==== WaterTiled (8)
+53	0x171a0	??0WaterTiled@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterTiled::WaterTiled(class Jet::WaterTiled const &)
+54	0x172c0	??0WaterTiled@Jet@@QAE@PAVWaterMaterial@1@PAVWaterGeometry@1@ABUSize@1@@Z	public: __thiscall Jet::WaterTiled::WaterTiled(class Jet::WaterMaterial *,class Jet::WaterGeometry *,struct Jet::Size const &)
+86	0x173e0	??1WaterTiled@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterTiled::~WaterTiled(void)
+105	0x171e0	??4WaterTiled@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterTiled & __thiscall Jet::WaterTiled::operator=(class Jet::WaterTiled const &)
+145	0x1f014	??_7WaterTiled@Jet@@6B@	const Jet::WaterTiled::`vftable'
+213	0x17810	?Cull@WaterTiled@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterTiled::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+302	0x17280	?GetTile@WaterTiled@Jet@@QAAPAVWaterTile@2@XZ	public: class Jet::WaterTile * __cdecl Jet::WaterTiled::GetTile(void)
+369	0x17450	?Render@WaterTiled@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterTiled::Render(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &)

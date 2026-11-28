@@ -1,0 +1,12 @@
+19	0x47c0	??0WaterAnimation@Jet@@QAE@XZ	public: __thiscall Jet::WaterAnimation::WaterAnimation(void)	LOCAL
+65	0x4860	??1WaterAnimation@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterAnimation::~WaterAnimation(void)	LOCAL
+115	0x1d918	??_7WaterAnimation@Jet@@6B01@@	const Jet::WaterAnimation::`vftable'{for `Jet::WaterAnimation'}	LOCAL
+116	0x1d928	??_7WaterAnimation@Jet@@6BPluginInstance@1@@	const Jet::WaterAnimation::`vftable'{for `Jet::PluginInstance'}	LOCAL
+146	0x1d930	??_8WaterAnimation@Jet@@7B@	const Jet::WaterAnimation::`vbtable'	LOCAL
+156	0x3440	??_DWaterAnimation@Jet@@QAEXXZ	public: void __thiscall Jet::WaterAnimation::`vbase destructor'(void)	LOCAL
+199	0x4890	?CreateInstance@WaterAnimation@Jet@@SAPAV12@ABVPString@2@@Z	public: static class Jet::WaterAnimation * __cdecl Jet::WaterAnimation::CreateInstance(class Jet::PString const &)	LOCAL
+238	0x3480	?GetAnimMaxHeight@WaterAnimation@Jet@@QBEMXZ	public: float __thiscall Jet::WaterAnimation::GetAnimMaxHeight(void)const 	LOCAL
+288	0x3470	?GetSize@WaterAnimation@Jet@@QBAABUSize@2@XZ	public: struct Jet::Size const & __cdecl Jet::WaterAnimation::GetSize(void)const 	LOCAL
+314	0x15db0	?GetXYFrame@WaterAnimation@Jet@@UAAPAV?$WaterGrid@VVector2@Jet@@@2@I@Z	public: virtual class Jet::WaterGrid<class Jet::Vector2> * __cdecl Jet::WaterAnimation::GetXYFrame(unsigned int)	LOCAL
+315	0x13f10	?Init@WaterAnimation@Jet@@QAA_NXZ	public: bool __cdecl Jet::WaterAnimation::Init(void)	LOCAL
+467	0x38fc8	?groupUid@WaterAnimation@Jet@@2VUId@2@B	public: static class Jet::UId const Jet::WaterAnimation::groupUid	LOCAL

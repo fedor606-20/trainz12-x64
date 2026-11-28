@@ -1,0 +1,3 @@
+13	0x9930	??0PhysicsProp@Jet@@QAE@XZ	public: __thiscall Jet::PhysicsProp::PhysicsProp(void)	LOCAL
+93	0x2f10	??4PhysicsProp@Jet@@QAEAAU01@ABU01@@Z	public: struct Jet::PhysicsProp & __thiscall Jet::PhysicsProp::operator=(struct Jet::PhysicsProp const &)	LOCAL
+354	0xa770	?Load@PhysicsProp@Jet@@QAEXABVConfigData@2@@Z	public: void __thiscall Jet::PhysicsProp::Load(class Jet::ConfigData const &)	LOCAL

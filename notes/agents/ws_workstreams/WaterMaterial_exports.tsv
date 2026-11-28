@@ -1,0 +1,39 @@
+34	0xcd00	??0WaterMaterial@Jet@@QAE@PAVMaterialManager@1@@Z	public: __thiscall Jet::WaterMaterial::WaterMaterial(class Jet::MaterialManager *)	TODO
+76	0xcfc0	??1WaterMaterial@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterMaterial::~WaterMaterial(void)	TODO
+131	0x1e4b4	??_7WaterMaterial@Jet@@6BMaterial@1@@	const Jet::WaterMaterial::`vftable'{for `Jet::Material'}	TODO
+132	0x1e578	??_7WaterMaterial@Jet@@6BPluginInstance@1@@	const Jet::WaterMaterial::`vftable'{for `Jet::PluginInstance'}	TODO
+152	0x1e580	??_8WaterMaterial@Jet@@7B@	const Jet::WaterMaterial::`vbtable'	TODO
+162	0x36a0	??_DWaterMaterial@Jet@@QAEXXZ	public: void __thiscall Jet::WaterMaterial::`vbase destructor'(void)	TODO
+195	0x36c0	?CreateGeometryChunk@WaterMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@@Z	public: virtual class Jet::GeometryChunk * __cdecl Jet::WaterMaterial::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,enum Jet::Material::GeometryType,class Jet::GeometryChunkCreateHint *)const 	TODO
+228	0x3540	?EnableDetailAnimInterpolation@WaterMaterial@Jet@@UAEX_N@Z	public: virtual void __thiscall Jet::WaterMaterial::EnableDetailAnimInterpolation(bool)	LOCAL
+237	0x35c0	?GetAmbientColor@WaterMaterial@Jet@@UBEABVColor@2@XZ	public: virtual class Jet::Color const & __thiscall Jet::WaterMaterial::GetAmbientColor(void)const 	LOCAL
+248	0x3530	?GetDetailAnim@WaterMaterial@Jet@@UBE_NXZ	public: virtual bool __thiscall Jet::WaterMaterial::GetDetailAnim(void)const 	LOCAL
+258	0x3640	?GetLightColor@WaterMaterial@Jet@@UBEABVColor@2@XZ	public: virtual class Jet::Color const & __thiscall Jet::WaterMaterial::GetLightColor(void)const 	LOCAL
+259	0x3600	?GetLightDir@WaterMaterial@Jet@@UBEABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __thiscall Jet::WaterMaterial::GetLightDir(void)const 	LOCAL
+310	0x3660	?GetUVScrollVelocity@WaterMaterial@Jet@@UBE?AVVector2@2@XZ	public: virtual class Jet::Vector2 __thiscall Jet::WaterMaterial::GetUVScrollVelocity(void)const 	LOCAL
+312	0x13f10	?GetUseVertexProgram@WaterMaterial@Jet@@UAE_NXZ	public: virtual bool __thiscall Jet::WaterMaterial::GetUseVertexProgram(void)	LOCAL
+313	0x3580	?GetWaterColor@WaterMaterial@Jet@@UBEABVColor@2@XZ	public: virtual class Jet::Color const & __thiscall Jet::WaterMaterial::GetWaterColor(void)const 	LOCAL
+318	0xd080	?InitInstance@WaterMaterial@Jet@@UBEXAAV12@@Z	public: virtual void __thiscall Jet::WaterMaterial::InitInstance(class Jet::WaterMaterial &)const 	TODO
+347	0x3690	?IsReflectEyeVector@WaterMaterial@Jet@@UBE_NXZ	public: virtual bool __thiscall Jet::WaterMaterial::IsReflectEyeVector(void)const 	LOCAL
+390	0x3590	?SetAmbientColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z	public: virtual void __thiscall Jet::WaterMaterial::SetAmbientColor(class Jet::Color const &)	LOCAL
+391	0x3540	?SetDetailAnim@WaterMaterial@Jet@@UAEX_N@Z	public: virtual void __thiscall Jet::WaterMaterial::SetDetailAnim(bool)	LOCAL
+400	0x3610	?SetLightColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z	public: virtual void __thiscall Jet::WaterMaterial::SetLightColor(class Jet::Color const &)	LOCAL
+401	0x35d0	?SetLightDir@WaterMaterial@Jet@@UAEXABVVector3@2@@Z	public: virtual void __thiscall Jet::WaterMaterial::SetLightDir(class Jet::Vector3 const &)	LOCAL
+405	0x3680	?SetReflectEyeVector@WaterMaterial@Jet@@UAEX_N@Z	public: virtual void __thiscall Jet::WaterMaterial::SetReflectEyeVector(bool)	LOCAL
+414	0x3540	?SetRefractiveIndex@WaterMaterial@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterMaterial::SetRefractiveIndex(float)	LOCAL
+434	0x3650	?SetUVScrollVelocity@WaterMaterial@Jet@@UAEXVVector2@2@@Z	public: virtual void __thiscall Jet::WaterMaterial::SetUVScrollVelocity(class Jet::Vector2)	LOCAL
+436	0x3550	?SetWaterColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z	public: virtual void __thiscall Jet::WaterMaterial::SetWaterColor(class Jet::Color const &)	LOCAL
+464	0x3540	?Update@WaterMaterial@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterMaterial::Update(float)	LOCAL
+471	0x390d8	?psWaterMatInterp@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatInterp	TODO
+472	0x390dc	?psWaterMatInterpFull@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatInterpFull	TODO
+473	0x390cc	?psWaterMatWaveAnim@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatWaveAnim	TODO
+474	0x390d0	?psWaterMatWaveAnimRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatWaveAnimRefl	TODO
+475	0x390d4	?psWaterMatWaveRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::psWaterMatWaveRefl	TODO
+482	0x390e0	?vsWaterMat@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMat	TODO
+483	0x390f8	?vsWaterMatAnimRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatAnimRefl	TODO
+484	0x390fc	?vsWaterMatRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatRefl	TODO
+485	0x390f4	?vsWaterMatWave@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWave	TODO
+486	0x390f0	?vsWaterMatWaveAnim@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWaveAnim	TODO
+487	0x390e8	?vsWaterMatWaveAnimRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWaveAnimRefl	TODO
+488	0x390ec	?vsWaterMatWaveRefl@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterMatWaveRefl	TODO
+489	0x390e4	?vsWaterTexInterp@WaterMaterial@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterMaterial::vsWaterTexInterp	TODO

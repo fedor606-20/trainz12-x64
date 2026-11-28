@@ -1,0 +1,18 @@
+32	0xb270	??0WaterManagerGeneric@Jet@@QAE@XZ	public: __thiscall Jet::WaterManagerGeneric::WaterManagerGeneric(void)	TODO
+74	0xb370	??1WaterManagerGeneric@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterManagerGeneric::~WaterManagerGeneric(void)	TODO
+127	0x1e330	??_7WaterManagerGeneric@Jet@@6BPluginInstance@1@@	const Jet::WaterManagerGeneric::`vftable'{for `Jet::PluginInstance'}	TODO
+128	0x1e30c	??_7WaterManagerGeneric@Jet@@6BWaterManager@1@@	const Jet::WaterManagerGeneric::`vftable'{for `Jet::WaterManager'}	TODO
+150	0x1e338	??_8WaterManagerGeneric@Jet@@7B@	const Jet::WaterManagerGeneric::`vbtable'	TODO
+160	0xb1c0	??_DWaterManagerGeneric@Jet@@QAEXXZ	public: void __thiscall Jet::WaterManagerGeneric::`vbase destructor'(void)	TODO
+192	0xba00	?CreateCubeMapTexture@WaterManagerGeneric@Jet@@IAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@QBV52@AAPAVTexture@2@@Z	protected: bool __thiscall Jet::WaterManagerGeneric::CreateCubeMapTexture(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,class Jet::PString const * const,class Jet::Texture * &)	TODO
+262	0xb120	?GetMaterial@WaterManagerGeneric@Jet@@UAEPAVWaterMaterial@2@XZ	public: virtual class Jet::WaterMaterial * __thiscall Jet::WaterManagerGeneric::GetMaterial(void)	TODO
+274	0xb210	?GetReflectionType@WaterManagerGeneric@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterManagerGeneric::GetReflectionType(void)const 	TODO
+283	0xb260	?GetScaleNormXY@WaterManagerGeneric@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterManagerGeneric::GetScaleNormXY(void)const 	TODO
+300	0xb130	?GetTextureAnimation@WaterManagerGeneric@Jet@@QAEPAVWaterTextureAnimation@2@XZ	public: class Jet::WaterTextureAnimation * __thiscall Jet::WaterManagerGeneric::GetTextureAnimation(void)	TODO
+333	0xb1e0	?Initialize@WaterManagerGeneric@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerGeneric::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,int)	TODO
+334	0xb450	?Initialize@WaterManagerGeneric@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@PBVWaterManagerConfig@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerGeneric::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::PString const &,int)	TODO
+360	0x390c4	?MANAGER_NAME@WaterManagerGeneric@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterManagerGeneric::MANAGER_NAME	TODO
+408	0xb1f0	?SetReflectionType@WaterManagerGeneric@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterManagerGeneric::SetReflectionType(int)	TODO
+421	0xb230	?SetScaleNormXY@WaterManagerGeneric@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerGeneric::SetScaleNormXY(float)	TODO
+462	0xc060	?Update@WaterManagerGeneric@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerGeneric::Update(float)	TODO
+469	0x38fbc	?instance@WaterManagerGeneric@Jet@@1HA	protected: static int Jet::WaterManagerGeneric::instance	TODO

@@ -1,0 +1,13 @@
+49	0x3490	??0WaterTextureAnimation@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterTextureAnimation::WaterTextureAnimation(class Jet::WaterTextureAnimation const &)	LOCAL
+50	0x16500	??0WaterTextureAnimation@Jet@@QAE@XZ	public: __thiscall Jet::WaterTextureAnimation::WaterTextureAnimation(void)	LOCAL
+84	0x16510	??1WaterTextureAnimation@Jet@@QAE@XZ	public: __thiscall Jet::WaterTextureAnimation::~WaterTextureAnimation(void)	LOCAL
+103	0x34e0	??4WaterTextureAnimation@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterTextureAnimation & __thiscall Jet::WaterTextureAnimation::operator=(class Jet::WaterTextureAnimation const &)	LOCAL
+143	0x1d7c8	??_7WaterTextureAnimation@Jet@@6B@	const Jet::WaterTextureAnimation::`vftable'	LOCAL
+181	0x16c70	?CalculateBumpMap@WaterTextureAnimation@Jet@@IAEXPAVWaterAnimation@2@HAAVBitmap@2@M@Z	protected: void __thiscall Jet::WaterTextureAnimation::CalculateBumpMap(class Jet::WaterAnimation *,int,class Jet::Bitmap &,float)	LOCAL
+191	0x16900	?CreateAnimationTexture@WaterTextureAnimation@Jet@@UAEPAEPAVFrameAnimation@2@PAVWaterAnimation@2@MM@Z	public: virtual unsigned char * __thiscall Jet::WaterTextureAnimation::CreateAnimationTexture(class Jet::FrameAnimation *,class Jet::WaterAnimation *,float,float)	LOCAL
+221	0x165a0	?Destroy@WaterTextureAnimation@Jet@@MAEXXZ	protected: virtual void __thiscall Jet::WaterTextureAnimation::Destroy(void)	LOCAL
+266	0x3520	?GetMaxHeight@WaterTextureAnimation@Jet@@QBEMXZ	public: float __thiscall Jet::WaterTextureAnimation::GetMaxHeight(void)const 	LOCAL
+299	0x5690	?GetTexture@WaterTextureAnimation@Jet@@QBEPAVTexture@2@H@Z	public: class Jet::Texture * __thiscall Jet::WaterTextureAnimation::GetTexture(int)const 	LOCAL
+341	0x16a10	?Initialize@WaterTextureAnimation@Jet@@UAE_NPAVRenderKernel@2@HUSize@2@PAEMM@Z	public: virtual bool __thiscall Jet::WaterTextureAnimation::Initialize(class Jet::RenderKernel *,int,struct Jet::Size,unsigned char *,float,float)	LOCAL
+342	0x16690	?Initialize@WaterTextureAnimation@Jet@@UAE_NPAVRenderKernel@2@PAVFrameAnimation@2@PAVWaterAnimation@2@MM@Z	public: virtual bool __thiscall Jet::WaterTextureAnimation::Initialize(class Jet::RenderKernel *,class Jet::FrameAnimation *,class Jet::WaterAnimation *,float,float)	LOCAL
+470	0x38fc4	?instance@WaterTextureAnimation@Jet@@1HA	protected: static int Jet::WaterTextureAnimation::instance	LOCAL

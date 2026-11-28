@@ -1,0 +1,14 @@
+51	0x3700	??0WaterTile@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterTile::WaterTile(class Jet::WaterTile const &)	TODO
+52	0x16ec0	??0WaterTile@Jet@@QAE@XZ	public: __thiscall Jet::WaterTile::WaterTile(void)	TODO
+85	0x16ef0	??1WaterTile@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterTile::~WaterTile(void)	TODO
+104	0x37b0	??4WaterTile@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterTile & __thiscall Jet::WaterTile::operator=(class Jet::WaterTile const &)	TODO
+144	0x1d7dc	??_7WaterTile@Jet@@6B@	const Jet::WaterTile::`vftable'	TODO
+214	0x16fa0	?CullTile@WaterTile@Jet@@UAEXAAVViewPoint@2@ABVMatrix4@2@ABVVector3@2@@Z	public: virtual void __thiscall Jet::WaterTile::CullTile(class Jet::ViewPoint &,class Jet::Matrix4 const &,class Jet::Vector3 const &)	TODO
+255	0x3930	?GetGeometry@WaterTile@Jet@@QAEPAVWaterGeometry@2@XZ	public: class Jet::WaterGeometry * __thiscall Jet::WaterTile::GetGeometry(void)	TODO
+264	0x39f0	?GetMaterial@WaterTile@Jet@@QAEPAVWaterMaterial@2@XZ	public: class Jet::WaterMaterial * __thiscall Jet::WaterTile::GetMaterial(void)	TODO
+271	0x56e0	?GetPosition@WaterTile@Jet@@QBEABVVector3@2@XZ	public: class Jet::Vector3 const & __thiscall Jet::WaterTile::GetPosition(void)const 	TODO
+368	0x17170	?Render@WaterTile@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterTile::Render(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &)	TODO
+396	0x38a0	?SetGeometry@WaterTile@Jet@@UAEXPAVWaterGeometry@2@@Z	public: virtual void __thiscall Jet::WaterTile::SetGeometry(class Jet::WaterGeometry *)	TODO
+399	0x16f90	?SetLight@WaterTile@Jet@@QAEXPBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@@Z	public: void __thiscall Jet::WaterTile::SetLight(class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *)	TODO
+402	0x3940	?SetMaterial@WaterTile@Jet@@UAEXPAVWaterMaterial@2@@Z	public: virtual void __thiscall Jet::WaterTile::SetMaterial(class Jet::WaterMaterial *)	TODO
+404	0x17150	?SetPosition@WaterTile@Jet@@UAEXABVVector3@2@@Z	public: virtual void __thiscall Jet::WaterTile::SetPosition(class Jet::Vector3 const &)	TODO

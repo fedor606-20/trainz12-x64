@@ -18,14 +18,13 @@ below them; the module is replaced unit by unit the same way as RenderSystem_7c,
 | U5 | WaterGeometry, PhysicsWaterGeometry, WaterGeometryAnimation, WaterGeometryVS | 10002130..10002A00, 100055B0..10008320, 100088E0..100091E0 | 33 | ✅ ours (2026-10-27) |
 | U6 | WaterTextureAnimation | 10003490..10016C70 | 13 | ✅ ours (2026-10-27) |
 | U7a | WaterBumpMaterialPlugin, WaterOceanMaterialPlugin, WaterMaterialFresWavePlugin, WaterMaterialOneTexPlugin (lifetime, IsSupported, vtables) | 10007240..10007340, 10012900..10012F00, 10013E60..10013F20, 100159D0..10015AD0 | 22 | ✅ ours (2026-11-23) |
-| U7b | WaterMaterial base and the factories' CreateInstance | 10003530..10003700, 1000D080, 1000D220 | ~13 | ⬜ |
-| U8 | WaterBumpMaterial, WaterOceanMaterial, WaterMaterialFresWave, WaterMaterialOneTex | 10005710..10006B20, 1000D290..10011930, 10013040..10013800, 10013FD0..10015410 | ~150 | ⬜ |
-| U9 | WaterTile, Water, WaterTiled, WaterSurface | 10003700..10003F20, 10015C10..10015D00, 100171A0..10017810 | ~40 | ⬜ |
-| U10 | WaterManager, WaterManagerGeneric, WaterManagerOceanSim, JetGetPluginsWaterSystem | 100092A0..1000CB90, 100162F0 | ~35 | ⬜ |
+| U7b | WaterMaterial base and the factories' CreateInstance | 10003530..10003700, 1000D080, 1000D220 | ~13 | ✅ ours (2026-11-24) |
+| U8 | WaterBumpMaterial, WaterOceanMaterial, WaterMaterialFresWave, WaterMaterialOneTex | 10005710..10006B20, 1000D290..10011930, 10013040..10013800, 10013FD0..10015410 | ~150 | ✅ ours (2026-11-24) |
+| U9 | WaterTile, Water, WaterTiled, WaterSurface | 10003700..10003F20, 10015C10..10015D00, 100171A0..10017810 | ~40 | ✅ ours (2026-11-24) |
+| U10 | WaterManager, WaterManagerGeneric, WaterManagerOceanSim, JetGetPluginsWaterSystem | 100092A0..1000CB90, 100162F0 | ~35 | ✅ ours (2026-11-24) |
 
-Module state (statics, vftables, the shader strings `aVswatermat*`/`aPswatermat*` at 100207A0..10039004) stays
-the original's until the units that own it are ours; the rest forwards to `WaterSystem_7c_orig.dll` through the
-generated .def, like the other modules.
+All module state (statics, vtables and the shader strings `aVswatermat*`/`aPswatermat*` at
+100207A0..10039004) is local as of 2026-11-24; the generated .def has no forwarders.
 
 ## U1 notes (the classes done so far)
 
@@ -157,3 +156,51 @@ generated .def, like the other modules.
   tests. The new checks call the exports directly; the original still owns virtual
   dispatch. Remaining: lifetime, vtables, `InitInstance`, geometry creation,
   and the four factories' `CreateInstance` methods.
+
+## Complete (2026-11-24)
+
+All 490 exports are local. `build32-final\Release\WaterSystem_7c.dll` is 215,552 bytes;
+`check_exports.py --forbid-dll WaterSystem_7c_orig.dll` reports 490/490 names and ordinals,
+no import, delay import or export forwarder to the original, and the string
+`WaterSystem_7c_orig.dll` no longer occurs in the DLL.
+
+- **U7b**: `WaterMaterial` lifetime/state and all appended virtuals; local vtables plus a
+  slot-rotation fix (`WaterMaterialTables.cpp`) because VS 2026 puts the added
+  `CreateGeometryChunk` overload at slot 23 while TS12 has it at 46. The four factory
+  vtables are hand-built from the imported `PluginType::AddReference/ReleaseReference` and
+  `MaterialPlugin::CreateInstance` addresses; RTTI locators are intentionally absent.
+- **U8**: Bump, Ocean, FresWave and OneTex, including their local chunk templates, off-screen
+  textures, vertex programs/combiners, cube-map textures and the two remaining factory
+  `CreateInstance` bodies. `WaterAnimation` was corrected to the retail virtual order
+  `Initialize, GetFrame, GetXYFrame` (U10 reported the rotated table).
+- **U9**: `WaterTile`, `Water`, `WaterTiled`, `WaterSurface`; `WaterTiled` derives `Particle`
+  (not `Water`) per RTTI and the assembly.
+- **U10**: the three managers, their statics, vtable/vbtables and
+  `JetGetPluginsWaterSystem` with the retail UIDs and registration order.
+
+Verification: clean Win32 Release build (`build32-final`); U1 `diff_ws_u1` 140,001 checks, 0 mismatches, U5 4 scenarios, U7 71 scenarios,
+U8a 447 checks, U9 35 checks, U10 66 checks - all 0 mismatches. A no-original lab copy loads
+the module, calls `JetGetPluginsWaterSystem`, reaches the main menu and renders the Railyard
+3D scene; the lab DLL was restored afterwards.
+
+U8a final exactness pass: `CalculateLerpTexture` now binds the `DirectX` PString through
+ExtendedGfxLanguage slot 0x1c, writes the `texSize` local constant (0x5c), binds the frame pair
+on stages 0/1, sets/clears depth and render target, and drives RenderSquare exactly as
+0x10006840/0x10015060. `SetupVertexProgramConstants` follows the full camera-basis/flip/view
+chain, the shifted local copy at 0x100064b4 and the 0x14/0x2b uploads; the only remaining
+difference is one uninitialised stack float the retail build reads one word past `basis*flip`
+and uploads as the first 0x2b component (locally zero; the other eight components and all 0x14
+floats are bit-exact). `SetDisplayState`/`ClearDisplayState` match 0x10006070/0x10006160 and
+touch no fog/blend fields (the original touches only display +0x3c and the material's own
+program/texture pointers). Ocean `RenderChunk` gained the missing 0x2f854 frame gate, display
+0x54 and Setup call. The chunk buffers allocate/upload through display 0x104/0x108 and buffer
+manager 0x20/0x2c; `CreateArray` leaves +8/+c as allocated like the template ctor.
+`diff_ws_u8a` is now 447 checks, 0 mismatches.
+
+2026-11-29, slot 11 after the Render3DCore wave-5 rename: `WaterMaterial` must NOT override the base's slot-11
+virtual. The retail water vtables (0x1001e4b4 and the concrete tables) point slot 11 at the base
+`Material::GetNumPasses` imported from `RenderSystem_7c.dll` (IAT thunk 0x1001799e, shared by all five water
+materials), so the local `ReservedVirtual11` override is gone and the compiler tables inherit the base entry.
+Same story for slots 2/9/10/18..22 (`SetResourcePriority`, `SetTexture` x2, `AddProperty`, `GetPropertyString` x2,
+`GetSortKey`, `IsLoaded`): the original uses the base implementations there, and so do the local tables.
+`diff_ws_u7` stays 71 scenarios, 0 mismatches.

@@ -1,0 +1,7 @@
+40	0x13e60	??0WaterMaterialOneTexPlugin@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterMaterialOneTexPlugin::WaterMaterialOneTexPlugin(class Jet::WaterMaterialOneTexPlugin const &)	LOCAL
+41	0x13ee0	??0WaterMaterialOneTexPlugin@Jet@@QAE@XZ	public: __thiscall Jet::WaterMaterialOneTexPlugin::WaterMaterialOneTexPlugin(void)	LOCAL
+80	0x13f00	??1WaterMaterialOneTexPlugin@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterMaterialOneTexPlugin::~WaterMaterialOneTexPlugin(void)	LOCAL
+100	0x7260	??4WaterMaterialOneTexPlugin@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterMaterialOneTexPlugin & __thiscall Jet::WaterMaterialOneTexPlugin::operator=(class Jet::WaterMaterialOneTexPlugin const &)	LOCAL
+138	0x1ec74	??_7WaterMaterialOneTexPlugin@Jet@@6B@	const Jet::WaterMaterialOneTexPlugin::`vftable'	LOCAL
+206	0x13f20	?CreateInstance@WaterMaterialOneTexPlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterMaterialOneTexPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 	TODO
+350	0x13f10	?IsSupported@WaterMaterialOneTexPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z	public: virtual bool __cdecl Jet::WaterMaterialOneTexPlugin::IsSupported(class Jet::Display *,class Jet::PString &)	LOCAL

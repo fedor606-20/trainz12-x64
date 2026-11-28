@@ -1,0 +1,8 @@
+5	0x2a90	??0AnimProp@Jet@@QAE@ABU01@@Z	public: __thiscall Jet::AnimProp::AnimProp(struct Jet::AnimProp const &)	LOCAL
+6	0x9730	??0AnimProp@Jet@@QAE@XZ	public: __thiscall Jet::AnimProp::AnimProp(void)	LOCAL
+57	0x9830	??1AnimProp@Jet@@QAE@XZ	public: __thiscall Jet::AnimProp::~AnimProp(void)	LOCAL
+88	0x2b60	??4AnimProp@Jet@@QAEAAU01@ABU01@@Z	public: struct Jet::AnimProp & __thiscall Jet::AnimProp::operator=(struct Jet::AnimProp const &)	LOCAL
+352	0x9c20	?Load@AnimProp@Jet@@QAEXABVConfigData@2@@Z	public: void __thiscall Jet::AnimProp::Load(class Jet::ConfigData const &)	LOCAL
+358	0x9e70	?LoadFile@AnimProp@Jet@@QAE_NAAVFile@2@@Z	public: bool __thiscall Jet::AnimProp::LoadFile(class Jet::File &)	LOCAL
+359	0xa1a0	?LoadFile@AnimProp@Jet@@QAE_NABVPString@2@@Z	public: bool __thiscall Jet::AnimProp::LoadFile(class Jet::PString const &)	LOCAL
+387	0xa370	?SaveFile@AnimProp@Jet@@QBE_NAAVFile@2@PAE@Z	public: bool __thiscall Jet::AnimProp::SaveFile(class Jet::File &,unsigned char *)const 	LOCAL

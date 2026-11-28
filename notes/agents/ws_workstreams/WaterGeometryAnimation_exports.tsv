@@ -1,0 +1,9 @@
+26	0x55b0	??0WaterGeometryAnimation@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterGeometryAnimation::WaterGeometryAnimation(class Jet::WaterGeometryAnimation const &)	LOCAL
+27	0x7dc0	??0WaterGeometryAnimation@Jet@@QAE@XZ	public: __thiscall Jet::WaterGeometryAnimation::WaterGeometryAnimation(void)	LOCAL
+70	0x7de0	??1WaterGeometryAnimation@Jet@@QAE@XZ	public: __thiscall Jet::WaterGeometryAnimation::~WaterGeometryAnimation(void)	LOCAL
+97	0x5640	??4WaterGeometryAnimation@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterGeometryAnimation & __thiscall Jet::WaterGeometryAnimation::operator=(class Jet::WaterGeometryAnimation const &)	LOCAL
+190	0x8320	?Create@WaterGeometryAnimation@Jet@@QAE_NPAVRenderKernel@2@PAVWaterMaterial@2@PAVFrameAnimation@2@PAVWaterAnimation@2@ABUSize@2@ABVVector3@2@ABVVector2@2@@Z	public: bool __thiscall Jet::WaterGeometryAnimation::Create(class Jet::RenderKernel *,class Jet::WaterMaterial *,class Jet::FrameAnimation *,class Jet::WaterAnimation *,struct Jet::Size const &,class Jet::Vector3 const &,class Jet::Vector2 const &)	LOCAL
+220	0x7ea0	?Destroy@WaterGeometryAnimation@Jet@@QAEXXZ	public: void __thiscall Jet::WaterGeometryAnimation::Destroy(void)	LOCAL
+253	0x5690	?GetFrame@WaterGeometryAnimation@Jet@@QAEPAV?$WaterGrid@M@2@H@Z	public: class Jet::WaterGrid<float> * __thiscall Jet::WaterGeometryAnimation::GetFrame(int)	LOCAL
+254	0x56d0	?GetGeometry@WaterGeometryAnimation@Jet@@QAEPAVWaterGeometry@2@XZ	public: class Jet::WaterGeometry * __thiscall Jet::WaterGeometryAnimation::GetGeometry(void)	LOCAL
+460	0x80a0	?Update@WaterGeometryAnimation@Jet@@QAEXPAVFrameAnimation@2@@Z	public: void __thiscall Jet::WaterGeometryAnimation::Update(class Jet::FrameAnimation *)	LOCAL

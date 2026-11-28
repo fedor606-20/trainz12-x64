@@ -1,6 +1,7 @@
 // U7 internals: the material factories' raw RenderSystem base and the mirrored vtables they publish.
 #pragma once
 
+#include <jet/Math.h>
 #include <jet/PString.h>
 #include <jet/UId.h>
 
@@ -52,8 +53,32 @@ static Fn WsBind(void* address)
     return fn;
 }
 
+// 0x10005180: the module's Matrix4 product (a * b, stored in `out`). The original adds each output's
+// products in the compiler's order ((a[r+1]*b[4+j] + a[r+3]*b[12+j]) + a[r+2]*b[8+j]) + a[r]*b[j],
+// so the single-precision rounding matches the retail build's.
+inline void WsMultiplyMatrix(Jet::Matrix4& out, const Jet::Matrix4& a, const Jet::Matrix4& b)
+{
+    Jet::Matrix4 result{};
+    for (int row = 0; row < 4; ++row) {
+        const int r = row * 4;
+        for (int col = 0; col < 4; ++col) {
+            float value = a.m[r + 1] * b.m[4 + col] + a.m[r + 3] * b.m[12 + col];
+            value += a.m[r + 2] * b.m[8 + col];
+            value += a.m[r] * b.m[col];
+            result.m[r + col] = value;
+        }
+    }
+    out = result;
+}
+
 // fills the mirrors on first use when the original DLL was loaded after this one
 void WsEnsureMirrors();
+
+// install the original-order vtable on a freshly constructed material (kind 0 base, 1 bump, 2 ocean)
+void WsInstallMaterialVtables(void* object, int kind);
+
+// set the factories' CreateInstance slot to the local implementations (Bump/Ocean)
+void WsInstallFactoryCreate();
 
 // the four published factory vtables; their first, second and fourth slots stay the original's import thunks
 extern void* WsBumpVftable[6];

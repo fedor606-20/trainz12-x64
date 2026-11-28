@@ -1,0 +1,9 @@
+46	0x15c50	??0WaterSurface@Jet@@QAE@ABUSize@1@ABVVector2@1@@Z	public: __thiscall Jet::WaterSurface::WaterSurface(struct Jet::Size const &,class Jet::Vector2 const &)	TODO
+47	0x15c20	??0WaterSurface@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterSurface::WaterSurface(class Jet::WaterSurface const &)	TODO
+48	0x15c10	??0WaterSurface@Jet@@QAE@XZ	public: __thiscall Jet::WaterSurface::WaterSurface(void)	TODO
+83	0x15ce0	??1WaterSurface@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterSurface::~WaterSurface(void)	TODO
+102	0x15b60	??4WaterSurface@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterSurface & __thiscall Jet::WaterSurface::operator=(class Jet::WaterSurface const &)	TODO
+142	0x1ef28	??_7WaterSurface@Jet@@6B@	const Jet::WaterSurface::`vftable'	TODO
+267	0x15c00	?GetNormal@WaterSurface@Jet@@UAEXHHAAVVector3@2@@Z	public: virtual void __thiscall Jet::WaterSurface::GetNormal(int,int,class Jet::Vector3 &)	TODO
+281	0x2130	?GetScale@WaterSurface@Jet@@QAEABVVector2@2@XZ	public: class Jet::Vector2 const & __thiscall Jet::WaterSurface::GetScale(void)	TODO
+340	0x15d00	?Initialize@WaterSurface@Jet@@UAEXABUSize@2@ABVVector2@2@@Z	public: virtual void __thiscall Jet::WaterSurface::Initialize(struct Jet::Size const &,class Jet::Vector2 const &)	TODO

@@ -1,0 +1,5 @@
+10	0x2ce0	??0MaterialProp@Jet@@QAE@ABU01@@Z	public: __thiscall Jet::MaterialProp::MaterialProp(struct Jet::MaterialProp const &)	LOCAL
+11	0x9870	??0MaterialProp@Jet@@QAE@XZ	public: __thiscall Jet::MaterialProp::MaterialProp(void)	LOCAL
+60	0x2c50	??1MaterialProp@Jet@@QAE@XZ	public: __thiscall Jet::MaterialProp::~MaterialProp(void)	LOCAL
+91	0x2e00	??4MaterialProp@Jet@@QAEAAU01@ABU01@@Z	public: struct Jet::MaterialProp & __thiscall Jet::MaterialProp::operator=(struct Jet::MaterialProp const &)	LOCAL
+353	0xa5f0	?Load@MaterialProp@Jet@@QAEXABVConfigData@2@@Z	public: void __thiscall Jet::MaterialProp::Load(class Jet::ConfigData const &)	LOCAL

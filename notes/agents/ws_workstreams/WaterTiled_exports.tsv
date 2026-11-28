@@ -1,0 +1,8 @@
+53	0x171a0	??0WaterTiled@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterTiled::WaterTiled(class Jet::WaterTiled const &)	TODO
+54	0x172c0	??0WaterTiled@Jet@@QAE@PAVWaterMaterial@1@PAVWaterGeometry@1@ABUSize@1@@Z	public: __thiscall Jet::WaterTiled::WaterTiled(class Jet::WaterMaterial *,class Jet::WaterGeometry *,struct Jet::Size const &)	TODO
+86	0x173e0	??1WaterTiled@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterTiled::~WaterTiled(void)	TODO
+105	0x171e0	??4WaterTiled@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterTiled & __thiscall Jet::WaterTiled::operator=(class Jet::WaterTiled const &)	TODO
+145	0x1f014	??_7WaterTiled@Jet@@6B@	const Jet::WaterTiled::`vftable'	TODO
+213	0x17810	?Cull@WaterTiled@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterTiled::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)	TODO
+302	0x17280	?GetTile@WaterTiled@Jet@@QAAPAVWaterTile@2@XZ	public: class Jet::WaterTile * __cdecl Jet::WaterTiled::GetTile(void)	TODO
+369	0x17450	?Render@WaterTiled@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@@Z	public: virtual void __cdecl Jet::WaterTiled::Render(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &)	TODO

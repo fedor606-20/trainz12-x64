@@ -1,0 +1,14 @@
+25	0x74d0	??0WaterGeometry@Jet@@QAE@XZ	public: __thiscall Jet::WaterGeometry::WaterGeometry(void)	LOCAL
+69	0x7520	??1WaterGeometry@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterGeometry::~WaterGeometry(void)	LOCAL
+122	0x1dea8	??_7WaterGeometry@Jet@@6B@	const Jet::WaterGeometry::`vftable'	LOCAL
+219	0x7590	?Destroy@WaterGeometry@Jet@@MAEXXZ	protected: virtual void __thiscall Jet::WaterGeometry::Destroy(void)	LOCAL
+240	0x2180	?GetBoundingBox@WaterGeometry@Jet@@QBEXAAVVector3@2@0@Z	public: void __thiscall Jet::WaterGeometry::GetBoundingBox(class Jet::Vector3 &,class Jet::Vector3 &)const 	LOCAL
+241	0x2160	?GetChunk@WaterGeometry@Jet@@QAEPAVGeometryChunk@2@XZ	public: class Jet::GeometryChunk * __thiscall Jet::WaterGeometry::GetChunk(void)	LOCAL
+261	0x2170	?GetMaterial@WaterGeometry@Jet@@QAEPAVWaterMaterial@2@XZ	public: class Jet::WaterMaterial * __thiscall Jet::WaterGeometry::GetMaterial(void)	LOCAL
+272	0x21b0	?GetRadius@WaterGeometry@Jet@@QBEMXZ	public: float __thiscall Jet::WaterGeometry::GetRadius(void)const 	LOCAL
+280	0x2140	?GetScale@WaterGeometry@Jet@@QBE?BVVector3@2@XZ	public: class Jet::Vector3 const __thiscall Jet::WaterGeometry::GetScale(void)const 	LOCAL
+289	0x2130	?GetSize@WaterGeometry@Jet@@QBEABUSize@2@XZ	public: struct Jet::Size const & __thiscall Jet::WaterGeometry::GetSize(void)const 	LOCAL
+328	0x7cb0	?Initialize@WaterGeometry@Jet@@UAE_NPAVRenderKernel@2@PAVWaterMaterial@2@ABUSize@2@ABVVector3@2@ABVVector2@2@_N@Z	public: virtual bool __thiscall Jet::WaterGeometry::Initialize(class Jet::RenderKernel *,class Jet::WaterMaterial *,struct Jet::Size const &,class Jet::Vector3 const &,class Jet::Vector2 const &,bool)	LOCAL
+329	0x75a0	?Initialize@WaterGeometry@Jet@@UAE_NPAVRenderKernel@2@PAVWaterMaterial@2@ABUSize@2@QBUPackedVertexPCT@2@_N@Z	public: virtual bool __thiscall Jet::WaterGeometry::Initialize(class Jet::RenderKernel *,class Jet::WaterMaterial *,struct Jet::Size const &,struct Jet::PackedVertexPCT const * const,bool)	LOCAL
+366	0x7c80	?Render@WaterGeometry@Jet@@UAEXPAVDisplay@2@AAVViewPort@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@AAVMatrix4@2@@Z	public: virtual void __thiscall Jet::WaterGeometry::Render(class Jet::Display *,class Jet::ViewPort &,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 &)	LOCAL
+459	0x91d0	?Update@WaterGeometry@Jet@@UAAXM@Z	public: virtual void __cdecl Jet::WaterGeometry::Update(float)	LOCAL

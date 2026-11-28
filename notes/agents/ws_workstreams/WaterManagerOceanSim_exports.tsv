@@ -1,0 +1,20 @@
+33	0xc290	??0WaterManagerOceanSim@Jet@@QAE@XZ	public: __thiscall Jet::WaterManagerOceanSim::WaterManagerOceanSim(void)	TODO
+75	0xc3a0	??1WaterManagerOceanSim@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterManagerOceanSim::~WaterManagerOceanSim(void)	TODO
+129	0x1e388	??_7WaterManagerOceanSim@Jet@@6BPluginInstance@1@@	const Jet::WaterManagerOceanSim::`vftable'{for `Jet::PluginInstance'}	TODO
+130	0x1e364	??_7WaterManagerOceanSim@Jet@@6BWaterManager@1@@	const Jet::WaterManagerOceanSim::`vftable'{for `Jet::WaterManager'}	TODO
+151	0x1e390	??_8WaterManagerOceanSim@Jet@@7B@	const Jet::WaterManagerOceanSim::`vbtable'	TODO
+161	0xc200	??_DWaterManagerOceanSim@Jet@@QAEXXZ	public: void __thiscall Jet::WaterManagerOceanSim::`vbase destructor'(void)	TODO
+193	0xc7d0	?CreateCubeMapTexture@WaterManagerOceanSim@Jet@@IAE_NPAVRenderKernel@2@PBVResourceDatabase@2@QBVPString@2@AAPAVTexture@2@@Z	protected: bool __thiscall Jet::WaterManagerOceanSim::CreateCubeMapTexture(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const * const,class Jet::Texture * &)	TODO
+256	0xc150	?GetGeometryAnimation@WaterManagerOceanSim@Jet@@QAEPAVWaterGeometryAnimation@2@XZ	public: class Jet::WaterGeometryAnimation * __thiscall Jet::WaterManagerOceanSim::GetGeometryAnimation(void)	TODO
+263	0xc130	?GetMaterial@WaterManagerOceanSim@Jet@@UAEPAVWaterMaterial@2@XZ	public: virtual class Jet::WaterMaterial * __thiscall Jet::WaterManagerOceanSim::GetMaterial(void)	TODO
+275	0xc240	?GetReflectionType@WaterManagerOceanSim@Jet@@UBEHXZ	public: virtual int __thiscall Jet::WaterManagerOceanSim::GetReflectionType(void)const 	TODO
+284	0xc280	?GetScaleNormXY@WaterManagerOceanSim@Jet@@UBEMXZ	public: virtual float __thiscall Jet::WaterManagerOceanSim::GetScaleNormXY(void)const 	TODO
+301	0xc140	?GetTextureAnimation@WaterManagerOceanSim@Jet@@QAEPAVWaterTextureAnimation@2@XZ	public: class Jet::WaterTextureAnimation * __thiscall Jet::WaterManagerOceanSim::GetTextureAnimation(void)	TODO
+304	0xc160	?GetTileScale@WaterManagerOceanSim@Jet@@QBEABVVector3@2@XZ	public: class Jet::Vector3 const & __thiscall Jet::WaterManagerOceanSim::GetTileScale(void)const 	TODO
+305	0xc170	?GetTileSize@WaterManagerOceanSim@Jet@@QBEABUSize@2@XZ	public: struct Jet::Size const & __thiscall Jet::WaterManagerOceanSim::GetTileSize(void)const 	TODO
+335	0xb1e0	?Initialize@WaterManagerOceanSim@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerOceanSim::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,int)	TODO
+336	0xc4a0	?Initialize@WaterManagerOceanSim@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@PBVWaterManagerConfig@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManagerOceanSim::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::WaterManagerConfig const *,class Jet::PString const &,int)	TODO
+361	0x390c8	?MANAGER_NAME@WaterManagerOceanSim@Jet@@2VPString@2@B	public: static class Jet::PString const Jet::WaterManagerOceanSim::MANAGER_NAME	TODO
+409	0xc220	?SetReflectionType@WaterManagerOceanSim@Jet@@UAE_NH@Z	public: virtual bool __thiscall Jet::WaterManagerOceanSim::SetReflectionType(int)	TODO
+422	0xc260	?SetScaleNormXY@WaterManagerOceanSim@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerOceanSim::SetScaleNormXY(float)	TODO
+463	0xcb90	?Update@WaterManagerOceanSim@Jet@@UAEXM@Z	public: virtual void __thiscall Jet::WaterManagerOceanSim::Update(float)	TODO

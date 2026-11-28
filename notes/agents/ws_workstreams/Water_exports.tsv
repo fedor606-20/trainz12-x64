@@ -1,0 +1,12 @@
+17	0x3a00	??0Water@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Water::Water(class Jet::Water const &)	TODO
+18	0x3b40	??0Water@Jet@@QAE@XZ	public: __thiscall Jet::Water::Water(void)	TODO
+64	0x3b70	??1Water@Jet@@UAE@XZ	public: virtual __thiscall Jet::Water::~Water(void)	TODO
+95	0x3a90	??4Water@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Water & __thiscall Jet::Water::operator=(class Jet::Water const &)	TODO
+114	0x1d80c	??_7Water@Jet@@6B@	const Jet::Water::`vftable'	TODO
+171	0x3cf0	?AddTile@Water@Jet@@UAAXPAVWaterTile@2@@Z	public: virtual void __cdecl Jet::Water::AddTile(class Jet::WaterTile *)	TODO
+212	0x3ea0	?Cull@Water@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::Water::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)	TODO
+239	0x3f20	?GetAxisAlignedBoundingBox@Water@Jet@@UAAXAAVVector3@2@0@Z	public: virtual void __cdecl Jet::Water::GetAxisAlignedBoundingBox(class Jet::Vector3 &,class Jet::Vector3 &)	TODO
+257	0x3e40	?GetLight@Water@Jet@@UAAPAVDisplayLight@2@XZ	public: virtual class Jet::DisplayLight * __cdecl Jet::Water::GetLight(void)	TODO
+343	0x3b30	?IsEmpty@Water@Jet@@QAE_NXZ	public: bool __thiscall Jet::Water::IsEmpty(void)	TODO
+365	0x3d50	?RemoveTile@Water@Jet@@UAAXPAVWaterTile@2@@Z	public: virtual void __cdecl Jet::Water::RemoveTile(class Jet::WaterTile *)	TODO
+398	0x3dd0	?SetLight@Water@Jet@@UAA_NPAVDisplayLight@2@@Z	public: virtual bool __cdecl Jet::Water::SetLight(class Jet::DisplayLight *)	TODO

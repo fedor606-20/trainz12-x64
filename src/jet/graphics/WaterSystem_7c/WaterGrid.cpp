@@ -2,9 +2,38 @@
 // function); the two instantiations are the ones the original exports.
 #include <jet/WaterGrid.h>
 
+#include <cstring>  // memcpy
+
 #include "WaterSystemInternal.h"  // GridNewBytes
 
 namespace Jet {
+
+namespace {
+
+// The original copies single floats through x87 (FLD/FSTP), which quiet signaling NaNs; a plain C++ assignment
+// keeps the payload. Reproduce the x87 load/store so the element bytes match even for arbitrary bit patterns.
+float X87Store(float v)
+{
+    unsigned bits;
+    std::memcpy(&bits, &v, sizeof bits);
+    if ((bits & 0x7f800000u) == 0x7f800000u && (bits & 0x007fffffu) != 0)
+        bits |= 0x00400000u;
+    std::memcpy(&v, &bits, sizeof bits);
+    return v;
+}
+
+void StoreElement(float& dst, const float& src)
+{
+    dst = X87Store(src);
+}
+
+void StoreElement(Vector2& dst, const Vector2& src)
+{
+    dst.x = X87Store(src.x);
+    dst.y = X87Store(src.y);
+}
+
+}  // namespace
 
 template <class T>
 WaterGrid<T>::WaterGrid() : data(nullptr)
@@ -26,7 +55,7 @@ WaterGrid<T>::WaterGrid(const WaterGrid& o)
     height = o.height;
     data = static_cast<T*>(Alloc::New(GridNewBytes(width * height, sizeof(T))));
     for (int i = 0; i < width * height; ++i)
-        data[i] = o.data[i];
+        StoreElement(data[i], o.data[i]);
 }
 
 template <class T>
@@ -45,7 +74,7 @@ void WaterGrid<T>::operator=(const WaterGrid& o)
     height = o.height;
     data = static_cast<T*>(Alloc::New(GridNewBytes(width * height, sizeof(T))));
     for (int i = 0; i < width * height; ++i)
-        data[i] = o.data[i];
+        StoreElement(data[i], o.data[i]);
 }
 
 template <class T>
@@ -65,7 +94,7 @@ const T& WaterGrid<T>::Get(int x, int y) const
 template <class T>
 void WaterGrid<T>::Set(int x, int y, const T& v)
 {
-    data[x + y * width] = v;
+    StoreElement(data[x + y * width], v);
 }
 
 template <class T>

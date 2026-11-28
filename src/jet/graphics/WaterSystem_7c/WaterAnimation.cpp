@@ -25,8 +25,18 @@ WaterAnimation::WaterAnimation() : animMaxHeight(0.0f)
 
 WaterAnimation::~WaterAnimation() = default;
 
-// 0x10015db0 (shared body: returns null in the original)
-WaterGrid<Vector2>* WaterAnimation::GetXYFrame(unsigned int frame)
+// 0x10015db0 (shared body: the three base virtuals are stubs in the original)
+bool WaterAnimation::Initialize(const FrameAnimation*, const Size&, const AnimProp&)
+{
+    return false;
+}
+
+WaterGrid<float>* WaterAnimation::GetFrame(unsigned int)
+{
+    return nullptr;
+}
+
+WaterGrid<Vector2>* WaterAnimation::GetXYFrame(unsigned int)
 {
     return nullptr;
 }

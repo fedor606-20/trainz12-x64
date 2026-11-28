@@ -65,10 +65,10 @@ int FrameAnimation::GetSampleRate() const
 void FrameAnimation::Update(float deltaTime)
 {
     time += deltaTime;
-    float pos = static_cast<float>(static_cast<double>(sampleRate) * time);
+    // the original multiplies in single precision, then truncates; only frac() goes through double floor
+    float pos = static_cast<float>(sampleRate) * time;
     currentFrame = static_cast<int>(pos) % numFrames;
-    // frac() through the double floor, as the original (the x87 result is rounded once, on the store)
-    deltaFrame = static_cast<float>(static_cast<double>(pos) - std::floor(static_cast<double>(pos)));
+    deltaFrame = pos - static_cast<float>(std::floor(static_cast<double>(pos)));
 }
 
 }  // namespace Jet

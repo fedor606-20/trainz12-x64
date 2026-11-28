@@ -1,0 +1,9 @@
+9	0x1440	??0FrameAnimation@Jet@@QAE@HH@Z	public: __thiscall Jet::FrameAnimation::FrameAnimation(int,int)	LOCAL
+59	0x91d0	??1FrameAnimation@Jet@@QAE@XZ	public: __thiscall Jet::FrameAnimation::~FrameAnimation(void)	LOCAL
+90	0x13d0	??4FrameAnimation@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::FrameAnimation & __thiscall Jet::FrameAnimation::operator=(class Jet::FrameAnimation const &)	LOCAL
+244	0x1400	?GetCurrentFrame@FrameAnimation@Jet@@QBAHXZ	public: int __cdecl Jet::FrameAnimation::GetCurrentFrame(void)const 	LOCAL
+247	0x1410	?GetDeltaFrame@FrameAnimation@Jet@@QBAMXZ	public: float __cdecl Jet::FrameAnimation::GetDeltaFrame(void)const 	LOCAL
+268	0x1420	?GetNumFrames@FrameAnimation@Jet@@QBAHXZ	public: int __cdecl Jet::FrameAnimation::GetNumFrames(void)const 	LOCAL
+269	0x1430	?GetPeriod@FrameAnimation@Jet@@QBAHXZ	public: int __cdecl Jet::FrameAnimation::GetPeriod(void)const 	LOCAL
+279	0x8750	?GetSampleRate@FrameAnimation@Jet@@QBAHXZ	public: int __cdecl Jet::FrameAnimation::GetSampleRate(void)const 	LOCAL
+457	0x1470	?Update@FrameAnimation@Jet@@QAAXM@Z	public: void __cdecl Jet::FrameAnimation::Update(float)	LOCAL

@@ -21,7 +21,11 @@ public:
     WaterAnimation();
     virtual ~WaterAnimation();
 
-    virtual WaterGrid<Vector2>* __cdecl GetXYFrame(unsigned int frame);  // the original's stub returns null
+    // original vtable slots 0..2, all stubs in the base (0x10015db0): Initialize false, GetFrame null,
+    // GetXYFrame null. WaterAnimationPN overrides the first two.
+    virtual bool __cdecl Initialize(const FrameAnimation* frameAnimation, const Size& gridSize, const AnimProp& anim);
+    virtual WaterGrid<float>* __cdecl GetFrame(unsigned int frame);
+    virtual WaterGrid<Vector2>* __cdecl GetXYFrame(unsigned int frame);
 
     const Size& __cdecl GetSize() const;   // +0x0c
     float __thiscall GetAnimMaxHeight() const;  // +0x14

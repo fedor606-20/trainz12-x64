@@ -1,0 +1,11 @@
+29	0x92a0	??0WaterManager@Jet@@QAE@XZ	public: __thiscall Jet::WaterManager::WaterManager(void)	TODO
+72	0x9360	??1WaterManager@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterManager::~WaterManager(void)	TODO
+124	0x1df20	??_7WaterManager@Jet@@6B01@@	const Jet::WaterManager::`vftable'{for `Jet::WaterManager'}	TODO
+125	0x1df44	??_7WaterManager@Jet@@6BPluginInstance@1@@	const Jet::WaterManager::`vftable'{for `Jet::PluginInstance'}	TODO
+149	0x1df4c	??_8WaterManager@Jet@@7B@	const Jet::WaterManager::`vbtable'	TODO
+159	0x56f0	??_DWaterManager@Jet@@QAEXXZ	public: void __thiscall Jet::WaterManager::`vbase destructor'(void)	TODO
+202	0x93e0	?CreateInstance@WaterManager@Jet@@SAPAV12@ABVPString@2@@Z	public: static class Jet::WaterManager * __cdecl Jet::WaterManager::CreateInstance(class Jet::PString const &)	TODO
+242	0x56e0	?GetConfig@WaterManager@Jet@@QBEABVWaterManagerConfig@2@XZ	public: class Jet::WaterManagerConfig const & __thiscall Jet::WaterManager::GetConfig(void)const 	TODO
+316	0x13f10	?Init@WaterManager@Jet@@QAE_NXZ	public: bool __thiscall Jet::WaterManager::Init(void)	TODO
+332	0x9460	?Initialize@WaterManager@Jet@@UAE_NPAVRenderKernel@2@PBVResourceDatabase@2@ABVPString@2@H@Z	public: virtual bool __thiscall Jet::WaterManager::Initialize(class Jet::RenderKernel *,class Jet::ResourceDatabase const *,class Jet::PString const &,int)	TODO
+468	0x38ff8	?groupUid@WaterManager@Jet@@2VUId@2@B	public: static class Jet::UId const Jet::WaterManager::groupUid	TODO

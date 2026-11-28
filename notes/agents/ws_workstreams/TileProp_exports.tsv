@@ -1,0 +1,5 @@
+15	0x2f50	??0TileProp@Jet@@QAE@ABU01@@Z	public: __thiscall Jet::TileProp::TileProp(struct Jet::TileProp const &)	LOCAL
+16	0x9960	??0TileProp@Jet@@QAE@XZ	public: __thiscall Jet::TileProp::TileProp(void)	LOCAL
+63	0x2f30	??1TileProp@Jet@@QAE@XZ	public: __thiscall Jet::TileProp::~TileProp(void)	LOCAL
+94	0x2fc0	??4TileProp@Jet@@QAEAAU01@ABU01@@Z	public: struct Jet::TileProp & __thiscall Jet::TileProp::operator=(struct Jet::TileProp const &)	LOCAL
+355	0xa6f0	?Load@TileProp@Jet@@QAEXABVConfigData@2@@Z	public: void __thiscall Jet::TileProp::Load(class Jet::ConfigData const &)	LOCAL

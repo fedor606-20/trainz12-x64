@@ -1,0 +1,8 @@
+43	0x15a90	??0WaterOceanMaterialPlugin@Jet@@IAE@ABVPString@1@ABVUId@1@@Z	protected: __thiscall Jet::WaterOceanMaterialPlugin::WaterOceanMaterialPlugin(class Jet::PString const &,class Jet::UId const &)	LOCAL
+44	0x159d0	??0WaterOceanMaterialPlugin@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::WaterOceanMaterialPlugin::WaterOceanMaterialPlugin(class Jet::WaterOceanMaterialPlugin const &)	LOCAL
+45	0x15a50	??0WaterOceanMaterialPlugin@Jet@@QAE@XZ	public: __thiscall Jet::WaterOceanMaterialPlugin::WaterOceanMaterialPlugin(void)	LOCAL
+82	0x15ac0	??1WaterOceanMaterialPlugin@Jet@@UAE@XZ	public: virtual __thiscall Jet::WaterOceanMaterialPlugin::~WaterOceanMaterialPlugin(void)	LOCAL
+101	0x7260	??4WaterOceanMaterialPlugin@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::WaterOceanMaterialPlugin & __thiscall Jet::WaterOceanMaterialPlugin::operator=(class Jet::WaterOceanMaterialPlugin const &)	LOCAL
+141	0x1eef4	??_7WaterOceanMaterialPlugin@Jet@@6B@	const Jet::WaterOceanMaterialPlugin::`vftable'	LOCAL
+208	0x15ad0	?CreateInstance@WaterOceanMaterialPlugin@Jet@@UBAPAVMaterial@2@PAVMaterialManager@2@PAVRenderKernel@2@@Z	public: virtual class Jet::Material * __cdecl Jet::WaterOceanMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)const 	TODO
+351	0x15a70	?IsSupported@WaterOceanMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z	public: virtual bool __cdecl Jet::WaterOceanMaterialPlugin::IsSupported(class Jet::Display *,class Jet::PString &)	LOCAL

@@ -1,0 +1,14 @@
+12	0x1e80	??0PNoise@Jet@@QAE@XZ	public: __thiscall Jet::PNoise::PNoise(void)	LOCAL
+61	0x91d0	??1PNoise@Jet@@QAE@XZ	public: __thiscall Jet::PNoise::~PNoise(void)	LOCAL
+92	0x14c0	??4PNoise@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::PNoise & __thiscall Jet::PNoise::operator=(class Jet::PNoise const &)	LOCAL
+362	0x14f0	?Noise1@PNoise@Jet@@QAAMM@Z	public: float __cdecl Jet::PNoise::Noise1(float)	LOCAL
+363	0x1570	?Noise2@PNoise@Jet@@QAAMQAM@Z	public: float __cdecl Jet::PNoise::Noise2(float * const)	LOCAL
+364	0x1700	?Noise3@PNoise@Jet@@QAAMQAM@Z	public: float __cdecl Jet::PNoise::Noise3(float * const)	LOCAL
+403	0x14e0	?SetNumOctaves@PNoise@Jet@@QAAXH@Z	public: void __cdecl Jet::PNoise::SetNumOctaves(int)	LOCAL
+442	0x1a70	?Turbulence1@PNoise@Jet@@QAAMM@Z	public: float __cdecl Jet::PNoise::Turbulence1(float)	LOCAL
+443	0x1cc0	?Turbulence2@PNoise@Jet@@QAAMMM@Z	public: float __cdecl Jet::PNoise::Turbulence2(float,float)	LOCAL
+444	0x1b50	?Turbulence2@PNoise@Jet@@QAAMQAM@Z	public: float __cdecl Jet::PNoise::Turbulence2(float * const)	LOCAL
+445	0x1c80	?Turbulence3@PNoise@Jet@@QAAMMMM@Z	public: float __cdecl Jet::PNoise::Turbulence3(float,float,float)	LOCAL
+446	0x1be0	?Turbulence3@PNoise@Jet@@QAAMQAM@Z	public: float __cdecl Jet::PNoise::Turbulence3(float * const)	LOCAL
+447	0x1df0	?TurbulenceLoopingTiled@PNoise@Jet@@QAAMMMMMM@Z	public: float __cdecl Jet::PNoise::TurbulenceLoopingTiled(float,float,float,float,float)	LOCAL
+448	0x1cf0	?TurbulenceTiled@PNoise@Jet@@QAAMMMMM@Z	public: float __cdecl Jet::PNoise::TurbulenceTiled(float,float,float,float)	LOCAL

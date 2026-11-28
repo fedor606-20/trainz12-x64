@@ -194,23 +194,3 @@
 ??_7WaterOceanMaterialPlugin@Jet@@6B@=?WsOceanVftable@@3PAPAXA
 ?IsSupported@WaterMaterialFresWavePlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?SupportedAlways@WsVfThunks@@QAA_NPAVDisplay@Jet@@AAVPString@3@@Z
 ??_7WaterMaterialFresWavePlugin@Jet@@6B@=?WsFresWaveVftable@@3PAPAXA
-
-# U7b state: direct WaterMaterial exports; the original still owns virtual dispatch.
-?GetDetailAnim@WaterMaterial@Jet@@UBE_NXZ=?GetDetailAnim@WsWaterMaterialState@@QBE_NXZ
-?GetUseVertexProgram@WaterMaterial@Jet@@UAE_NXZ=?GetUseVertexProgram@WsWaterMaterialState@@QAE_NXZ
-?EnableDetailAnimInterpolation@WaterMaterial@Jet@@UAEX_N@Z=?IgnoreBool@WsWaterMaterialState@@QAEX_N@Z
-?SetDetailAnim@WaterMaterial@Jet@@UAEX_N@Z=?IgnoreBool@WsWaterMaterialState@@QAEX_N@Z
-?SetRefractiveIndex@WaterMaterial@Jet@@UAEXM@Z=?IgnoreFloat@WsWaterMaterialState@@QAEXM@Z
-?Update@WaterMaterial@Jet@@UAEXM@Z=?IgnoreFloat@WsWaterMaterialState@@QAEXM@Z
-?SetWaterColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z=?SetWaterColor@WsWaterMaterialState@@QAEXPBM@Z
-?GetWaterColor@WaterMaterial@Jet@@UBEABVColor@2@XZ=?GetWaterColor@WsWaterMaterialState@@QBEPBMXZ
-?SetLightColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z=?SetLightColor@WsWaterMaterialState@@QAEXPBM@Z
-?GetLightColor@WaterMaterial@Jet@@UBEABVColor@2@XZ=?GetLightColor@WsWaterMaterialState@@QBEPBMXZ
-?SetAmbientColor@WaterMaterial@Jet@@UAEXABVColor@2@@Z=?SetAmbientColor@WsWaterMaterialState@@QAEXPBM@Z
-?GetAmbientColor@WaterMaterial@Jet@@UBEABVColor@2@XZ=?GetAmbientColor@WsWaterMaterialState@@QBEPBMXZ
-?SetLightDir@WaterMaterial@Jet@@UAEXABVVector3@2@@Z=?SetLightDir@WsWaterMaterialState@@QAEXPBM@Z
-?GetLightDir@WaterMaterial@Jet@@UBEABVVector3@2@XZ=?GetLightDir@WsWaterMaterialState@@QBEPBMXZ
-?SetUVScrollVelocity@WaterMaterial@Jet@@UAEXVVector2@2@@Z=?SetUVScrollVelocity@WsWaterMaterialState@@QAEXMM@Z
-?GetUVScrollVelocity@WaterMaterial@Jet@@UBE?AVVector2@2@XZ=?GetUVScrollVelocity@WsWaterMaterialState@@QBEPAMPAM@Z
-?SetReflectEyeVector@WaterMaterial@Jet@@UAEX_N@Z=?SetReflectEyeVector@WsWaterMaterialState@@QAEX_N@Z
-?IsReflectEyeVector@WaterMaterial@Jet@@UBE_NXZ=?IsReflectEyeVector@WsWaterMaterialState@@QBE_NXZ

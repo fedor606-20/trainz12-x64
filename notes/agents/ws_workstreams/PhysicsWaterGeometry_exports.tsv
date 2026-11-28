@@ -1,0 +1,7 @@
+14	0x22e0	??0PhysicsWaterGeometry@Jet@@QAE@XZ	public: __thiscall Jet::PhysicsWaterGeometry::PhysicsWaterGeometry(void)	LOCAL
+62	0x2500	??1PhysicsWaterGeometry@Jet@@UAE@XZ	public: virtual __thiscall Jet::PhysicsWaterGeometry::~PhysicsWaterGeometry(void)	LOCAL
+113	0x1d794	??_7PhysicsWaterGeometry@Jet@@6B@	const Jet::PhysicsWaterGeometry::`vftable'	LOCAL
+222	0x2920	?Displace@PhysicsWaterGeometry@Jet@@QAAXPAVDisplacementHull@2@HHM@Z	public: void __cdecl Jet::PhysicsWaterGeometry::Displace(class Jet::DisplacementHull *,int,int,float)	LOCAL
+223	0x22a0	?Displace@PhysicsWaterGeometry@Jet@@UAAXHHM@Z	public: virtual void __cdecl Jet::PhysicsWaterGeometry::Displace(int,int,float)	LOCAL
+325	0x2330	?Initialize@PhysicsWaterGeometry@Jet@@UAA_NPAVRenderKernel@2@PAVWaterMaterial@2@ABUSize@2@ABVVector3@2@ABVVector2@2@MMM_NMMM@Z	public: virtual bool __cdecl Jet::PhysicsWaterGeometry::Initialize(class Jet::RenderKernel *,class Jet::WaterMaterial *,struct Jet::Size const &,class Jet::Vector3 const &,class Jet::Vector2 const &,float,float,float,bool,float,float,float)	LOCAL
+458	0x2540	?Update@PhysicsWaterGeometry@Jet@@UAAXM@Z	public: virtual void __cdecl Jet::PhysicsWaterGeometry::Update(float)	LOCAL
