@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <vector>
 
 // GL 1.2+ / vendor tokens that the Windows 1.1 header does not carry
 namespace {
@@ -42,6 +43,41 @@ constexpr GLenum kMaxTextureUnits = 0x84E2;
 constexpr GLenum kUnsignedShort565 = 0x8363;
 constexpr GLenum kRgb5A1 = 0x8057;
 constexpr GLenum kSgisGenerateMipmap = 0x8191;
+}  // namespace
+
+namespace {
+
+// Temporary: dump the first UI atlas (GL texture 5) once, so its gradient/alpha can be checked outside the game.
+void DumpUiAtlas(unsigned int id)
+{
+    static bool dumped = false;
+    if (dumped) return;
+    GLint width = 0;
+    GLint height = 0;
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+    if (width <= 0 || height <= 0 || width > 2048 || height > 2048) return;
+    std::vector<unsigned char> pixels(static_cast<size_t>(width) * static_cast<size_t>(height) * 4);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+    HANDLE file = CreateFileA("D:\\universal modder\\build-trainz32\\game-rogl\\tex5.raw", GENERIC_WRITE,
+                              FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (file != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        WriteFile(file, pixels.data(), static_cast<DWORD>(pixels.size()), &written, nullptr);
+        CloseHandle(file);
+    }
+    char info[32];
+    const int length = wsprintfA(info, "%dx%d\r\n%u\r\n", width, height, id);
+    file = CreateFileA("D:\\universal modder\\build-trainz32\\game-rogl\\tex5.txt", GENERIC_WRITE, FILE_SHARE_READ,
+                       nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (file != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        WriteFile(file, info, static_cast<DWORD>(length), &written, nullptr);
+        CloseHandle(file);
+    }
+    dumped = true;
+}
+
 }  // namespace
 
 namespace Jet {
@@ -195,8 +231,10 @@ void __cdecl DisplayTextureOpenGL::InitInstance(DisplayTextureOpenGL&) const {}
 
 void __cdecl DisplayTextureOpenGL::BindTexture(unsigned int unit) const
 {
+    if (GL::ext.ActiveTexture) GL::ext.ActiveTexture(0x84C0 + unit);
     if (unit >= maxTextureUnits || !bound) {
         glBindTexture(GL_TEXTURE_2D, apiTexture);
+        if (apiTexture == 5 && !dirty) DumpUiAtlas(apiTexture);
         return;
     }
     if (bound[unit] != this) {
@@ -204,6 +242,7 @@ void __cdecl DisplayTextureOpenGL::BindTexture(unsigned int unit) const
         bound[unit] = this;
     }
     glBindTexture(dimension == static_cast<TextureDimension>(1) ? kTextureCubeMap : GL_TEXTURE_2D, apiTexture);
+    if (apiTexture == 5 && !dirty) DumpUiAtlas(apiTexture);
 }
 
 void __cdecl DisplayTextureOpenGL::UnbindRenderTexture(unsigned int unit) const
@@ -215,6 +254,7 @@ void __cdecl DisplayTextureOpenGL::UnbindRenderTexture(unsigned int unit) const
 void __cdecl DisplayTextureOpenGL::SetBasicState() const
 {
     if (apiTexture == 0xffffffff) return;
+    if (GL::ext.ActiveTexture) GL::ext.ActiveTexture(0x84C0);
     if (dimension == static_cast<TextureDimension>(1)) {
         glTexParameteri(kTextureCubeMap, GL_TEXTURE_MIN_FILTER, minFilter);
         glTexParameteri(kTextureCubeMap, GL_TEXTURE_MAG_FILTER, magFilter);

@@ -17,6 +17,8 @@
 #include <jet/Plugin.h>
 #include <jet/RenderSystem.h>
 #include <jet/RenderTypes.h>
+#include "ShaderLoaderStub.h"
+
 #include <jet/Window.h>
 
 #include <windows.h>
@@ -25,6 +27,7 @@
 #include <GL/glu.h>
 
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <new>
 
@@ -40,11 +43,170 @@ static void TracePtr(const char* label, const void* value)
     (void)value;
 }
 
+// Temporary first-chance fault log: kernel32 only, no CRT and no allocation, so it is safe inside a VEH.
+static LONG g_faultLogging = 0;
+
+static char* AppendText(char* p, char* end, const char* text)
+{
+    while (*text && p < end) *p++ = *text++;
+    return p;
+}
+
+static char* AppendHex(char* p, char* end, unsigned int value)
+{
+    static const char digits[] = "0123456789abcdef";
+    for (int shift = 28; shift >= 0 && p < end; shift -= 4) *p++ = digits[(value >> shift) & 15];
+    return p;
+}
+
+static bool Readable(const void* address, unsigned int size)
+{
+    MEMORY_BASIC_INFORMATION info;
+    if (VirtualQuery(address, &info, sizeof info) == 0) return false;
+    if (info.State != MEM_COMMIT) return false;
+    if ((info.Protect & (PAGE_NOACCESS | PAGE_GUARD)) != 0) return false;
+    return size <= info.RegionSize;
+}
+
+// Temporary draw/texture counters: a few lines per run show whether the 3D path submits anything.
+static volatile LONG g_drawTotal = 0;
+static volatile LONG g_drawBySlot[4] = {0, 0, 0, 0};
+static volatile LONG g_textureBinds = 0;
+static volatile LONG g_textureCreates = 0;
+
+static void DebugLogText(const char* text)
+{
+    HANDLE file = CreateFileA("D:\\universal modder\\build-trainz32\\game-rogl\\rogl_draw.log", FILE_APPEND_DATA,
+                              FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (file == INVALID_HANDLE_VALUE) return;
+    DWORD written = 0;
+    WriteFile(file, text, static_cast<DWORD>(std::strlen(text)), &written, nullptr);
+    CloseHandle(file);
+}
+
+static void NoteDraw(int slot, const char* name, void* type, int primitive, int count)
+{
+    const LONG total = InterlockedIncrement(&g_drawTotal);
+    const LONG mine = InterlockedIncrement(&g_drawBySlot[slot]);
+    if (total <= 32 || (total & 511) == 0) {
+        char line[512];
+        GLboolean mask[4] = {0, 0, 0, 0};
+        GLint viewport[4] = {0, 0, 0, 0};
+        GLint scissor[4] = {0, 0, 0, 0};
+        GLint texture = 0;
+        GLint textureWidth = 0;
+        GLint textureHeight = 0;
+        GLint textureFormat = 0;
+        GLint blendSrc = 0;
+        GLint blendDst = 0;
+        GLfloat alphaRef = 0.0f;
+        glGetBooleanv(GL_COLOR_WRITEMASK, mask);
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        glGetIntegerv(GL_SCISSOR_BOX, scissor);
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, &texture);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &textureWidth);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &textureHeight);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &textureFormat);
+        glGetIntegerv(GL_BLEND_SRC, &blendSrc);
+        glGetIntegerv(GL_BLEND_DST, &blendDst);
+        glGetFloatv(GL_ALPHA_TEST_REF, &alphaRef);
+        wsprintfA(line,
+                  "%s type=%x prim=%d count=%d total=%d slot=%d texbinds=%d depth=%d blend=%d(%x,%x) cull=%d "
+                  "light=%d tex2d=%d atest=%d aref=%x mask=%d%d%d%d vp=%d,%d,%d,%d sc=%d,%d,%d,%d,%d "
+                  "tex=%x(%dx%d,%x) err=%x\r\n",
+                  name, static_cast<unsigned>(reinterpret_cast<uintptr_t>(type)), primitive, count, total, mine,
+                  g_textureBinds, glIsEnabled(GL_DEPTH_TEST), glIsEnabled(GL_BLEND), blendSrc, blendDst,
+                  glIsEnabled(GL_CULL_FACE), glIsEnabled(GL_LIGHTING), glIsEnabled(GL_TEXTURE_2D),
+                  glIsEnabled(GL_ALPHA_TEST), *reinterpret_cast<unsigned*>(&alphaRef), mask[0], mask[1], mask[2],
+                  mask[3], viewport[0], viewport[1], viewport[2], viewport[3], glIsEnabled(GL_SCISSOR_TEST), scissor[0],
+                  scissor[1], scissor[2], scissor[3], texture, textureWidth, textureHeight, textureFormat,
+                  glGetError());
+        DebugLogText(line);
+        if (slot == 1) {
+            GLfloat projection[16] = {};
+            GLfloat modelview[16] = {};
+            glGetFloatv(GL_PROJECTION_MATRIX, projection);
+            glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+            wsprintfA(line, "mat total=%d p=%x,%x,%x,%x mv=%x,%x,%x,%x,%x,%x,%x\r\n", total,
+                      *reinterpret_cast<unsigned*>(&projection[0]), *reinterpret_cast<unsigned*>(&projection[5]),
+                      *reinterpret_cast<unsigned*>(&projection[10]), *reinterpret_cast<unsigned*>(&projection[14]),
+                      *reinterpret_cast<unsigned*>(&modelview[0]), *reinterpret_cast<unsigned*>(&modelview[5]),
+                      *reinterpret_cast<unsigned*>(&modelview[10]), *reinterpret_cast<unsigned*>(&modelview[12]),
+                      *reinterpret_cast<unsigned*>(&modelview[13]), *reinterpret_cast<unsigned*>(&modelview[14]),
+                      *reinterpret_cast<unsigned*>(&modelview[15]));
+            DebugLogText(line);
+        }
+    }
+}
+
+static LONG CALLBACK LogAccessViolation(EXCEPTION_POINTERS* info)
+{
+    if (info->ExceptionRecord->ExceptionCode != EXCEPTION_ACCESS_VIOLATION) return EXCEPTION_CONTINUE_SEARCH;
+    if (InterlockedCompareExchange(&g_faultLogging, 1, 0) != 0) return EXCEPTION_CONTINUE_SEARCH;
+    const CONTEXT* ctx = info->ContextRecord;
+    char text[2048];
+    char* p = text;
+    char* const end = text + sizeof text - 2;
+    p = AppendText(p, end, "AV eip=");
+    p = AppendHex(p, end, ctx->Eip);
+    p = AppendText(p, end, " esp=");
+    p = AppendHex(p, end, ctx->Esp);
+    p = AppendText(p, end, " ebp=");
+    p = AppendHex(p, end, ctx->Ebp);
+    p = AppendText(p, end, " eax=");
+    p = AppendHex(p, end, ctx->Eax);
+    p = AppendText(p, end, " info=");
+    p = AppendHex(p, end, static_cast<unsigned int>(info->ExceptionRecord->ExceptionInformation[0]));
+    p = AppendText(p, end, ",");
+    p = AppendHex(p, end, static_cast<unsigned int>(info->ExceptionRecord->ExceptionInformation[1]));
+    p = AppendText(p, end, " exe=");
+    p = AppendHex(p, end, static_cast<unsigned int>(reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr))));
+    p = AppendText(p, end, " ks=");
+    p = AppendHex(p, end, static_cast<unsigned int>(reinterpret_cast<uintptr_t>(GetModuleHandleA("KernelStandard_7c.dll"))));
+    p = AppendText(p, end, " k7=");
+    p = AppendHex(p, end, static_cast<unsigned int>(reinterpret_cast<uintptr_t>(GetModuleHandleA("Kernel_7c.dll"))));
+    p = AppendText(p, end, " rs=");
+    p = AppendHex(p, end, static_cast<unsigned int>(reinterpret_cast<uintptr_t>(GetModuleHandleA("RenderSystem_7c.dll"))));
+    p = AppendText(p, end, "\r\n");
+    unsigned int frame = ctx->Ebp;
+    for (int i = 0; i < 16 && p + 24 < end; ++i) {
+        if (frame < 0x10000 || !Readable(reinterpret_cast<const void*>(frame), 8)) break;
+        const unsigned int next = *reinterpret_cast<const unsigned int*>(frame);
+        const unsigned int ret = *reinterpret_cast<const unsigned int*>(frame + 4);
+        p = AppendText(p, end, " ");
+        p = AppendHex(p, end, ret);
+        p = AppendText(p, end, "@");
+        p = AppendHex(p, end, frame);
+        if (next <= frame) break;
+        frame = next;
+    }
+    p = AppendText(p, end, "\r\n");
+    unsigned int esp = ctx->Esp;
+    for (int i = 0; i < 48 && p + 10 < end; ++i) {
+        const unsigned int value = static_cast<unsigned int>(esp + i * 4);
+        if (!Readable(reinterpret_cast<const void*>(value), 4)) break;
+        p = AppendText(p, end, " ");
+        p = AppendHex(p, end, *reinterpret_cast<const unsigned int*>(value));
+    }
+    *p++ = '\r';
+    *p++ = '\n';
+    HANDLE file = CreateFileA("D:\\universal modder\\build-trainz32\\game-rogl\\rogl_av.log",
+                              FILE_APPEND_DATA, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_ALWAYS,
+                              FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (file != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        WriteFile(file, text, static_cast<DWORD>(p - text), &written, nullptr);
+        CloseHandle(file);
+    }
+    InterlockedExchange(&g_faultLogging, 0);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID)
 {
     if (reason == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(instance);
-        TraceLine("DllMain attach");
+        AddVectoredExceptionHandler(1, &LogAccessViolation);
     }
     return TRUE;
 }
@@ -508,6 +670,119 @@ const Jet::VertexType::Stream* StreamList(const void* type)
                 : nullptr;
 }
 
+// Temporary: dump the vertices of large texture-5 quads (the UI/fade panels) to see the intended alpha and UVs.
+void LogUiQuad(const void* type, const void* vertices, const Jet::StaticBuffer* buffer)
+{
+    GLint texture = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &texture);
+    if (texture != 5) return;
+    const auto* streams = StreamList(type);
+    if (!streams || !StreamCount(type)) return;
+    const auto& stream = streams[0];
+    const void* const data = vertices ? vertices : (buffer ? AsBuffer(buffer)->data : nullptr);
+    if (!data) return;
+    int positionOffset = -1;
+    int colorOffset = -1;
+    int uvOffset = -1;
+    for (unsigned i = 0; i < stream.count; ++i) {
+        const auto& item = stream.items[i];
+        if (item.type == 1) positionOffset = item.offset;
+        else if (item.type == 2 || item.type == 3) colorOffset = item.offset;
+        else if (item.type >= 15 && item.type <= 22 && uvOffset < 0) uvOffset = item.offset;
+    }
+    if (positionOffset < 0) return;
+    float x[4] = {};
+    float y[4] = {};
+    for (int i = 0; i < 4; ++i) {
+        const auto* p = static_cast<const unsigned char*>(data) + stream.stride * i + positionOffset;
+        x[i] = *reinterpret_cast<const float*>(p);
+        y[i] = *reinterpret_cast<const float*>(p + 4);
+    }
+    float minX = x[0], maxX = x[0], minY = y[0], maxY = y[0];
+    for (int i = 1; i < 4; ++i) {
+        if (x[i] < minX) minX = x[i];
+        if (x[i] > maxX) maxX = x[i];
+        if (y[i] < minY) minY = y[i];
+        if (y[i] > maxY) maxY = y[i];
+    }
+    if (maxX - minX < 100.0f) return;
+    if (minY > 500.0f) return;  // the bottom toolbar strip is not the left fade
+    static volatile LONG logged = 0;
+    if (InterlockedIncrement(&logged) > 20) return;
+    GLint viewport[4] = {0, 0, 0, 0};
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    char line[512];
+    int length = std::snprintf(line, sizeof line, "uiquad %.1f..%.1f x %.1f..%.1f blend=%d vp=%d,%d,%d,%d",
+                               static_cast<double>(minX), static_cast<double>(maxX), static_cast<double>(minY),
+                               static_cast<double>(maxY), glIsEnabled(GL_BLEND), viewport[0], viewport[1], viewport[2],
+                               viewport[3]);
+    if (colorOffset >= 0) {
+        const auto* c = static_cast<const unsigned char*>(data) + colorOffset;
+        length += std::snprintf(line + length, sizeof line - length,
+                                " c0=%02x%02x%02x%02x c1=%02x%02x%02x%02x c2=%02x%02x%02x%02x c3=%02x%02x%02x%02x",
+                                c[0], c[1], c[2], c[3], c[stream.stride], c[stream.stride + 1], c[stream.stride + 2],
+                                c[stream.stride + 3], c[stream.stride * 2], c[stream.stride * 2 + 1],
+                                c[stream.stride * 2 + 2], c[stream.stride * 2 + 3], c[stream.stride * 3],
+                                c[stream.stride * 3 + 1], c[stream.stride * 3 + 2], c[stream.stride * 3 + 3]);
+    }
+    if (uvOffset >= 0) {
+        const auto* uv = static_cast<const unsigned char*>(data) + uvOffset;
+        std::snprintf(line + length, sizeof line - length,
+                      " uv=%.4f,%.4f %.4f,%.4f %.4f,%.4f %.4f,%.4f",
+                      static_cast<double>(*reinterpret_cast<const float*>(uv)),
+                      static_cast<double>(*reinterpret_cast<const float*>(uv + 4)),
+                      static_cast<double>(*reinterpret_cast<const float*>(uv + stream.stride)),
+                      static_cast<double>(*reinterpret_cast<const float*>(uv + stream.stride + 4)),
+                      static_cast<double>(*reinterpret_cast<const float*>(uv + stream.stride * 2)),
+                      static_cast<double>(*reinterpret_cast<const float*>(uv + stream.stride * 2 + 4)),
+                      static_cast<double>(*reinterpret_cast<const float*>(uv + stream.stride * 3)),
+                      static_cast<double>(*reinterpret_cast<const float*>(uv + stream.stride * 3 + 4)));
+    }
+    std::snprintf(line + std::strlen(line), sizeof line - std::strlen(line), "\r\n");
+    DebugLogText(line);
+}
+
+// Temporary: one line per distinct vertex type, plus the matrices on the first 3D type. The dataType/count fields
+// are what the client-array binding must honour.
+void LogVertexLayout(const void* type, const char* name)
+{
+    static const void* seen[8] = {};
+    static volatile LONG logged = 0;
+    if (!type) return;
+    for (const void* p : seen)
+        if (p == type) return;
+    const LONG index = InterlockedIncrement(&logged) - 1;
+    if (index >= 8) return;
+    seen[index] = type;
+
+    const auto* streams = StreamList(type);
+    const unsigned count = StreamCount(type);
+    char line[1400];
+    int len = wsprintfA(line, "layout %s type=%x streams=%u\r\n", name,
+                        static_cast<unsigned>(reinterpret_cast<uintptr_t>(type)), count);
+    for (unsigned s = 0; streams && s < count; ++s) {
+        len += wsprintfA(line + len, " stream%u stride=%u items=%u\r\n", s, streams[s].stride, streams[s].count);
+        for (unsigned i = 0; i < streams[s].count; ++i) {
+            const auto& item = streams[s].items[i];
+            len += wsprintfA(line + len, "  item%u type=%d off=%d count=%d data=%d sem=%d shared=%d\r\n", i,
+                             static_cast<int>(item.type), item.offset, item.count, item.dataType, item.semantic,
+                             item.sharedWith);
+        }
+    }
+    GLfloat projection[16] = {};
+    GLfloat modelview[16] = {};
+    glGetFloatv(GL_PROJECTION_MATRIX, projection);
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+    len += wsprintfA(line + len, " projection=");
+    for (float value : projection)
+        len += wsprintfA(line + len, "%08x", *reinterpret_cast<unsigned*>(&value));
+    len += wsprintfA(line + len, "\r\n modelview=");
+    for (float value : modelview)
+        len += wsprintfA(line + len, "%08x", *reinterpret_cast<unsigned*>(&value));
+    len += wsprintfA(line + len, "\r\n");
+    DebugLogText(line);
+}
+
 template <class Bind>
 void ForEachItem(const void* type, Bind bind)
 {
@@ -541,7 +816,9 @@ const unsigned short* IndexData(const void* block)
 void DrawElementBatch(const void* type, const void* vertices, const Jet::StaticBuffer* vertexBuffer,
                       const void* indices, const Jet::StaticBuffer* indexBuffer, unsigned count, int primitive)
 {
+    LogVertexLayout(type, "draw");
     if (!type || !count) return;
+    LogUiQuad(type, vertices, vertexBuffer);
     const auto* streams = StreamList(type);
     if (!streams) return;
     if (vertices && !vertexBuffer) {
@@ -562,6 +839,7 @@ void DrawElementBatch(const void* type, const void* vertices, const Jet::StaticB
 void DrawMultiStream(const void* type, const StreamEntry* entries, unsigned entryCount, const void* indices,
                      const Jet::StaticBuffer* indexBuffer, unsigned count, int primitive)
 {
+    LogVertexLayout(type, "multi");
     if (!type || !entries || !count) return;
     const unsigned streams = StreamCount(type);
     const auto* list = StreamList(type);
@@ -645,6 +923,7 @@ void ApplyDefaults(void* self)
     glFrontFace(GL_CCW);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     glDisable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     if (GL::ext.BlendEquation) GL::ext.BlendEquation(kFuncAdd);
     glDisable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
@@ -724,7 +1003,11 @@ extern "C" void __cdecl SlotBeginFrame(void* self, float delta)
 {
     if (!g_state.inFrame) Trace("BeginFrame");
     if (auto fn = BaseBeginFrame()) fn(self, delta);
-    if (auto* iface = Interface(self)) iface->MakeCurrent();
+    if (auto* iface = Interface(self)) {
+        iface->MakeCurrent();
+        glDisable(GL_SCISSOR_TEST);
+        glDisable(GL_DEPTH_TEST);
+    }
     g_state.inFrame = true;
     ++g_state.frame;
 }
@@ -828,6 +1111,8 @@ extern "C" void __cdecl SlotMask(void*, int kind, unsigned value)
                     (value & 0xff000000u) != 0);
     } else if (kind == 2) {
         glDepthMask(value != 0);
+        // RenderSystem's layer code disables the overlay depth test through this shared slot.
+        if (!value) glDisable(GL_DEPTH_TEST);
     }
 }
 
@@ -927,8 +1212,12 @@ extern "C" void __cdecl SlotAlphaFunction(void*, int function, float reference)
 
 extern "C" void __cdecl SlotAlphaBlend(void*, bool on)
 {
-    if (on) glEnable(GL_BLEND);
-    else glDisable(GL_BLEND);
+    if (on) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    } else {
+        glDisable(GL_BLEND);
+    }
 }
 
 extern "C" void __cdecl SlotLighting(void*, bool on)
@@ -1000,6 +1289,12 @@ extern "C" void __cdecl SlotTextureMode(void*, bool on)
 
 extern "C" void __cdecl SlotSetTexture(void*, int stage)
 {
+    const LONG binds = InterlockedIncrement(&g_textureBinds);
+    if (binds <= 16) {
+        char line[96];
+        wsprintfA(line, "bind stage=%d total=%d\r\n", stage, binds);
+        DebugLogText(line);
+    }
     if (stage < 0) stage = 0;
     if (stage >= g_state.maxTextureUnits) stage = g_state.maxTextureUnits - 1;
     g_state.currentUnit = stage;
@@ -1126,11 +1421,11 @@ extern "C" void __cdecl SlotMatrixIdentity(void* self)
     }
 }
 
-extern "C" void __cdecl SlotMatrixMultiply(void*, const Jet::Matrix4* matrix)
+extern "C" void __cdecl SlotLoadModelView(void*, const Jet::Matrix4* matrix)
 {
     if (!matrix) return;
     SetMatrixMode(GL_MODELVIEW);
-    glMultMatrixf(matrix->m);
+    glLoadMatrixf(matrix->m);
 }
 
 extern "C" void __cdecl SlotMatrixLoadIdentity(void*, int mode)
@@ -1156,6 +1451,43 @@ extern "C" void __cdecl SlotLoadMatrix(void*, const Jet::Matrix4* matrix)
 extern "C" void __cdecl SlotLoadMatrixIndexed(void*, int, const Jet::Matrix4* matrix)
 {
     if (matrix) glLoadMatrixf(matrix->m);
+}
+
+// 0x64/0x68/0x70/0x7c are getters used by VertexProgramBasic to fill its constants. They must copy the display's
+// matrix into the caller's buffer, never load that (often uninitialised) buffer into GL.
+extern "C" void __cdecl SlotGetProjection(void*, float* out)
+{
+    if (out) glGetFloatv(GL_PROJECTION_MATRIX, out);
+}
+
+extern "C" void __cdecl SlotGetModelView(void*, float* out)
+{
+    if (out) glGetFloatv(GL_MODELVIEW_MATRIX, out);
+}
+
+extern "C" void __cdecl SlotGetMatrixIndexed(void*, int index, float* out)
+{
+    if (!out) return;
+    if (index == 0) {
+        glGetFloatv(GL_MODELVIEW_MATRIX, out);
+        return;
+    }
+    for (int i = 0; i < 16; ++i) out[i] = (i % 5 == 0) ? 1.0f : 0.0f;
+}
+
+extern "C" void __cdecl SlotGetLightMatrix(void*, int, float* out)
+{
+    if (!out) return;
+    for (int i = 0; i < 16; ++i) out[i] = (i % 5 == 0) ? 1.0f : 0.0f;
+}
+
+// 0x6c: Display::LoadProjectionMatrix(const Matrix4&) - a whole projection matrix, not the extents of 0x180.
+extern "C" void __cdecl SlotLoadProjectionMatrix(void*, const Jet::Matrix4* matrix)
+{
+    if (!matrix) return;
+    SetMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(matrix->m);
+    SetMatrixMode(GL_MODELVIEW);
 }
 
 extern "C" void __cdecl SlotProjection(void*, float left, float right, float bottom, float top, float nearPlane,
@@ -1199,6 +1531,28 @@ extern "C" void __cdecl SlotLoadProjection(void*, const Jet::Matrix4* matrix)
     SetMatrixMode(GL_MODELVIEW);
 }
 
+// 0x74: Display's texture matrix setter (retail vf29): switch to the unit, load its GL texture matrix,
+// then restore MODELVIEW. A stale texture matrix otherwise samples UI gradients at the wrong place.
+extern "C" void __cdecl SlotSetTextureMatrix(void*, int unit, const Jet::Matrix4* matrix)
+{
+    if (!matrix) return;
+    if (unit < 0) unit = 0;
+    if (unit >= g_state.maxTextureUnits) unit = g_state.maxTextureUnits - 1;
+    SetActiveUnit(unit);
+    SetMatrixMode(GL_TEXTURE);
+    glLoadMatrixf(matrix->m);
+    SetMatrixMode(GL_MODELVIEW);
+}
+
+extern "C" void __cdecl SlotGetTextureMatrix(void*, int unit, float* out)
+{
+    if (!out) return;
+    if (unit < 0) unit = 0;
+    if (unit >= g_state.maxTextureUnits) unit = g_state.maxTextureUnits - 1;
+    SetActiveUnit(unit);
+    glGetFloatv(GL_TEXTURE_MATRIX, out);
+}
+
 extern "C" void __cdecl SlotMatrixMode(void* self, int mode)
 {
     (void)self;
@@ -1207,6 +1561,12 @@ extern "C" void __cdecl SlotMatrixMode(void* self, int mode)
 
 extern "C" void* __cdecl SlotCreateTexture(void* self)
 {
+    const LONG created = InterlockedIncrement(&g_textureCreates);
+    if (created <= 16) {
+        char line[64];
+        wsprintfA(line, "create texture total=%d\r\n", created);
+        DebugLogText(line);
+    }
     return new Jet::DisplayTextureOpenGL(static_cast<Jet::Display*>(self));
 }
 
@@ -1223,6 +1583,7 @@ extern "C" void* __cdecl SlotAllocStaticIndex(void*, unsigned count, int wide)
 extern "C" void __cdecl SlotDrawUser(void* self, void* type, int primitive, int, const void* vertices, int count)
 {
     (void)self;
+    NoteDraw(0, "user", type, primitive, count);
     if (!type || count <= 0) return;
     BindSingleStream(type, vertices, nullptr);
     glDrawArrays(Primitive(primitive), 0, count);
@@ -1233,6 +1594,8 @@ extern "C" void __cdecl SlotDrawStatic(void* self, void* type, int primitive, in
                                        const void* indices, int count, void* vertexBuffer, int, void* indexBuffer, int)
 {
     (void)self;
+    NoteDraw(1, "static", type, primitive, count);
+    if (glIsEnabled(GL_DEPTH_TEST) && glIsEnabled(GL_ALPHA_TEST)) glDisable(GL_BLEND);
     DrawElementBatch(type, vertices, static_cast<const Jet::StaticBuffer*>(vertexBuffer), indices,
                      static_cast<const Jet::StaticBuffer*>(indexBuffer), static_cast<unsigned>(count), primitive);
 }
@@ -1241,6 +1604,7 @@ extern "C" void __cdecl SlotDrawDynamic(void* self, void* type, int primitive, i
                                         const void* indices, int count)
 {
     (void)self;
+    NoteDraw(2, "dynamic", type, primitive, count);
     DrawElementBatch(type, vertices, nullptr, indices, nullptr, static_cast<unsigned>(count), primitive);
 }
 
@@ -1248,6 +1612,7 @@ extern "C" void __cdecl SlotDrawMulti(void* self, void* type, int primitive, int
                                       const void* indices, const Jet::StaticBuffer* indexBuffer, int, int count, int)
 {
     (void)self;
+    NoteDraw(3, "multi", type, primitive, count);
     DrawMultiStream(type, entries, StreamCount(type), indices, indexBuffer, static_cast<unsigned>(count), primitive);
 }
 
@@ -1271,6 +1636,14 @@ extern "C" bool __cdecl SlotReadDepth(void*, const Jet::Rect* area, void* destin
 }
 
 extern "C" void* __cdecl SlotDescriptor(void* self) { Trace("SlotDescriptor"); return Bytes(self) + kDescriptorOffset; }
+
+// 0x154: the display makes the effect loader the game's shader path asks for. This backend runs fixed-function
+// GL, so the loader hands out technique/constant objects that accept every value and apply nothing.
+extern "C" void* __cdecl SlotCreateShaderLoader(void*)
+{
+    Trace("SlotCreateShaderLoader");
+    return CreateShaderLoaderStub();
+}
 
 extern "C" void* __cdecl SlotBufferManager(void* self)
 {
@@ -1450,13 +1823,15 @@ void BuildTables()
     g_vtable[0x44 / 4] = reinterpret_cast<void*>(&SlotBeginFrame);
     g_vtable[0x48 / 4] = reinterpret_cast<void*>(&SlotEndFrame);
     g_vtable[0x50 / 4] = reinterpret_cast<void*>(&SlotMatrixIdentity);
-    g_vtable[0x54 / 4] = reinterpret_cast<void*>(&SlotMatrixMultiply);
+    g_vtable[0x54 / 4] = reinterpret_cast<void*>(&SlotLoadModelView);
     g_vtable[0x58 / 4] = reinterpret_cast<void*>(&SlotMatrixLoadIdentity);
     g_vtable[0x5c / 4] = reinterpret_cast<void*>(&SlotMatrixLoad);
-    g_vtable[0x68 / 4] = reinterpret_cast<void*>(&SlotLoadMatrixIndexed);
-    g_vtable[0x6c / 4] = reinterpret_cast<void*>(&SlotLoadProjection);
-    g_vtable[0x70 / 4] = reinterpret_cast<void*>(&SlotLoadMatrix);
-    g_vtable[0x74 / 4] = reinterpret_cast<void*>(&SlotMatrixMode);
+    g_vtable[0x64 / 4] = reinterpret_cast<void*>(&SlotGetProjection);
+    g_vtable[0x68 / 4] = reinterpret_cast<void*>(&SlotGetMatrixIndexed);
+    g_vtable[0x6c / 4] = reinterpret_cast<void*>(&SlotLoadProjectionMatrix);
+    g_vtable[0x70 / 4] = reinterpret_cast<void*>(&SlotGetProjection);
+    g_vtable[0x74 / 4] = reinterpret_cast<void*>(&SlotSetTextureMatrix);
+    g_vtable[0x7c / 4] = reinterpret_cast<void*>(&SlotGetTextureMatrix);
     g_vtable[0x80 / 4] = reinterpret_cast<void*>(&SlotTexelOffset);
     g_vtable[0x88 / 4] = reinterpret_cast<void*>(&SlotZero);
     g_vtable[0x8c / 4] = reinterpret_cast<void*>(&SlotCapability);
@@ -1476,7 +1851,7 @@ void BuildTables()
     g_vtable[0x114 / 4] = reinterpret_cast<void*>(&SlotZero);
     g_vtable[0x144 / 4] = reinterpret_cast<void*>(&SlotZero);
     g_vtable[0x150 / 4] = reinterpret_cast<void*>(&SlotDescriptor);
-    g_vtable[0x154 / 4] = reinterpret_cast<void*>(&SlotZero);
+    g_vtable[0x154 / 4] = reinterpret_cast<void*>(&SlotCreateShaderLoader);
     g_vtable[0x158 / 4] = reinterpret_cast<void*>(&SlotZero);
     g_vtable[0x15c / 4] = reinterpret_cast<void*>(&SlotVoid);
     g_vtable[0x160 / 4] = reinterpret_cast<void*>(&SlotVoid);

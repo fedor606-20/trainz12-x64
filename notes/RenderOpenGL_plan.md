@@ -62,7 +62,7 @@ first caller; mark it in `implemented.txt` only when that unit compiles.
 - `Initialize` uses `opengl32!glGetString` and interface slot 0x58.
 - Verified with proxy + `_orig`; menu stable.
 
-### M2 — GL/WGL platform layer (in progress)
+### M2 — GL/WGL platform layer (in progress; base wrapper and GL table done 2026-11-24)
 
 The base `DisplayInterfaceOpenGL` is local: constructor, extension-list test
 (`HasExtension`/`IsExtensionSupported`) and the retail stubs. The GL table and
@@ -90,7 +90,7 @@ Work:
 Risk: `vf4` names several hundred pointers; a missing one must fail loudly at
 load, not as a null call later.
 
-### M3 — texture backend
+### M3 — texture backend (done 2026-11-24, pending differential/game check)
 
 `DisplayTextureOpenGL` (30 functions, 7440 bytes) plus its static data
 (`anisotropySupport`, `canAutoMip`, `bound`, `numObjects`, format tables).
