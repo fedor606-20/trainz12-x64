@@ -26,15 +26,15 @@ https://discord.gg/DmqMJGtCZ
 ## 📊 Progress
 
 <!-- progress:start -->
-Measured by code size: a finished module counts whole, a partial one by the code behind the exports that are already ours (`tools/progress.py`, 2026-11-24).
+Measured by code size: a finished module counts whole, a partial one by the code behind the exports that are already ours (`tools/progress.py`, 2026-11-29).
 
 ```
-🌍 Whole game         ████░░░░░░░░░░░░░░░░░░░░░░░░░░  12.4 %   6,768 KB left of 7,719
+🌍 Whole game         █████░░░░░░░░░░░░░░░░░░░░░░░░░  18.2 %   6,312 KB left of 7,719
 
-🧩 Jet engine         █████████████░░░░░░░░░░░░░░░░░  43.1 %   1,258 KB left of 2,208  9/19 modules
+🧩 Jet engine         ███████████████████░░░░░░░░░░░  63.7 %     801 KB left of 2,208  11/19 modules
   🔧 Engine core      ██████████████████████████████ 100.0 %       0 KB left of   378  4/4 modules
   🎮 Input            ██████████████████████████████ 100.0 %       0 KB left of   103  3/3 modules
-  🎨 Graphics         ██████████░░░░░░░░░░░░░░░░░░░░  34.7 %     885 KB left of 1,355  2/8 modules
+  🎨 Graphics         ████████████████████░░░░░░░░░░  68.3 %     429 KB left of 1,355  4/8 modules
   🪟 User interface   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %     354 KB left of   354  0/2 modules
   🐞 Debug            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.0 %      18 KB left of    18  0/2 modules
 
@@ -72,12 +72,12 @@ Plan steps finished: 9 of 11 (`PORT_PLAN.md`). After the 32-bit replacement come
 | 🎨 **Graphics** | | | | |
 | Render2DCore_7c | 17 KB | 167 | 85/85 | ✅ done |
 | RenderSystem_7c | 351 KB | 3,628 | 2687/2687 | ✅ done |
-| Render3DCore_7c | 458 KB | 3,168 | 505/2500 | 🟡 partial |
+| Render3DCore_7c | 458 KB | 3,168 | 2500/2500 | 🟡 cutover |
 | Render3DFoundation_7c | 194 KB | 1,453 | 0/1084 | ⬜ not started |
 | Render3DExtension_7c | 38 KB | 326 | 0/186 | ⬜ not started |
 | RenderOpenGL_7c | 135 KB | 944 | 51/51 | 🟡 partial |
 | RenderDirectX9_7c | 70 KB | 404 | 0/41 | ⬜ not started |
-| WaterSystem_7c | 92 KB | 714 | 196/490 | 🟡 partial |
+| WaterSystem_7c | 92 KB | 714 | 490/490 | ✅ done |
 | 🪟 **User interface** | | | | |
 | InterfaceSystem_7c | 319 KB | 3,358 | 0/2022 | ⬜ not started |
 | InterfaceResources_7c | 34 KB | 345 | 0/169 | ⬜ not started |

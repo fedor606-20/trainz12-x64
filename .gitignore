@@ -13,6 +13,37 @@
 qualified_names_trainz.txt
 log_names_trainz.txt
 
+# decompiled or disassembled game code never enters the repo (see the header); the workstream
+# listings regenerate from D:\trainz12-decomp with tools/ghidra_all.ps1
+*_asm.txt
+*_decomp.c
+
+# compiled probe artifacts, crash logs and regenerable analysis dumps
+*.obj
+*.pdb
+*.ilk
+*.rar
+hs_err_pid*.log
+tmp_ghidra*.log
+ws_disasm.txt
+ws_exports.txt
+vt.txt
+fwd_u5b.txt
+idx_u5b.txt
+idx_u5b_lines.txt
+r3d_cutover_ctx.txt
+r3d_dyn_inv.txt
+Render3DCore_7c_forwards.cpp
+
+# local test scaffolding, game captures and one-off patch scripts
+/testdir-*/
+/testbin*/
+/shots/
+/probe/
+addprints.py
+trim_cell.py
+trim_portals.py
+
 __pycache__/
 
 # local CMake build trees

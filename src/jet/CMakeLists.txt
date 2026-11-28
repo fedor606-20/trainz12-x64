@@ -19,11 +19,23 @@ function(jet_module name)
     file(GLOB dir LIST_DIRECTORIES true "${CMAKE_CURRENT_SOURCE_DIR}/*/${name}")
     set(def "${CMAKE_CURRENT_BINARY_DIR}/${name}.def")
     set(impl "${dir}/implemented.txt")
+    set(impl_deps "${impl}")
+    # Parallel workstreams write their own implemented.d/<unit>.txt fragment; merge them before gen_def.
+    if(IS_DIRECTORY "${dir}/implemented.d")
+        file(GLOB impl_parts CONFIGURE_DEPENDS "${dir}/implemented.d/*.txt")
+        set(impl "${CMAKE_CURRENT_BINARY_DIR}/${name}_implemented.txt")
+        add_custom_command(
+            OUTPUT "${impl}"
+            COMMAND ${PY} -I "${TOOLS}/merge_implemented.py" "${dir}/implemented.txt" "${impl}" ${impl_parts}
+            DEPENDS "${TOOLS}/merge_implemented.py" "${dir}/implemented.txt" ${impl_parts}
+            VERBATIM)
+        list(APPEND impl_deps "${impl}")
+    endif()
     set(fwd "${CMAKE_CURRENT_BINARY_DIR}/${name}_forwards.cpp")
     add_custom_command(
         OUTPUT ${def} ${fwd}
         COMMAND ${PY} -I "${TOOLS}/gen_def.py" "${EXPORTS}/${name}.tsv" ${name} "${impl}" ${def}
-        DEPENDS "${TOOLS}/gen_def.py" "${EXPORTS}/${name}.tsv" "${impl}"
+        DEPENDS "${TOOLS}/gen_def.py" "${EXPORTS}/${name}.tsv" ${impl_deps}
         VERBATIM)
     file(GLOB_RECURSE srcs CONFIGURE_DEPENDS "${dir}/*.cpp")
     add_library(${name} SHARED ${srcs} ${def} ${fwd})
@@ -85,7 +97,7 @@ endforeach()
 target_sources(KernelStandard_7c PRIVATE ${SCFG_TABLES})
 
 # step 5, small Jet modules: drop-in proxies, replaced module by module (the rest forwards to <module>_orig.dll)
-foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c WaterSystem_7c RenderOpenGL_7c InputDirectX_7c)
+foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c InputWin32_7c RenderSystem_7c Render3DCore_7c WaterSystem_7c RenderOpenGL_7c InputDirectX_7c)
     jet_module(${m})
     target_compile_definitions(${m} PRIVATE _CRT_SECURE_NO_WARNINGS)
     # each calls the other Jet modules by their original names (our proxies or the originals)
@@ -93,6 +105,11 @@ foreach(m KernelResource_7c KernelResources_7c Render2DCore_7c InputSystem_7c In
 endforeach()
 target_link_libraries(KernelResources_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib")
 target_link_libraries(Render2DCore_7c PRIVATE "${IMPLIB}/KernelResource_7c.lib" "${IMPLIB}/RenderSystem_7c.lib")
+# Render3DCore_7c: replaced unit by unit (notes/Render3DCore.md). U1a (AxisAlignedBox) calls no other module;
+# the links mirror the original's import table for the units that follow.
+target_compile_definitions(Render3DCore_7c PRIVATE JET_R3DC_BUILD)
+target_link_libraries(Render3DCore_7c PRIVATE "${IMPLIB}/Render3DCore_7c_orig.lib" "${IMPLIB}/RenderSystem_7c.lib"
+                      "${IMPLIB}/KernelResource_7c.lib" "${IMPLIB}/DebugInterface_7c.lib")
 target_link_libraries(InputWin32_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib")
 # InputDirectX_7c: the DirectInput driver (keyboard, mouse, joysticks, force feedback)
 target_link_libraries(InputDirectX_7c PRIVATE "${IMPLIB}/InputSystem_7c.lib" dinput8 dxguid)
@@ -105,8 +122,20 @@ target_link_libraries(RenderSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c_orig.li
 target_compile_definitions(WaterSystem_7c PRIVATE JET_WS_BUILD)
 # the water code still calls RenderSystem classes (GeometryChunk, Texture, DisplayFormat) by their original names
 target_link_libraries(WaterSystem_7c PRIVATE "${IMPLIB}/RenderSystem_7c.lib")
+# U9: Water/WaterTiled derive from Render3DCore_7c's Particle; the unit imports those methods by name
+target_link_libraries(WaterSystem_7c PRIVATE "${IMPLIB}/Render3DCore_7c.lib")
 # RenderOpenGL_7c: the OpenGL backend; no static imports from its renamed original yet
-target_link_libraries(RenderOpenGL_7c PRIVATE "${IMPLIB}/RenderSystem_7c.lib" "${IMPLIB}/Kernel_7c.lib" "${IMPLIB}/KernelStandard_7c.lib")
+target_link_libraries(RenderOpenGL_7c PRIVATE "${IMPLIB}/RenderSystem_7c.lib" "${IMPLIB}/Kernel_7c.lib" "${IMPLIB}/KernelStandard_7c.lib" opengl32 glu32)
+
+# standalone smoke test for the local OpenGL texture class (needs a real GL context)
+add_executable(rogl_texture_smoke tests/rogl_texture_smoke.cpp
+               graphics/RenderOpenGL_7c/DisplayTextureOpenGL.cpp graphics/RenderOpenGL_7c/OpenGLExtensions.cpp)
+target_include_directories(rogl_texture_smoke PRIVATE include graphics/RenderOpenGL_7c)
+target_compile_options(rogl_texture_smoke PRIVATE /EHsc /GR /Zc:wchar_t- /Zp8)
+target_compile_definitions(rogl_texture_smoke PRIVATE _CRT_SECURE_NO_WARNINGS)
+target_link_libraries(rogl_texture_smoke PRIVATE "${IMPLIB}/RenderSystem_7c.lib" "${IMPLIB}/KernelStandard_7c.lib"
+                      opengl32 glu32)
+
 # the map lets the diff tests find the parsers' internal entry points (RsTest*)
 target_link_options(RenderSystem_7c PRIVATE /MAP)
 # the shader-language scanners' DFA tables and their Lemon parsers' tables (generated output with no source), read
@@ -223,6 +252,17 @@ add_executable(diff_ks_pstring tests/diff_ks_pstring.cpp)
 add_executable(diff_ks_alloc tests/diff_ks_alloc.cpp)
 add_executable(diff_krs tests/diff_krs.cpp)
 add_executable(diff_r2d tests/diff_r2d.cpp)
+# Render3DCore U1a: AxisAlignedBox, ours vs Render3DCore_7c_orig.dll on the same random boxes (raw bytes compared)
+add_executable(diff_r3d_u1 tests/diff_r3d_u1.cpp)
+# Render3DCore parallel workstreams: each unit adds its own test; the target appears once the file exists.
+foreach(t u1b u1c u1d1 u1d2 u2 u3 u3b u4 u4_rem u5a u5a2 u5a_rem u5a_final u5b u5b_rem u5b_final u5b_last u6 u7 u8 u9a u9b u9b2 u9b_rem u10 u10_rem u11 tails tails2 tails3 templates livepaths simple_rem final15)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/diff_r3d_${t}.cpp")
+        add_executable(diff_r3d_${t} "tests/diff_r3d_${t}.cpp")
+        target_include_directories(diff_r3d_${t} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+        target_compile_options(diff_r3d_${t} PRIVATE /EHsc /GR /Zc:wchar_t- /Zp8)
+        target_compile_definitions(diff_r3d_${t} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    endif()
+endforeach()
 # RenderSystem U1: ours vs RenderSystem_7c_orig.dll (vertex records by signature, the small display types)
 add_executable(diff_rs_u1 tests/diff_rs_u1.cpp)
 # RenderSystem U4: modifiers and lists, ours vs RenderSystem_7c_orig.dll on the same scripts
@@ -265,6 +305,10 @@ add_executable(diff_ws_u1 tests/diff_ws_u1.cpp)
 add_executable(diff_ws_u5 tests/diff_ws_u5.cpp)
 # WaterSystem U7a: material factory lifetime, mirrored vtables and IsSupported
 add_executable(diff_ws_u7 tests/diff_ws_u7.cpp)
+# WaterSystem U7b/U8a: WaterMaterial base + WaterBumpMaterial/WaterOceanMaterial
+add_executable(diff_ws_u8a tests/diff_ws_u8a.cpp)
+# WaterSystem U9: WaterTile, Water, WaterTiled, WaterSurface
+add_executable(diff_ws_u9 tests/diff_ws_u9.cpp)
 add_executable(diff_iw32 tests/diff_iw32.cpp)
 add_executable(diff_is_obs tests/diff_is_obs.cpp)
 add_executable(diff_is_dev tests/diff_is_dev.cpp)

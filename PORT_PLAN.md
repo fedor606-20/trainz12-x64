@@ -57,6 +57,18 @@ at every step and catches mistakes while they are small.
   or recorded (MODLOG "Kernel_7c on x64").
 - Phase 3 deps: x64 builds via vcpkg in `D:\trainz12-decomp\thirdparty` (OpenAL Soft, OpenSSL 3,
   libjpeg-turbo, nvtt); Cg, d3dx9, XULRunner, SpeedTree still open.
+- Phase 2, RenderOpenGL_7c: M1 descriptors done; M2 WGL/GL table local (compiling), M3
+  `DisplayTextureOpenGL` local and smoke-tested in a real GL context (2026-11-24). The display
+  object/vtable and `JetGetPluginsRenderOpenGL` are the next units; the module still forwards
+  that one export to the renamed original.
+- Phase 2, RenderSystem_7c U16: private `DisplayNull` + 29-entry format table, bitmap
+  resource/factories, shared texture data and local vtables/RTTI are implemented. With zero
+  `*_orig*` files in `bin`, the game reaches the route/session page and renders its background
+  and route thumbnail. One optional retail-data mirror literal remains. Still open: clean
+  differential fixture and all `diff_rs_*`, OpenGL/DirectX9/NullRender launches, driving
+  session and clean exit. See MODLOG "RenderSystem U16: independent module".
+- Phase 2, Render3DCore_7c: U0 proxy and U1a `AxisAlignedBox` are ours (25/2500 exports; `diff_r3d_u1` 29,000
+  checks, 0 mismatches). U1b is the remaining `AxisAlignedBox` interactions plus `Plane`; see `notes/Render3DCore.md`.
 
 ## Next steps (one fresh session each; read MODLOG.md first, work sequentially to save the usage limit)
 After each step, refresh the README progress block: `python -I tools/progress.py --exports D:/trainz12-decomp/exports --write`.
@@ -202,10 +214,20 @@ After each step, refresh the README progress block: `python -I tools/progress.py
             and clean shutdown. Build-time parser tables and vertex recipes still
             use a pristine DLL; removing that input is a separate build milestone.
     8e. Render3DCore, Render3DFoundation, RenderOpenGL, then InterfaceSystem, WaterSystem (own inventories).
-        WaterSystem is already in progress alongside RenderSystem. U7b moved 18 direct
-        `WaterMaterial` state exports, bringing it to **196/490**. Continue with
-        `WaterMaterial` lifetime and vtables, geometry creation, and the factory
-        `CreateInstance` methods. See `notes/WaterSystem.md`.
+        Render3DCore started 2026-11-24 with its own plan (`notes/Render3DCore.md`): the proxy target and U1a
+        `AxisAlignedBox` are local (25/2500 exports, `diff_r3d_u1` 29,000 checks, 0 mismatches). The next unit is U1b:
+        the nine remaining `AxisAlignedBox` interactions (`GetMinMaxCollision`, the line/OrientedBox/Cylinder/Ellipsoid
+        tests, the OrientedBox constructor and maximize) plus `Plane`. The 802 unnamed global functions (48.9 KB) and
+        the shared cache/static state stay with the classes that own them.
+        WaterSystem_7c is **done**: all 490 exports are local (0 forwarders, no import or
+        runtime load of `WaterSystem_7c_orig.dll`). U7b/U8 (the material base, Bump, Ocean,
+        FresWave and OneTex), U9 (WaterTile/Water/WaterTiled/WaterSurface) and U10 (the three
+        managers plus `JetGetPluginsWaterSystem`) landed together. The game reaches the main
+        menu and Railyard with the retail DLL removed from the lab copy. Differential tests:
+        U1 (1,000+ grid/noise checks; the CRT rand table stream is the only allowed
+        difference), U5 4 scenarios, U7 71 scenarios, U8a 78 checks, U9 35 checks, U10 66
+        checks, all 0 mismatches. The remaining U8a simplifications (display-state save,
+        lerp detail constants, VP matrix quirk) are listed in `notes/WaterSystem.md`.
    8f. RenderDirectX9_7c, the launcher's other renderer (d3dx9_42; x64 uses d3dx9_43). Checks with DirectX
        picked in the launcher.
    8g. ~~InputDirectX_7c, the DirectInput driver (joysticks, wheels, force feedback through InputSystem's

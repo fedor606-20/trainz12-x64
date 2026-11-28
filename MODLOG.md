@@ -3725,3 +3725,123 @@ every merge:
   stride bug (`/0x34`, not `/0x68`) in U5a's `Equals`, fixed.
 - U11: 49/167 background/thread/state exports; `Facility`, the plugin entry and 109 orphan global/template data
   exports still forward.
+
+### Render3DCore wave 4: caches, materials, MultiPass, scene, primitives, statics, tails (2026-11-24)
+
+- U4 129/129, U5a 241/374, U5b 115/254, U9b 200/209, U10 191/230, U11 59/167, tails +16.
+- Module 1938/2500 local, 562 forwarded; 2500/2500 export names/ordinals.
+- New tests: u4_rem 1,102; u5a_rem 14,909; u5b_rem 6,666; u9b_rem 1,600; u10_rem 739; tails 57,145;
+  all 0 mismatches, existing 20 suites 0.
+- Remaining: U5a data/dtors/factories/render paths (133), U5b render/display (139), U10 live kernel (39),
+  seven U9b RVA bridges, U11 entry helpers (8), 108 template/ITree/Line exports, 69 tails.
+
+### Render3DCore wave 5: materials, templates, tails, live paths (2026-11-25)
+
+- Module **2337/2500** local, 163 forwarded; 2500/2500 names/ordinals.
+- U5a final 118 (data/vtables/dtors/factories/render), U5b final +91, U10 230/230, 108 template/ITree/Line
+  exports, 43 tails2, 27 tail paths, U9b seven local definitions (six still call private original RVAs).
+- New tests: u5a_final 3,776; u5b_final 127,177; tails2 4,174; templates 30,852; livepaths 80,002; all 0.
+- ReflectiveMaterial layout fixed (cubeMatrix 0x40, vbtable {0,0xfc}, size 0x108); Material slot 11 is
+  GetNumPasses and has a protected virtual dtor.
+- Wave 6: U5b plugin/state 48, simple Camera/DebugRender/Tube/Transformation/Primitive3D/ViewPoint 76,
+  tails3 27, AutoTex vtable + Reflective/GenericShader chunk 4.
+
+### Render3DCore exports complete: 2500/2500 (2026-11-25)
+
+- Wave 6 merged: U5b last 48, simple classes 74, tails3 26, final15 15. All 2500 exports local, 0 forwarders,
+  0 missing/wrong/extra.
+- New tests: u5b_last 160, simple_rem 29,200, tails3 76,066, final15 10,712; all diff_r3d_* green.
+- Layout fixes: ReflectiveMaterial cubeMatrix 0x40 (vbtable {0,0xfc}, size 0x108); Material protected virtual dtor
+  and slot 11 GetNumPasses; U5b StateSetup/SetScissor cdecl hidden-return fix (Display::GetScissor writes Rect
+  through a stack buffer, not a return register).
+- Runtime cutover remains: 25 static imports and dynamic RVA/vtable lookups into Render3DCore_7c_orig.dll.
+  Static-import and dynamic-bridge streams are running; the export/behaviour layer is complete.
+
+### Render3DCore cutover, batch 1: local cross-unit calls and local Cell (2026-11-27)
+
+The export layer was already complete; this batch removes runtime links to `Render3DCore_7c_orig.dll` that only
+existed because the owning unit landed later. `Particle`'s embedded bounding volume is now constructed, copied and
+assigned by the local `ParticleBoundingVolume` (placement new/assignment), and the change notifications,
+`OrientedBox` transform/init/maximize and aligned-box conversions call the local U1c/U3 bodies directly.
+`ViewPort`'s embedded `ViewPoint` assignment/destruction is local as well. 
+
+Two argument-order bugs were fixed in the same pass: `Camera::SetPosition`, `SetOrientation` and
+`SetReferenceFrame` passed `(next, previous)` to helpers whose bodies take `(old, new)`. The original call at
+0x10007260 pushes `(bv, oldPos, newPos, oldQ, newQ)`; the camera now does the same, so the bounding volume moves
+by the right delta. The camera fields were already correct, which is why the byte comparison never caught it.
+
+`Cell::Cell` (0x1001bd20) is now a local transcription: the 0x4c node with the original's field initialisation, the
+stats increments, and the private `CellAxisAlignedBoundingBox` (0xdc) whose only override is
+`RecalculateAxisAlignedBoxVolume` (copies the node extents at +0x30..0x44, clears dirty bit 3).
+`SplineSegment::GetRatio` stays forwarded: the local body is off by one ulp in about 10% of `diff_r3d_tails2`
+cases, so the residual is not merged yet.
+
+Tests: dwords pointing into either module image (own vtables, the embedded `Sphere` vtable) are compared
+structurally; u3/u3b report NaN-payload-only differences separately (1961 and 117), and u10 scans vtable slots inside
+`.text` instead of using page executability. All 35 `diff_r3d_*` suites pass; u9b 460, u9b_rem 1600, tails3 3058,
+u2 3,267,002 checks, 0 mismatches. Remaining forwarders are listed in `notes/agents/cutover.md` (Camera 12,
+ViewPort 8, Bones 8, four `BatchCalculateDiffuse`, Particle collision/cell 3, ParticleStructure 3, DebugViewPort 2,
+the three portal `Camera` constructors, the U9b octree/portal RVAs, and the vtable/data lookups).
+
+
+### Render3DCore cutover batch 2: Camera transforms and a mutation self-check (2026-11-27)
+
+`Camera::Translate`, both `Rotate` overloads, both `SelfRotate` overloads, `Perspective` and
+`UpdateCachedViewTransform` are local transcriptions now. The first six call the local `Particle` transform and then
+`ResetViewCone`; `UpdateCachedViewTransform` rebuilds the view matrix from `cachedOrientation` with the
+original's row order and the negation-add translation row. `diff_r3d_u8` 300 rounds: 53,100 checks, 0 mismatches.
+Seven Camera entries still forward: `GetClippingPlanes`, `Cull`, `Orbit`, `AlignToTarget`, `UpdateViewCone`,
+`UpdateGlobalViewTransform`, `RenderDebug`.
+
+New `tools/r3d_mutate.py` (mutation self-check): patch one catalogued line, rebuild, run the listed tests, kill or
+survive, restore. First run: 0/4 killed. It exposed three test gaps: `diff_r3d_u8` compared the camera bytes but not
+the bounding volume behind camera+0x4c; `diff_r3d_u9a` never cleared the dirty bits before the setters, so the
+centre delta never ran; `diff_r3d_u9b_rem` never called the cell volume's `RecalculateAxisAlignedBoxVolume`. After
+extending those fixtures and clearing the volume flags through the real pointer, 4/4 mutations are killed; a fifth
+entry (`cached-view-row`) guards the new matrix code.
+
+Camera continuation: `AlignToTarget` is local too (0x10013cb0). It normalises the target direction with the
+local fast sqrt, builds the basis from `up x dir` and `right x dir`, handles the degenerate case
+(`|right| <= 0.0001`) with `(1,0,0)`/`(0,1,0)` and calls `SetOrientation`. `diff_r3d_u8` now reports
+NaN-payload-only float differences separately (470 in 300 rounds); every non-NaN bit matches. All 35 diff suites
+pass. Remaining Camera entries: `GetClippingPlanes`, `Cull`, `Orbit`, `UpdateViewCone`,
+`UpdateGlobalViewTransform`, `RenderDebug`.
+
+### Landing the pending waves: full green re-run, two regressions fixed (2026-11-29)
+
+The WaterSystem U7b..U10 work, the Render3DCore waves 1..6 and cutover batches 1-2, and the RenderOpenGL display
+work had been sitting uncommitted since 2026-11-24. This step rebuilds the whole tree (build32, VS 18 Win32
+Release), re-runs every differential suite against the current sources, fixes what the merge broke, and lands
+the backlog in topic commits.
+
+Two real regressions were found and fixed:
+
+- `WaterMaterial` still overrode the base's slot-11 virtual as `ReservedVirtual11`; the Render3DCore wave-5 rename
+  (`Material slot 11 is GetNumPasses`) broke the WaterSystem build. The retail water vtables point slot 11 at the
+  base `Material::GetNumPasses` imported from `RenderSystem_7c.dll` (IAT thunk 0x1001799e, shared by WaterMaterial/
+  Bump/Ocean/FresWave/OneTex), so the override is removed and the local tables inherit the base entry exactly as
+  the original does.
+- `Canvas.cpp`'s `TextureBind` had been changed from texture slot 0x20 to 0x44. `diff_r2d` reported 387 mismatches
+  (ours "select", retail "bind"); the retail Canvas calls slot 0x20, so the change is reverted.
+
+`diff_ks_eh` and `diff_r2d` also died with ERROR_DLL_INIT_FAILED before running: they loaded our KernelStandard
+first. `KernelStandardInit` calls the msvcr80 `setlocale` through `Crt80`, and only an `_orig` module's import
+table pulls `msvcr80.dll` into a bare process (the quirk documented in `diff_r3d_u6`). Both tests now load the
+original module first, like every other suite.
+
+Checks on the merged tree:
+
+- all 35 `diff_r3d_*` suites green (`tools/r3d_run_tests.ps1`, 500 rounds; u1d1 388, u3 1961, u3b 117, u8 191
+  NaN-payload-only differences, everything else 0);
+- `diff_ws_u1` 28,001 checks (fa/gridf/gridv2/pnoise phases of the reworked PNoise test), `diff_ws_u5` 4
+  scenarios, `diff_ws_u7` 71 scenarios, `diff_ws_u8a` 447 checks, `diff_ws_u9` 35 checks — 0 mismatches each;
+- `diff_ks_eh` 131 results, `diff_r2d` 124,788 checks — 0 mismatches.
+
+Gap on record: `diff_ws_u10` is not in the tree. It was built standalone in a temp session (66 normalized
+lines, one process per module; `notes/agents/ws_u10.md`) and must be rebuilt as a repo test before the
+WaterSystem cutover is signed off.
+
+Cutover status unchanged. The `ParticleStructure` trio (`EnumerateAttachmentPoints` x2, `SetCurrentReferencePoint`)
+stays forwarded: the enumeration is a `__RTDynamicCast` against the original's RTTI descriptors
+(0x100c12e0/0x100c127c) and `SetCurrentReferencePoint` needs the scene unit's pose maths (0x10053a30). Both
+problems are cross-module; see `notes/agents/cutover.md`.
