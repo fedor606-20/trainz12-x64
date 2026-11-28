@@ -1,0 +1,160 @@
+ordinal	rva	mangled	demangled
+52	0x9800	??0Camera@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Camera::Camera(class Jet::Camera const &)
+53	0x17320	??0Camera@Jet@@QAE@ABV01@ABVMatrix4@1@@Z	public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Matrix4 const &)
+54	0x17650	??0Camera@Jet@@QAE@ABV01@ABVVector2@1@1ABVVector3@1@M@Z	public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Vector2 const &,class Jet::Vector2 const &,class Jet::Vector3 const &,float)
+55	0x182a0	??0Camera@Jet@@QAE@ABV01@PBVVector3@1@ABVMatrix4@1@@Z	public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Vector3 const *,class Jet::Matrix4 const &)
+56	0x19070	??0Camera@Jet@@QAE@ABV01@PBVVector3@1@ABVMatrix4@1@ABV21@_N@Z	public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Vector3 const *,class Jet::Matrix4 const &,class Jet::Vector3 const &,bool)
+57	0x13370	??0Camera@Jet@@QAE@ABVVector3@1@ABVMatrix3@1@@Z	public: __thiscall Jet::Camera::Camera(class Jet::Vector3 const &,class Jet::Matrix3 const &)
+58	0x135d0	??0Camera@Jet@@QAE@ABVVector3@1@ABVMatrix3@1@MMM@Z	public: __thiscall Jet::Camera::Camera(class Jet::Vector3 const &,class Jet::Matrix3 const &,float,float,float)
+59	0x132c0	??0Camera@Jet@@QAE@ABVVector3@1@ABVQuaternion@1@@Z	public: __thiscall Jet::Camera::Camera(class Jet::Vector3 const &,class Jet::Quaternion const &)
+60	0x13520	??0Camera@Jet@@QAE@ABVVector3@1@ABVQuaternion@1@MMM@Z	public: __thiscall Jet::Camera::Camera(class Jet::Vector3 const &,class Jet::Quaternion const &,float,float,float)
+61	0x13440	??0Camera@Jet@@QAE@ABVVector3@1@MMM@Z	public: __thiscall Jet::Camera::Camera(class Jet::Vector3 const &,float,float,float)
+62	0x136a0	??0Camera@Jet@@QAE@ABVVector3@1@MMMMMM@Z	public: __thiscall Jet::Camera::Camera(class Jet::Vector3 const &,float,float,float,float,float,float)
+63	0x13240	??0Camera@Jet@@QAE@MMM@Z	public: __thiscall Jet::Camera::Camera(float,float,float)
+64	0x131c0	??0Camera@Jet@@QAE@XZ	public: __thiscall Jet::Camera::Camera(void)
+91	0x12f40	??0DebugViewPort@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::DebugViewPort::DebugViewPort(class Jet::DebugViewPort const &)
+92	0x22670	??0DebugViewPort@Jet@@QAE@PAVViewPort@1@@Z	public: __thiscall Jet::DebugViewPort::DebugViewPort(class Jet::ViewPort *)
+322	0xa990	??0ViewPort@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ViewPort::ViewPort(class Jet::ViewPort const &)
+323	0x73070	??0ViewPort@Jet@@QAE@PAVCamera@1@ABURect@1@PAVLayerGroup@1@@Z	public: __thiscall Jet::ViewPort::ViewPort(class Jet::Camera *,struct Jet::Rect const &,class Jet::LayerGroup *)
+324	0x72f20	??0ViewPort@Jet@@QAE@PAVCamera@1@PAVLayerGroup@1@@Z	public: __thiscall Jet::ViewPort::ViewPort(class Jet::Camera *,class Jet::LayerGroup *)
+325	0x72dc0	??0ViewPort@Jet@@QAE@XZ	public: __thiscall Jet::ViewPort::ViewPort(void)
+351	0x97f0	??1Camera@Jet@@UAE@XZ	public: virtual __thiscall Jet::Camera::~Camera(void)
+359	0x22820	??1DebugViewPort@Jet@@UAE@XZ	public: virtual __thiscall Jet::DebugViewPort::~DebugViewPort(void)
+445	0x731b0	??1ViewPort@Jet@@UAE@XZ	public: virtual __thiscall Jet::ViewPort::~ViewPort(void)
+464	0x9920	??4Camera@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Camera & __thiscall Jet::Camera::operator=(class Jet::Camera const &)
+476	0x12f80	??4DebugViewPort@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::DebugViewPort & __thiscall Jet::DebugViewPort::operator=(class Jet::DebugViewPort const &)
+559	0xaaa0	??4ViewPort@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ViewPort & __thiscall Jet::ViewPort::operator=(class Jet::ViewPort const &)
+618	0x7d85c	??_7Camera@Jet@@6B@	const Jet::Camera::`vftable'
+628	0x7e4cc	??_7DebugViewPort@Jet@@6B@	const Jet::DebugViewPort::`vftable'
+746	0x7d820	??_7ViewPort@Jet@@6B@	const Jet::ViewPort::`vftable'
+858	0xacc0	?AdjustAspectRatio@ViewPort@Jet@@QBAXAAM0@Z	public: void __cdecl Jet::ViewPort::AdjustAspectRatio(float &,float &)const 
+859	0x13cb0	?AlignToTarget@Camera@Jet@@QAAXABVVector3@2@0@Z	public: void __cdecl Jet::Camera::AlignToTarget(class Jet::Vector3 const &,class Jet::Vector3 const &)
+884	0x73550	?Begin@ViewPort@Jet@@UAAXXZ	public: virtual void __cdecl Jet::ViewPort::Begin(void)
+885	0xa480	?BigEnough@Camera@Jet@@QBA_NABVVector3@2@M@Z	public: bool __cdecl Jet::Camera::BigEnough(class Jet::Vector3 const &,float)const 
+942	0x74410	?CalculateOrientedBoxSize@ViewPort@Jet@@QBA?AURect@2@ABVOrientedBox@2@ABVMatrix4@2@@Z	public: struct Jet::Rect __cdecl Jet::ViewPort::CalculateOrientedBoxSize(class Jet::OrientedBox const &,class Jet::Matrix4 const &)const 
+951	0x73e00	?CalculateSphereSize@ViewPort@Jet@@QBA?AURect@2@ABVVector3@2@MABVMatrix4@2@@Z	public: struct Jet::Rect __cdecl Jet::ViewPort::CalculateSphereSize(class Jet::Vector3 const &,float,class Jet::Matrix4 const &)const 
+953	0x73730	?CanRender@ViewPort@Jet@@UAA_NXZ	public: virtual bool __cdecl Jet::ViewPort::CanRender(void)
+966	0x73920	?Clear@ViewPort@Jet@@QAAXXZ	public: void __cdecl Jet::ViewPort::Clear(void)
+977	0xa230	?Clip3D@Camera@Jet@@QBA?AW4ClipResult@2@ABVVector3@2@M@Z	public: enum Jet::ClipResult __cdecl Jet::Camera::Clip3D(class Jet::Vector3 const &,float)const 
+978	0xa360	?Clip3D@Camera@Jet@@QBA?AW4ClipResult@2@PBVVector3@2@H@Z	public: enum Jet::ClipResult __cdecl Jet::Camera::Clip3D(class Jet::Vector3 const *,int)const 
+980	0xa400	?ClipNear@Camera@Jet@@QBA?AW4ClipResult@2@AAVVector3@2@@Z	public: enum Jet::ClipResult __cdecl Jet::Camera::ClipNear(class Jet::Vector3 &)const 
+981	0x277f0	?Collides@ViewPort@Jet@@UBA_NABVVector2@2@0@Z	public: virtual bool __cdecl Jet::ViewPort::Collides(class Jet::Vector2 const &,class Jet::Vector2 const &)const 
+982	0x277f0	?Collides@ViewPort@Jet@@UBA_NABVVector2@2@@Z	public: virtual bool __cdecl Jet::ViewPort::Collides(class Jet::Vector2 const &)const 
+1011	0x9d90	?CreateInstance@Camera@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::Camera::CreateInstance(void)const 
+1079	0x14e70	?Cull@Camera@Jet@@UBAXAAVViewPoint@2@@Z	public: virtual void __cdecl Jet::Camera::Cull(class Jet::ViewPoint &)const 
+1145	0x736b0	?End@ViewPort@Jet@@UAAXXZ	public: virtual void __cdecl Jet::ViewPort::End(void)
+1193	0x73c10	?GetAllWithin@ViewPort@Jet@@UAAXABVVector2@2@0AAV?$FastDynamicArray@PAVElement@Jet@@$0N@U?$Less@PAVElement@Jet@@PAV12@@2@@2@@Z	public: virtual void __cdecl Jet::ViewPort::GetAllWithin(class Jet::Vector2 const &,class Jet::Vector2 const &,class Jet::FastDynamicArray<class Jet::Element *,13,struct Jet::Less<class Jet::Element *,class Jet::Element *> > &)
+1198	0xadd0	?GetAlphaMaskReference@ViewPort@Jet@@QBAMXZ	public: float __cdecl Jet::ViewPort::GetAlphaMaskReference(void)const 
+1230	0x9f70	?GetCachedOrientation@Camera@Jet@@QBAABVMatrix3@2@XZ	public: class Jet::Matrix3 const & __cdecl Jet::Camera::GetCachedOrientation(void)const 
+1232	0x5ff80	?GetCamera@ViewPort@Jet@@QBAPAVCamera@2@XZ	public: class Jet::Camera * __cdecl Jet::ViewPort::GetCamera(void)const 
+1235	0x9f80	?GetCellSpaceViewTransform@Camera@Jet@@QBAABVMatrix4@2@XZ	public: class Jet::Matrix4 const & __cdecl Jet::Camera::GetCellSpaceViewTransform(void)const 
+1257	0xa960	?GetClearColor@ViewPort@Jet@@QBAABVColor@2@XZ	public: class Jet::Color const & __cdecl Jet::ViewPort::GetClearColor(void)const 
+1258	0xa970	?GetClearDepth@ViewPort@Jet@@QBAMXZ	public: float __cdecl Jet::ViewPort::GetClearDepth(void)const 
+1259	0x7af0	?GetClearMode@ViewPort@Jet@@QBAKXZ	public: unsigned long __cdecl Jet::ViewPort::GetClearMode(void)const 
+1260	0xa980	?GetClearStencil@ViewPort@Jet@@QBAKXZ	public: unsigned long __cdecl Jet::ViewPort::GetClearStencil(void)const 
+1261	0x146c0	?GetClippingPlanes@Camera@Jet@@QBAXMMMMAAV?$DynamicArray@VPlane@Jet@@$0BA@U?$Less@VPlane@Jet@@V12@@2@@2@@Z	public: void __cdecl Jet::Camera::GetClippingPlanes(float,float,float,float,class Jet::DynamicArray<class Jet::Plane,16,struct Jet::Less<class Jet::Plane,class Jet::Plane> > &)const 
+1281	0x73b40	?GetElementAt@ViewPort@Jet@@UAAPAVElement@2@ABVVector2@2@@Z	public: virtual class Jet::Element * __cdecl Jet::ViewPort::GetElementAt(class Jet::Vector2 const &)
+1288	0xabd0	?GetExtents@ViewPort@Jet@@QBAXAAURect@2@@Z	public: void __cdecl Jet::ViewPort::GetExtents(struct Jet::Rect &)const 
+1293	0x9e40	?GetFarClipDistance@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetFarClipDistance(void)const 
+1300	0xa140	?GetForward@Camera@Jet@@QBA?AVVector3@2@XZ	public: class Jet::Vector3 __cdecl Jet::Camera::GetForward(void)const 
+1303	0x9e10	?GetFrustum@Camera@Jet@@QAAPAVPlane@2@XZ	public: class Jet::Plane * __cdecl Jet::Camera::GetFrustum(void)
+1304	0x9e10	?GetFrustum@Camera@Jet@@QBAPBVPlane@2@XZ	public: class Jet::Plane const * __cdecl Jet::Camera::GetFrustum(void)const 
+1332	0x9fa0	?GetGlobalViewTransform@Camera@Jet@@UBAABVMatrix4@2@XZ	public: virtual class Jet::Matrix4 const & __cdecl Jet::Camera::GetGlobalViewTransform(void)const 
+1334	0xac90	?GetHeight@ViewPort@Jet@@QBAHXZ	public: int __cdecl Jet::ViewPort::GetHeight(void)const 
+1335	0x9fd0	?GetHorizontalFOV@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetHorizontalFOV(void)const 
+1341	0x9d60	?GetID@Camera@Jet@@UBAHXZ	public: virtual int __cdecl Jet::Camera::GetID(void)const 
+1364	0xacb0	?GetLetterBoxMode@ViewPort@Jet@@QBA_NXZ	public: bool __cdecl Jet::ViewPort::GetLetterBoxMode(void)const 
+1371	0xabc0	?GetLocalExtents@ViewPort@Jet@@QBAABURect@2@XZ	public: struct Jet::Rect const & __cdecl Jet::ViewPort::GetLocalExtents(void)const 
+1372	0x73390	?GetLocalPosition@ViewPort@Jet@@QBAXAAH0@Z	public: void __cdecl Jet::ViewPort::GetLocalPosition(int &,int &)const 
+1379	0xac00	?GetLocalX@ViewPort@Jet@@QBAHXZ	public: int __cdecl Jet::ViewPort::GetLocalX(void)const 
+1380	0xac40	?GetLocalY@ViewPort@Jet@@QBAHXZ	public: int __cdecl Jet::ViewPort::GetLocalY(void)const 
+1397	0x9e30	?GetNearClipDistance@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetNearClipDistance(void)const 
+1398	0x9e50	?GetNearClipHeight@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetNearClipHeight(void)const 
+1399	0x9ee0	?GetNearClipWidth@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetNearClipWidth(void)const 
+1421	0xa570	?GetPerspectiveTransform@Camera@Jet@@QBA?AVMatrix4@2@XZ	public: class Jet::Matrix4 __cdecl Jet::Camera::GetPerspectiveTransform(void)const 
+1422	0xa180	?GetPitch@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetPitch(void)const 
+1433	0x733b0	?GetPosition@ViewPort@Jet@@QBAXAAH0@Z	public: void __cdecl Jet::ViewPort::GetPosition(int &,int &)const 
+1444	0x14500	?GetProjectionMode@Camera@Jet@@QBA?AW4ProjectionMode@12@XZ	public: enum Jet::Camera::ProjectionMode __cdecl Jet::Camera::GetProjectionMode(void)const 
+1453	0x13ee0	?GetRay@Camera@Jet@@QBA?AVRay@2@MM@Z	public: class Jet::Ray __cdecl Jet::Camera::GetRay(float,float)const 
+1460	0xa680	?GetRelevantHeight@Camera@Jet@@IBEMXZ	protected: float __thiscall Jet::Camera::GetRelevantHeight(void)const 
+1461	0xa640	?GetRelevantWidth@Camera@Jet@@IBEMXZ	protected: float __thiscall Jet::Camera::GetRelevantWidth(void)const 
+1462	0xad80	?GetRenderFlags@ViewPort@Jet@@QBAKXZ	public: unsigned long __cdecl Jet::ViewPort::GetRenderFlags(void)const 
+1464	0xad60	?GetRenderHint@ViewPort@Jet@@QBA?AW4RenderHint@2@XZ	public: enum Jet::RenderHint __cdecl Jet::ViewPort::GetRenderHint(void)const 
+1468	0xa0e0	?GetRight@Camera@Jet@@QBA?AVVector3@2@XZ	public: class Jet::Vector3 __cdecl Jet::Camera::GetRight(void)const 
+1469	0xa1c0	?GetRoll@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetRoll(void)const 
+1473	0x9e00	?GetScene@Camera@Jet@@QAAPAVElement@2@XZ	public: class Jet::Element * __cdecl Jet::Camera::GetScene(void)
+1509	0x73450	?GetSize@ViewPort@Jet@@QBAXAAH0@Z	public: void __cdecl Jet::ViewPort::GetSize(int &,int &)const 
+1549	0xade0	?GetTraversalNumber@ViewPort@Jet@@SAKXZ	public: static unsigned long __cdecl Jet::ViewPort::GetTraversalNumber(void)
+1572	0xa110	?GetUp@Camera@Jet@@QBA?AVVector3@2@XZ	public: class Jet::Vector3 __cdecl Jet::Camera::GetUp(void)const 
+1575	0xad40	?GetUserData@ViewPort@Jet@@QBAKXZ	public: unsigned long __cdecl Jet::ViewPort::GetUserData(void)const 
+1603	0xa050	?GetVerticalFOV@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetVerticalFOV(void)const 
+1605	0x13010	?GetViewPort@DebugViewPort@Jet@@QBAPAVViewPort@2@XZ	public: class Jet::ViewPort * __cdecl Jet::DebugViewPort::GetViewPort(void)const 
+1607	0x9f80	?GetViewTransform@Camera@Jet@@QBAABVMatrix4@2@XZ	public: class Jet::Matrix4 const & __cdecl Jet::Camera::GetViewTransform(void)const 
+1608	0xad90	?GetViewportNumber@ViewPort@Jet@@QBAKXZ	public: unsigned long __cdecl Jet::ViewPort::GetViewportNumber(void)const 
+1609	0xacf0	?GetVisibleList@ViewPort@Jet@@QBEABV?$Array@UVisibleElement@Jet@@$0IA@@2@XZ	public: class Jet::Array<struct Jet::VisibleElement,128> const & __thiscall Jet::ViewPort::GetVisibleList(void)const 
+1610	0xac80	?GetWidth@ViewPort@Jet@@QBAHXZ	public: int __cdecl Jet::ViewPort::GetWidth(void)const 
+1611	0xadb0	?GetWindowViewport@ViewPort@Jet@@QBA_NXZ	public: bool __cdecl Jet::ViewPort::GetWindowViewport(void)const 
+1612	0xac10	?GetX@ViewPort@Jet@@QBAHXZ	public: int __cdecl Jet::ViewPort::GetX(void)const 
+1613	0xac50	?GetY@ViewPort@Jet@@QBAHXZ	public: int __cdecl Jet::ViewPort::GetY(void)const 
+1614	0xa1a0	?GetYaw@Camera@Jet@@QBAMXZ	public: float __cdecl Jet::Camera::GetYaw(void)const 
+1626	0x17090	?Init@Camera@Jet@@IAAXMMM@Z	protected: void __cdecl Jet::Camera::Init(float,float,float)
+1649	0x13780	?InitInstance@Camera@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::Camera::InitInstance(class Jet::Camera &)const 
+1689	0x73260	?Initialize@ViewPort@Jet@@AAAXPAVCamera@2@PBURect@2@@Z	private: void __cdecl Jet::ViewPort::Initialize(class Jet::Camera *,struct Jet::Rect const *)
+1800	0x9d70	?IsOfType@Camera@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::Camera::IsOfType(int)const 
+1814	0xa560	?IsReflectionCull@Camera@Jet@@QBE_NXZ	public: bool __thiscall Jet::Camera::IsReflectionCull(void)const 
+1900	0x15540	?Orbit@Camera@Jet@@QAAXABVVector3@2@MM0@Z	public: void __cdecl Jet::Camera::Orbit(class Jet::Vector3 const &,float,float,class Jet::Vector3 const &)
+1906	0x15a00	?Perspective@Camera@Jet@@QBAXAAVVector3@2@@Z	public: void __cdecl Jet::Camera::Perspective(class Jet::Vector3 &)const 
+1980	0x22d00	?Render@DebugViewPort@Jet@@UAAXXZ	public: virtual void __cdecl Jet::DebugViewPort::Render(void)
+1984	0x738d0	?Render@ViewPort@Jet@@UAAXXZ	public: virtual void __cdecl Jet::ViewPort::Render(void)
+1997	0x1a460	?RenderDebug@Camera@Jet@@UBAXPAVDisplay@2@AAVDebugViewPort@2@AAVMatrix4@2@K@Z	public: virtual void __cdecl Jet::Camera::RenderDebug(class Jet::Display *,class Jet::DebugViewPort &,class Jet::Matrix4 &,unsigned long)const 
+2001	0x73d90	?RenderLayer@ViewPort@Jet@@UAAXAAV?$FastDynamicArray@PAVSystemResourceViewer@Jet@@$0N@U?$Less@PAVSystemResourceViewer@Jet@@PAV12@@2@@2@@Z	public: virtual void __cdecl Jet::ViewPort::RenderLayer(class Jet::FastDynamicArray<class Jet::SystemResourceViewer *,13,struct Jet::Less<class Jet::SystemResourceViewer *,class Jet::SystemResourceViewer *> > &)
+2039	0x17100	?ResetView@Camera@Jet@@IAAXMMMMM@Z	protected: void __cdecl Jet::Camera::ResetView(float,float,float,float,float)
+2040	0x15ee0	?ResetViewCone@Camera@Jet@@UAAXXZ	public: virtual void __cdecl Jet::Camera::ResetViewCone(void)
+2043	0x14f90	?Rotate@Camera@Jet@@UAAXABVMatrix3@2@@Z	public: virtual void __cdecl Jet::Camera::Rotate(class Jet::Matrix3 const &)
+2044	0x150f0	?Rotate@Camera@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::Camera::Rotate(class Jet::Quaternion const &)
+2054	0x73870	?Scale@ViewPort@Jet@@QAAXM@Z	public: void __cdecl Jet::ViewPort::Scale(float)
+2055	0x738a0	?Scale@ViewPort@Jet@@QAAXMM@Z	public: void __cdecl Jet::ViewPort::Scale(float,float)
+2056	0x15250	?SelfRotate@Camera@Jet@@UAAXABVMatrix3@2@@Z	public: virtual void __cdecl Jet::Camera::SelfRotate(class Jet::Matrix3 const &)
+2057	0x153d0	?SelfRotate@Camera@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::Camera::SelfRotate(class Jet::Quaternion const &)
+2095	0xadc0	?SetAlphaMaskReference@ViewPort@Jet@@QAAXM@Z	public: void __cdecl Jet::ViewPort::SetAlphaMaskReference(float)
+2106	0xaca0	?SetCamera@ViewPort@Jet@@QAAXPAVCamera@2@@Z	public: void __cdecl Jet::ViewPort::SetCamera(class Jet::Camera *)
+2119	0x73930	?SetClearColor@ViewPort@Jet@@QAAXABVColor@2@@Z	public: void __cdecl Jet::ViewPort::SetClearColor(class Jet::Color const &)
+2120	0x73950	?SetClearDepth@ViewPort@Jet@@QAAXM@Z	public: void __cdecl Jet::ViewPort::SetClearDepth(float)
+2121	0x73970	?SetClearMode@ViewPort@Jet@@QAAXK@Z	public: void __cdecl Jet::ViewPort::SetClearMode(unsigned long)
+2122	0x73960	?SetClearStencil@ViewPort@Jet@@QAAXJ@Z	public: void __cdecl Jet::ViewPort::SetClearStencil(long)
+2153	0x13c90	?SetFarDistance@Camera@Jet@@QAAXM@Z	public: void __cdecl Jet::Camera::SetFarDistance(float)
+2161	0x73470	?SetLetterBoxMode@ViewPort@Jet@@QAAX_N@Z	public: void __cdecl Jet::ViewPort::SetLetterBoxMode(bool)
+2169	0x73370	?SetLocalPosition@ViewPort@Jet@@QAAXHH@Z	public: void __cdecl Jet::ViewPort::SetLocalPosition(int,int)
+2184	0x13c10	?SetNearDistance@Camera@Jet@@QAAXM@Z	public: void __cdecl Jet::Camera::SetNearDistance(float)
+2191	0x13b50	?SetOrientation@Camera@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::Camera::SetOrientation(class Jet::Quaternion const &)
+2196	0x144b0	?SetOrthographic@Camera@Jet@@QAAXMM@Z	public: void __cdecl Jet::Camera::SetOrthographic(float,float)
+2201	0x14370	?SetPerspective@Camera@Jet@@QAAXMM@Z	public: void __cdecl Jet::Camera::SetPerspective(float,float)
+2206	0xa1f0	?SetPosition@Camera@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::Camera::SetPosition(class Jet::Vector3 const &)
+2212	0x16ec0	?SetProjected3D@Camera@Jet@@QAAXPAVRenderKernel@2@@Z	public: void __cdecl Jet::Camera::SetProjected3D(class Jet::RenderKernel *)
+2213	0x17000	?SetProjected3DOffset@Camera@Jet@@QAAXPAVRenderKernel@2@M@Z	public: void __cdecl Jet::Camera::SetProjected3DOffset(class Jet::RenderKernel *,float)
+2214	0x14510	?SetProjectionData@Camera@Jet@@QAEXABV12@@Z	public: void __thiscall Jet::Camera::SetProjectionData(class Jet::Camera const &)
+2227	0x13ba0	?SetReferenceFrame@Camera@Jet@@UAAXABVVector3@2@ABVQuaternion@2@@Z	public: virtual void __cdecl Jet::Camera::SetReferenceFrame(class Jet::Vector3 const &,class Jet::Quaternion const &)
+2231	0xad70	?SetRenderFlags@ViewPort@Jet@@QAAXK@Z	public: void __cdecl Jet::ViewPort::SetRenderFlags(unsigned long)
+2233	0xad50	?SetRenderHint@ViewPort@Jet@@QAAXW4RenderHint@2@@Z	public: void __cdecl Jet::ViewPort::SetRenderHint(enum Jet::RenderHint)
+2234	0x17050	?SetRenderView@Camera@Jet@@QAAXPAVRenderKernel@2@@Z	public: void __cdecl Jet::Camera::SetRenderView(class Jet::RenderKernel *)
+2241	0xa1e0	?SetScene@Camera@Jet@@QAAXPAVElement@2@@Z	public: void __cdecl Jet::Camera::SetScene(class Jet::Element *)
+2246	0x733f0	?SetSize@ViewPort@Jet@@QAAXHH@Z	public: void __cdecl Jet::ViewPort::SetSize(int,int)
+2275	0x143d0	?SetTransition@Camera@Jet@@QAAXMMMM@Z	public: void __cdecl Jet::Camera::SetTransition(float,float,float,float)
+2279	0xad30	?SetUserData@ViewPort@Jet@@QAAXK@Z	public: void __cdecl Jet::ViewPort::SetUserData(unsigned long)
+2282	0xada0	?SetWindowViewport@ViewPort@Jet@@QAAX_N@Z	public: void __cdecl Jet::ViewPort::SetWindowViewport(bool)
+2378	0x15d30	?TrainzTransform2D@Camera@Jet@@QBE_NAAVVector3@2@M@Z	public: bool __thiscall Jet::Camera::TrainzTransform2D(class Jet::Vector3 &,float)const 
+2379	0x15b10	?TrainzUnPerspective@Camera@Jet@@QBAXMMMAAVVector3@2@@Z	public: void __cdecl Jet::Camera::TrainzUnPerspective(float,float,float,class Jet::Vector3 &)const 
+2380	0x15b90	?Transform2D@Camera@Jet@@QBA_NAAVVector3@2@M@Z	public: bool __cdecl Jet::Camera::Transform2D(class Jet::Vector3 &,float)const 
+2386	0x73770	?Transform@ViewPort@Jet@@QAAXAAVVector3@2@@Z	public: void __cdecl Jet::ViewPort::Transform(class Jet::Vector3 &)
+2389	0x14f00	?Translate@Camera@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::Camera::Translate(class Jet::Vector3 const &)
+2393	0x73850	?Translate@ViewPort@Jet@@QAAXHH@Z	public: void __cdecl Jet::ViewPort::Translate(int,int)
+2446	0x22890	?Update@DebugViewPort@Jet@@UAAXM@Z	public: virtual void __cdecl Jet::DebugViewPort::Update(float)
+2449	0x737f0	?Update@ViewPort@Jet@@UAAXM@Z	public: virtual void __cdecl Jet::ViewPort::Update(float)
+2451	0x16ba0	?UpdateCachedViewTransform@Camera@Jet@@IBAXXZ	protected: void __cdecl Jet::Camera::UpdateCachedViewTransform(void)const 
+2452	0x16d70	?UpdateGlobalViewTransform@Camera@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::Camera::UpdateGlobalViewTransform(void)const 
+2458	0x16040	?UpdateViewCone@Camera@Jet@@IBAXXZ	protected: void __cdecl Jet::Camera::UpdateViewCone(void)const 
+2459	0x73980	?ViewTransformPoint@ViewPort@Jet@@QAAXAAVVector3@2@@Z	public: void __cdecl Jet::ViewPort::ViewTransformPoint(class Jet::Vector3 &)
+2471	0xad00	?WindowSpaceConvert@ViewPort@Jet@@QBAXAAURect@2@@Z	public: void __cdecl Jet::ViewPort::WindowSpaceConvert(struct Jet::Rect &)const 
+2488	0xdca2c	?numViewports@ViewPort@Jet@@1KA	protected: static unsigned long Jet::ViewPort::numViewports
+2489	0xda1c4	?pixelError@Camera@Jet@@1MA	protected: static float Jet::Camera::pixelError
+2498	0xdca30	?traversalNumber@ViewPort@Jet@@1KA	protected: static unsigned long Jet::ViewPort::traversalNumber

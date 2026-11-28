@@ -1,0 +1,24 @@
+# U11 remainder: Facility, the BackgroundResource/BackgroundLoadingThread static data and the plugin entry.
+#
+# The debug tables are arrays, but MSVC mangles an array of const like a pointer to const, which is why the
+# original's export table demangles them as pointers. `results` is exported as the three-entry ResultTable array
+# itself (the original's symbol is that array), while the local ResultClass symbol is the pointer the template
+# needs: the export name is an alias to resultsTable.
+
+# ---- Facility (4)
+??0Facility@Jet@@QAE@ABV01@@Z
+??0Facility@Jet@@QAE@XZ
+??4Facility@Jet@@QAEAAV01@ABV01@@Z
+??_7Facility@Jet@@6B@
+
+# ---- BackgroundResource debug tables and FSM pointer (4)
+?actionNames@BackgroundResource@Jet@@1QBUNameCheck@12@B
+?fsm@BackgroundResource@Jet@@1QAY08$$CBUStateTable@12@A
+?inputNames@BackgroundResource@Jet@@1QBUNameCheck@12@B
+?stateNames@BackgroundResource@Jet@@1QBUNameCheck@12@B
+
+# ---- BackgroundLoadingThread result table (1)
+?results@BackgroundLoadingThread@Jet@@2QBUResultTable@2@B=?resultsTable@BackgroundLoadingThread@Jet@@1QBUResultTable@2@B
+
+# ---- plugin entry (1)
+JetGetPluginsRender3DCore

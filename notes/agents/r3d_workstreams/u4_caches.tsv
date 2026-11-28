@@ -1,0 +1,130 @@
+ordinal	rva	mangled	demangled
+9	0x1570	??0AlphaBlendCache@Jet@@IAE@_N@Z	protected: __thiscall Jet::AlphaBlendCache::AlphaBlendCache(bool)
+10	0x1400	??0AlphaBlendCache@Jet@@QAE@XZ	public: __thiscall Jet::AlphaBlendCache::AlphaBlendCache(void)
+11	0x2f90	??0AlphaMaskCache@Jet@@QAE@XZ	public: __thiscall Jet::AlphaMaskCache::AlphaMaskCache(void)
+51	0x2710	??0CacheBucket@AlphaBlendCache@Jet@@QAE@XZ	public: __thiscall Jet::AlphaBlendCache::CacheBucket::CacheBucket(void)
+103	0x25b80	??0GenericMaterialChunkCache@Jet@@QAE@ABVPString@1@M@Z	public: __thiscall Jet::GenericMaterialChunkCache::GenericMaterialChunkCache(class Jet::PString const &,float)
+144	0x2b600	??0MaterialChunkCache@Jet@@IAE@ABVPString@1@M@Z	protected: __thiscall Jet::MaterialChunkCache::MaterialChunkCache(class Jet::PString const &,float)
+145	0x2b540	??0MaterialChunkCache@Jet@@QAE@XZ	public: __thiscall Jet::MaterialChunkCache::MaterialChunkCache(void)
+212	0x52ed0	??0ParticleFXCache@Jet@@QAE@XZ	public: __thiscall Jet::ParticleFXCache::ParticleFXCache(void)
+239	0x58a10	??0ProjectorCache@Jet@@QAE@XZ	public: __thiscall Jet::ProjectorCache::ProjectorCache(void)
+319	0x72600	??0UnsortedAlphaBlendCache@Jet@@QAE@XZ	public: __thiscall Jet::UnsortedAlphaBlendCache::UnsortedAlphaBlendCache(void)
+334	0x1660	??1AlphaBlendCache@Jet@@UAE@XZ	public: virtual __thiscall Jet::AlphaBlendCache::~AlphaBlendCache(void)
+335	0x3060	??1AlphaMaskCache@Jet@@UAE@XZ	public: virtual __thiscall Jet::AlphaMaskCache::~AlphaMaskCache(void)
+350	0x2720	??1CacheBucket@AlphaBlendCache@Jet@@QAE@XZ	public: __thiscall Jet::AlphaBlendCache::CacheBucket::~CacheBucket(void)
+360	0x25a50	??1GenericMaterialChunkCache@Jet@@UAE@XZ	public: virtual __thiscall Jet::GenericMaterialChunkCache::~GenericMaterialChunkCache(void)
+372	0x2b6c0	??1MaterialChunkCache@Jet@@UAE@XZ	public: virtual __thiscall Jet::MaterialChunkCache::~MaterialChunkCache(void)
+404	0x52db0	??1ParticleFXCache@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleFXCache::~ParticleFXCache(void)
+412	0x58930	??1ProjectorCache@Jet@@UAE@XZ	public: virtual __thiscall Jet::ProjectorCache::~ProjectorCache(void)
+443	0x726d0	??1UnsortedAlphaBlendCache@Jet@@UAE@XZ	public: virtual __thiscall Jet::UnsortedAlphaBlendCache::~UnsortedAlphaBlendCache(void)
+451	0xb210	??4AlphaBlendCache@Jet@@AAAABV01@ABV01@@Z	private: class Jet::AlphaBlendCache const & __cdecl Jet::AlphaBlendCache::operator=(class Jet::AlphaBlendCache const &)
+463	0x1090	??4CacheBucket@AlphaBlendCache@Jet@@QAEAAU012@ABU012@@Z	public: struct Jet::AlphaBlendCache::CacheBucket & __thiscall Jet::AlphaBlendCache::CacheBucket::operator=(struct Jet::AlphaBlendCache::CacheBucket const &)
+597	0x7c9c8	??_7AlphaBlendCache@Jet@@6BReferenceCount@1@@	const Jet::AlphaBlendCache::`vftable'{for `Jet::ReferenceCount'}
+598	0x7c984	??_7AlphaBlendCache@Jet@@6BRenderingCache@1@@	const Jet::AlphaBlendCache::`vftable'{for `Jet::RenderingCache'}
+599	0x7d2d4	??_7AlphaMaskCache@Jet@@6BReferenceCount@1@@	const Jet::AlphaMaskCache::`vftable'{for `Jet::ReferenceCount'}
+600	0x7d2a8	??_7AlphaMaskCache@Jet@@6BRenderingCache@1@@	const Jet::AlphaMaskCache::`vftable'{for `Jet::RenderingCache'}
+632	0x7ede8	??_7GenericMaterialChunkCache@Jet@@6BReferenceCount@1@@	const Jet::GenericMaterialChunkCache::`vftable'{for `Jet::ReferenceCount'}
+633	0x7edc4	??_7GenericMaterialChunkCache@Jet@@6BRenderingCache@1@@	const Jet::GenericMaterialChunkCache::`vftable'{for `Jet::RenderingCache'}
+651	0x7f2b8	??_7MaterialChunkCache@Jet@@6BReferenceCount@1@@	const Jet::MaterialChunkCache::`vftable'{for `Jet::ReferenceCount'}
+652	0x7f28c	??_7MaterialChunkCache@Jet@@6BRenderingCache@1@@	const Jet::MaterialChunkCache::`vftable'{for `Jet::RenderingCache'}
+697	0x839d8	??_7ParticleFXCache@Jet@@6BReferenceCount@1@@	const Jet::ParticleFXCache::`vftable'{for `Jet::ReferenceCount'}
+698	0x839b0	??_7ParticleFXCache@Jet@@6BRenderingCache@1@@	const Jet::ParticleFXCache::`vftable'{for `Jet::RenderingCache'}
+707	0x83ac8	??_7ProjectorCache@Jet@@6BReferenceCount@1@@	const Jet::ProjectorCache::`vftable'{for `Jet::ReferenceCount'}
+708	0x83aa4	??_7ProjectorCache@Jet@@6BRenderingCache@1@@	const Jet::ProjectorCache::`vftable'{for `Jet::RenderingCache'}
+744	0x8662c	??_7UnsortedAlphaBlendCache@Jet@@6BReferenceCount@1@@	const Jet::UnsortedAlphaBlendCache::`vftable'{for `Jet::ReferenceCount'}
+745	0x86600	??_7UnsortedAlphaBlendCache@Jet@@6BRenderingCache@1@@	const Jet::UnsortedAlphaBlendCache::`vftable'{for `Jet::RenderingCache'}
+749	0x7c9d0	??_8AlphaBlendCache@Jet@@7B@	const Jet::AlphaBlendCache::`vbtable'
+750	0x7d2dc	??_8AlphaMaskCache@Jet@@7B@	const Jet::AlphaMaskCache::`vbtable'
+754	0x7edf0	??_8GenericMaterialChunkCache@Jet@@7B@	const Jet::GenericMaterialChunkCache::`vbtable'
+758	0x7f2c0	??_8MaterialChunkCache@Jet@@7B@	const Jet::MaterialChunkCache::`vbtable'
+768	0x839e0	??_8ParticleFXCache@Jet@@7B@	const Jet::ParticleFXCache::`vbtable'
+769	0x83ad0	??_8ProjectorCache@Jet@@7B@	const Jet::ProjectorCache::`vbtable'
+771	0x86634	??_8UnsortedAlphaBlendCache@Jet@@7B@	const Jet::UnsortedAlphaBlendCache::`vbtable'
+773	0x1120	??_DAlphaBlendCache@Jet@@QAEXXZ	public: void __thiscall Jet::AlphaBlendCache::`vbase destructor'(void)
+774	0x2df0	??_DAlphaMaskCache@Jet@@QAEXXZ	public: void __thiscall Jet::AlphaMaskCache::`vbase destructor'(void)
+778	0x25af0	??_DGenericMaterialChunkCache@Jet@@QAEXXZ	public: void __thiscall Jet::GenericMaterialChunkCache::`vbase destructor'(void)
+782	0x10230	??_DMaterialChunkCache@Jet@@QAEXXZ	public: void __thiscall Jet::MaterialChunkCache::`vbase destructor'(void)
+792	0x52e30	??_DParticleFXCache@Jet@@QAEXXZ	public: void __thiscall Jet::ParticleFXCache::`vbase destructor'(void)
+793	0x589f0	??_DProjectorCache@Jet@@QAEXXZ	public: void __thiscall Jet::ProjectorCache::`vbase destructor'(void)
+795	0x3d510	??_DUnsortedAlphaBlendCache@Jet@@QAEXXZ	public: void __thiscall Jet::UnsortedAlphaBlendCache::`vbase destructor'(void)
+797	0x25a80	??_FGenericMaterialChunkCache@Jet@@QAEXXZ	public: void __thiscall Jet::GenericMaterialChunkCache::`default constructor closure'(void)
+822	0x1930	?Add@AlphaBlendCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@PBVMaterial@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: virtual void __cdecl Jet::AlphaBlendCache::Add(class Jet::Display *,class Jet::ViewPort *,class Jet::Material const *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)
+823	0x2e10	?Add@AlphaMaskCache@Jet@@UAAXPBVMaterial@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: virtual void __cdecl Jet::AlphaMaskCache::Add(class Jet::Material const *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)
+828	0x25c80	?Add@GenericMaterialChunkCache@Jet@@QAAXPAVDisplay@2@PAVViewPort@2@PBVMaterial@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: void __cdecl Jet::GenericMaterialChunkCache::Add(class Jet::Display *,class Jet::ViewPort *,class Jet::Material const *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)
+829	0x2b720	?Add@MaterialChunkCache@Jet@@QAAXPAVDisplay@2@PAVViewPort@2@PBVMaterial@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	public: void __cdecl Jet::MaterialChunkCache::Add(class Jet::Display *,class Jet::ViewPort *,class Jet::Material const *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)
+832	0x52f70	?Add@ParticleFXCache@Jet@@UAAXPBVParticleFXRenderItem@2@PBVMatrix4@2@@Z	public: virtual void __cdecl Jet::ParticleFXCache::Add(class Jet::ParticleFXRenderItem const *,class Jet::Matrix4 const *)
+833	0x58b60	?Add@ProjectorCache@Jet@@QAAXPAVProjector@2@@Z	public: void __cdecl Jet::ProjectorCache::Add(class Jet::Projector *)
+839	0x72760	?Add@UnsortedAlphaBlendCache@Jet@@UAAXPBVMaterial@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@M@Z	public: virtual void __cdecl Jet::UnsortedAlphaBlendCache::Add(class Jet::Material const *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,float)
+856	0x24f0	?AddToFreeList@AlphaBlendCache@Jet@@QAAXPAUCacheRecord@12@@Z	public: void __cdecl Jet::AlphaBlendCache::AddToFreeList(struct Jet::AlphaBlendCache::CacheRecord *)
+865	0x2530	?AllocateIndexArray@AlphaBlendCache@Jet@@IAAPAGH@Z	protected: unsigned short * __cdecl Jet::AlphaBlendCache::AllocateIndexArray(int)
+866	0xdca34	?AlphaBlendCacheID@AlphaBlendCache@Jet@@2VPString@2@A	public: static class Jet::PString Jet::AlphaBlendCache::AlphaBlendCacheID
+867	0xdca38	?AlphaMaskCacheID@AlphaMaskCache@Jet@@2VPString@2@A	public: static class Jet::PString Jet::AlphaMaskCache::AlphaMaskCacheID
+877	0x1800	?Begin@AlphaBlendCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::AlphaBlendCache::Begin(class Jet::Display *,class Jet::ViewPort *)
+878	0x73920	?Begin@AlphaMaskCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::AlphaMaskCache::Begin(class Jet::Display *,class Jet::ViewPort *)
+879	0x25b70	?Begin@GenericMaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::GenericMaterialChunkCache::Begin(class Jet::Display *,class Jet::ViewPort *)
+880	0x73920	?Begin@MaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::MaterialChunkCache::Begin(class Jet::Display *,class Jet::ViewPort *)
+881	0x52fb0	?Begin@ParticleFXCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::ParticleFXCache::Begin(class Jet::Display *,class Jet::ViewPort *)
+882	0x58ab0	?Begin@ProjectorCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::ProjectorCache::Begin(class Jet::Display *,class Jet::ViewPort *)
+883	0x73920	?Begin@UnsortedAlphaBlendCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::UnsortedAlphaBlendCache::Begin(class Jet::Display *,class Jet::ViewPort *)
+965	0x1aa0	?CleanupDisplayState@AlphaBlendCache@Jet@@MAAXPAVDisplay@2@@Z	protected: virtual void __cdecl Jet::AlphaBlendCache::CleanupDisplayState(class Jet::Display *)
+983	0x1c20	?CompareSortFaces@AlphaBlendCache@Jet@@KAHPBX0@Z	protected: static int __cdecl Jet::AlphaBlendCache::CompareSortFaces(void const *,void const *)
+1138	0x1810	?End@AlphaBlendCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::AlphaBlendCache::End(class Jet::Display *,class Jet::ViewPort *)
+1139	0x2ed0	?End@AlphaMaskCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::AlphaMaskCache::End(class Jet::Display *,class Jet::ViewPort *)
+1140	0x25f90	?End@GenericMaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::GenericMaterialChunkCache::End(class Jet::Display *,class Jet::ViewPort *)
+1141	0x10290	?End@MaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::MaterialChunkCache::End(class Jet::Display *,class Jet::ViewPort *)
+1142	0x52fc0	?End@ParticleFXCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::ParticleFXCache::End(class Jet::Display *,class Jet::ViewPort *)
+1143	0x58b00	?End@ProjectorCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::ProjectorCache::End(class Jet::Display *,class Jet::ViewPort *)
+1144	0x72840	?End@UnsortedAlphaBlendCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@@Z	public: virtual void __cdecl Jet::UnsortedAlphaBlendCache::End(class Jet::Display *,class Jet::ViewPort *)
+1146	0x1350	?EndOfTree@CacheBucket@AlphaBlendCache@Jet@@QAAPAUCacheRecord@23@PAU423@@Z	public: struct Jet::AlphaBlendCache::CacheRecord * __cdecl Jet::AlphaBlendCache::CacheBucket::EndOfTree(struct Jet::AlphaBlendCache::CacheRecord *)
+1147	0x2970	?Enter@AlphaBlendCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z	public: virtual void __cdecl Jet::AlphaBlendCache::Enter(class Jet::Display *,class Jet::ViewPort *,bool)
+1148	0x26030	?Enter@GenericMaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z	public: virtual void __cdecl Jet::GenericMaterialChunkCache::Enter(class Jet::Display *,class Jet::ViewPort *,bool)
+1149	0x26030	?Enter@MaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z	public: virtual void __cdecl Jet::MaterialChunkCache::Enter(class Jet::Display *,class Jet::ViewPort *,bool)
+1180	0x102e0	?FlushPipe@MaterialChunkCache@Jet@@MAAXHPAVDisplay@2@PAVViewPort@2@@Z	protected: virtual void __cdecl Jet::MaterialChunkCache::FlushPipe(int,class Jet::Display *,class Jet::ViewPort *)
+1181	0xdca84	?GenericMaterialChunkCacheID@GenericMaterialChunkCache@Jet@@2VPString@2@A	public: static class Jet::PString Jet::GenericMaterialChunkCache::GenericMaterialChunkCacheID
+1219	0x1170	?GetBlendFunction@AlphaBlendCache@Jet@@QBAXAAW4Factor@Src@2@AAW43Dst@2@@Z	public: void __cdecl Jet::AlphaBlendCache::GetBlendFunction(enum Jet::Src::Factor &,enum Jet::Dst::Factor &)const 
+1301	0x2430	?GetFreeCacheRecord@AlphaBlendCache@Jet@@QAAPAUCacheRecord@12@PBVMaterial@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@PAGM@Z	public: struct Jet::AlphaBlendCache::CacheRecord * __cdecl Jet::AlphaBlendCache::GetFreeCacheRecord(class Jet::Material const *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *,unsigned short *,float)
+1333	0x6970	?GetHead@CacheBucket@AlphaBlendCache@Jet@@QAAPAUCacheRecord@23@XZ	public: struct Jet::AlphaBlendCache::CacheRecord * __cdecl Jet::AlphaBlendCache::CacheBucket::GetHead(void)
+1387	0x2660	?GetMaxBucketRange@AlphaBlendCache@Jet@@QAAMXZ	public: float __cdecl Jet::AlphaBlendCache::GetMaxBucketRange(void)
+1388	0x1140	?GetMaxBuckets@AlphaBlendCache@Jet@@QBAHXZ	public: int __cdecl Jet::AlphaBlendCache::GetMaxBuckets(void)const 
+1400	0x1370	?GetNextRecord@CacheBucket@AlphaBlendCache@Jet@@QAAPAUCacheRecord@23@PAU423@@Z	public: struct Jet::AlphaBlendCache::CacheRecord * __cdecl Jet::AlphaBlendCache::CacheBucket::GetNextRecord(struct Jet::AlphaBlendCache::CacheRecord *)
+1512	0x25f0	?GetSortEverythingRange@AlphaBlendCache@Jet@@QAAMXZ	public: float __cdecl Jet::AlphaBlendCache::GetSortEverythingRange(void)
+1513	0x1c50	?GetSortFunction@AlphaBlendCache@Jet@@MAAP6AHPBX0@ZXZ	protected: virtual int (__cdecl*__cdecl Jet::AlphaBlendCache::GetSortFunction(void))(void const *,void const *)
+1514	0xa970	?GetSortPolysInChunkRange@AlphaBlendCache@Jet@@QAAMXZ	public: float __cdecl Jet::AlphaBlendCache::GetSortPolysInChunkRange(void)
+1722	0x1190	?Insert@CacheBucket@AlphaBlendCache@Jet@@QAAPAUCacheRecord@23@PAU423@@Z	public: struct Jet::AlphaBlendCache::CacheRecord * __cdecl Jet::AlphaBlendCache::CacheBucket::Insert(struct Jet::AlphaBlendCache::CacheRecord *)
+1775	0x17a0	?IsEmpty@AlphaBlendCache@Jet@@UBE_NXZ	public: virtual bool __thiscall Jet::AlphaBlendCache::IsEmpty(void)const 
+1776	0x30e0	?IsEmpty@AlphaMaskCache@Jet@@UBE_NXZ	public: virtual bool __thiscall Jet::AlphaMaskCache::IsEmpty(void)const 
+1778	0x2b710	?IsEmpty@MaterialChunkCache@Jet@@UBE_NXZ	public: virtual bool __thiscall Jet::MaterialChunkCache::IsEmpty(void)const 
+1780	0x30e0	?IsEmpty@UnsortedAlphaBlendCache@Jet@@UBE_NXZ	public: virtual bool __thiscall Jet::UnsortedAlphaBlendCache::IsEmpty(void)const 
+1845	0x29a0	?Leave@AlphaBlendCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z	public: virtual void __cdecl Jet::AlphaBlendCache::Leave(class Jet::Display *,class Jet::ViewPort *,bool)
+1846	0x26030	?Leave@GenericMaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z	public: virtual void __cdecl Jet::GenericMaterialChunkCache::Leave(class Jet::Display *,class Jet::ViewPort *,bool)
+1847	0x26030	?Leave@MaterialChunkCache@Jet@@UAAXPAVDisplay@2@PAVViewPort@2@_N@Z	public: virtual void __cdecl Jet::MaterialChunkCache::Leave(class Jet::Display *,class Jet::ViewPort *,bool)
+1879	0xdcbe4	?MaterialChunkCacheID@MaterialChunkCache@Jet@@2VPString@2@A	public: static class Jet::PString Jet::MaterialChunkCache::MaterialChunkCacheID
+1905	0xdcf3c	?ParticleFXCacheID@ParticleFXCache@Jet@@2VPString@2@A	public: static class Jet::PString Jet::ParticleFXCache::ParticleFXCacheID
+1917	0xdcf40	?ProjectorCacheID@ProjectorCache@Jet@@2VPString@2@A	public: static class Jet::PString Jet::ProjectorCache::ProjectorCacheID
+1930	0x2690	?RecalculateBucketParametrs@AlphaBlendCache@Jet@@MAAX_N@Z	protected: virtual void __cdecl Jet::AlphaBlendCache::RecalculateBucketParametrs(bool)
+2027	0x17b0	?Reset@AlphaBlendCache@Jet@@UAAXXZ	public: virtual void __cdecl Jet::AlphaBlendCache::Reset(void)
+2028	0x2eb0	?Reset@AlphaMaskCache@Jet@@UAAXXZ	public: virtual void __cdecl Jet::AlphaMaskCache::Reset(void)
+2029	0x27a0	?Reset@CacheBucket@AlphaBlendCache@Jet@@QAAXPAV23@@Z	public: void __cdecl Jet::AlphaBlendCache::CacheBucket::Reset(class Jet::AlphaBlendCache *)
+2031	0x25c30	?Reset@GenericMaterialChunkCache@Jet@@UAAXXZ	public: virtual void __cdecl Jet::GenericMaterialChunkCache::Reset(void)
+2032	0x10280	?Reset@MaterialChunkCache@Jet@@UAAXXZ	public: virtual void __cdecl Jet::MaterialChunkCache::Reset(void)
+2033	0x52fb0	?Reset@ParticleFXCache@Jet@@UAAXXZ	public: virtual void __cdecl Jet::ParticleFXCache::Reset(void)
+2036	0x58ab0	?Reset@ProjectorCache@Jet@@UAAXXZ	public: virtual void __cdecl Jet::ProjectorCache::Reset(void)
+2037	0x72820	?Reset@UnsortedAlphaBlendCache@Jet@@UAAXXZ	public: virtual void __cdecl Jet::UnsortedAlphaBlendCache::Reset(void)
+2051	0x2900	?RotateTree@CacheBucket@AlphaBlendCache@Jet@@QAAPAUCacheRecord@23@PAU423@0@Z	public: struct Jet::AlphaBlendCache::CacheRecord * __cdecl Jet::AlphaBlendCache::CacheBucket::RotateTree(struct Jet::AlphaBlendCache::CacheRecord *,struct Jet::AlphaBlendCache::CacheRecord *)
+2099	0x1150	?SetBlendFunction@AlphaBlendCache@Jet@@QAAXW4Factor@Src@2@W43Dst@2@@Z	public: void __cdecl Jet::AlphaBlendCache::SetBlendFunction(enum Jet::Src::Factor,enum Jet::Dst::Factor)
+2178	0x2620	?SetMaxBucketRange@AlphaBlendCache@Jet@@QAAXM@Z	public: void __cdecl Jet::AlphaBlendCache::SetMaxBucketRange(float)
+2179	0x2670	?SetMaxBuckets@AlphaBlendCache@Jet@@UAAXH@Z	public: virtual void __cdecl Jet::AlphaBlendCache::SetMaxBuckets(int)
+2248	0x25d0	?SetSortEverythingRange@AlphaBlendCache@Jet@@UAAXM@Z	public: virtual void __cdecl Jet::AlphaBlendCache::SetSortEverythingRange(float)
+2249	0x2600	?SetSortPolysInChunkRange@AlphaBlendCache@Jet@@QAAXM@Z	public: void __cdecl Jet::AlphaBlendCache::SetSortPolysInChunkRange(float)
+2274	0x3d500	?SetTrainzDelayedRender@UnsortedAlphaBlendCache@Jet@@SAX_N@Z	public: static void __cdecl Jet::UnsortedAlphaBlendCache::SetTrainzDelayedRender(bool)
+2283	0x1a60	?SetupDisplayState@AlphaBlendCache@Jet@@MAAXPAVDisplay@2@@Z	protected: virtual void __cdecl Jet::AlphaBlendCache::SetupDisplayState(class Jet::Display *)
+2285	0x1ae0	?SetupPrimitiveSort@AlphaBlendCache@Jet@@IAAHPAVGeometryChunk@2@AAH1AAMAAW4DPrimitive@2@@Z	protected: int __cdecl Jet::AlphaBlendCache::SetupPrimitiveSort(class Jet::GeometryChunk *,int &,int &,float &,enum Jet::DPrimitive &)
+2289	0x1c60	?SortChunk@AlphaBlendCache@Jet@@IAAXAAUCacheRecord@12@@Z	protected: void __cdecl Jet::AlphaBlendCache::SortChunk(struct Jet::AlphaBlendCache::CacheRecord &)
+2290	0x20d0	?SortChunkIntoBuckets@AlphaBlendCache@Jet@@IAAXPBVMaterial@2@PAVGeometryChunk@2@PBV?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@PBVMatrix4@2@@Z	protected: void __cdecl Jet::AlphaBlendCache::SortChunkIntoBuckets(class Jet::Material const *,class Jet::GeometryChunk *,class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > const *,class Jet::Matrix4 const *)
+2292	0x2880	?SplitTree@CacheBucket@AlphaBlendCache@Jet@@QAAXPAUCacheRecord@23@0000@Z	public: void __cdecl Jet::AlphaBlendCache::CacheBucket::SplitTree(struct Jet::AlphaBlendCache::CacheRecord *,struct Jet::AlphaBlendCache::CacheRecord *,struct Jet::AlphaBlendCache::CacheRecord *,struct Jet::AlphaBlendCache::CacheRecord *,struct Jet::AlphaBlendCache::CacheRecord *)
+2445	0xdd0a8	?UnsortedAlphaBlendCacheID@UnsortedAlphaBlendCache@Jet@@2VPString@2@A	public: static class Jet::PString Jet::UnsortedAlphaBlendCache::UnsortedAlphaBlendCacheID
+2484	0xdca25	?m_ceebtrainz_delayed_alpha_render@UnsortedAlphaBlendCache@Jet@@1_NA	protected: static bool Jet::UnsortedAlphaBlendCache::m_ceebtrainz_delayed_alpha_render
+2491	0xdc9fc	?singleton@AlphaBlendCache@Jet@@2PAV12@A	public: static class Jet::AlphaBlendCache * Jet::AlphaBlendCache::singleton
+2492	0xdca00	?singleton@AlphaMaskCache@Jet@@2PAV12@A	public: static class Jet::AlphaMaskCache * Jet::AlphaMaskCache::singleton
+2493	0xdca18	?singleton@MaterialChunkCache@Jet@@2PAV12@A	public: static class Jet::MaterialChunkCache * Jet::MaterialChunkCache::singleton
+2494	0xdca28	?singleton@UnsortedAlphaBlendCache@Jet@@2PAV12@A	public: static class Jet::UnsortedAlphaBlendCache * Jet::UnsortedAlphaBlendCache::singleton

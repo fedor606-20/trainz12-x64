@@ -1,0 +1,96 @@
+ordinal	rva	mangled	demangled
+12	0x7fa0	??0AmbientLight@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::AmbientLight::AmbientLight(class Jet::AmbientLight const &)
+13	0x8100	??0AmbientLight@Jet@@QAE@ABVVector3@1@MABVColor@1@@Z	public: __thiscall Jet::AmbientLight::AmbientLight(class Jet::Vector3 const &,float,class Jet::Color const &)
+14	0x8060	??0AmbientLight@Jet@@QAE@XZ	public: __thiscall Jet::AmbientLight::AmbientLight(void)
+85	0x20e80	??0CubeMapLight@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::CubeMapLight::CubeMapLight(class Jet::CubeMapLight const &)
+86	0x21230	??0CubeMapLight@Jet@@QAE@ABVVector3@1@ABVQuaternion@1@ABV?$AutoReference@VTexture@Jet@@@1@MABVColor@1@@Z	public: __thiscall Jet::CubeMapLight::CubeMapLight(class Jet::Vector3 const &,class Jet::Quaternion const &,class Jet::AutoReference<class Jet::Texture> const &,float,class Jet::Color const &)
+119	0x7bc0	??0Light@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Light::Light(class Jet::Light const &)
+120	0x7ca0	??0Light@Jet@@QAE@W4DLightTypes@1@@Z	public: __thiscall Jet::Light::Light(enum Jet::DLightTypes)
+121	0x7ce0	??0Light@Jet@@QAE@W4DLightTypes@1@ABVVector3@1@M@Z	public: __thiscall Jet::Light::Light(enum Jet::DLightTypes,class Jet::Vector3 const &,float)
+183	0x42190	??0OmniLight@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::OmniLight::OmniLight(class Jet::OmniLight const &)
+184	0x42600	??0OmniLight@Jet@@QAE@ABVVector3@1@MABVColor@1@@Z	public: __thiscall Jet::OmniLight::OmniLight(class Jet::Vector3 const &,float,class Jet::Color const &)
+185	0x42540	??0OmniLight@Jet@@QAE@XZ	public: __thiscall Jet::OmniLight::OmniLight(void)
+199	0x4d140	??0ParallelLight@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParallelLight::ParallelLight(class Jet::ParallelLight const &)
+200	0x4d840	??0ParallelLight@Jet@@QAE@ABVVector3@1@ABVQuaternion@1@MABVColor@1@W4DLightTypes@1@@Z	public: __thiscall Jet::ParallelLight::ParallelLight(class Jet::Vector3 const &,class Jet::Quaternion const &,float,class Jet::Color const &,enum Jet::DLightTypes)
+201	0x4d6a0	??0ParallelLight@Jet@@QAE@W4DLightTypes@1@@Z	public: __thiscall Jet::ParallelLight::ParallelLight(enum Jet::DLightTypes)
+303	0x70450	??0SpotLight@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::SpotLight::SpotLight(class Jet::SpotLight const &)
+304	0x70730	??0SpotLight@Jet@@QAE@ABVVector3@1@ABVQuaternion@1@MMMABVColor@1@@Z	public: __thiscall Jet::SpotLight::SpotLight(class Jet::Vector3 const &,class Jet::Quaternion const &,float,float,float,class Jet::Color const &)
+305	0x70670	??0SpotLight@Jet@@QAE@XZ	public: __thiscall Jet::SpotLight::SpotLight(void)
+336	0x70440	??1AmbientLight@Jet@@UAE@XZ	public: virtual __thiscall Jet::AmbientLight::~AmbientLight(void)
+358	0x20e20	??1CubeMapLight@Jet@@UAE@XZ	public: virtual __thiscall Jet::CubeMapLight::~CubeMapLight(void)
+368	0x7b60	??1Light@Jet@@UAE@XZ	public: virtual __thiscall Jet::Light::~Light(void)
+393	0x70440	??1OmniLight@Jet@@UAE@XZ	public: virtual __thiscall Jet::OmniLight::~OmniLight(void)
+398	0x70440	??1ParallelLight@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParallelLight::~ParallelLight(void)
+438	0x70440	??1SpotLight@Jet@@UAE@XZ	public: virtual __thiscall Jet::SpotLight::~SpotLight(void)
+452	0x7fc0	??4AmbientLight@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::AmbientLight & __thiscall Jet::AmbientLight::operator=(class Jet::AmbientLight const &)
+473	0x20f20	??4CubeMapLight@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::CubeMapLight & __thiscall Jet::CubeMapLight::operator=(class Jet::CubeMapLight const &)
+486	0x7f60	??4Light@Jet@@QAAAAV01@ABV01@@Z	public: class Jet::Light & __cdecl Jet::Light::operator=(class Jet::Light const &)
+504	0x421e0	??4OmniLight@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::OmniLight & __thiscall Jet::OmniLight::operator=(class Jet::OmniLight const &)
+508	0x4d1e0	??4ParallelLight@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParallelLight & __thiscall Jet::ParallelLight::operator=(class Jet::ParallelLight const &)
+551	0x704a0	??4SpotLight@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::SpotLight & __thiscall Jet::SpotLight::operator=(class Jet::SpotLight const &)
+568	0x7e90	??8Light@Jet@@UBA_NABV01@@Z	public: virtual bool __cdecl Jet::Light::operator==(class Jet::Light const &)const 
+577	0x423d0	??8OmniLight@Jet@@UBA_NABV01@@Z	public: virtual bool __cdecl Jet::OmniLight::operator==(class Jet::OmniLight const &)const 
+601	0x7d640	??_7AmbientLight@Jet@@6BDisplayLight@1@@	const Jet::AmbientLight::`vftable'{for `Jet::DisplayLight'}
+602	0x7d66c	??_7AmbientLight@Jet@@6BParticle@1@@	const Jet::AmbientLight::`vftable'{for `Jet::Particle'}
+625	0x7ea8c	??_7CubeMapLight@Jet@@6BDisplayLight@1@@	const Jet::CubeMapLight::`vftable'{for `Jet::DisplayLight'}
+626	0x7eacc	??_7CubeMapLight@Jet@@6BParticle@1@@	const Jet::CubeMapLight::`vftable'{for `Jet::Particle'}
+643	0x7d54c	??_7Light@Jet@@6BDisplayLight@1@@	const Jet::Light::`vftable'{for `Jet::DisplayLight'}
+644	0x7d57c	??_7Light@Jet@@6BParticle@1@@	const Jet::Light::`vftable'{for `Jet::Particle'}
+682	0x81da8	??_7OmniLight@Jet@@6BDisplayLight@1@@	const Jet::OmniLight::`vftable'{for `Jet::DisplayLight'}
+683	0x81ddc	??_7OmniLight@Jet@@6BParticle@1@@	const Jet::OmniLight::`vftable'{for `Jet::Particle'}
+690	0x835a0	??_7ParallelLight@Jet@@6BDisplayLight@1@@	const Jet::ParallelLight::`vftable'{for `Jet::DisplayLight'}
+691	0x835cc	??_7ParallelLight@Jet@@6BParticle@1@@	const Jet::ParallelLight::`vftable'{for `Jet::Particle'}
+738	0x864ec	??_7SpotLight@Jet@@6BDisplayLight@1@@	const Jet::SpotLight::`vftable'{for `Jet::DisplayLight'}
+739	0x8651c	??_7SpotLight@Jet@@6BParticle@1@@	const Jet::SpotLight::`vftable'{for `Jet::Particle'}
+798	0x4d2a0	??_FParallelLight@Jet@@QAEXXZ	public: void __thiscall Jet::ParallelLight::`default constructor closure'(void)
+872	0x8250	?BatchCalculateDiffuse@AmbientLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z	public: virtual void __cdecl Jet::AmbientLight::BatchCalculateDiffuse(class Jet::Display *,int,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<unsigned long,class Jet::VertexItemPtr<unsigned long const ,class Jet::VIPConstHelper> >,class Jet::Matrix4 const &,class Jet::Matrix4 const &,class Jet::Material *)const 
+873	0x73920	?BatchCalculateDiffuse@CubeMapLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::BatchCalculateDiffuse(class Jet::Display *,int,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<unsigned long,class Jet::VertexItemPtr<unsigned long const ,class Jet::VIPConstHelper> >,class Jet::Matrix4 const &,class Jet::Matrix4 const &,class Jet::Material *)const 
+874	0x426c0	?BatchCalculateDiffuse@OmniLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z	public: virtual void __cdecl Jet::OmniLight::BatchCalculateDiffuse(class Jet::Display *,int,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<unsigned long,class Jet::VertexItemPtr<unsigned long const ,class Jet::VIPConstHelper> >,class Jet::Matrix4 const &,class Jet::Matrix4 const &,class Jet::Material *)const 
+875	0x4d9e0	?BatchCalculateDiffuse@ParallelLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z	public: virtual void __cdecl Jet::ParallelLight::BatchCalculateDiffuse(class Jet::Display *,int,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<unsigned long,class Jet::VertexItemPtr<unsigned long const ,class Jet::VIPConstHelper> >,class Jet::Matrix4 const &,class Jet::Matrix4 const &,class Jet::Material *)const 
+876	0x70800	?BatchCalculateDiffuse@SpotLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z	public: virtual void __cdecl Jet::SpotLight::BatchCalculateDiffuse(class Jet::Display *,int,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<class Jet::Vector3,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper> >,class Jet::VertexItemPtr<unsigned long,class Jet::VertexItemPtr<unsigned long const ,class Jet::VIPConstHelper> >,class Jet::Matrix4 const &,class Jet::Matrix4 const &,class Jet::Material *)const 
+1007	0x8180	?CreateInstance@AmbientLight@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::AmbientLight::CreateInstance(void)const 
+1014	0x21090	?CreateInstance@CubeMapLight@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::CubeMapLight::CreateInstance(void)const 
+1035	0x422b0	?CreateInstance@OmniLight@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::OmniLight::CreateInstance(void)const 
+1040	0x4d310	?CreateInstance@ParallelLight@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::ParallelLight::CreateInstance(void)const 
+1064	0x70540	?CreateInstance@SpotLight@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::SpotLight::CreateInstance(void)const 
+1302	0x21220	?GetFrontFaceMode@CubeMapLight@Jet@@QAA_NXZ	public: bool __cdecl Jet::CubeMapLight::GetFrontFaceMode(void)
+1339	0x8220	?GetID@AmbientLight@Jet@@UBAHXZ	public: virtual int __cdecl Jet::AmbientLight::GetID(void)const 
+1343	0x21060	?GetID@CubeMapLight@Jet@@UBAHXZ	public: virtual int __cdecl Jet::CubeMapLight::GetID(void)const 
+1344	0x7dd0	?GetID@Light@Jet@@UBAHXZ	public: virtual int __cdecl Jet::Light::GetID(void)const 
+1346	0x3e5b0	?GetID@OmniLight@Jet@@UBAHXZ	public: virtual int __cdecl Jet::OmniLight::GetID(void)const 
+1347	0x4d3b0	?GetID@ParallelLight@Jet@@UBAHXZ	public: virtual int __cdecl Jet::ParallelLight::GetID(void)const 
+1353	0x70600	?GetID@SpotLight@Jet@@UBAHXZ	public: virtual int __cdecl Jet::SpotLight::GetID(void)const 
+1365	0x83b0	?GetLightDirection@AmbientLight@Jet@@UBAABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __cdecl Jet::AmbientLight::GetLightDirection(void)const 
+1366	0x215d0	?GetLightDirection@CubeMapLight@Jet@@UBAABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __cdecl Jet::CubeMapLight::GetLightDirection(void)const 
+1367	0x42cb0	?GetLightDirection@OmniLight@Jet@@UBAABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __cdecl Jet::OmniLight::GetLightDirection(void)const 
+1368	0x4d530	?GetLightDirection@ParallelLight@Jet@@UBAABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __cdecl Jet::ParallelLight::GetLightDirection(void)const 
+1369	0x21200	?GetLightMatrix@CubeMapLight@Jet@@QBAABVMatrix3@2@XZ	public: class Jet::Matrix3 const & __cdecl Jet::CubeMapLight::GetLightMatrix(void)const 
+1370	0x7e10	?GetLightPosition@Light@Jet@@UBAABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __cdecl Jet::Light::GetLightPosition(void)const 
+1525	0x21190	?GetTexture@CubeMapLight@Jet@@QBAABV?$AutoReference@VTexture@Jet@@@2@XZ	public: class Jet::AutoReference<class Jet::Texture> const & __cdecl Jet::CubeMapLight::GetTexture(void)const 
+1645	0x7d90	?InitInstance@AmbientLight@Jet@@QBAXAAV12@@Z	public: void __cdecl Jet::AmbientLight::InitInstance(class Jet::AmbientLight &)const 
+1654	0x7d90	?InitInstance@Light@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::Light::InitInstance(class Jet::Light &)const 
+1661	0x42370	?InitInstance@OmniLight@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::OmniLight::InitInstance(class Jet::OmniLight &)const 
+1664	0x4d3e0	?InitInstance@ParallelLight@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ParallelLight::InitInstance(class Jet::ParallelLight &)const 
+1687	0x70630	?InitInstance@SpotLight@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::SpotLight::InitInstance(class Jet::SpotLight &)const 
+1798	0x8230	?IsOfType@AmbientLight@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::AmbientLight::IsOfType(int)const 
+1802	0x21070	?IsOfType@CubeMapLight@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::CubeMapLight::IsOfType(int)const 
+1803	0x7de0	?IsOfType@Light@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::Light::IsOfType(int)const 
+1805	0x42350	?IsOfType@OmniLight@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::OmniLight::IsOfType(int)const 
+1806	0x4d3c0	?IsOfType@ParallelLight@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::ParallelLight::IsOfType(int)const 
+1812	0x70610	?IsOfType@SpotLight@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::SpotLight::IsOfType(int)const 
+2045	0x21350	?Rotate@CubeMapLight@Jet@@UAAXABVMatrix3@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::Rotate(class Jet::Matrix3 const &)
+2046	0x21370	?Rotate@CubeMapLight@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::Rotate(class Jet::Quaternion const &)
+2058	0x21390	?SelfRotate@CubeMapLight@Jet@@UAAXABVMatrix3@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::SelfRotate(class Jet::Matrix3 const &)
+2059	0x213e0	?SelfRotate@CubeMapLight@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::SelfRotate(class Jet::Quaternion const &)
+2155	0x21210	?SetFrontFaceMode@CubeMapLight@Jet@@QAAX_N@Z	public: void __cdecl Jet::CubeMapLight::SetFrontFaceMode(bool)
+2162	0x73920	?SetLightDirection@AmbientLight@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::AmbientLight::SetLightDirection(class Jet::Vector3 const &)
+2163	0x73920	?SetLightDirection@CubeMapLight@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::SetLightDirection(class Jet::Vector3 const &)
+2164	0x73920	?SetLightDirection@OmniLight@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::OmniLight::SetLightDirection(class Jet::Vector3 const &)
+2165	0x4d490	?SetLightDirection@ParallelLight@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::ParallelLight::SetLightDirection(class Jet::Vector3 const &)
+2166	0x211a0	?SetLightMatrix@CubeMapLight@Jet@@QAAXABVMatrix3@2@@Z	public: void __cdecl Jet::CubeMapLight::SetLightMatrix(class Jet::Matrix3 const &)
+2167	0x7e30	?SetLightPosition@Light@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::Light::SetLightPosition(class Jet::Vector3 const &)
+2168	0x7e00	?SetLightingBegin@Light@Jet@@UAAXXZ	public: virtual void __cdecl Jet::Light::SetLightingBegin(void)
+2192	0x21310	?SetOrientation@CubeMapLight@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::SetOrientation(class Jet::Quaternion const &)
+2228	0x21420	?SetReferenceFrame@CubeMapLight@Jet@@UAAXABVVector3@2@ABVQuaternion@2@@Z	public: virtual void __cdecl Jet::CubeMapLight::SetReferenceFrame(class Jet::Vector3 const &,class Jet::Quaternion const &)
+2255	0x21160	?SetTexture@CubeMapLight@Jet@@QAAXABV?$AutoReference@VTexture@Jet@@@2@@Z	public: void __cdecl Jet::CubeMapLight::SetTexture(class Jet::AutoReference<class Jet::Texture> const &)
+2453	0x21480	?UpdateLightMatrix@CubeMapLight@Jet@@QAAXXZ	public: void __cdecl Jet::CubeMapLight::UpdateLightMatrix(void)

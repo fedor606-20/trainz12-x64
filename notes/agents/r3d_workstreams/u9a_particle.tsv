@@ -1,0 +1,150 @@
+ordinal	rva	mangled	demangled
+202	0x6d80	??0Particle@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Particle::Particle(class Jet::Particle const &)
+203	0x4def0	??0Particle@Jet@@QAE@XZ	public: __thiscall Jet::Particle::Particle(void)
+204	0x50020	??0ParticleAlias@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParticleAlias::ParticleAlias(class Jet::ParticleAlias const &)
+205	0x50150	??0ParticleAlias@Jet@@QAE@PAVViewPortParticle@1@@Z	public: __thiscall Jet::ParticleAlias::ParticleAlias(class Jet::ViewPortParticle *)
+217	0xb300	??0ParticleStructure@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParticleStructure::ParticleStructure(class Jet::ParticleStructure const &)
+218	0xb420	??0ParticleStructure@Jet@@QAE@XZ	public: __thiscall Jet::ParticleStructure::ParticleStructure(void)
+326	0xadf0	??0ViewPortParticle@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ViewPortParticle::ViewPortParticle(class Jet::ViewPortParticle const &)
+327	0xaf10	??0ViewPortParticle@Jet@@QAE@XZ	public: __thiscall Jet::ViewPortParticle::ViewPortParticle(void)
+399	0x4dfb0	??1Particle@Jet@@UAE@XZ	public: virtual __thiscall Jet::Particle::~Particle(void)
+400	0x501d0	??1ParticleAlias@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleAlias::~ParticleAlias(void)
+406	0xb2a0	??1ParticleStructure@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleStructure::~ParticleStructure(void)
+446	0x75980	??1ViewPortParticle@Jet@@UAE@XZ	public: virtual __thiscall Jet::ViewPortParticle::~ViewPortParticle(void)
+509	0x6ec0	??4Particle@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Particle & __thiscall Jet::Particle::operator=(class Jet::Particle const &)
+510	0x50050	??4ParticleAlias@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParticleAlias & __thiscall Jet::ParticleAlias::operator=(class Jet::ParticleAlias const &)
+516	0xb370	??4ParticleStructure@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParticleStructure & __thiscall Jet::ParticleStructure::operator=(class Jet::ParticleStructure const &)
+560	0xae70	??4ViewPortParticle@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ViewPortParticle & __thiscall Jet::ViewPortParticle::operator=(class Jet::ViewPortParticle const &)
+692	0x7d35c	??_7Particle@Jet@@6B@	const Jet::Particle::`vftable'
+693	0x83694	??_7ParticleAlias@Jet@@6B@	const Jet::ParticleAlias::`vftable'
+701	0x7da14	??_7ParticleStructure@Jet@@6B@	const Jet::ParticleStructure::`vftable'
+747	0x7d94c	??_7ViewPortParticle@Jet@@6B@	const Jet::ViewPortParticle::`vftable'
+830	0x7320	?Add@Particle@Jet@@UAAXPAV12@@Z	public: virtual void __cdecl Jet::Particle::Add(class Jet::Particle *)
+831	0x4e1a0	?Add@Particle@Jet@@UAA_NABVPString@2@PAV12@@Z	public: virtual bool __cdecl Jet::Particle::Add(class Jet::PString const &,class Jet::Particle *)
+842	0x75a00	?AddAlias@ViewPortParticle@Jet@@QAAXPAVParticleAlias@2@@Z	public: void __cdecl Jet::ViewPortParticle::AddAlias(class Jet::ParticleAlias *)
+844	0x53950	?AddAttachmentPoint@ParticleStructure@Jet@@QAA_NPAVAttachmentPoint@2@_N@Z	public: bool __cdecl Jet::ParticleStructure::AddAttachmentPoint(class Jet::AttachmentPoint *,bool)
+851	0xb4f0	?AddReferencePoint@ParticleStructure@Jet@@QAAXABVReferencePoint@2@@Z	public: void __cdecl Jet::ParticleStructure::AddReferencePoint(class Jet::ReferencePoint const &)
+870	0x50310	?AssumeIdentity@ParticleAlias@Jet@@IAAXPAVViewPortParticle@2@@Z	protected: void __cdecl Jet::ParticleAlias::AssumeIdentity(class Jet::ViewPortParticle *)
+961	0x4e0c0	?CheckVisible@Particle@Jet@@UAA_NABVViewPoint@2@@Z	public: virtual bool __cdecl Jet::Particle::CheckVisible(class Jet::ViewPoint const &)
+962	0x50370	?CheckVisible@ParticleAlias@Jet@@UAA_NABVViewPoint@2@@Z	public: virtual bool __cdecl Jet::ParticleAlias::CheckVisible(class Jet::ViewPoint const &)
+963	0xaf60	?CheckVisible@ViewPortParticle@Jet@@UAA_NABVViewPoint@2@@Z	public: virtual bool __cdecl Jet::ViewPortParticle::CheckVisible(class Jet::ViewPoint const &)
+1041	0x7020	?CreateInstance@Particle@Jet@@UBAPAV12@XZ	public: virtual class Jet::Particle * __cdecl Jet::Particle::CreateInstance(void)const 
+1042	0x50210	?CreateInstance@ParticleAlias@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::ParticleAlias::CreateInstance(void)const 
+1046	0xb460	?CreateInstance@ParticleStructure@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::ParticleStructure::CreateInstance(void)const 
+1065	0xafc0	?CreateInstance@ViewPortParticle@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::ViewPortParticle::CreateInstance(void)const 
+1084	0x4e110	?Cull@Particle@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::Particle::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+1085	0x50400	?Cull@ParticleAlias@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::ParticleAlias::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+1108	0x4f640	?DeleteAll@Particle@Jet@@UAAXXZ	public: virtual void __cdecl Jet::Particle::DeleteAll(void)
+1110	0x75a40	?DeleteAllAliases@ViewPortParticle@Jet@@QAAXXZ	public: void __cdecl Jet::ViewPortParticle::DeleteAllAliases(void)
+1152	0x539c0	?EnumerateAttachmentPoints@ParticleStructure@Jet@@QAA_NAAV?$FastDynamicArray@PAVAttachmentPoint@Jet@@$0N@U?$Less@PAVAttachmentPoint@Jet@@PAV12@@2@@2@@Z	public: bool __cdecl Jet::ParticleStructure::EnumerateAttachmentPoints(class Jet::FastDynamicArray<class Jet::AttachmentPoint *,13,struct Jet::Less<class Jet::AttachmentPoint *,class Jet::AttachmentPoint *> > &)
+1153	0x539c0	?EnumerateAttachmentPoints@ParticleStructure@Jet@@QBA_NAAV?$FastDynamicArray@PBVAttachmentPoint@Jet@@$0N@U?$Less@PBVAttachmentPoint@Jet@@PBV12@@2@@2@@Z	public: bool __cdecl Jet::ParticleStructure::EnumerateAttachmentPoints(class Jet::FastDynamicArray<class Jet::AttachmentPoint const *,13,struct Jet::Less<class Jet::AttachmentPoint const *,class Jet::AttachmentPoint const *> > &)const 
+1154	0x4f6c0	?EnumerateParticles@Particle@Jet@@QAA_NAAV?$FastDynamicArray@PAVParticle@Jet@@$0BF@U?$Less@PAVParticle@Jet@@PAV12@@2@@2@@Z	public: bool __cdecl Jet::Particle::EnumerateParticles(class Jet::FastDynamicArray<class Jet::Particle *,21,struct Jet::Less<class Jet::Particle *,class Jet::Particle *> > &)
+1155	0x4f6c0	?EnumerateParticles@Particle@Jet@@QBA_NAAV?$FastDynamicArray@PBVParticle@Jet@@$0BF@U?$Less@PBVParticle@Jet@@PBV12@@2@@2@@Z	public: bool __cdecl Jet::Particle::EnumerateParticles(class Jet::FastDynamicArray<class Jet::Particle const *,21,struct Jet::Less<class Jet::Particle const *,class Jet::Particle const *> > &)const 
+1172	0x4f680	?FindByName@Particle@Jet@@QAAPAV12@ABVPString@2@@Z	public: class Jet::Particle * __cdecl Jet::Particle::FindByName(class Jet::PString const &)
+1173	0x4f680	?FindByName@Particle@Jet@@QBAPBV12@ABVPString@2@@Z	public: class Jet::Particle const * __cdecl Jet::Particle::FindByName(class Jet::PString const &)const 
+1174	0x4f5a0	?FindParentContainer@Particle@Jet@@UAAPAV12@XZ	public: virtual class Jet::Particle * __cdecl Jet::Particle::FindParentContainer(void)
+1175	0x4f5a0	?FindParentContainer@Particle@Jet@@UBAPBV12@XZ	public: virtual class Jet::Particle const * __cdecl Jet::Particle::FindParentContainer(void)const 
+1188	0x2ba60	?GetAliasTo@ParticleAlias@Jet@@QBAPAVViewPortParticle@2@XZ	public: class Jet::ViewPortParticle * __cdecl Jet::ParticleAlias::GetAliasTo(void)const 
+1189	0x4f950	?GetAllWithin@Particle@Jet@@UAA_NABV?$DynamicArray@VPlane@Jet@@$0BA@U?$Less@VPlane@Jet@@V12@@2@@2@AAV?$FastDynamicArray@PAVParticle@Jet@@$0BF@U?$Less@PAVParticle@Jet@@PAV12@@2@@2@@Z	public: virtual bool __cdecl Jet::Particle::GetAllWithin(class Jet::DynamicArray<class Jet::Plane,16,struct Jet::Less<class Jet::Plane,class Jet::Plane> > const &,class Jet::FastDynamicArray<class Jet::Particle *,21,struct Jet::Less<class Jet::Particle *,class Jet::Particle *> > &)
+1190	0x4fa10	?GetAllWithin@Particle@Jet@@UAA_NABVSphere@2@AAV?$FastDynamicArray@PAVParticle@Jet@@$0BF@U?$Less@PAVParticle@Jet@@PAV12@@2@@2@@Z	public: virtual bool __cdecl Jet::Particle::GetAllWithin(class Jet::Sphere const &,class Jet::FastDynamicArray<class Jet::Particle *,21,struct Jet::Less<class Jet::Particle *,class Jet::Particle *> > &)
+1191	0x4f9b0	?GetAllWithin@Particle@Jet@@UBA_NABV?$DynamicArray@VPlane@Jet@@$0BA@U?$Less@VPlane@Jet@@V12@@2@@2@AAV?$FastDynamicArray@PBVParticle@Jet@@$0BF@U?$Less@PBVParticle@Jet@@PBV12@@2@@2@@Z	public: virtual bool __cdecl Jet::Particle::GetAllWithin(class Jet::DynamicArray<class Jet::Plane,16,struct Jet::Less<class Jet::Plane,class Jet::Plane> > const &,class Jet::FastDynamicArray<class Jet::Particle const *,21,struct Jet::Less<class Jet::Particle const *,class Jet::Particle const *> > &)const 
+1192	0x4fb20	?GetAllWithin@Particle@Jet@@UBA_NABVSphere@2@AAV?$FastDynamicArray@PBVParticle@Jet@@$0BF@U?$Less@PBVParticle@Jet@@PBV12@@2@@2@@Z	public: virtual bool __cdecl Jet::Particle::GetAllWithin(class Jet::Sphere const &,class Jet::FastDynamicArray<class Jet::Particle const *,21,struct Jet::Less<class Jet::Particle const *,class Jet::Particle const *> > &)const 
+1216	0x7630	?GetAxisAlignedBoundingBox@Particle@Jet@@QBAABVAxisAlignedBox@2@_N@Z	public: class Jet::AxisAlignedBox const & __cdecl Jet::Particle::GetAxisAlignedBoundingBox(bool)const 
+1224	0x7600	?GetBoundingSphere@Particle@Jet@@QBAABVSphere@2@_N@Z	public: class Jet::Sphere const & __cdecl Jet::Particle::GetBoundingSphere(bool)const 
+1226	0x7af0	?GetBoundingVolume@Particle@Jet@@QAAPAVParticleBoundingVolume@2@XZ	public: class Jet::ParticleBoundingVolume * __cdecl Jet::Particle::GetBoundingVolume(void)
+1227	0x7af0	?GetBoundingVolume@Particle@Jet@@QBAPBVParticleBoundingVolume@2@XZ	public: class Jet::ParticleBoundingVolume const * __cdecl Jet::Particle::GetBoundingVolume(void)const 
+1233	0x4fd90	?GetCell@Particle@Jet@@QAAPAVCell@2@XZ	public: class Jet::Cell * __cdecl Jet::Particle::GetCell(void)
+1234	0x4fd90	?GetCell@Particle@Jet@@QBAPBVCell@2@XZ	public: class Jet::Cell const * __cdecl Jet::Particle::GetCell(void)const 
+1267	0x7ae0	?GetCullSizeCheck@Particle@Jet@@QBA_NXZ	public: bool __cdecl Jet::Particle::GetCullSizeCheck(void)const 
+1283	0x72e0	?GetEnabled@Particle@Jet@@QBA_NXZ	public: bool __cdecl Jet::Particle::GetEnabled(void)const 
+1289	0x4f940	?GetFacilities@Particle@Jet@@UAA_NAAV?$FastDynamicArray@PAVFacility@Jet@@$0N@U?$Less@PAVFacility@Jet@@PAV12@@2@@2@@Z	public: virtual bool __cdecl Jet::Particle::GetFacilities(class Jet::FastDynamicArray<class Jet::Facility *,13,struct Jet::Less<class Jet::Facility *,class Jet::Facility *> > &)
+1290	0x4f940	?GetFacilities@Particle@Jet@@UBA_NAAV?$FastDynamicArray@PBVFacility@Jet@@$0N@U?$Less@PBVFacility@Jet@@PBV12@@2@@2@@Z	public: virtual bool __cdecl Jet::Particle::GetFacilities(class Jet::FastDynamicArray<class Jet::Facility const *,13,struct Jet::Less<class Jet::Facility const *,class Jet::Facility const *> > &)const 
+1291	0x79e0	?GetFacility@Particle@Jet@@UAAPAVFacility@2@ABVPString@2@@Z	public: virtual class Jet::Facility * __cdecl Jet::Particle::GetFacility(class Jet::PString const &)
+1292	0x79e0	?GetFacility@Particle@Jet@@UBAPBVFacility@2@ABVPString@2@@Z	public: virtual class Jet::Facility const * __cdecl Jet::Particle::GetFacility(class Jet::PString const &)const 
+1323	0x7690	?GetGlobalBoundingSphere@Particle@Jet@@QBA?AVSphere@2@_N@Z	public: class Jet::Sphere __cdecl Jet::Particle::GetGlobalBoundingSphere(bool)const 
+1324	0x7710	?GetGlobalBoundingSphere@Particle@Jet@@QBAXAAVSphere@2@_N@Z	public: void __cdecl Jet::Particle::GetGlobalBoundingSphere(class Jet::Sphere &,bool)const 
+1325	0x7770	?GetGlobalBoundingSphereCenter@Particle@Jet@@QBAABVVector3@2@_N@Z	public: class Jet::Vector3 const & __cdecl Jet::Particle::GetGlobalBoundingSphereCenter(bool)const 
+1328	0x7130	?GetGlobalOrientation@Particle@Jet@@QBAABVQuaternion@2@XZ	public: class Jet::Quaternion const & __cdecl Jet::Particle::GetGlobalOrientation(void)const 
+1330	0x7110	?GetGlobalPosition@Particle@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Particle::GetGlobalPosition(void)const 
+1348	0x7070	?GetID@Particle@Jet@@UBAHXZ	public: virtual int __cdecl Jet::Particle::GetID(void)const 
+1349	0xd380	?GetID@ParticleAlias@Jet@@UBAHXZ	public: virtual int __cdecl Jet::ParticleAlias::GetID(void)const 
+1350	0x27d00	?GetID@ParticleStructure@Jet@@UBAHXZ	public: virtual int __cdecl Jet::ParticleStructure::GetID(void)const 
+1393	0x4e370	?GetModelView@Particle@Jet@@QBA?AVMatrix4@2@ABV32@@Z	public: class Jet::Matrix4 __cdecl Jet::Particle::GetModelView(class Jet::Matrix4 const &)const 
+1394	0x4e250	?GetModelView@Particle@Jet@@QBAXAAVMatrix4@2@ABV32@@Z	public: void __cdecl Jet::Particle::GetModelView(class Jet::Matrix4 &,class Jet::Matrix4 const &)const 
+1395	0x7090	?GetName@Particle@Jet@@QBAABVPString@2@XZ	public: class Jet::PString const & __cdecl Jet::Particle::GetName(void)const 
+1412	0x7310	?GetOpacity@Particle@Jet@@UBAMXZ	public: virtual float __cdecl Jet::Particle::GetOpacity(void)const 
+1414	0x7210	?GetOrientation@Particle@Jet@@QBAABVQuaternion@2@XZ	public: class Jet::Quaternion const & __cdecl Jet::Particle::GetOrientation(void)const 
+1416	0x7660	?GetOrientedBoundingBox@Particle@Jet@@QBAABVOrientedBox@2@_N@Z	public: class Jet::OrientedBox const & __cdecl Jet::Particle::GetOrientedBoundingBox(bool)const 
+1419	0x7100	?GetParent@Particle@Jet@@QAAPAV12@XZ	public: class Jet::Particle * __cdecl Jet::Particle::GetParent(void)
+1420	0x7100	?GetParent@Particle@Jet@@QBAPBV12@XZ	public: class Jet::Particle const * __cdecl Jet::Particle::GetParent(void)const 
+1431	0x7150	?GetPosition@Particle@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Particle::GetPosition(void)const 
+1442	0x7190	?GetPositionXY@Particle@Jet@@QBA?AVVector2@2@XZ	public: class Jet::Vector2 __cdecl Jet::Particle::GetPositionXY(void)const 
+1458	0xb510	?GetReferencePointList@ParticleStructure@Jet@@QAAAAV?$DynamicArray@VReferencePoint@Jet@@$02U?$Less@VReferencePoint@Jet@@V12@@2@@2@XZ	public: class Jet::DynamicArray<class Jet::ReferencePoint,3,struct Jet::Less<class Jet::ReferencePoint,class Jet::ReferencePoint> > & __cdecl Jet::ParticleStructure::GetReferencePointList(void)
+1459	0xb510	?GetReferencePointList@ParticleStructure@Jet@@QBAABV?$DynamicArray@VReferencePoint@Jet@@$02U?$Less@VReferencePoint@Jet@@V12@@2@@2@XZ	public: class Jet::DynamicArray<class Jet::ReferencePoint,3,struct Jet::Less<class Jet::ReferencePoint,class Jet::ReferencePoint> > const & __cdecl Jet::ParticleStructure::GetReferencePointList(void)const 
+1463	0xaf50	?GetRenderFlags@ViewPortParticle@Jet@@QBAKXZ	public: unsigned long __cdecl Jet::ViewPortParticle::GetRenderFlags(void)const 
+1615	0x4f320	?GlobalToLocal@Particle@Jet@@QBAXAAVOrientedBox@2@@Z	public: void __cdecl Jet::Particle::GlobalToLocal(class Jet::OrientedBox &)const 
+1616	0x4ecf0	?GlobalToLocal@Particle@Jet@@QBAXAAVPlane@2@@Z	public: void __cdecl Jet::Particle::GlobalToLocal(class Jet::Plane &)const 
+1617	0x4f250	?GlobalToLocal@Particle@Jet@@QBAXAAVQuaternion@2@@Z	public: void __cdecl Jet::Particle::GlobalToLocal(class Jet::Quaternion &)const 
+1618	0x4efe0	?GlobalToLocal@Particle@Jet@@QBAXAAVVector3@2@@Z	public: void __cdecl Jet::Particle::GlobalToLocal(class Jet::Vector3 &)const 
+1619	0x4f2f0	?GlobalToLocal@Particle@Jet@@QBAXAAVVector3@2@AAVQuaternion@2@@Z	public: void __cdecl Jet::Particle::GlobalToLocal(class Jet::Vector3 &,class Jet::Quaternion &)const 
+1665	0x4fc30	?InitInstance@Particle@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::Particle::InitInstance(class Jet::Particle &)const 
+1666	0x502a0	?InitInstance@ParticleAlias@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ParticleAlias::InitInstance(class Jet::ParticleAlias &)const 
+1671	0x53cf0	?InitInstance@ParticleStructure@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ParticleStructure::InitInstance(class Jet::ParticleStructure &)const 
+1688	0x502a0	?InitInstance@ViewPortParticle@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ViewPortParticle::InitInstance(class Jet::ViewPortParticle &)const 
+1727	0x7480	?InsertAfter@Particle@Jet@@UAA?AVIterator@?$ITree@VParticle@Jet@@@2@AAV342@PAV12@@Z	public: virtual class Jet::ITree<class Jet::Particle>::Iterator __cdecl Jet::Particle::InsertAfter(class Jet::ITree<class Jet::Particle>::Iterator &,class Jet::Particle *)
+1734	0x7400	?InsertBefore@Particle@Jet@@UAA?AVIterator@?$ITree@VParticle@Jet@@@2@AAV342@PAV12@@Z	public: virtual class Jet::ITree<class Jet::Particle>::Iterator __cdecl Jet::Particle::InsertBefore(class Jet::ITree<class Jet::Particle>::Iterator &,class Jet::Particle *)
+1774	0x4f940	?IsContainer@Particle@Jet@@UBA_NXZ	public: virtual bool __cdecl Jet::Particle::IsContainer(void)const 
+1807	0x7080	?IsOfType@Particle@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::Particle::IsOfType(int)const 
+1808	0x50120	?IsOfType@ParticleAlias@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::ParticleAlias::IsOfType(int)const 
+1809	0xb4d0	?IsOfType@ParticleStructure@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::ParticleStructure::IsOfType(int)const 
+1830	0x79f0	?IsWithin@Particle@Jet@@UBA_NABV?$DynamicArray@VPlane@Jet@@$0BA@U?$Less@VPlane@Jet@@V12@@2@@2@@Z	public: virtual bool __cdecl Jet::Particle::IsWithin(class Jet::DynamicArray<class Jet::Plane,16,struct Jet::Less<class Jet::Plane,class Jet::Plane> > const &)const 
+1863	0x4eb70	?LocalToGlobal@Particle@Jet@@QBAXAAVOrientedBox@2@@Z	public: void __cdecl Jet::Particle::LocalToGlobal(class Jet::OrientedBox &)const 
+1864	0x4e720	?LocalToGlobal@Particle@Jet@@QBAXAAVPlane@2@@Z	public: void __cdecl Jet::Particle::LocalToGlobal(class Jet::Plane &)const 
+1865	0x4eac0	?LocalToGlobal@Particle@Jet@@QBAXAAVQuaternion@2@@Z	public: void __cdecl Jet::Particle::LocalToGlobal(class Jet::Quaternion &)const 
+1866	0x4ea20	?LocalToGlobal@Particle@Jet@@QBAXAAVVector3@2@@Z	public: void __cdecl Jet::Particle::LocalToGlobal(class Jet::Vector3 &)const 
+1867	0x4eb10	?LocalToGlobal@Particle@Jet@@QBAXAAVVector3@2@AAVQuaternion@2@@Z	public: void __cdecl Jet::Particle::LocalToGlobal(class Jet::Vector3 &,class Jet::Quaternion &)const 
+1868	0x4f580	?LocalToLocal@Particle@Jet@@QBAXPBV12@AAVOrientedBox@2@@Z	public: void __cdecl Jet::Particle::LocalToLocal(class Jet::Particle const *,class Jet::OrientedBox &)const 
+1869	0x4f4a0	?LocalToLocal@Particle@Jet@@QBAXPBV12@AAVPlane@2@@Z	public: void __cdecl Jet::Particle::LocalToLocal(class Jet::Particle const *,class Jet::Plane &)const 
+1870	0x4f4e0	?LocalToLocal@Particle@Jet@@QBAXPBV12@AAVQuaternion@2@@Z	public: void __cdecl Jet::Particle::LocalToLocal(class Jet::Particle const *,class Jet::Quaternion &)const 
+1871	0x4f4c0	?LocalToLocal@Particle@Jet@@QBAXPBV12@AAVVector3@2@@Z	public: void __cdecl Jet::Particle::LocalToLocal(class Jet::Particle const *,class Jet::Vector3 &)const 
+1872	0x4f540	?LocalToLocal@Particle@Jet@@QBAXPBV12@AAVVector3@2@AAVQuaternion@2@@Z	public: void __cdecl Jet::Particle::LocalToLocal(class Jet::Particle const *,class Jet::Vector3 &,class Jet::Quaternion &)const 
+1907	0x77a0	?PointXAt@Particle@Jet@@QAAXABVVector3@2@0@Z	public: void __cdecl Jet::Particle::PointXAt(class Jet::Vector3 const &,class Jet::Vector3 const &)
+1908	0x7860	?PointYAt@Particle@Jet@@QAAXABVVector3@2@0@Z	public: void __cdecl Jet::Particle::PointYAt(class Jet::Vector3 const &,class Jet::Vector3 const &)
+1909	0x7920	?PointZAt@Particle@Jet@@QAAXABVVector3@2@0@Z	public: void __cdecl Jet::Particle::PointZAt(class Jet::Vector3 const &,class Jet::Vector3 const &)
+1912	0x75c0	?Pop@Particle@Jet@@UAAPAV12@XZ	public: virtual class Jet::Particle * __cdecl Jet::Particle::Pop(void)
+1920	0x7390	?Push@Particle@Jet@@UAAXPAV12@@Z	public: virtual void __cdecl Jet::Particle::Push(class Jet::Particle *)
+1921	0x4fdb0	?PushToCellRoot@Particle@Jet@@QAAXXZ	public: void __cdecl Jet::Particle::PushToCellRoot(void)
+1954	0x7580	?Remove@Particle@Jet@@UAA?AVIterator@?$ITree@VParticle@Jet@@@2@AAV342@@Z	public: virtual class Jet::ITree<class Jet::Particle>::Iterator __cdecl Jet::Particle::Remove(class Jet::ITree<class Jet::Particle>::Iterator &)
+1955	0x4e1f0	?Remove@Particle@Jet@@UAAPAV12@ABVPString@2@@Z	public: virtual class Jet::Particle * __cdecl Jet::Particle::Remove(class Jet::PString const &)
+1956	0x7500	?Remove@Particle@Jet@@UAAPAV12@XZ	public: virtual class Jet::Particle * __cdecl Jet::Particle::Remove(void)
+1957	0x7540	?Remove@Particle@Jet@@UAA_NPAV12@@Z	public: virtual bool __cdecl Jet::Particle::Remove(class Jet::Particle *)
+1961	0x75a20	?RemoveAlias@ViewPortParticle@Jet@@QAAXPAVParticleAlias@2@@Z	public: void __cdecl Jet::ViewPortParticle::RemoveAlias(class Jet::ParticleAlias *)
+1964	0x4f5d0	?RemoveAll@Particle@Jet@@UAAXXZ	public: virtual void __cdecl Jet::Particle::RemoveAll(void)
+1969	0x4f600	?RemoveAllChildren@Particle@Jet@@UAAXXZ	public: virtual void __cdecl Jet::Particle::RemoveAllChildren(void)
+1999	0x4fd20	?RenderDebug@Particle@Jet@@UAAXPAVDisplay@2@AAVDebugViewPort@2@AAVMatrix4@2@K@Z	public: virtual void __cdecl Jet::Particle::RenderDebug(class Jet::Display *,class Jet::DebugViewPort &,class Jet::Matrix4 &,unsigned long)
+2049	0x4e410	?Rotate@Particle@Jet@@QAAXABVMatrix3@2@@Z	public: void __cdecl Jet::Particle::Rotate(class Jet::Matrix3 const &)
+2050	0x4e4f0	?Rotate@Particle@Jet@@QAAXABVQuaternion@2@@Z	public: void __cdecl Jet::Particle::Rotate(class Jet::Quaternion const &)
+2061	0x4e6b0	?SelfRotate@Particle@Jet@@QAAXABVMatrix3@2@@Z	public: void __cdecl Jet::Particle::SelfRotate(class Jet::Matrix3 const &)
+2062	0x4e6f0	?SelfRotate@Particle@Jet@@QAAXABVQuaternion@2@@Z	public: void __cdecl Jet::Particle::SelfRotate(class Jet::Quaternion const &)
+2090	0x502d0	?SetAliasTo@ParticleAlias@Jet@@QAAXPAVViewPortParticle@2@@Z	public: void __cdecl Jet::ParticleAlias::SetAliasTo(class Jet::ViewPortParticle *)
+2102	0x7b00	?SetBoundingVolume@Particle@Jet@@UAA_NPAVParticleBoundingVolume@2@@Z	public: virtual bool __cdecl Jet::Particle::SetBoundingVolume(class Jet::ParticleBoundingVolume *)
+2107	0x4fd40	?SetCell@Particle@Jet@@QAAXPAVCell@2@@Z	public: void __cdecl Jet::Particle::SetCell(class Jet::Cell *)
+2108	0x7b50	?SetCellNode@Particle@Jet@@AAAXPAVCellNode@2@@Z	private: void __cdecl Jet::Particle::SetCellNode(class Jet::CellNode *)
+2125	0x7ac0	?SetCullSizeCheck@Particle@Jet@@QAAX_N@Z	public: void __cdecl Jet::Particle::SetCullSizeCheck(bool)
+2126	0x53a30	?SetCurrentReferencePoint@ParticleStructure@Jet@@QAA_NABVPString@2@@Z	public: bool __cdecl Jet::ParticleStructure::SetCurrentReferencePoint(class Jet::PString const &)
+2149	0x72f0	?SetEnabled@Particle@Jet@@QAAX_N@Z	public: void __cdecl Jet::Particle::SetEnabled(bool)
+2182	0x70a0	?SetName@Particle@Jet@@UAAXABVPString@2@@Z	public: virtual void __cdecl Jet::Particle::SetName(class Jet::PString const &)
+2189	0x4e170	?SetOpacity@Particle@Jet@@UAAXM@Z	public: virtual void __cdecl Jet::Particle::SetOpacity(float)
+2193	0x7220	?SetOrientation@Particle@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::Particle::SetOrientation(class Jet::Quaternion const &)
+2199	0x4e080	?SetParent@Particle@Jet@@UAAXPAV12@@Z	public: virtual void __cdecl Jet::Particle::SetParent(class Jet::Particle *)
+2207	0x7160	?SetPosition@Particle@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::Particle::SetPosition(class Jet::Vector3 const &)
+2211	0x71b0	?SetPositionXY@Particle@Jet@@UAAXABVVector2@2@@Z	public: virtual void __cdecl Jet::Particle::SetPositionXY(class Jet::Vector2 const &)
+2223	0x72c0	?SetRawOrientation@Particle@Jet@@MAAXABVQuaternion@2@@Z	protected: virtual void __cdecl Jet::Particle::SetRawOrientation(class Jet::Quaternion const &)
+2224	0x71f0	?SetRawPosition@Particle@Jet@@MAAXABVVector3@2@@Z	protected: virtual void __cdecl Jet::Particle::SetRawPosition(class Jet::Vector3 const &)
+2229	0x7260	?SetReferenceFrame@Particle@Jet@@UAAXABVVector3@2@ABVQuaternion@2@@Z	public: virtual void __cdecl Jet::Particle::SetReferenceFrame(class Jet::Vector3 const &,class Jet::Quaternion const &)
+2230	0xb520	?SetReferencePointList@ParticleStructure@Jet@@QAAXABV?$DynamicArray@VReferencePoint@Jet@@$02U?$Less@VReferencePoint@Jet@@V12@@2@@2@@Z	public: void __cdecl Jet::ParticleStructure::SetReferencePointList(class Jet::DynamicArray<class Jet::ReferencePoint,3,struct Jet::Less<class Jet::ReferencePoint,class Jet::ReferencePoint> > const &)
+2232	0xaf40	?SetRenderFlags@ViewPortParticle@Jet@@QAAXK@Z	public: void __cdecl Jet::ViewPortParticle::SetRenderFlags(unsigned long)
+2348	0x4f710	?TestCollision@Particle@Jet@@UAA_NABVRay@2@AAVCollisionResult@2@PBV12@@Z	public: virtual bool __cdecl Jet::Particle::TestCollision(class Jet::Ray const &,class Jet::CollisionResult &,class Jet::Particle const *)
+2374	0x4f940	?TestCollisionGeometry@Particle@Jet@@UBA_NABVRay@2@AAMAAVConstFaceDescriptor@2@@Z	public: virtual bool __cdecl Jet::Particle::TestCollisionGeometry(class Jet::Ray const &,float &,class Jet::ConstFaceDescriptor &)const 
+2392	0x4e390	?Translate@Particle@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Particle::Translate(class Jet::Vector3 const &)
+2431	0x50140	?Unalias@ParticleAlias@Jet@@IAAXXZ	protected: void __cdecl Jet::ParticleAlias::Unalias(void)

@@ -1,0 +1,210 @@
+ordinal	rva	mangled	demangled
+15	0x8ee0	??0AttachmentObserver@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::AttachmentObserver::AttachmentObserver(class Jet::AttachmentObserver const &)
+16	0x9780	??0AttachmentObserver@Jet@@QAE@PAVAttachmentPoint@1@@Z	public: __thiscall Jet::AttachmentObserver::AttachmentObserver(class Jet::AttachmentPoint *)
+17	0x8f80	??0AttachmentObserver@Jet@@QAE@XZ	public: __thiscall Jet::AttachmentObserver::AttachmentObserver(void)
+18	0x8f90	??0AttachmentPoint@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::AttachmentPoint::AttachmentPoint(class Jet::AttachmentPoint const &)
+19	0x9140	??0AttachmentPoint@Jet@@QAE@ABVPString@1@0@Z	public: __thiscall Jet::AttachmentPoint::AttachmentPoint(class Jet::PString const &,class Jet::PString const &)
+20	0x9210	??0AttachmentPoint@Jet@@QAE@ABVPString@1@0ABVVector3@1@ABVQuaternion@1@@Z	public: __thiscall Jet::AttachmentPoint::AttachmentPoint(class Jet::PString const &,class Jet::PString const &,class Jet::Vector3 const &,class Jet::Quaternion const &)
+21	0x9120	??0AttachmentPoint@Jet@@QAE@XZ	public: __thiscall Jet::AttachmentPoint::AttachmentPoint(void)
+44	0x10a90	??0BoneBlender@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::BoneBlender::BoneBlender(class Jet::BoneBlender const &)
+45	0x11030	??0BoneBlender@Jet@@QAE@PAVSkeletonModifier@1@ABVPString@1@PAVParticle@1@@Z	public: __thiscall Jet::BoneBlender::BoneBlender(class Jet::SkeletonModifier *,class Jet::PString const &,class Jet::Particle *)
+46	0x10c50	??0BoneModifier@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::BoneModifier::BoneModifier(class Jet::BoneModifier const &)
+47	0x11d30	??0BoneModifier@Jet@@QAE@ABVPString@1@M0K@Z	public: __thiscall Jet::BoneModifier::BoneModifier(class Jet::PString const &,float,class Jet::PString const &,unsigned long)
+48	0x11df0	??0BoneModifier@Jet@@QAE@PAVModifierHost@1@ABVPString@1@M1K@Z	public: __thiscall Jet::BoneModifier::BoneModifier(class Jet::ModifierHost *,class Jet::PString const &,float,class Jet::PString const &,unsigned long)
+49	0x11ec0	??0BoneModifier@Jet@@QAE@PAVRenderKernel@1@ABVPString@1@M1K@Z	public: __thiscall Jet::BoneModifier::BoneModifier(class Jet::RenderKernel *,class Jet::PString const &,float,class Jet::PString const &,unsigned long)
+50	0x11d10	??0BoneModifier@Jet@@QAE@XZ	public: __thiscall Jet::BoneModifier::BoneModifier(void)
+70	0x12d30	??0Cell@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Cell::Cell(class Jet::Cell const &)
+71	0x1bd20	??0Cell@Jet@@QAE@XZ	public: __thiscall Jet::Cell::Cell(void)
+84	0x20dd0	??0Corona@Jet@@QAE@XZ	public: __thiscall Jet::Corona::Corona(void)
+101	0x25a40	??0Function@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Function::Function(class Jet::Function const &)
+102	0x25a30	??0Function@Jet@@QAE@XZ	public: __thiscall Jet::Function::Function(void)
+136	0x2b470	??0Location@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Location::Location(class Jet::Location const &)
+137	0x2b450	??0Location@Jet@@QAE@ABVVector3@1@PAVParticle@1@@Z	public: __thiscall Jet::Location::Location(class Jet::Vector3 const &,class Jet::Particle *)
+138	0x2b440	??0Location@Jet@@QAE@XZ	public: __thiscall Jet::Location::Location(void)
+148	0x2bb70	??0Mirror@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Mirror::Mirror(class Jet::Mirror const &)
+149	0x2bca0	??0Mirror@Jet@@QAE@PAVCell@1@ABVVector2@1@@Z	public: __thiscall Jet::Mirror::Mirror(class Jet::Cell *,class Jet::Vector2 const &)
+221	0x2b8d0	??0PhysicalPortal@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::PhysicalPortal::PhysicalPortal(class Jet::PhysicalPortal const &)
+222	0x53ed0	??0PhysicalPortal@Jet@@QAE@PAVCell@1@ABVVector2@1@@Z	public: __thiscall Jet::PhysicalPortal::PhysicalPortal(class Jet::Cell *,class Jet::Vector2 const &)
+235	0x13020	??0Portal@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Portal::Portal(class Jet::Portal const &)
+236	0x13110	??0Portal@Jet@@QAE@XZ	public: __thiscall Jet::Portal::Portal(void)
+245	0xb050	??0ReferencePoint@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ReferencePoint::ReferencePoint(class Jet::ReferencePoint const &)
+246	0xb160	??0ReferencePoint@Jet@@QAE@ABVPString@1@ABVVector3@1@ABVQuaternion@1@@Z	public: __thiscall Jet::ReferencePoint::ReferencePoint(class Jet::PString const &,class Jet::Vector3 const &,class Jet::Quaternion const &)
+247	0xb150	??0ReferencePoint@Jet@@QAE@XZ	public: __thiscall Jet::ReferencePoint::ReferencePoint(void)
+287	0x10eb0	??0SkeletonModifier@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::SkeletonModifier::SkeletonModifier(class Jet::SkeletonModifier const &)
+288	0x6b5d0	??0SkeletonModifier@Jet@@QAE@PAVParticle@1@M@Z	public: __thiscall Jet::SkeletonModifier::SkeletonModifier(class Jet::Particle *,float)
+289	0x6b6a0	??0SkeletonModifier@Jet@@QAE@PAVParticle@1@PAVModifierHost@1@M@Z	public: __thiscall Jet::SkeletonModifier::SkeletonModifier(class Jet::Particle *,class Jet::ModifierHost *,float)
+290	0x6b780	??0SkeletonModifier@Jet@@QAE@PAVParticle@1@PAVRenderKernel@1@M@Z	public: __thiscall Jet::SkeletonModifier::SkeletonModifier(class Jet::Particle *,class Jet::RenderKernel *,float)
+328	0x2baa0	??0VirtualPortal@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::VirtualPortal::VirtualPortal(class Jet::VirtualPortal const &)
+329	0x75b60	??0VirtualPortal@Jet@@QAE@PAVCell@1@ABVVector2@1@@Z	public: __thiscall Jet::VirtualPortal::VirtualPortal(class Jet::Cell *,class Jet::Vector2 const &)
+337	0x97b0	??1AttachmentObserver@Jet@@UAE@XZ	public: virtual __thiscall Jet::AttachmentObserver::~AttachmentObserver(void)
+338	0x9310	??1AttachmentPoint@Jet@@UAE@XZ	public: virtual __thiscall Jet::AttachmentPoint::~AttachmentPoint(void)
+348	0x10a30	??1BoneBlender@Jet@@QAE@XZ	public: __thiscall Jet::BoneBlender::~BoneBlender(void)
+349	0x10be0	??1BoneModifier@Jet@@UAE@XZ	public: virtual __thiscall Jet::BoneModifier::~BoneModifier(void)
+354	0x1bec0	??1Cell@Jet@@UAE@XZ	public: virtual __thiscall Jet::Cell::~Cell(void)
+357	0x73920	??1Corona@Jet@@QAE@XZ	public: __thiscall Jet::Corona::~Corona(void)
+374	0x2bb50	??1Mirror@Jet@@UAE@XZ	public: virtual __thiscall Jet::Mirror::~Mirror(void)
+408	0x2bb50	??1PhysicalPortal@Jet@@UAE@XZ	public: virtual __thiscall Jet::PhysicalPortal::~PhysicalPortal(void)
+411	0x2bb50	??1Portal@Jet@@UAE@XZ	public: virtual __thiscall Jet::Portal::~Portal(void)
+413	0xb030	??1ReferencePoint@Jet@@QAE@XZ	public: __thiscall Jet::ReferencePoint::~ReferencePoint(void)
+433	0x6b860	??1SkeletonModifier@Jet@@UAE@XZ	public: virtual __thiscall Jet::SkeletonModifier::~SkeletonModifier(void)
+447	0x2bb50	??1VirtualPortal@Jet@@UAE@XZ	public: virtual __thiscall Jet::VirtualPortal::~VirtualPortal(void)
+453	0x8f00	??4AttachmentObserver@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::AttachmentObserver & __thiscall Jet::AttachmentObserver::operator=(class Jet::AttachmentObserver const &)
+454	0x9040	??4AttachmentPoint@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::AttachmentPoint & __thiscall Jet::AttachmentPoint::operator=(class Jet::AttachmentPoint const &)
+461	0x10b40	??4BoneBlender@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::BoneBlender & __thiscall Jet::BoneBlender::operator=(class Jet::BoneBlender const &)
+462	0x10ce0	??4BoneModifier@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::BoneModifier & __thiscall Jet::BoneModifier::operator=(class Jet::BoneModifier const &)
+467	0x12e10	??4Cell@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Cell & __thiscall Jet::Cell::operator=(class Jet::Cell const &)
+472	0x6d50	??4Corona@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Corona & __thiscall Jet::Corona::operator=(class Jet::Corona const &)
+480	0x21cb0	??4Function@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Function & __thiscall Jet::Function::operator=(class Jet::Function const &)
+492	0x2b470	??4Location@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Location & __thiscall Jet::Location::operator=(class Jet::Location const &)
+495	0x2bbc0	??4Mirror@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Mirror & __thiscall Jet::Mirror::operator=(class Jet::Mirror const &)
+518	0x2b950	??4PhysicalPortal@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::PhysicalPortal & __thiscall Jet::PhysicalPortal::operator=(class Jet::PhysicalPortal const &)
+523	0x13060	??4Portal@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Portal & __thiscall Jet::Portal::operator=(class Jet::Portal const &)
+526	0xb0c0	??4ReferencePoint@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ReferencePoint & __thiscall Jet::ReferencePoint::operator=(class Jet::ReferencePoint const &)
+545	0x10f40	??4SkeletonModifier@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::SkeletonModifier & __thiscall Jet::SkeletonModifier::operator=(class Jet::SkeletonModifier const &)
+561	0x2bbc0	??4VirtualPortal@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::VirtualPortal & __thiscall Jet::VirtualPortal::operator=(class Jet::VirtualPortal const &)
+603	0x7d808	??_7AttachmentObserver@Jet@@6B@	const Jet::AttachmentObserver::`vftable'
+604	0x7d734	??_7AttachmentPoint@Jet@@6B@	const Jet::AttachmentPoint::`vftable'
+616	0x7e428	??_7BoneBlender@Jet@@6B@	const Jet::BoneBlender::`vftable'
+617	0x7e36c	??_7BoneModifier@Jet@@6B@	const Jet::BoneModifier::`vftable'
+621	0x7e504	??_7Cell@Jet@@6B@	const Jet::Cell::`vftable'
+631	0x7eda8	??_7Function@Jet@@6B@	const Jet::Function::`vftable'
+654	0x7f47c	??_7Mirror@Jet@@6B@	const Jet::Mirror::`vftable'
+703	0x7f2cc	??_7PhysicalPortal@Jet@@6B@	const Jet::PhysicalPortal::`vftable'
+705	0x7e5cc	??_7Portal@Jet@@6B@	const Jet::Portal::`vftable'
+731	0x7e400	??_7SkeletonModifier@Jet@@6BModifier@1@@	const Jet::SkeletonModifier::`vftable'{for `Jet::Modifier'}
+732	0x7e3d0	??_7SkeletonModifier@Jet@@6BModifierList@1@@	const Jet::SkeletonModifier::`vftable'{for `Jet::ModifierList'}
+748	0x7f3a4	??_7VirtualPortal@Jet@@6B@	const Jet::VirtualPortal::`vftable'
+824	0x94e0	?Add@AttachmentPoint@Jet@@UAAXPAVParticle@2@@Z	public: virtual void __cdecl Jet::AttachmentPoint::Add(class Jet::Particle *)
+825	0x9510	?Add@AttachmentPoint@Jet@@UAA_NABVPString@2@PAVParticle@2@@Z	public: virtual bool __cdecl Jet::AttachmentPoint::Add(class Jet::PString const &,class Jet::Particle *)
+826	0x110f0	?Add@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@@Z	public: virtual bool __cdecl Jet::BoneBlender::Add(class Jet::BoneModifier *)
+827	0x1bfb0	?Add@Cell@Jet@@UAAXPAVParticle@2@@Z	public: virtual void __cdecl Jet::Cell::Add(class Jet::Particle *)
+837	0x10fe0	?Add@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::Add(class Jet::Modifier *)
+843	0x1c8e0	?AddAllToVisible@Cell@Jet@@AAAXPAVCellNode@2@AAVViewPoint@2@ABVMatrix4@2@H@Z	private: void __cdecl Jet::Cell::AddAllToVisible(class Jet::CellNode *,class Jet::ViewPoint &,class Jet::Matrix4 const &,int)
+845	0xb8e0	?AddObserver@AttachmentPoint@Jet@@UAAXPAVAttachmentObserver@2@@Z	public: virtual void __cdecl Jet::AttachmentPoint::AddObserver(class Jet::AttachmentObserver *)
+855	0x6c790	?AddToBoneBlenders@SkeletonModifier@Jet@@IAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@PBV42@_N@Z	protected: class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::AddToBoneBlenders(class Jet::Modifier *,class Jet::Modifier const *,bool)
+976	0xb960	?ClearObservers@AttachmentPoint@Jet@@UAAXXZ	public: virtual void __cdecl Jet::AttachmentPoint::ClearObservers(void)
+987	0x6c690	?CreateBlenders@SkeletonModifier@Jet@@IAAXPAVParticle@2@@Z	protected: void __cdecl Jet::SkeletonModifier::CreateBlenders(class Jet::Particle *)
+988	0x2bcc0	?CreateCamera@Mirror@Jet@@MBAPAVCamera@2@PAV32@PBVVector3@2@PAXAAVMatrix4@2@@Z	protected: virtual class Jet::Camera * __cdecl Jet::Mirror::CreateCamera(class Jet::Camera *,class Jet::Vector3 const *,void *,class Jet::Matrix4 &)const 
+989	0x54180	?CreateCamera@PhysicalPortal@Jet@@MBAPAVCamera@2@PAV32@PBVVector3@2@PAXAAVMatrix4@2@@Z	protected: virtual class Jet::Camera * __cdecl Jet::PhysicalPortal::CreateCamera(class Jet::Camera *,class Jet::Vector3 const *,void *,class Jet::Matrix4 &)const 
+990	0x75c10	?CreateCamera@VirtualPortal@Jet@@MBAPAVCamera@2@PAV32@PBVVector3@2@PAXAAVMatrix4@2@@Z	protected: virtual class Jet::Camera * __cdecl Jet::VirtualPortal::CreateCamera(class Jet::Camera *,class Jet::Vector3 const *,void *,class Jet::Matrix4 &)const 
+1008	0x93e0	?CreateInstance@AttachmentPoint@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::AttachmentPoint::CreateInstance(void)const 
+1080	0x1c040	?Cull@Cell@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::Cell::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+1081	0x73920	?Cull@Corona@Jet@@QAAXAAVViewPoint@2@ABVMatrix4@2@AAVVector3@2@@Z	public: void __cdecl Jet::Corona::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &,class Jet::Vector3 &)
+1083	0x2bf80	?Cull@Mirror@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::Mirror::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+1086	0x54120	?Cull@PhysicalPortal@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::PhysicalPortal::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+1150	0x542d0	?Enter@PhysicalPortal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z	public: virtual void __cdecl Jet::PhysicalPortal::Enter(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &,unsigned int,unsigned int)
+1151	0x58860	?Enter@Portal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z	public: virtual void __cdecl Jet::Portal::Enter(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &,unsigned int,unsigned int)
+1220	0x10bd0	?GetBone@BoneBlender@Jet@@QAAPAVParticle@2@XZ	public: class Jet::Particle * __cdecl Jet::BoneBlender::GetBone(void)
+1221	0x10bd0	?GetBone@BoneBlender@Jet@@QBAPBVParticle@2@XZ	public: class Jet::Particle const * __cdecl Jet::BoneBlender::GetBone(void)const 
+1222	0x6c550	?GetBoneBlender@SkeletonModifier@Jet@@IAAPAVBoneBlender@2@ABVPString@2@@Z	protected: class Jet::BoneBlender * __cdecl Jet::SkeletonModifier::GetBoneBlender(class Jet::PString const &)
+1223	0x1e720	?GetBoneName@BoneBlender@Jet@@QBAABVPString@2@XZ	public: class Jet::PString const & __cdecl Jet::BoneBlender::GetBoneName(void)const 
+1273	0x2ba60	?GetDestination@PhysicalPortal@Jet@@QAAPAVCell@2@XZ	public: class Jet::Cell * __cdecl Jet::PhysicalPortal::GetDestination(void)
+1274	0x2ba60	?GetDestination@PhysicalPortal@Jet@@QBAPBVCell@2@XZ	public: class Jet::Cell const * __cdecl Jet::PhysicalPortal::GetDestination(void)const 
+1282	0x131b0	?GetEnableGlobalStencil@Portal@Jet@@SA_NXZ	public: static bool __cdecl Jet::Portal::GetEnableGlobalStencil(void)
+1285	0x1bf70	?GetExtents@Cell@Jet@@QBA?AVAxisAlignedBox@2@XZ	public: class Jet::AxisAlignedBox __cdecl Jet::Cell::GetExtents(void)const 
+1295	0x119a0	?GetFirstReplaceable@BoneBlender@Jet@@QAAPAVBoneModifier@2@M@Z	public: class Jet::BoneModifier * __cdecl Jet::BoneBlender::GetFirstReplaceable(float)
+1327	0x2b4b0	?GetGlobalLocation@Location@Jet@@QBA?AVVector3@2@XZ	public: class Jet::Vector3 __cdecl Jet::Location::GetGlobalLocation(void)const 
+1338	0x9470	?GetHostName@AttachmentPoint@Jet@@QBAABVPString@2@XZ	public: class Jet::PString const & __cdecl Jet::AttachmentPoint::GetHostName(void)const 
+1340	0x9440	?GetID@AttachmentPoint@Jet@@UBAHXZ	public: virtual int __cdecl Jet::AttachmentPoint::GetID(void)const 
+1342	0x3f220	?GetID@Cell@Jet@@UBAHXZ	public: virtual int __cdecl Jet::Cell::GetID(void)const 
+1345	0x41030	?GetID@Mirror@Jet@@UBAHXZ	public: virtual int __cdecl Jet::Mirror::GetID(void)const 
+1351	0x2ba30	?GetID@PhysicalPortal@Jet@@UBAHXZ	public: virtual int __cdecl Jet::PhysicalPortal::GetID(void)const 
+1352	0x3f4a0	?GetID@Portal@Jet@@UBAHXZ	public: virtual int __cdecl Jet::Portal::GetID(void)const 
+1354	0x2bae0	?GetID@VirtualPortal@Jet@@UBAHXZ	public: virtual int __cdecl Jet::VirtualPortal::GetID(void)const 
+1355	0x10e60	?GetInfluence@BoneModifier@Jet@@UBAMABVPString@2@@Z	public: virtual float __cdecl Jet::BoneModifier::GetInfluence(class Jet::PString const &)const 
+1356	0x10e60	?GetInfluenceInTime@BoneModifier@Jet@@UBAMABVPString@2@@Z	public: virtual float __cdecl Jet::BoneModifier::GetInfluenceInTime(class Jet::PString const &)const 
+1357	0x10e60	?GetInfluenceLimit@BoneModifier@Jet@@UBAMABVPString@2@@Z	public: virtual float __cdecl Jet::BoneModifier::GetInfluenceLimit(class Jet::PString const &)const 
+1358	0x10e60	?GetInfluenceOutTime@BoneModifier@Jet@@UBAMABVPString@2@@Z	public: virtual float __cdecl Jet::BoneModifier::GetInfluenceOutTime(class Jet::PString const &)const 
+1396	0xb210	?GetName@ReferencePoint@Jet@@QBAABVPString@2@XZ	public: class Jet::PString const & __cdecl Jet::ReferencePoint::GetName(void)const 
+1401	0x2ba90	?GetNonReenterant@PhysicalPortal@Jet@@QBA_NXZ	public: bool __cdecl Jet::PhysicalPortal::GetNonReenterant(void)const 
+1404	0x6cad0	?GetNumBones@SkeletonModifier@Jet@@QBAHXZ	public: int __cdecl Jet::SkeletonModifier::GetNumBones(void)const 
+1415	0x4c60	?GetOrientation@ReferencePoint@Jet@@QBAABVQuaternion@2@XZ	public: class Jet::Quaternion const & __cdecl Jet::ReferencePoint::GetOrientation(void)const 
+1432	0xf8f0	?GetPosition@ReferencePoint@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::ReferencePoint::GetPosition(void)const 
+1454	0x79e0	?GetReference@Mirror@Jet@@AAAPAVParticle@2@XZ	private: class Jet::Particle * __cdecl Jet::Mirror::GetReference(void)
+1455	0x79e0	?GetReference@Mirror@Jet@@ABAPBVParticle@2@XZ	private: class Jet::Particle const * __cdecl Jet::Mirror::GetReference(void)const 
+1456	0x2bb20	?GetReference@VirtualPortal@Jet@@QAAPAVParticle@2@XZ	public: class Jet::Particle * __cdecl Jet::VirtualPortal::GetReference(void)
+1457	0x2bb20	?GetReference@VirtualPortal@Jet@@QBAPBVParticle@2@XZ	public: class Jet::Particle const * __cdecl Jet::VirtualPortal::GetReference(void)const 
+1470	0x10db0	?GetRootBone@BoneModifier@Jet@@UBA?AVPString@2@XZ	public: virtual class Jet::PString __cdecl Jet::BoneModifier::GetRootBone(void)const 
+1471	0x6ba00	?GetRootBone@SkeletonModifier@Jet@@QBA?AVPString@2@XZ	public: class Jet::PString __cdecl Jet::SkeletonModifier::GetRootBone(void)const 
+1508	0x2ba70	?GetSize@PhysicalPortal@Jet@@QBAABVVector2@2@XZ	public: class Jet::Vector2 const & __cdecl Jet::PhysicalPortal::GetSize(void)const 
+1510	0x11f90	?GetSkeleton@BoneModifier@Jet@@UAAPAVSkeletonModifier@2@XZ	public: virtual class Jet::SkeletonModifier * __cdecl Jet::BoneModifier::GetSkeleton(void)
+1517	0x12f00	?GetStat@Cell@Jet@@SAIW4Stats@12@@Z	public: static unsigned int __cdecl Jet::Cell::GetStat(enum Jet::Cell::Stats)
+1519	0x12f10	?GetStats@Cell@Jet@@SAPBIXZ	public: static unsigned int const * __cdecl Jet::Cell::GetStats(void)
+1520	0x13160	?GetStencil@Portal@Jet@@QBA_NXZ	public: bool __cdecl Jet::Portal::GetStencil(void)const 
+1521	0xb5b0	?GetSubNames@AttachmentPoint@Jet@@SAXABVPString@2@AAV32@1@Z	public: static void __cdecl Jet::AttachmentPoint::GetSubNames(class Jet::PString const &,class Jet::PString &,class Jet::PString &)
+1522	0xb5b0	?GetSubNames@ReferencePoint@Jet@@SAXABVPString@2@AAV32@1@Z	public: static void __cdecl Jet::ReferencePoint::GetSubNames(class Jet::PString const &,class Jet::PString &,class Jet::PString &)
+1547	0x13190	?GetTotal@Portal@Jet@@SAIXZ	public: static unsigned int __cdecl Jet::Portal::GetTotal(void)
+1550	0x13180	?GetTraversed@Portal@Jet@@SAIXZ	public: static unsigned int __cdecl Jet::Portal::GetTraversed(void)
+1574	0x10e70	?GetUpdateFlag@BoneModifier@Jet@@UBA_NK@Z	public: virtual bool __cdecl Jet::BoneModifier::GetUpdateFlag(unsigned long)const 
+1646	0xb540	?InitInstance@AttachmentPoint@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::AttachmentPoint::InitInstance(class Jet::AttachmentPoint &)const 
+1724	0x95f0	?InsertAfter@AttachmentPoint@Jet@@UAA?AVIterator@?$ITree@VParticle@Jet@@@2@AAV342@PAVParticle@2@@Z	public: virtual class Jet::ITree<class Jet::Particle>::Iterator __cdecl Jet::AttachmentPoint::InsertAfter(class Jet::ITree<class Jet::Particle>::Iterator &,class Jet::Particle *)
+1725	0x11320	?InsertAfter@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@@Z	public: virtual bool __cdecl Jet::BoneBlender::InsertAfter(class Jet::BoneModifier *)
+1726	0x113e0	?InsertAfter@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@PBV32@@Z	public: virtual bool __cdecl Jet::BoneBlender::InsertAfter(class Jet::BoneModifier *,class Jet::BoneModifier const *)
+1728	0x6c070	?InsertAfter@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::InsertAfter(class Jet::Modifier *)
+1729	0x6c120	?InsertAfter@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@PBV42@@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::InsertAfter(class Jet::Modifier *,class Jet::Modifier const *)
+1731	0x95b0	?InsertBefore@AttachmentPoint@Jet@@UAA?AVIterator@?$ITree@VParticle@Jet@@@2@AAV342@PAVParticle@2@@Z	public: virtual class Jet::ITree<class Jet::Particle>::Iterator __cdecl Jet::AttachmentPoint::InsertBefore(class Jet::ITree<class Jet::Particle>::Iterator &,class Jet::Particle *)
+1732	0x11100	?InsertBefore@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@@Z	public: virtual bool __cdecl Jet::BoneBlender::InsertBefore(class Jet::BoneModifier *)
+1733	0x111c0	?InsertBefore@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@PBV32@@Z	public: virtual bool __cdecl Jet::BoneBlender::InsertBefore(class Jet::BoneModifier *,class Jet::BoneModifier const *)
+1735	0x6bf00	?InsertBefore@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::InsertBefore(class Jet::Modifier *)
+1736	0x6bfb0	?InsertBefore@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@PBV42@@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::InsertBefore(class Jet::Modifier *,class Jet::Modifier const *)
+1737	0x1cc10	?InsertParticle@Cell@Jet@@AAAPAVCellNode@2@PAVParticle@2@@Z	private: class Jet::CellNode * __cdecl Jet::Cell::InsertParticle(class Jet::Particle *)
+1768	0x54960	?IsBackfacing@PhysicalPortal@Jet@@IBA_NPBVCamera@2@@Z	protected: bool __cdecl Jet::PhysicalPortal::IsBackfacing(class Jet::Camera const *)const 
+1799	0x9450	?IsOfType@AttachmentPoint@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::AttachmentPoint::IsOfType(int)const 
+1801	0x12f20	?IsOfType@Cell@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::Cell::IsOfType(int)const 
+1804	0x2bc70	?IsOfType@Mirror@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::Mirror::IsOfType(int)const 
+1810	0x2ba40	?IsOfType@PhysicalPortal@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::PhysicalPortal::IsOfType(int)const 
+1811	0x13130	?IsOfType@Portal@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::Portal::IsOfType(int)const 
+1813	0x2baf0	?IsOfType@VirtualPortal@Jet@@UBA_NH@Z	public: virtual bool __cdecl Jet::VirtualPortal::IsOfType(int)const 
+1848	0x54690	?Leave@PhysicalPortal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z	public: virtual void __cdecl Jet::PhysicalPortal::Leave(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &,unsigned int,unsigned int)
+1849	0x588c0	?Leave@Portal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z	public: virtual void __cdecl Jet::Portal::Leave(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &,unsigned int,unsigned int)
+1894	0xb9f0	?NotifyObservers@AttachmentPoint@Jet@@MAAX_NPAVParticle@2@@Z	protected: virtual void __cdecl Jet::AttachmentPoint::NotifyObservers(bool,class Jet::Particle *)
+1895	0x1ccd0	?ObjectMoved@Cell@Jet@@EAAPAVCellNode@2@PAVParticle@2@PAV32@@Z	private: virtual class Jet::CellNode * __cdecl Jet::Cell::ObjectMoved(class Jet::Particle *,class Jet::CellNode *)
+1911	0x9730	?Pop@AttachmentPoint@Jet@@UAAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::AttachmentPoint::Pop(void)
+1919	0x9580	?Push@AttachmentPoint@Jet@@UAAXPAVParticle@2@@Z	public: virtual void __cdecl Jet::AttachmentPoint::Push(class Jet::Particle *)
+1948	0x96d0	?Remove@AttachmentPoint@Jet@@UAA?AVIterator@?$ITree@VParticle@Jet@@@2@AAV342@@Z	public: virtual class Jet::ITree<class Jet::Particle>::Iterator __cdecl Jet::AttachmentPoint::Remove(class Jet::ITree<class Jet::Particle>::Iterator &)
+1949	0x9630	?Remove@AttachmentPoint@Jet@@UAAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::AttachmentPoint::Remove(void)
+1950	0x9680	?Remove@AttachmentPoint@Jet@@UAA_NPAVParticle@2@@Z	public: virtual bool __cdecl Jet::AttachmentPoint::Remove(class Jet::Particle *)
+1951	0x115f0	?Remove@BoneBlender@Jet@@UAA_NABVPString@2@@Z	public: virtual bool __cdecl Jet::BoneBlender::Remove(class Jet::PString const &)
+1952	0x11570	?Remove@BoneBlender@Jet@@UAA_NPBVModifier@2@@Z	public: virtual bool __cdecl Jet::BoneBlender::Remove(class Jet::Modifier const *)
+1953	0x1c000	?Remove@Cell@Jet@@UAA_NPAVParticle@2@@Z	public: virtual bool __cdecl Jet::Cell::Remove(class Jet::Particle *)
+1958	0x6c2c0	?Remove@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@ABVPString@2@@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::Remove(class Jet::PString const &)
+1959	0x6c1e0	?Remove@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PBVModifier@2@@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::Remove(class Jet::Modifier const *)
+1963	0x116c0	?RemoveAll@BoneBlender@Jet@@UAEXXZ	public: virtual void __thiscall Jet::BoneBlender::RemoveAll(void)
+1966	0x6c3a0	?RemoveAll@SkeletonModifier@Jet@@UAAXXZ	public: virtual void __cdecl Jet::SkeletonModifier::RemoveAll(void)
+1971	0x6bd60	?RemoveBlender@SkeletonModifier@Jet@@QAA_NPAVBoneBlender@2@_N@Z	public: bool __cdecl Jet::SkeletonModifier::RemoveBlender(class Jet::BoneBlender *,bool)
+1972	0x6be40	?RemoveBlenders@SkeletonModifier@Jet@@QAAIABV?$FastDynamicArray@PAVBoneBlender@Jet@@$0N@U?$Less@PAVBoneBlender@Jet@@PAV12@@2@@2@_N@Z	public: unsigned int __cdecl Jet::SkeletonModifier::RemoveBlenders(class Jet::FastDynamicArray<class Jet::BoneBlender *,13,struct Jet::Less<class Jet::BoneBlender *,class Jet::BoneBlender *> > const &,bool)
+1976	0xb900	?RemoveObserver@AttachmentPoint@Jet@@UAA_NPAVAttachmentObserver@2@@Z	public: virtual bool __cdecl Jet::AttachmentPoint::RemoveObserver(class Jet::AttachmentObserver *)
+1978	0x1cc80	?RemoveParticle@Cell@Jet@@AAAXPAVParticle@2@PAVCellNode@2@@Z	private: void __cdecl Jet::Cell::RemoveParticle(class Jet::Particle *,class Jet::CellNode *)
+1979	0x73920	?Render@Corona@Jet@@QAAXAAVMatrix4@2@@Z	public: void __cdecl Jet::Corona::Render(class Jet::Matrix4 &)
+1998	0x73920	?RenderDebug@Cell@Jet@@UAAXPAVDisplay@2@AAVDebugViewPort@2@AAVMatrix4@2@K@Z	public: virtual void __cdecl Jet::Cell::RenderDebug(class Jet::Display *,class Jet::DebugViewPort &,class Jet::Matrix4 &,unsigned long)
+2030	0x1cbb0	?Reset@Cell@Jet@@SAXXZ	public: static void __cdecl Jet::Cell::Reset(void)
+2035	0x58920	?Reset@Portal@Jet@@SAXXZ	public: static void __cdecl Jet::Portal::Reset(void)
+2038	0x1cda0	?ResetAll@Cell@Jet@@SAXXZ	public: static void __cdecl Jet::Cell::ResetAll(void)
+2074	0x2b490	?Set@Location@Jet@@QAAXABVVector3@2@PAVParticle@2@@Z	public: void __cdecl Jet::Location::Set(class Jet::Vector3 const &,class Jet::Particle *)
+2101	0x10bc0	?SetBone@BoneBlender@Jet@@QAAXPAVParticle@2@@Z	public: void __cdecl Jet::BoneBlender::SetBone(class Jet::Particle *)
+2148	0x131a0	?SetEnableGlobalStencil@Portal@Jet@@SAX_N@Z	public: static void __cdecl Jet::Portal::SetEnableGlobalStencil(bool)
+2159	0x9480	?SetHostName@AttachmentPoint@Jet@@QAAXABVPString@2@@Z	public: void __cdecl Jet::AttachmentPoint::SetHostName(class Jet::PString const &)
+2183	0xb220	?SetName@ReferencePoint@Jet@@QAAXABVPString@2@@Z	public: void __cdecl Jet::ReferencePoint::SetName(class Jet::PString const &)
+2185	0x2ba80	?SetNonReenterant@PhysicalPortal@Jet@@QAAX_N@Z	public: void __cdecl Jet::PhysicalPortal::SetNonReenterant(bool)
+2194	0xb280	?SetOrientation@ReferencePoint@Jet@@QAAXABVQuaternion@2@@Z	public: void __cdecl Jet::ReferencePoint::SetOrientation(class Jet::Quaternion const &)
+2208	0x4a80	?SetPosition@ReferencePoint@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::ReferencePoint::SetPosition(class Jet::Vector3 const &)
+2225	0x73920	?SetReference@Mirror@Jet@@AAAXPAVParticle@2@@Z	private: void __cdecl Jet::Mirror::SetReference(class Jet::Particle *)
+2226	0x2bb10	?SetReference@VirtualPortal@Jet@@QAAXPAVParticle@2@@Z	public: void __cdecl Jet::VirtualPortal::SetReference(class Jet::Particle *)
+2239	0x10e00	?SetRootBone@BoneModifier@Jet@@UAAXABVPString@2@@Z	public: virtual void __cdecl Jet::BoneModifier::SetRootBone(class Jet::PString const &)
+2253	0x13150	?SetStencil@Portal@Jet@@IAAX_N@Z	protected: void __cdecl Jet::Portal::SetStencil(bool)
+2278	0x10e90	?SetUpdateFlag@BoneModifier@Jet@@UAAXK_N@Z	public: virtual void __cdecl Jet::BoneModifier::SetUpdateFlag(unsigned long,bool)
+2281	0x2bb30	?SetWarpMatrix@VirtualPortal@Jet@@AAAXABVMatrix4@2@@Z	private: void __cdecl Jet::VirtualPortal::SetWarpMatrix(class Jet::Matrix4 const &)
+2287	0x97d0	?ShutDown@AttachmentObserver@Jet@@IAAXXZ	protected: void __cdecl Jet::AttachmentObserver::ShutDown(void)
+2297	0x6bb10	?SwitchParticles@SkeletonModifier@Jet@@QAAXPAVParticle@2@PAV?$FastDynamicArray@PAVBoneBlender@Jet@@$0N@U?$Less@PAVBoneBlender@Jet@@PAV12@@2@@2@1@Z	public: void __cdecl Jet::SkeletonModifier::SwitchParticles(class Jet::Particle *,class Jet::FastDynamicArray<class Jet::BoneBlender *,13,struct Jet::Less<class Jet::BoneBlender *,class Jet::BoneBlender *> > *,class Jet::FastDynamicArray<class Jet::BoneBlender *,13,struct Jet::Less<class Jet::BoneBlender *,class Jet::BoneBlender *> > *)
+2396	0x53f30	?Traverse@PhysicalPortal@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@PAVCamera@2@@Z	public: virtual void __cdecl Jet::PhysicalPortal::Traverse(class Jet::ViewPoint &,class Jet::Matrix4 const &,class Jet::Camera *)
+2397	0x13100	?Traverse@Portal@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@PAVCamera@2@@Z	public: virtual void __cdecl Jet::Portal::Traverse(class Jet::ViewPoint &,class Jet::Matrix4 const &,class Jet::Camera *)
+2442	0x6c620	?UnlinkBlenders@SkeletonModifier@Jet@@IAAXXZ	protected: void __cdecl Jet::SkeletonModifier::UnlinkBlenders(void)
+2447	0x6c450	?Update@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@Modifier@Jet@@2QBUResultTable@2@BW4Results@Modifier@Jet@@@2@M@Z	public: virtual class Jet::ResultClass<&public: static struct Modifier::ResultTable const * const Jet::Modifier::results,enum Jet::Modifier::Results> __cdecl Jet::SkeletonModifier::Update(float)
+2450	0x11700	?UpdateBoneModifiers@BoneBlender@Jet@@UAA_NM@Z	public: virtual bool __cdecl Jet::BoneBlender::UpdateBoneModifiers(float)
+2454	0x11000	?UpdateModifiers@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@M@Z	public: virtual class Jet::ResultClass<&public: static struct ModifierHost::ResultTable const * const Jet::ModifierHost::results,enum Jet::ModifierHost::Results> __cdecl Jet::SkeletonModifier::UpdateModifiers(float)
+2477	0xdca14	?cache@Corona@Jet@@1PAVParticleFXCache@2@A	protected: static class Jet::ParticleFXCache * Jet::Corona::cache
+2479	0xc1c8b	?enableStencilMode@Portal@Jet@@0_NA	private: static bool Jet::Portal::enableStencilMode
+2487	0xda1c8	?nullString@BoneModifier@Jet@@2AAVPString@2@A	public: static class Jet::PString & Jet::BoneModifier::nullString
+2496	0xdc9a8	?stats@Cell@Jet@@0PAIA	private: static unsigned int * Jet::Cell::stats
+2497	0xdca20	?total@Portal@Jet@@0IA	private: static unsigned int Jet::Portal::total
+2499	0xdca1c	?traversed@Portal@Jet@@0IA	private: static unsigned int Jet::Portal::traversed

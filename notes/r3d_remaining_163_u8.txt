@@ -1,0 +1,163 @@
+53 0x17320 public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Matrix4 const &)
+54 0x17650 public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Vector2 const &,class Jet::Vector2 const &,class Jet::Vector3 const &,floa
+55 0x182a0 public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Vector3 const *,class Jet::Matrix4 const &)
+56 0x19070 public: __thiscall Jet::Camera::Camera(class Jet::Camera const &,class Jet::Vector3 const *,class Jet::Matrix4 const &,class Jet::Vector3 const &,bool
+90 0x21c60 public: __thiscall Jet::DebugRender::DebugRender(class Jet::Color const &,unsigned long)
+213 0x52ec0 public: __thiscall Jet::ParticleFXRenderItem::ParticleFXRenderItem(class Jet::ParticleFXRenderItem const &)
+214 0x52eb0 public: __thiscall Jet::ParticleFXRenderItem::ParticleFXRenderItem(void)
+237 0x4a20 public: __thiscall Jet::Primitive3D::Primitive3D(class Jet::Primitive3D const &)
+238 0x4a10 public: __thiscall Jet::Primitive3D::Primitive3D(void)
+313 0x3ec0 public: __thiscall Jet::Transformation::Transformation(class Jet::Matrix3 const &,class Jet::Vector3 const &)
+314 0x3e70 public: __thiscall Jet::Transformation::Transformation(void)
+317 0x72200 public: __thiscall Jet::Tube::Tube(class Jet::Vector3 const &,class Jet::Vector3 const &,float)
+318 0x721d0 public: __thiscall Jet::Tube::Tube(void)
+320 0x72a40 private: __thiscall Jet::ViewPoint::ViewPoint(class Jet::ViewPoint &,class Jet::Portal *,class Jet::Matrix4 const &,unsigned int,class Jet::ViewPoint 
+321 0xa830 public: __thiscall Jet::ViewPoint::ViewPoint(class Jet::Array<struct Jet::VisibleElement,128> *,class Jet::RenderKernel *,class Jet::ViewPort const *)
+340 0xd7a0 public: virtual __thiscall Jet::AutoTexMaterialPlugin::~AutoTexMaterialPlugin(void)
+444 0x72b80 public: __thiscall Jet::ViewPoint::~ViewPoint(void)
+475 0x21cb0 public: class Jet::DebugRender & __thiscall Jet::DebugRender::operator=(class Jet::DebugRender const &)
+487 0x21cb0 public: class Jet::LightLoader & __thiscall Jet::LightLoader::operator=(class Jet::LightLoader const &)
+514 0x21cb0 public: class Jet::ParticleFXRenderItem & __thiscall Jet::ParticleFXRenderItem::operator=(class Jet::ParticleFXRenderItem const &)
+524 0x21cb0 public: class Jet::Primitive3D & __thiscall Jet::Primitive3D::operator=(class Jet::Primitive3D const &)
+555 0x23050 public: class Jet::Transformation & __thiscall Jet::Transformation::operator=(class Jet::Transformation const &)
+557 0x72160 public: class Jet::Tube & __thiscall Jet::Tube::operator=(class Jet::Tube const &)
+558 0xa770 public: class Jet::ViewPoint & __thiscall Jet::ViewPoint::operator=(class Jet::ViewPoint const &)
+585 0x4450 public: class Jet::Transformation __cdecl Jet::Transformation::operator*(class Jet::Transformation const &)
+590 0x3f20 public: class Jet::Transformation & __cdecl Jet::Transformation::operator*=(class Jet::Transformation const &)
+607 0x7df2c const Jet::AutoTexMaterialPlugin::`vftable'
+699 0x839a8 const Jet::ParticleFXRenderItem::`vftable'
+706 0x7d45c const Jet::Primitive3D::`vftable'
+772 0xdd0ac `public: class Jet::Color const & __cdecl Jet::DebugRender::GetBoundingVolumeColor(void)const '::`2'::`local static guard'{2}'
+840 0xa7d0 public: void __cdecl Jet::ViewPoint::Add(class Jet::Element *,class Jet::Matrix4 const &)
+841 0xa8f0 public: void __cdecl Jet::ViewPoint::Add(class Jet::Element *,class Jet::Matrix4 const &,unsigned long)
+849 0xa880 public: void __cdecl Jet::ViewPoint::AddPortal(class Jet::Portal *,class Jet::Matrix4 const &,unsigned int)
+937 0x72c70 public: static int __cdecl Jet::ViewPoint::CalcWantedMipLevelsForCull(class Jet::ViewPoint &,class Jet::Particle &,float)
+942 0x74410 public: struct Jet::Rect __cdecl Jet::ViewPort::CalculateOrientedBoxSize(class Jet::OrientedBox const &,class Jet::Matrix4 const &)const 
+951 0x73e00 public: struct Jet::Rect __cdecl Jet::ViewPort::CalculateSphereSize(class Jet::Vector3 const &,float,class Jet::Matrix4 const &)const 
+993 0x27070 public: virtual class Jet::GeometryChunk * __cdecl Jet::GenericShaderMaterial::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int
+1000 0x59f50 public: virtual class Jet::GeometryChunk * __cdecl Jet::ReflectiveMaterial::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,en
+1022 0x31670 public: virtual class Jet::Material * __cdecl Jet::MultiPassBump2MaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *
+1024 0x2f4c0 public: virtual class Jet::Material * __cdecl Jet::MultiPassBumpMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKernel *)
+1026 0x33110 public: virtual class Jet::Material * __cdecl Jet::MultiPassBumpSpec2MaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKern
+1028 0x32160 public: virtual class Jet::Material * __cdecl Jet::MultiPassBumpSpecMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKerne
+1030 0x34d30 public: virtual class Jet::Material * __cdecl Jet::MultiPassNoTextureMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKern
+1032 0x37a70 public: virtual class Jet::Material * __cdecl Jet::MultiPassOneTextureMaterialPlugin::CreateInstance(class Jet::MaterialManager *,class Jet::RenderKer
+1078 0x2c250 public: virtual void __cdecl Jet::MultiPassBumpChunkBase::CreateTangentVectors(class Jet::GeometryChunk *)
+1082 0x73920 public: void __cdecl Jet::DebugRender::Cull(class Jet::RenderKernel *,class Jet::ViewPoint &,class Jet::Particle *)
+1127 0x2e2f0 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+1128 0x2d880 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+1129 0x2dde0 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+1208 0x2af50 public: float __cdecl Jet::LineSegment2D::GetApproxSeparation(class Jet::Line2D const &)const 
+1210 0x10e60 public: float __cdecl Jet::Polygon2D::GetApproxSeparation(class Jet::Polygon2D const &)const 
+1228 0x21c70 public: class Jet::Color const & __cdecl Jet::DebugRender::GetBoundingVolumeColor(void)const 
+1229 0x79e0 public: unsigned long __cdecl Jet::DebugRender::GetBoundingVolumeMask(void)const 
+1231 0x6970 public: class Jet::Camera const * __cdecl Jet::ViewPoint::GetCamera(void)const 
+1247 0x20370 public: class Jet::Vector3 __cdecl Jet::Tube::GetCenter(int)
+1248 0x20360 public: class Jet::Vector3 const & __cdecl Jet::Tube::GetCenter(int)const 
+1249 0x203a0 public: void __cdecl Jet::Tube::GetCenter(class Jet::Vector3 &,int)const 
+1251 0xb210 public: class Jet::Vector3 * __cdecl Jet::Tube::GetCenters(void)const 
+1384 0x23150 public: class Jet::Matrix3 __cdecl Jet::Ellipse::GetMatrix(void)
+1385 0x244e0 public: class Jet::Matrix3 __cdecl Jet::Ellipsoid::GetMatrix(void)const 
+1430 0x54e60 public: class Jet::Portal const * __cdecl Jet::ViewPoint::GetPortal(void)const 
+1451 0x72110 public: float __cdecl Jet::Tube::GetRadius(void)const 
+1453 0x13ee0 public: class Jet::Ray __cdecl Jet::Camera::GetRay(float,float)const 
+1465 0xa870 public: class Jet::RenderKernel * __cdecl Jet::ViewPoint::GetRenderKernel(void)const 
+1483 0x2ab00 public: float __cdecl Jet::LineSegment2D::GetSeparation(class Jet::Line2D const &)const 
+1485 0x57930 public: float __cdecl Jet::Polygon2D::GetSeparation(class Jet::Polygon2D const &)const 
+1499 0x57950 public: float __cdecl Jet::Polygon2D::GetSeparationSquared(class Jet::Polygon2D const &)const 
+1504 0x22520 public: static unsigned long __cdecl Jet::DebugRender::GetShowAllBoundingTestMask(void)
+1505 0x22500 public: static bool __cdecl Jet::DebugRender::GetShowAllBoundingVolumes(void)
+1506 0x4f940 public: bool __cdecl Jet::DebugRender::GetShowBoundingVolume(void)const 
+1606 0x5ff70 public: class Jet::ViewPort const * __cdecl Jet::ViewPoint::GetViewPort(void)const 
+1620 0x57fb0 public: void __cdecl Jet::Polygon2D::GrahamScan(void)
+1690 0x2fa00 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeAmbientLightRenders(class Jet::RenderKernel *)const 
+1691 0x34fc0 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::InitializeAmbientLightRenders(class Jet::RenderKernel *)const 
+1692 0x37ec0 protected: bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializeAmbientLightRenders(class Jet::RenderKernel *)const 
+1697 0x2f5a0 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeCaches(class Jet::RenderKernel *)const 
+1698 0x30790 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeCubeMapLightRenders(class Jet::RenderKernel *)const 
+1699 0x35b20 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::InitializeCubeMapLightRenders(class Jet::RenderKernel *)const 
+1700 0x38b70 protected: bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializeCubeMapLightRenders(class Jet::RenderKernel *)const 
+1701 0x30b80 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeCubeSpotLightRenders(class Jet::RenderKernel *)const 
+1702 0x35e90 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::InitializeCubeSpotLightRenders(class Jet::RenderKernel *)const 
+1703 0x38f60 protected: bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializeCubeSpotLightRenders(class Jet::RenderKernel *)const 
+1704 0x31750 protected: virtual void __cdecl Jet::MultiPassBump2MaterialPlugin::InitializeFixedVertexType(class Jet::RenderKernel *)const 
+1705 0x2f6e0 protected: virtual void __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeFixedVertexType(class Jet::RenderKernel *)const 
+1706 0x331f0 protected: virtual void __cdecl Jet::MultiPassBumpSpec2MaterialPlugin::InitializeFixedVertexType(class Jet::RenderKernel *)const 
+1707 0x37c30 protected: virtual void __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializeFixedVertexType(class Jet::RenderKernel *)const 
+1708 0x2f910 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeLightRenders(class Jet::RenderKernel *)const 
+1709 0x34ee0 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::InitializeLightRenders(class Jet::RenderKernel *)const 
+1710 0x37de0 protected: virtual bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializeLightRenders(class Jet::RenderKernel *)const 
+1711 0x2fbd0 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeParallelLightRenders(class Jet::RenderKernel *)const 
+1712 0x32240 protected: virtual bool __cdecl Jet::MultiPassBumpSpecMaterialPlugin::InitializeParallelLightRenders(class Jet::RenderKernel *)const 
+1713 0x35120 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::InitializeParallelLightRenders(class Jet::RenderKernel *)const 
+1714 0x38090 protected: bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializeParallelLightRenders(class Jet::RenderKernel *)const 
+1715 0x2ff00 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializePointLightRenders(class Jet::RenderKernel *)const 
+1716 0x32720 protected: virtual bool __cdecl Jet::MultiPassBumpSpecMaterialPlugin::InitializePointLightRenders(class Jet::RenderKernel *)const 
+1717 0x35310 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::InitializePointLightRenders(class Jet::RenderKernel *)const 
+1718 0x382f0 protected: bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializePointLightRenders(class Jet::RenderKernel *)const 
+1719 0x30320 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::InitializeSpotLightRenders(class Jet::RenderKernel *)const 
+1720 0x356b0 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::InitializeSpotLightRenders(class Jet::RenderKernel *)const 
+1721 0x38700 protected: bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::InitializeSpotLightRenders(class Jet::RenderKernel *)const 
+1764 0x4f940 public: virtual bool __cdecl Jet::Primitive3D::Intersects(class Jet::IndexedMeshInstance const &,class Jet::Transformation const &,class Jet::Collisio
+1766 0x4a50 public: void __cdecl Jet::Primitive3D::InverseTransform(class Jet::Transformation const &)
+1767 0x4280 public: class Jet::Vector3 __cdecl Jet::Transformation::InverseTransform(class Jet::Vector3 const &)const 
+1792 0x2e4c0 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+1793 0x2e030 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+1850 0x79e0 public: class Jet::Light * __cdecl Jet::LightLoader::Load(class Jet::PString const &,class Jet::PString const &)
+1854 0x30fe0 protected: virtual bool __cdecl Jet::MultiPassBumpMaterialPlugin::LoadLightPrograms(class Jet::MultiPassLightRender *,class Jet::RenderKernel *,char c
+1855 0x362f0 protected: bool __cdecl Jet::MultiPassNoTextureMaterialPlugin::LoadLightPrograms(class Jet::MultiPassLightRender *,class Jet::RenderKernel *,char cons
+1856 0x393d0 protected: bool __cdecl Jet::MultiPassOneTextureMaterialPlugin::LoadLightPrograms(class Jet::MultiPassLightRender *,class Jet::RenderKernel *,char con
+1857 0x3b4b0 public: void __cdecl Jet::MultiPassRenderState::LoadRenderProperties(class Jet::DisplayLight &,class Jet::Array<struct Jet::MultiPassRenderState::Ligh
+1858 0x3a870 public: void __cdecl Jet::MultiPassRenderState::LoadRenderProperties(class Jet::DisplayLight &,class Jet::Array<struct Jet::MultiPassRenderState::Ligh
+1877 0x49380 public: void __cdecl Jet::OrientedBox::MakeBestFit(unsigned int,class Jet::Vector3 const *)
+1878 0x493b0 public: void __cdecl Jet::OrientedBox::MakeBestFit(unsigned int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>)
+1885 0x4b600 protected: void __cdecl Jet::OrientedBox::MinimalBoxForAngles(int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>,float 
+1887 0x4340 public: void __cdecl Jet::Transformation::MultiplyTransform(class Jet::Matrix3 const &,class Jet::Vector3 const &,class Jet::Transformation &)const 
+1925 0x6d7c0 public: bool __cdecl Jet::SplineDefinition::ReadConfigData(class Jet::ConfigData const &)
+1926 0x6e3e0 public: bool __cdecl Jet::SplineDefinition::ReadTextFile(class Jet::ResourceDatabase const *,char const *)
+1941 0x31230 protected: virtual void __cdecl Jet::MultiPassBumpMaterialPlugin::RegisterBuiltInPrograms(void)const 
+1942 0x32c70 protected: virtual void __cdecl Jet::MultiPassBumpSpecMaterialPlugin::RegisterBuiltInPrograms(void)const 
+1943 0x36540 protected: virtual void __cdecl Jet::MultiPassNoTextureMaterialPlugin::RegisterBuiltInPrograms(void)const 
+1944 0x39620 protected: virtual void __cdecl Jet::MultiPassOneTextureMaterialPlugin::RegisterBuiltInPrograms(void)const 
+1967 0x72aa0 public: void __cdecl Jet::ViewPoint::RemoveAll(void)
+1983 0x72bc0 public: void __cdecl Jet::ViewPoint::Render(class Jet::ViewPort &)
+1996 0x37510 protected: virtual void __cdecl Jet::MultiPassOneTextureMaterial::RenderChunkPerVertex(class Jet::Display *,class Jet::ViewPort *,class Jet::GeometryC
+2025 0x3c3d0 public: void __cdecl Jet::MultiPassRenderState::RenderSingleLightPasses(struct Jet::MultiPassRenderState::MPLightRender *)
+2052 0x28ee0 public: bool __cdecl Jet::LightLoader::Save(class Jet::PString const &,class Jet::PString const &,class Jet::Light *)
+2103 0x73920 public: void __cdecl Jet::DebugRender::SetBoundingVolumeColor(class Jet::Color const &)
+2104 0x73920 public: void __cdecl Jet::DebugRender::SetBoundingVolumeMask(unsigned long)
+2105 0x22510 public: static void __cdecl Jet::DebugRender::SetBoundingVolumesTestMask(unsigned long)
+2115 0x721a0 public: void __cdecl Jet::Tube::SetCenter(class Jet::Vector3 const &,int)
+2117 0x72120 public: void __cdecl Jet::Tube::SetCenters(class Jet::Vector3 const * const)
+2220 0x72150 public: void __cdecl Jet::Tube::SetRadius(float)
+2242 0x3c150 public: void __cdecl Jet::MultiPassRenderState::SetScissor(class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::Displa
+2243 0x224f0 public: static void __cdecl Jet::DebugRender::SetShowAllBoundingVolumes(bool)
+2244 0x73920 public: void __cdecl Jet::DebugRender::SetShowBoundingVolume(bool)
+2260 0x2e9b0 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+2261 0x2e850 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+2262 0x34260 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+2263 0x34080 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+2264 0x36de0 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+2265 0x36c80 public: virtual class Jet::ResultClass<&public: static struct Material::ResultTable const * const Jet::Material::results,enum Jet::Material::Results> 
+2294 0x39d30 protected: bool __cdecl Jet::MultiPassRenderState::StateSetup(class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::Dis
+2310 0x20690 public: bool __cdecl Jet::Cone::TestCollision(class Jet::Line const &)
+2311 0x20970 public: bool __cdecl Jet::Cone::TestCollision(class Jet::Sphere const &)
+2319 0x23d30 public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Circle const &)
+2320 0x23930 public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Line const &)
+2321 0x23a40 public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Plane const &)
+2322 0x23ab0 public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Sphere const &)
+2336 0x2a900 public: bool __cdecl Jet::LineSegment::TestCollision(class Jet::Ellipse &)const 
+2337 0x2a680 public: bool __cdecl Jet::LineSegment::TestCollision(class Jet::Ellipsoid &)const 
+2370 0x72460 public: bool __cdecl Jet::Tube::TestCollision(class Jet::Tube const &)
+2371 0x722f0 public: bool __cdecl Jet::Tube::TestCollision(class Jet::Line const &)
+2372 0x723a0 public: bool __cdecl Jet::Tube::TestCollision(class Jet::Sphere const &)
+2373 0x72240 public: bool __cdecl Jet::Tube::TestCollision(class Jet::Vector3 const &)
+2384 0x4a30 public: void __cdecl Jet::Primitive3D::Transform(class Jet::Transformation const &)
+2385 0x4180 public: class Jet::Vector3 __cdecl Jet::Transformation::Transform(class Jet::Vector3 const &)const 
+2387 0x45a0 public: void __cdecl Jet::Transformation::TransformArray(int,class Jet::Vector3 const *,class Jet::Vector3 *)
+2398 0x72b50 private: void __cdecl Jet::ViewPoint::TraversePortal(class Jet::Camera *)
+2448 0x72940 public: void __cdecl Jet::ViewPoint::Update(class Jet::Camera *)
+2460 0x4b220 protected: static float __cdecl Jet::OrientedBox::Volume(float const *,unsigned int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPC
+2472 0x6db80 public: bool __cdecl Jet::SplineDefinition::WriteConfigData(class Jet::ConfigData &,bool)const 
+2473 0x6e530 public: bool __cdecl Jet::SplineDefinition::WriteTextFile(class Jet::ResourceDatabase const *,char const *)const 
+2478 0xdd0b0 class Jet::Color `public: class Jet::Color const & __cdecl Jet::DebugRender::GetBoundingVolumeColor(void)const '::`2'::cx

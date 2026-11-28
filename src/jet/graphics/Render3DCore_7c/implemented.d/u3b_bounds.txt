@@ -1,0 +1,13 @@
+# U3b: the U3 bounding-volume view and renderable overrides, now that U8 Camera/ViewPoint and U10 primitives are local
+?CheckRenderableObjectPosition@ParticleAxisAlignedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@PAV32@@Z
+?CheckRenderableObjectPosition@ParticleBoundingSphere@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@PAV32@@Z
+?CheckRenderableObjectPosition@ParticleOrientedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@PAV32@@Z
+?CreateRenderableObject@ParticleAxisAlignedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@ABVColor@2@@Z
+?CreateRenderableObject@ParticleBoundingSphere@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@ABVColor@2@@Z
+?CreateRenderableObject@ParticleOrientedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@ABVColor@2@@Z
+?IsWithinView@ParticleAxisAlignedBoundingBox@Jet@@UBA_NABVViewPoint@2@@Z
+?IsWithinView@ParticleAxisAlignedBoundingBox@Jet@@UBA_NPBVCamera@2@@Z
+?IsWithinView@ParticleBoundingSphere@Jet@@UBA_NABVViewPoint@2@@Z
+?IsWithinView@ParticleBoundingSphere@Jet@@UBA_NPBVCamera@2@@Z
+?IsWithinView@ParticleOrientedBoundingBox@Jet@@UBA_NABVViewPoint@2@@Z
+?IsWithinView@ParticleOrientedBoundingBox@Jet@@UBA_NPBVCamera@2@@Z

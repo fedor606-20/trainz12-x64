@@ -1,0 +1,231 @@
+ordinal	rva	mangled	demangled
+252	0x5fad0	??0Render2DPrimitive@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Render2DPrimitive::Render2DPrimitive(class Jet::Render2DPrimitive const &)
+253	0x5fb70	??0Render2DPrimitive@Jet@@QAE@H@Z	public: __thiscall Jet::Render2DPrimitive::Render2DPrimitive(int)
+254	0x22430	??0Render3DPrimitive@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Render3DPrimitive::Render3DPrimitive(class Jet::Render3DPrimitive const &)
+255	0x60bd0	??0Render3DPrimitive@Jet@@QAE@H@Z	public: __thiscall Jet::Render3DPrimitive::Render3DPrimitive(int)
+256	0x50440	??0RenderBox@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderBox::RenderBox(class Jet::RenderBox const &)
+257	0x60ca0	??0RenderBox@Jet@@QAE@XZ	public: __thiscall Jet::RenderBox::RenderBox(void)
+258	0x62b70	??0RenderCircle@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderCircle::RenderCircle(class Jet::RenderCircle const &)
+259	0x62cb0	??0RenderCircle@Jet@@QAE@XZ	public: __thiscall Jet::RenderCircle::RenderCircle(void)
+260	0x630a0	??0RenderCone@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderCone::RenderCone(class Jet::RenderCone const &)
+261	0x631c0	??0RenderCone@Jet@@QAE@XZ	public: __thiscall Jet::RenderCone::RenderCone(void)
+262	0x63db0	??0RenderCylinder@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderCylinder::RenderCylinder(class Jet::RenderCylinder const &)
+263	0x63ea0	??0RenderCylinder@Jet@@QAE@XZ	public: __thiscall Jet::RenderCylinder::RenderCylinder(void)
+264	0x64a50	??0RenderEllipse@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderEllipse::RenderEllipse(class Jet::RenderEllipse const &)
+265	0x64b80	??0RenderEllipse@Jet@@QAE@XZ	public: __thiscall Jet::RenderEllipse::RenderEllipse(void)
+266	0x64f80	??0RenderEllipsoid@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderEllipsoid::RenderEllipsoid(class Jet::RenderEllipsoid const &)
+267	0x65140	??0RenderEllipsoid@Jet@@QAE@XZ	public: __thiscall Jet::RenderEllipsoid::RenderEllipsoid(void)
+268	0x65ae0	??0RenderLine@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderLine::RenderLine(class Jet::RenderLine const &)
+269	0x65ac0	??0RenderLine@Jet@@QAE@XZ	public: __thiscall Jet::RenderLine::RenderLine(void)
+270	0x65d10	??0RenderLines@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderLines::RenderLines(class Jet::RenderLines const &)
+271	0x66320	??0RenderLines@Jet@@QAE@XZ	public: __thiscall Jet::RenderLines::RenderLines(void)
+272	0x66fd0	??0RenderPlane@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderPlane::RenderPlane(class Jet::RenderPlane const &)
+273	0x67120	??0RenderPlane@Jet@@QAE@XZ	public: __thiscall Jet::RenderPlane::RenderPlane(void)
+274	0x660a0	??0RenderPolygon@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderPolygon::RenderPolygon(class Jet::RenderPolygon const &)
+275	0x67bd0	??0RenderPolygon@Jet@@QAE@XZ	public: __thiscall Jet::RenderPolygon::RenderPolygon(void)
+276	0x658c0	??0RenderPolyline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderPolyline::RenderPolyline(class Jet::RenderPolyline const &)
+277	0x68060	??0RenderPolyline@Jet@@QAE@XZ	public: __thiscall Jet::RenderPolyline::RenderPolyline(void)
+278	0x21cc0	??0RenderPrimitive@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderPrimitive::RenderPrimitive(class Jet::RenderPrimitive const &)
+279	0x684a0	??0RenderPrimitive@Jet@@QAE@H@Z	public: __thiscall Jet::RenderPrimitive::RenderPrimitive(int)
+280	0x683c0	??0RenderPrimitive@Jet@@QAE@XZ	public: __thiscall Jet::RenderPrimitive::RenderPrimitive(void)
+281	0x51210	??0RenderSphere@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderSphere::RenderSphere(class Jet::RenderSphere const &)
+282	0x69030	??0RenderSphere@Jet@@QAE@XZ	public: __thiscall Jet::RenderSphere::RenderSphere(void)
+283	0x699d0	??0RenderSpline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderSpline::RenderSpline(class Jet::RenderSpline const &)
+284	0x699b0	??0RenderSpline@Jet@@QAE@XZ	public: __thiscall Jet::RenderSpline::RenderSpline(void)
+285	0x69fe0	??0RenderTube@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::RenderTube::RenderTube(class Jet::RenderTube const &)
+286	0x6a120	??0RenderTube@Jet@@QAE@XZ	public: __thiscall Jet::RenderTube::RenderTube(void)
+416	0x66fc0	??1Render2DPrimitive@Jet@@UAE@XZ	public: virtual __thiscall Jet::Render2DPrimitive::~Render2DPrimitive(void)
+417	0x22420	??1Render3DPrimitive@Jet@@UAE@XZ	public: virtual __thiscall Jet::Render3DPrimitive::~Render3DPrimitive(void)
+418	0x66fc0	??1RenderBox@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderBox::~RenderBox(void)
+419	0x66fc0	??1RenderCircle@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderCircle::~RenderCircle(void)
+420	0x66fc0	??1RenderCone@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderCone::~RenderCone(void)
+421	0x66fc0	??1RenderCylinder@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderCylinder::~RenderCylinder(void)
+422	0x66fc0	??1RenderEllipse@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderEllipse::~RenderEllipse(void)
+423	0x66fc0	??1RenderEllipsoid@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderEllipsoid::~RenderEllipsoid(void)
+424	0x66fc0	??1RenderLine@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderLine::~RenderLine(void)
+425	0x66440	??1RenderLines@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderLines::~RenderLines(void)
+426	0x66fc0	??1RenderPlane@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderPlane::~RenderPlane(void)
+427	0x66060	??1RenderPolygon@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderPolygon::~RenderPolygon(void)
+428	0x66fc0	??1RenderPolyline@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderPolyline::~RenderPolyline(void)
+429	0x68600	??1RenderPrimitive@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderPrimitive::~RenderPrimitive(void)
+430	0x66fc0	??1RenderSphere@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderSphere::~RenderSphere(void)
+431	0x66fc0	??1RenderSpline@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderSpline::~RenderSpline(void)
+432	0x66fc0	??1RenderTube@Jet@@UAE@XZ	public: virtual __thiscall Jet::RenderTube::~RenderTube(void)
+528	0x22450	??4Render2DPrimitive@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Render2DPrimitive & __thiscall Jet::Render2DPrimitive::operator=(class Jet::Render2DPrimitive const &)
+529	0x22450	??4Render3DPrimitive@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Render3DPrimitive & __thiscall Jet::Render3DPrimitive::operator=(class Jet::Render3DPrimitive const &)
+530	0x6a020	??4RenderBox@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderBox & __thiscall Jet::RenderBox::operator=(class Jet::RenderBox const &)
+531	0x62ba0	??4RenderCircle@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderCircle & __thiscall Jet::RenderCircle::operator=(class Jet::RenderCircle const &)
+532	0x630e0	??4RenderCone@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderCone & __thiscall Jet::RenderCone::operator=(class Jet::RenderCone const &)
+533	0x630e0	??4RenderCylinder@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderCylinder & __thiscall Jet::RenderCylinder::operator=(class Jet::RenderCylinder const &)
+534	0x630e0	??4RenderEllipse@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderEllipse & __thiscall Jet::RenderEllipse::operator=(class Jet::RenderEllipse const &)
+535	0x6a020	??4RenderEllipsoid@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderEllipsoid & __thiscall Jet::RenderEllipsoid::operator=(class Jet::RenderEllipsoid const &)
+536	0x65910	??4RenderLine@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderLine & __thiscall Jet::RenderLine::operator=(class Jet::RenderLine const &)
+537	0x65e70	??4RenderLines@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderLines & __thiscall Jet::RenderLines::operator=(class Jet::RenderLines const &)
+538	0x630e0	??4RenderPlane@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderPlane & __thiscall Jet::RenderPlane::operator=(class Jet::RenderPlane const &)
+539	0x66120	??4RenderPolygon@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderPolygon & __thiscall Jet::RenderPolygon::operator=(class Jet::RenderPolygon const &)
+540	0x65910	??4RenderPolyline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderPolyline & __thiscall Jet::RenderPolyline::operator=(class Jet::RenderPolyline const &)
+541	0x21e90	??4RenderPrimitive@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderPrimitive & __thiscall Jet::RenderPrimitive::operator=(class Jet::RenderPrimitive const &)
+542	0x62ba0	??4RenderSphere@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderSphere & __thiscall Jet::RenderSphere::operator=(class Jet::RenderSphere const &)
+543	0x65910	??4RenderSpline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderSpline & __thiscall Jet::RenderSpline::operator=(class Jet::RenderSpline const &)
+544	0x6a020	??4RenderTube@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::RenderTube & __thiscall Jet::RenderTube::operator=(class Jet::RenderTube const &)
+713	0x85634	??_7Render2DPrimitive@Jet@@6B@	const Jet::Render2DPrimitive::`vftable'
+714	0x7ebb4	??_7Render3DPrimitive@Jet@@6B@	const Jet::Render3DPrimitive::`vftable'
+715	0x8375c	??_7RenderBox@Jet@@6B@	const Jet::RenderBox::`vftable'
+716	0x85834	??_7RenderCircle@Jet@@6B@	const Jet::RenderCircle::`vftable'
+717	0x8592c	??_7RenderCone@Jet@@6B@	const Jet::RenderCone::`vftable'
+718	0x85a24	??_7RenderCylinder@Jet@@6B@	const Jet::RenderCylinder::`vftable'
+719	0x85b1c	??_7RenderEllipse@Jet@@6B@	const Jet::RenderEllipse::`vftable'
+720	0x85c14	??_7RenderEllipsoid@Jet@@6B@	const Jet::RenderEllipsoid::`vftable'
+721	0x85dfc	??_7RenderLine@Jet@@6B@	const Jet::RenderLine::`vftable'
+722	0x85fec	??_7RenderLines@Jet@@6B@	const Jet::RenderLines::`vftable'
+723	0x860b4	??_7RenderPlane@Jet@@6B@	const Jet::RenderPlane::`vftable'
+724	0x85fe4	??_7RenderPolygon@Jet@@6BPolygon@1@@	const Jet::RenderPolygon::`vftable'{for `Jet::Polygon'}
+725	0x85eec	??_7RenderPolygon@Jet@@6BRender2DPrimitive@1@@	const Jet::RenderPolygon::`vftable'{for `Jet::Render2DPrimitive'}
+726	0x85d0c	??_7RenderPolyline@Jet@@6B@	const Jet::RenderPolyline::`vftable'
+727	0x7ecac	??_7RenderPrimitive@Jet@@6B@	const Jet::RenderPrimitive::`vftable'
+728	0x838a4	??_7RenderSphere@Jet@@6B@	const Jet::RenderSphere::`vftable'
+729	0x861bc	??_7RenderSpline@Jet@@6B@	const Jet::RenderSpline::`vftable'
+730	0x862ac	??_7RenderTube@Jet@@6B@	const Jet::RenderTube::`vftable'
+799	0x5faf0	??_FRender2DPrimitive@Jet@@QAEXXZ	public: void __thiscall Jet::Render2DPrimitive::`default constructor closure'(void)
+800	0x22470	??_FRender3DPrimitive@Jet@@QAEXXZ	public: void __thiscall Jet::Render3DPrimitive::`default constructor closure'(void)
+834	0x66540	?Add@RenderLines@Jet@@QAAXPAVRenderKernel@2@ABVVector3@2@1ABVColor@2@@Z	public: void __cdecl Jet::RenderLines::Add(class Jet::RenderKernel *,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Color const &)
+835	0x66670	?Add@RenderLines@Jet@@QAAXPAVRenderKernel@2@ABVVector3@2@ABVColor@2@@Z	public: void __cdecl Jet::RenderLines::Add(class Jet::RenderKernel *,class Jet::Vector3 const &,class Jet::Color const &)
+836	0x667c0	?Add@RenderLines@Jet@@QAAXPAVRenderKernel@2@PBVVector3@2@HABVColor@2@@Z	public: void __cdecl Jet::RenderLines::Add(class Jet::RenderKernel *,class Jet::Vector3 const *,int,class Jet::Color const &)
+848	0x65fa0	?AddPolygon@RenderLines@Jet@@QAAXPAVRenderKernel@2@ABVVector3@2@111ABVColor@2@@Z	public: void __cdecl Jet::RenderLines::AddPolygon(class Jet::RenderKernel *,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Color const &)
+896	0x60d70	?BuildGeometry@RenderBox@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HHHH@Z	protected: bool __cdecl Jet::RenderBox::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int,int,int)
+897	0x62d40	?BuildGeometry@RenderCircle@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HH@Z	protected: bool __cdecl Jet::RenderCircle::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int)
+898	0x63270	?BuildGeometry@RenderCone@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HH@Z	protected: bool __cdecl Jet::RenderCone::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int)
+899	0x63f50	?BuildGeometry@RenderCylinder@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HH@Z	protected: bool __cdecl Jet::RenderCylinder::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int)
+900	0x64c30	?BuildGeometry@RenderEllipse@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HH@Z	protected: bool __cdecl Jet::RenderEllipse::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int)
+901	0x651f0	?BuildGeometry@RenderEllipsoid@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HH@Z	protected: bool __cdecl Jet::RenderEllipsoid::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int)
+902	0x671d0	?BuildGeometry@RenderPlane@Jet@@MAA_NPAVRenderKernel@2@ABVColor@2@MMHHH@Z	protected: virtual bool __cdecl Jet::RenderPlane::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,float,float,int,int,int)
+903	0x67d20	?BuildGeometry@RenderPolygon@Jet@@MAA_NPAVRenderKernel@2@ABVColor@2@ABVPolygon@2@H@Z	protected: virtual bool __cdecl Jet::RenderPolygon::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,class Jet::Polygon const &,int)
+904	0x680e0	?BuildGeometry@RenderPolyline@Jet@@MAA_NPAVRenderKernel@2@ABVColor@2@PBVVector3@2@HH@Z	protected: virtual bool __cdecl Jet::RenderPolyline::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,class Jet::Vector3 const *,int,int)
+905	0x690c0	?BuildGeometry@RenderSphere@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HH@Z	protected: bool __cdecl Jet::RenderSphere::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int)
+906	0x6a1d0	?BuildGeometry@RenderTube@Jet@@IAA_NPAVRenderKernel@2@ABVColor@2@HH@Z	protected: bool __cdecl Jet::RenderTube::BuildGeometry(class Jet::RenderKernel *,class Jet::Color const &,int,int)
+907	0x61c70	?BuildIndicesSolid@RenderBox@Jet@@IAAXHHHHPAGH@Z	protected: void __cdecl Jet::RenderBox::BuildIndicesSolid(int,int,int,int,unsigned short *,int)
+908	0x63480	?BuildIndicesSolid@RenderCone@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderCone::BuildIndicesSolid(int,int,unsigned short *,int)
+909	0x641a0	?BuildIndicesSolid@RenderCylinder@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderCylinder::BuildIndicesSolid(int,int,unsigned short *,int)
+910	0x69550	?BuildIndicesSolid@RenderEllipsoid@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderEllipsoid::BuildIndicesSolid(int,int,unsigned short *,int)
+911	0x679d0	?BuildIndicesSolid@RenderPlane@Jet@@IAAXHHHPAGH@Z	protected: void __cdecl Jet::RenderPlane::BuildIndicesSolid(int,int,int,unsigned short *,int)
+912	0x69550	?BuildIndicesSolid@RenderSphere@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderSphere::BuildIndicesSolid(int,int,unsigned short *,int)
+913	0x6a510	?BuildIndicesSolid@RenderTube@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderTube::BuildIndicesSolid(int,int,unsigned short *,int)
+914	0x624a0	?BuildIndicesWire@RenderBox@Jet@@IAAXHHHHPAGH@Z	protected: void __cdecl Jet::RenderBox::BuildIndicesWire(int,int,int,int,unsigned short *,int)
+915	0x63520	?BuildIndicesWire@RenderCone@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderCone::BuildIndicesWire(int,int,unsigned short *,int)
+916	0x642b0	?BuildIndicesWire@RenderCylinder@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderCylinder::BuildIndicesWire(int,int,unsigned short *,int)
+917	0x696d0	?BuildIndicesWire@RenderEllipsoid@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderEllipsoid::BuildIndicesWire(int,int,unsigned short *,int)
+918	0x67a60	?BuildIndicesWire@RenderPlane@Jet@@IAAXHHHPAGH@Z	protected: void __cdecl Jet::RenderPlane::BuildIndicesWire(int,int,int,unsigned short *,int)
+919	0x696d0	?BuildIndicesWire@RenderSphere@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderSphere::BuildIndicesWire(int,int,unsigned short *,int)
+920	0x6a7f0	?BuildIndicesWire@RenderTube@Jet@@IAAXHHPAGH@Z	protected: void __cdecl Jet::RenderTube::BuildIndicesWire(int,int,unsigned short *,int)
+939	0x68c10	?CalculateBoxVolume@RenderPrimitive@Jet@@IAAXXZ	protected: void __cdecl Jet::RenderPrimitive::CalculateBoxVolume(void)
+943	0x65d00	?CalculatePrimitiveVolume@RenderBox@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderBox::CalculatePrimitiveVolume(void)
+944	0x65d00	?CalculatePrimitiveVolume@RenderLine@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderLine::CalculatePrimitiveVolume(void)
+945	0x65d00	?CalculatePrimitiveVolume@RenderPlane@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderPlane::CalculatePrimitiveVolume(void)
+946	0x65d00	?CalculatePrimitiveVolume@RenderPolygon@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderPolygon::CalculatePrimitiveVolume(void)
+947	0x65d00	?CalculatePrimitiveVolume@RenderPolyline@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderPolyline::CalculatePrimitiveVolume(void)
+948	0x68ba0	?CalculatePrimitiveVolume@RenderPrimitive@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderPrimitive::CalculatePrimitiveVolume(void)
+949	0x65d00	?CalculatePrimitiveVolume@RenderSpline@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderSpline::CalculatePrimitiveVolume(void)
+950	0x65d00	?CalculatePrimitiveVolume@RenderTube@Jet@@MAAXXZ	protected: virtual void __cdecl Jet::RenderTube::CalculatePrimitiveVolume(void)
+1001	0x68ca0	?CreateGeometryChunk@RenderPrimitive@Jet@@IAAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@@Z	protected: class Jet::GeometryChunk * __cdecl Jet::RenderPrimitive::CreateGeometryChunk(unsigned int,unsigned int,unsigned int,unsigned int,enum Jet::Material::GeometryType,class Jet::GeometryChunkCreateHint *)
+1050	0x50480	?CreateInstance@RenderBox@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderBox::CreateInstance(void)const 
+1051	0x62c10	?CreateInstance@RenderCircle@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderCircle::CreateInstance(void)const 
+1052	0x63110	?CreateInstance@RenderCone@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderCone::CreateInstance(void)const 
+1053	0x63df0	?CreateInstance@RenderCylinder@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderCylinder::CreateInstance(void)const 
+1054	0x64ad0	?CreateInstance@RenderEllipse@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderEllipse::CreateInstance(void)const 
+1055	0x65080	?CreateInstance@RenderEllipsoid@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderEllipsoid::CreateInstance(void)const 
+1056	0x65b90	?CreateInstance@RenderLine@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderLine::CreateInstance(void)const 
+1057	0x67070	?CreateInstance@RenderPlane@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderPlane::CreateInstance(void)const 
+1058	0x66230	?CreateInstance@RenderPolygon@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderPolygon::CreateInstance(void)const 
+1059	0x65a00	?CreateInstance@RenderPolyline@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderPolyline::CreateInstance(void)const 
+1060	0x512a0	?CreateInstance@RenderSphere@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderSphere::CreateInstance(void)const 
+1061	0x69a20	?CreateInstance@RenderSpline@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderSpline::CreateInstance(void)const 
+1062	0x6a060	?CreateInstance@RenderTube@Jet@@UBAPAVParticle@2@XZ	public: virtual class Jet::Particle * __cdecl Jet::RenderTube::CreateInstance(void)const 
+1087	0x66b20	?Cull@RenderLines@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::RenderLines::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+1088	0x68850	?Cull@RenderPrimitive@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z	public: virtual void __cdecl Jet::RenderPrimitive::Cull(class Jet::ViewPoint &,class Jet::Matrix4 const &)
+1109	0x66ec0	?DeleteAll@RenderLines@Jet@@UAAXXZ	public: virtual void __cdecl Jet::RenderLines::DeleteAll(void)
+1182	0x62760	?GeometryTestCollision@RenderBox@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderBox::GeometryTestCollision(class Jet::Ray const &,class Jet::Vector3 &)const 
+1183	0x636d0	?GeometryTestCollision@RenderCone@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderCone::GeometryTestCollision(class Jet::Ray const &,class Jet::Vector3 &)const 
+1184	0x64470	?GeometryTestCollision@RenderCylinder@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderCylinder::GeometryTestCollision(class Jet::Ray const &,class Jet::Vector3 &)const 
+1185	0x656d0	?GeometryTestCollision@RenderEllipsoid@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderEllipsoid::GeometryTestCollision(class Jet::Ray const &,class Jet::Vector3 &)const 
+1186	0x697e0	?GeometryTestCollision@RenderSphere@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderSphere::GeometryTestCollision(class Jet::Ray const &,class Jet::Vector3 &)const 
+1187	0x6ab60	?GeometryTestCollision@RenderTube@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderTube::GeometryTestCollision(class Jet::Ray const &,class Jet::Vector3 &)const 
+1255	0x22360	?GetChunkArray@RenderPrimitive@Jet@@QAA?AV?$AutoReferenceArray@V?$AutoReference@VGeometryChunk@Jet@@@Jet@@@2@XZ	public: class Jet::AutoReferenceArray<class Jet::AutoReference<class Jet::GeometryChunk> > __cdecl Jet::RenderPrimitive::GetChunkArray(void)
+1256	0x22360	?GetChunkArray@RenderPrimitive@Jet@@QBA?BV?$AutoReferenceArray@V?$AutoReference@VGeometryChunk@Jet@@@Jet@@@2@XZ	public: class Jet::AutoReferenceArray<class Jet::AutoReference<class Jet::GeometryChunk> > const __cdecl Jet::RenderPrimitive::GetChunkArray(void)const 
+1263	0x223e0	?GetColor@RenderPrimitive@Jet@@QBAABVColor@2@XZ	public: class Jet::Color const & __cdecl Jet::RenderPrimitive::GetColor(void)const 
+1266	0x22330	?GetCreationFlags@RenderPrimitive@Jet@@QBAHXZ	public: int __cdecl Jet::RenderPrimitive::GetCreationFlags(void)const 
+1270	0x22410	?GetDebugRender@RenderPrimitive@Jet@@QBA_NXZ	public: bool __cdecl Jet::RenderPrimitive::GetDebugRender(void)const 
+1287	0x50540	?GetExtents@RenderBox@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::RenderBox::GetExtents(void)const 
+1305	0x63640	?GetGeometryCenter@RenderCone@Jet@@MBA?AVVector3@2@XZ	protected: virtual class Jet::Vector3 __cdecl Jet::RenderCone::GetGeometryCenter(void)const 
+1306	0x64430	?GetGeometryCenter@RenderCylinder@Jet@@MBA?AVVector3@2@XZ	protected: virtual class Jet::Vector3 __cdecl Jet::RenderCylinder::GetGeometryCenter(void)const 
+1307	0x659b0	?GetGeometryCenter@RenderPolyline@Jet@@MBA?AVVector3@2@XZ	protected: virtual class Jet::Vector3 __cdecl Jet::RenderPolyline::GetGeometryCenter(void)const 
+1308	0x22150	?GetGeometryCenter@RenderPrimitive@Jet@@MBA?AVVector3@2@XZ	protected: virtual class Jet::Vector3 __cdecl Jet::RenderPrimitive::GetGeometryCenter(void)const 
+1309	0x6ab20	?GetGeometryCenter@RenderTube@Jet@@MBA?AVVector3@2@XZ	protected: virtual class Jet::Vector3 __cdecl Jet::RenderTube::GetGeometryCenter(void)const 
+1310	0x22260	?GetGeometryOrientation@RenderPrimitive@Jet@@UBAABVQuaternion@2@XZ	public: virtual class Jet::Quaternion const & __cdecl Jet::RenderPrimitive::GetGeometryOrientation(void)const 
+1311	0x221f0	?GetGeometryPosition@RenderPrimitive@Jet@@UBAABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __cdecl Jet::RenderPrimitive::GetGeometryPosition(void)const 
+1312	0x626d0	?GetGeometryRadius@RenderBox@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderBox::GetGeometryRadius(void)const 
+1313	0x62bd0	?GetGeometryRadius@RenderCircle@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderCircle::GetGeometryRadius(void)const 
+1314	0x635c0	?GetGeometryRadius@RenderCone@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderCone::GetGeometryRadius(void)const 
+1315	0x643a0	?GetGeometryRadius@RenderCylinder@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderCylinder::GetGeometryRadius(void)const 
+1316	0x64a90	?GetGeometryRadius@RenderEllipse@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderEllipse::GetGeometryRadius(void)const 
+1317	0x65020	?GetGeometryRadius@RenderEllipsoid@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderEllipsoid::GetGeometryRadius(void)const 
+1318	0x67af0	?GetGeometryRadius@RenderPlane@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderPlane::GetGeometryRadius(void)const 
+1319	0x67fd0	?GetGeometryRadius@RenderPolygon@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderPolygon::GetGeometryRadius(void)const 
+1320	0x65960	?GetGeometryRadius@RenderPolyline@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderPolyline::GetGeometryRadius(void)const 
+1321	0x65960	?GetGeometryRadius@RenderSphere@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderSphere::GetGeometryRadius(void)const 
+1322	0x6aa90	?GetGeometryRadius@RenderTube@Jet@@MBAMXZ	protected: virtual float __cdecl Jet::RenderTube::GetGeometryRadius(void)const 
+1382	0x223a0	?GetMaterialArray@RenderPrimitive@Jet@@QAA?AV?$AutoReferenceArray@V?$AutoReference@VMaterial@Jet@@@Jet@@@2@XZ	public: class Jet::AutoReferenceArray<class Jet::AutoReference<class Jet::Material> > __cdecl Jet::RenderPrimitive::GetMaterialArray(void)
+1383	0x223a0	?GetMaterialArray@RenderPrimitive@Jet@@QBA?BV?$AutoReferenceArray@V?$AutoReference@VMaterial@Jet@@@Jet@@@2@XZ	public: class Jet::AutoReferenceArray<class Jet::AutoReference<class Jet::Material> > const __cdecl Jet::RenderPrimitive::GetMaterialArray(void)const 
+1405	0x22340	?GetNumChunks@RenderPrimitive@Jet@@QBAIXZ	public: unsigned int __cdecl Jet::RenderPrimitive::GetNumChunks(void)const 
+1413	0x22110	?GetOpacity@RenderPrimitive@Jet@@UBAMXZ	public: virtual float __cdecl Jet::RenderPrimitive::GetOpacity(void)const 
+1449	0x51340	?GetRadius@RenderSphere@Jet@@QBAMXZ	public: float __cdecl Jet::RenderSphere::GetRadius(void)const 
+1472	0x222e0	?GetScale@RenderPrimitive@Jet@@UBAABVVector3@2@XZ	public: virtual class Jet::Vector3 const & __cdecl Jet::RenderPrimitive::GetScale(void)const 
+1518	0x66f50	?GetState@RenderLines@Jet@@SA_NXZ	public: static bool __cdecl Jet::RenderLines::GetState(void)
+1524	0x22310	?GetTestCollision@RenderPrimitive@Jet@@QBA_NXZ	public: bool __cdecl Jet::RenderPrimitive::GetTestCollision(void)const 
+1628	0x60cd0	?Init@RenderBox@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MMMIIIH@Z	public: bool __cdecl Jet::RenderBox::Init(class Jet::RenderKernel *,class Jet::Color const &,float,float,float,unsigned int,unsigned int,unsigned int,int)
+1629	0x62cd0	?Init@RenderCircle@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MIH@Z	public: bool __cdecl Jet::RenderCircle::Init(class Jet::RenderKernel *,class Jet::Color const &,float,unsigned int,int)
+1630	0x631f0	?Init@RenderCone@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MMIH@Z	public: bool __cdecl Jet::RenderCone::Init(class Jet::RenderKernel *,class Jet::Color const &,float,float,unsigned int,int)
+1631	0x63ed0	?Init@RenderCylinder@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MMIH@Z	public: bool __cdecl Jet::RenderCylinder::Init(class Jet::RenderKernel *,class Jet::Color const &,float,float,unsigned int,int)
+1632	0x64bb0	?Init@RenderEllipse@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MMIH@Z	public: bool __cdecl Jet::RenderEllipse::Init(class Jet::RenderKernel *,class Jet::Color const &,float,float,unsigned int,int)
+1633	0x65170	?Init@RenderEllipsoid@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MMMIH@Z	public: bool __cdecl Jet::RenderEllipsoid::Init(class Jet::RenderKernel *,class Jet::Color const &,float,float,float,unsigned int,int)
+1634	0x65c50	?Init@RenderLine@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@ABVVector3@2@2H@Z	public: bool __cdecl Jet::RenderLine::Init(class Jet::RenderKernel *,class Jet::Color const &,class Jet::Vector3 const &,class Jet::Vector3 const &,int)
+1635	0x67150	?Init@RenderPlane@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MMIIH@Z	public: bool __cdecl Jet::RenderPlane::Init(class Jet::RenderKernel *,class Jet::Color const &,float,float,unsigned int,unsigned int,int)
+1636	0x67c10	?Init@RenderPolygon@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@ABVPolygon@2@H@Z	public: bool __cdecl Jet::RenderPolygon::Init(class Jet::RenderKernel *,class Jet::Color const &,class Jet::Polygon const &,int)
+1637	0x67c70	?Init@RenderPolygon@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@HPBVVector3@2@H@Z	public: bool __cdecl Jet::RenderPolygon::Init(class Jet::RenderKernel *,class Jet::Color const &,int,class Jet::Vector3 const *,int)
+1638	0x68080	?Init@RenderPolyline@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@PBVVector3@2@HH@Z	public: bool __cdecl Jet::RenderPolyline::Init(class Jet::RenderKernel *,class Jet::Color const &,class Jet::Vector3 const *,int,int)
+1639	0x68680	?Init@RenderPrimitive@Jet@@MAA_NPAVRenderKernel@2@ABVColor@2@H@Z	protected: virtual bool __cdecl Jet::RenderPrimitive::Init(class Jet::RenderKernel *,class Jet::Color const &,int)
+1640	0x69050	?Init@RenderSphere@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MIH@Z	public: bool __cdecl Jet::RenderSphere::Init(class Jet::RenderKernel *,class Jet::Color const &,float,unsigned int,int)
+1641	0x69ae0	?Init@RenderSpline@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@ABVSpline@2@IH@Z	public: bool __cdecl Jet::RenderSpline::Init(class Jet::RenderKernel *,class Jet::Color const &,class Jet::Spline const &,unsigned int,int)
+1642	0x6a150	?Init@RenderTube@Jet@@QAA_NPAVRenderKernel@2@ABVColor@2@MMMIH@Z	public: bool __cdecl Jet::RenderTube::Init(class Jet::RenderKernel *,class Jet::Color const &,float,float,float,unsigned int,int)
+1673	0x62b30	?InitInstance@RenderBox@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderBox::InitInstance(class Jet::RenderBox &)const 
+1674	0x63050	?InitInstance@RenderCircle@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderCircle::InitInstance(class Jet::RenderCircle &)const 
+1675	0x63d80	?InitInstance@RenderCone@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderCone::InitInstance(class Jet::RenderCone &)const 
+1676	0x63d80	?InitInstance@RenderCylinder@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderCylinder::InitInstance(class Jet::RenderCylinder &)const 
+1677	0x64f50	?InitInstance@RenderEllipse@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderEllipse::InitInstance(class Jet::RenderEllipse &)const 
+1678	0x62b30	?InitInstance@RenderEllipsoid@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderEllipsoid::InitInstance(class Jet::RenderEllipsoid &)const 
+1679	0x68370	?InitInstance@RenderLine@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderLine::InitInstance(class Jet::RenderLine &)const 
+1680	0x64f50	?InitInstance@RenderPlane@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderPlane::InitInstance(class Jet::RenderPlane &)const 
+1681	0x68010	?InitInstance@RenderPolygon@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderPolygon::InitInstance(class Jet::RenderPolygon &)const 
+1682	0x68370	?InitInstance@RenderPolyline@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderPolyline::InitInstance(class Jet::RenderPolyline &)const 
+1683	0x68e50	?InitInstance@RenderPrimitive@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderPrimitive::InitInstance(class Jet::RenderPrimitive &)const 
+1684	0x63050	?InitInstance@RenderSphere@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderSphere::InitInstance(class Jet::RenderSphere &)const 
+1685	0x68370	?InitInstance@RenderSpline@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderSpline::InitInstance(class Jet::RenderSpline &)const 
+1686	0x6b590	?InitInstance@RenderTube@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::RenderTube::InitInstance(class Jet::RenderTube &)const 
+1831	0x62fe0	?IsWithin@RenderCircle@Jet@@MBA_NABVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderCircle::IsWithin(class Jet::Vector3 const &)const 
+1832	0x64ee0	?IsWithin@RenderEllipse@Jet@@MBA_NABVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderEllipse::IsWithin(class Jet::Vector3 const &)const 
+1833	0x67b70	?IsWithin@RenderPlane@Jet@@MBA_NABVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderPlane::IsWithin(class Jet::Vector3 const &)const 
+1834	0x66300	?IsWithin@RenderPolygon@Jet@@MBA_NABVVector3@2@@Z	protected: virtual bool __cdecl Jet::RenderPolygon::IsWithin(class Jet::Vector3 const &)const 
+1965	0x668d0	?RemoveAll@RenderLines@Jet@@UAAXXZ	public: virtual void __cdecl Jet::RenderLines::RemoveAll(void)
+1982	0x68880	?Render@RenderPrimitive@Jet@@MAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@@Z	protected: virtual void __cdecl Jet::RenderPrimitive::Render(class Jet::Display *,class Jet::ViewPort &,class Jet::Matrix4 &)
+2123	0x68d90	?SetColor@RenderPrimitive@Jet@@QAAXABVColor@2@@Z	public: void __cdecl Jet::RenderPrimitive::SetColor(class Jet::Color const &)
+2128	0x223f0	?SetDebugRender@RenderPrimitive@Jet@@QAAX_N@Z	public: void __cdecl Jet::RenderPrimitive::SetDebugRender(bool)
+2156	0x22200	?SetGeometryOrientation@RenderPrimitive@Jet@@UAAXABVQuaternion@2@@Z	public: virtual void __cdecl Jet::RenderPrimitive::SetGeometryOrientation(class Jet::Quaternion const &)
+2157	0x22170	?SetGeometryPosition@RenderPrimitive@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::RenderPrimitive::SetGeometryPosition(class Jet::Vector3 const &)
+2190	0x22090	?SetOpacity@RenderPrimitive@Jet@@UAAXM@Z	public: virtual void __cdecl Jet::RenderPrimitive::SetOpacity(float)
+2240	0x22270	?SetScale@RenderPrimitive@Jet@@UAAXABVVector3@2@@Z	public: virtual void __cdecl Jet::RenderPrimitive::SetScale(class Jet::Vector3 const &)
+2252	0x66f40	?SetState@RenderLines@Jet@@SAX_N@Z	public: static void __cdecl Jet::RenderLines::SetState(bool)
+2254	0x222f0	?SetTestCollision@RenderPrimitive@Jet@@QAAX_N@Z	public: void __cdecl Jet::RenderPrimitive::SetTestCollision(bool)
+2296	0x66f60	?Switch@RenderLines@Jet@@SA_NXZ	public: static bool __cdecl Jet::RenderLines::Switch(void)
+2375	0x5fb90	?TestCollisionGeometry@Render2DPrimitive@Jet@@UBA_NABVRay@2@MAAVVector3@2@AAVConstFaceDescriptor@2@@Z	public: virtual bool __cdecl Jet::Render2DPrimitive::TestCollisionGeometry(class Jet::Ray const &,float,class Jet::Vector3 &,class Jet::ConstFaceDescriptor &)const 
+2376	0x60bf0	?TestCollisionGeometry@Render3DPrimitive@Jet@@UBA_NABVRay@2@MAAVVector3@2@AAVConstFaceDescriptor@2@@Z	public: virtual bool __cdecl Jet::Render3DPrimitive::TestCollisionGeometry(class Jet::Ray const &,float,class Jet::Vector3 &,class Jet::ConstFaceDescriptor &)const 
+2480	0xdca24	?enabled@RenderLines@Jet@@0_NA	private: static bool Jet::RenderLines::enabled
+2483	0xdd080	?lights@RenderPrimitive@Jet@@1V?$FastDynamicArray@PAVDisplayLight@Jet@@$0N@U?$Less@PAVDisplayLight@Jet@@PAV12@@2@@2@A	protected: static class Jet::FastDynamicArray<class Jet::DisplayLight *,13,struct Jet::Less<class Jet::DisplayLight *,class Jet::DisplayLight *> > Jet::RenderPrimitive::lights

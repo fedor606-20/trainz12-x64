@@ -1,0 +1,16 @@
+# Render3DCore_7c U6 (u6_geometry): Geometry and TriangleGeometry, 13 exports.
+# The geometry chunk templates are header-only (include/jet/Render3DCoreGeometry.h); their
+# exported instantiations stay forwarded and are not listed here.
+??0Geometry@Jet@@QAE@ABV01@@Z
+??0Geometry@Jet@@QAE@XZ
+??0TriangleGeometry@Jet@@QAE@ABV01@@Z
+??0TriangleGeometry@Jet@@QAE@XZ
+??1Geometry@Jet@@UAE@XZ
+??1TriangleGeometry@Jet@@UAE@XZ
+??4Geometry@Jet@@QAEAAV01@ABV01@@Z
+??4TriangleGeometry@Jet@@QAEAAV01@ABV01@@Z
+??_7Geometry@Jet@@6B@
+??_7TriangleGeometry@Jet@@6B@
+?GetRenderMatrix@Geometry@Jet@@QBA?AVMatrix4@2@ABVViewPort@2@@Z
+?InitInstance@Geometry@Jet@@IBAXAAV12@@Z
+?StoreMatrix@Geometry@Jet@@QAAXABVViewPort@2@ABVMatrix4@2@@Z

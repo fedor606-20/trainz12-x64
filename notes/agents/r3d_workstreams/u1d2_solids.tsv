@@ -1,0 +1,130 @@
+ordinal	rva	mangled	demangled
+75	0x1da90	??0Circle@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Circle::Circle(class Jet::Circle const &)
+76	0x1dc10	??0Circle@Jet@@QAE@ABVVector3@1@MABVPlane@1@@Z	public: __thiscall Jet::Circle::Circle(class Jet::Vector3 const &,float,class Jet::Plane const &)
+77	0x1dbd0	??0Circle@Jet@@QAE@XZ	public: __thiscall Jet::Circle::Circle(void)
+82	0x20450	??0Cone@Jet@@QAE@ABVVector3@1@0M@Z	public: __thiscall Jet::Cone::Cone(class Jet::Vector3 const &,class Jet::Vector3 const &,float)
+83	0x20420	??0Cone@Jet@@QAE@XZ	public: __thiscall Jet::Cone::Cone(void)
+87	0x1db50	??0Cylinder@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Cylinder::Cylinder(class Jet::Cylinder const &)
+88	0x217d0	??0Cylinder@Jet@@QAE@ABVVector3@1@0M@Z	public: __thiscall Jet::Cylinder::Cylinder(class Jet::Vector3 const &,class Jet::Vector3 const &,float)
+89	0x217a0	??0Cylinder@Jet@@QAE@XZ	public: __thiscall Jet::Cylinder::Cylinder(void)
+93	0x22ff0	??0Ellipse@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Ellipse::Ellipse(class Jet::Ellipse const &)
+94	0x230f0	??0Ellipse@Jet@@QAE@ABVVector3@1@MM0ABVPlane@1@@Z	public: __thiscall Jet::Ellipse::Ellipse(class Jet::Vector3 const &,float,float,class Jet::Vector3 const &,class Jet::Plane const &)
+95	0x230a0	??0Ellipse@Jet@@QAE@XZ	public: __thiscall Jet::Ellipse::Ellipse(void)
+96	0x216c0	??0Ellipsoid@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Ellipsoid::Ellipsoid(class Jet::Ellipsoid const &)
+97	0x24460	??0Ellipsoid@Jet@@QAE@ABVVector3@1@MMMABVPlane@1@0@Z	public: __thiscall Jet::Ellipsoid::Ellipsoid(class Jet::Vector3 const &,float,float,float,class Jet::Plane const &,class Jet::Vector3 const &)
+98	0x24400	??0Ellipsoid@Jet@@QAE@XZ	public: __thiscall Jet::Ellipsoid::Ellipsoid(void)
+231	0x55d80	??0Polygon@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Polygon::Polygon(class Jet::Polygon const &)
+232	0x55df0	??0Polygon@Jet@@QAE@ABVPolygon2D@1@@Z	public: __thiscall Jet::Polygon::Polygon(class Jet::Polygon2D const &)
+233	0x55e20	??0Polygon@Jet@@QAE@HPBVVector3@1@@Z	public: __thiscall Jet::Polygon::Polygon(int,class Jet::Vector3 const *)
+234	0x55d60	??0Polygon@Jet@@QAE@XZ	public: __thiscall Jet::Polygon::Polygon(void)
+291	0x6300	??0Sphere@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Sphere::Sphere(class Jet::Sphere const &)
+292	0x6cbe0	??0Sphere@Jet@@QAE@ABVVector3@1@M@Z	public: __thiscall Jet::Sphere::Sphere(class Jet::Vector3 const &,float)
+293	0x6cbd0	??0Sphere@Jet@@QAE@XZ	public: __thiscall Jet::Sphere::Sphere(void)
+410	0x55e50	??1Polygon@Jet@@UAE@XZ	public: virtual __thiscall Jet::Polygon::~Polygon(void)
+469	0x20320	??4Circle@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Circle & __thiscall Jet::Circle::operator=(class Jet::Circle const &)
+471	0x20320	??4Cone@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Cone & __thiscall Jet::Cone::operator=(class Jet::Cone const &)
+474	0x1db90	??4Cylinder@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Cylinder & __thiscall Jet::Cylinder::operator=(class Jet::Cylinder const &)
+477	0x23050	??4Ellipse@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Ellipse & __thiscall Jet::Ellipse::operator=(class Jet::Ellipse const &)
+478	0x21730	??4Ellipsoid@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Ellipsoid & __thiscall Jet::Ellipsoid::operator=(class Jet::Ellipsoid const &)
+521	0x54fd0	??4Polygon@Jet@@QAAAAV01@ABV01@@Z	public: class Jet::Polygon & __cdecl Jet::Polygon::operator=(class Jet::Polygon const &)
+522	0x55060	??4Polygon@Jet@@QAAAAV01@ABVPolygon2D@1@@Z	public: class Jet::Polygon & __cdecl Jet::Polygon::operator=(class Jet::Polygon2D const &)
+546	0x6330	??4Sphere@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Sphere & __thiscall Jet::Sphere::operator=(class Jet::Sphere const &)
+627	0x7e7c8	??_7Cylinder@Jet@@6B@	const Jet::Cylinder::`vftable'
+629	0x7eb90	??_7Ellipsoid@Jet@@6B@	const Jet::Ellipsoid::`vftable'
+704	0x83a8c	??_7Polygon@Jet@@6B@	const Jet::Polygon::`vftable'
+733	0x7d448	??_7Sphere@Jet@@6B@	const Jet::Sphere::`vftable'
+938	0x569c0	?CalculateBoundingSphere@Polygon@Jet@@QBA_NAAVSphere@2@@Z	public: bool __cdecl Jet::Polygon::CalculateBoundingSphere(class Jet::Sphere &)const 
+940	0x56910	?CalculateCenter@Polygon@Jet@@QBA_NAAVVector3@2@@Z	public: bool __cdecl Jet::Polygon::CalculateCenter(class Jet::Vector3 &)const 
+941	0x20bf0	?CalculateCosTheta@Cone@Jet@@IAAXXZ	protected: void __cdecl Jet::Cone::CalculateCosTheta(void)
+960	0x6360	?CheckVisibility@Sphere@Jet@@QAA_NPBVPlane@2@@Z	public: bool __cdecl Jet::Sphere::CheckVisibility(class Jet::Plane const *)
+1179	0x56df0	?Flip@Polygon@Jet@@QAAXXZ	public: void __cdecl Jet::Polygon::Flip(void)
+1238	0x4c60	?GetCenter@Circle@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Circle::GetCenter(void)const 
+1239	0x20370	?GetCenter@Cone@Jet@@QAA?AVVector3@2@H@Z	public: class Jet::Vector3 __cdecl Jet::Cone::GetCenter(int)
+1240	0x20360	?GetCenter@Cone@Jet@@QBAABVVector3@2@H@Z	public: class Jet::Vector3 const & __cdecl Jet::Cone::GetCenter(int)const 
+1241	0x203a0	?GetCenter@Cone@Jet@@QBAXAAVVector3@2@H@Z	public: void __cdecl Jet::Cone::GetCenter(class Jet::Vector3 &,int)const 
+1242	0x21630	?GetCenter@Ellipsoid@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Ellipsoid::GetCenter(void)const 
+1245	0xf8f0	?GetCenter@Sphere@Jet@@QAAAAVVector3@2@XZ	public: class Jet::Vector3 & __cdecl Jet::Sphere::GetCenter(void)
+1246	0xf8f0	?GetCenter@Sphere@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Sphere::GetCenter(void)const 
+1250	0xf8f0	?GetCenters@Cylinder@Jet@@QBAPBVVector3@2@XZ	public: class Jet::Vector3 const * __cdecl Jet::Cylinder::GetCenters(void)const 
+1265	0x1db00	?GetCosTheta@Cone@Jet@@QBAMXZ	public: float __cdecl Jet::Cone::GetCosTheta(void)const 
+1381	0x21640	?GetMajor@Ellipsoid@Jet@@QBAMXZ	public: float __cdecl Jet::Ellipsoid::GetMajor(void)const 
+1384	0x23150	?GetMatrix@Ellipse@Jet@@QAA?AVMatrix3@2@XZ	public: class Jet::Matrix3 __cdecl Jet::Ellipse::GetMatrix(void)
+1385	0x244e0	?GetMatrix@Ellipsoid@Jet@@QBA?AVMatrix3@2@XZ	public: class Jet::Matrix3 __cdecl Jet::Ellipsoid::GetMatrix(void)const 
+1392	0x21650	?GetMinor@Ellipsoid@Jet@@QBAMXZ	public: float __cdecl Jet::Ellipsoid::GetMinor(void)const 
+1411	0x54e60	?GetNumVerts@Polygon@Jet@@QBAHXZ	public: int __cdecl Jet::Polygon::GetNumVerts(void)const 
+1446	0x1db00	?GetRadius@Circle@Jet@@QBAMXZ	public: float __cdecl Jet::Circle::GetRadius(void)const 
+1447	0x72110	?GetRadius@Cone@Jet@@QBAMXZ	public: float __cdecl Jet::Cone::GetRadius(void)const 
+1448	0x1db00	?GetRadius@Cylinder@Jet@@QBAMXZ	public: float __cdecl Jet::Cylinder::GetRadius(void)const 
+1450	0x62e0	?GetRadius@Sphere@Jet@@QBAMXZ	public: float __cdecl Jet::Sphere::GetRadius(void)const 
+1573	0x21660	?GetUp@Ellipsoid@Jet@@QBAMXZ	public: float __cdecl Jet::Ellipsoid::GetUp(void)const 
+1590	0x55130	?GetVertex@Polygon@Jet@@QAA?AVVector3@2@H@Z	public: class Jet::Vector3 __cdecl Jet::Polygon::GetVertex(int)
+1591	0x55110	?GetVertex@Polygon@Jet@@QBAABVVector3@2@H@Z	public: class Jet::Vector3 const & __cdecl Jet::Polygon::GetVertex(int)const 
+1592	0x55190	?GetVertex@Polygon@Jet@@QBAXAAVVector2@2@H@Z	public: void __cdecl Jet::Polygon::GetVertex(class Jet::Vector2 &,int)const 
+1593	0x55160	?GetVertex@Polygon@Jet@@QBAXAAVVector3@2@H@Z	public: void __cdecl Jet::Polygon::GetVertex(class Jet::Vector3 &,int)const 
+1598	0x5ff70	?GetVertexArray@Polygon@Jet@@QBAPBVVector3@2@XZ	public: class Jet::Vector3 const * __cdecl Jet::Polygon::GetVertexArray(void)const 
+1751	0x54e70	?Intersect@Polygon@Jet@@QBA_NABVLine@2@AAVVector3@2@@Z	public: bool __cdecl Jet::Polygon::Intersect(class Jet::Line const &,class Jet::Vector3 &)const 
+1783	0x56360	?IsInside@Polygon@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Polygon::IsInside(class Jet::Vector3 const &)const 
+1784	0x56060	?IsInsideXY@Polygon@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Polygon::IsInsideXY(class Jet::Vector3 const &)const 
+1785	0x56420	?IsInsideXY@Polygon@Jet@@QBA_NABVVector3@2@AAM@Z	public: bool __cdecl Jet::Polygon::IsInsideXY(class Jet::Vector3 const &,float &)const 
+1786	0x561e0	?IsInsideXYNegative@Polygon@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Polygon::IsInsideXYNegative(class Jet::Vector3 const &)const 
+1787	0x560e0	?IsInsideYZ@Polygon@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Polygon::IsInsideYZ(class Jet::Vector3 const &)const 
+1788	0x56260	?IsInsideYZNegative@Polygon@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Polygon::IsInsideYZNegative(class Jet::Vector3 const &)const 
+1789	0x56160	?IsInsideZX@Polygon@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Polygon::IsInsideZX(class Jet::Vector3 const &)const 
+1790	0x562e0	?IsInsideZXNegative@Polygon@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Polygon::IsInsideZXNegative(class Jet::Vector3 const &)const 
+1884	0x6cd50	?Maximize@Sphere@Jet@@UAAXABV12@@Z	public: virtual void __cdecl Jet::Sphere::Maximize(class Jet::Sphere const &)
+1896	0x571b0	?Offset@Polygon@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Polygon::Offset(class Jet::Vector3 const &)
+1901	0x1df70	?Overlap@Circle@Jet@@QAA_NAAVVector3@2@000@Z	public: bool __cdecl Jet::Circle::Overlap(class Jet::Vector3 &,class Jet::Vector3 &,class Jet::Vector3 &,class Jet::Vector3 &)
+1902	0x24100	?Overlap@Ellipse@Jet@@QAA_NAAVVector3@2@000@Z	public: bool __cdecl Jet::Ellipse::Overlap(class Jet::Vector3 &,class Jet::Vector3 &,class Jet::Vector3 &,class Jet::Vector3 &)
+1940	0x56fe0	?ReduceWithTolerance@Polygon@Jet@@QAAXM@Z	public: void __cdecl Jet::Polygon::ReduceWithTolerance(float)
+1975	0x56ea0	?RemoveDuplicates@Polygon@Jet@@QAAXXZ	public: void __cdecl Jet::Polygon::RemoveDuplicates(void)
+2034	0x54eb0	?Reset@Polygon@Jet@@QAAXXZ	public: void __cdecl Jet::Polygon::Reset(void)
+2083	0x55e80	?Set@Polygon@Jet@@QAAXH@Z	public: void __cdecl Jet::Polygon::Set(int)
+2084	0x55fd0	?Set@Polygon@Jet@@QAAXHPBVVector2@2@@Z	public: void __cdecl Jet::Polygon::Set(int,class Jet::Vector2 const *)
+2085	0x55f50	?Set@Polygon@Jet@@QAAXHPBVVector3@2@@Z	public: void __cdecl Jet::Polygon::Set(int,class Jet::Vector3 const *)
+2110	0x1dad0	?SetCenter@Circle@Jet@@QAAXVVector3@2@@Z	public: void __cdecl Jet::Circle::SetCenter(class Jet::Vector3)
+2111	0x203d0	?SetCenter@Cone@Jet@@QAAXABVVector3@2@H@Z	public: void __cdecl Jet::Cone::SetCenter(class Jet::Vector3 const &,int)
+2112	0x21670	?SetCenter@Ellipsoid@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Ellipsoid::SetCenter(class Jet::Vector3 const &)
+2114	0x4a80	?SetCenter@Sphere@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Sphere::SetCenter(class Jet::Vector3 const &)
+2116	0x1db10	?SetCenters@Cylinder@Jet@@QAAXQBVVector3@2@@Z	public: void __cdecl Jet::Cylinder::SetCenters(class Jet::Vector3 const * const)
+2176	0x21690	?SetMajor@Ellipsoid@Jet@@QAAXM@Z	public: void __cdecl Jet::Ellipsoid::SetMajor(float)
+2181	0x216a0	?SetMinor@Ellipsoid@Jet@@QAAXM@Z	public: void __cdecl Jet::Ellipsoid::SetMinor(float)
+2216	0x1db40	?SetRadius@Circle@Jet@@QAAXM@Z	public: void __cdecl Jet::Circle::SetRadius(float)
+2217	0x20400	?SetRadius@Cone@Jet@@QAAXM@Z	public: void __cdecl Jet::Cone::SetRadius(float)
+2218	0x1db40	?SetRadius@Cylinder@Jet@@QAAXM@Z	public: void __cdecl Jet::Cylinder::SetRadius(float)
+2219	0x62f0	?SetRadius@Sphere@Jet@@QAAXM@Z	public: void __cdecl Jet::Sphere::SetRadius(float)
+2277	0x216b0	?SetUp@Ellipsoid@Jet@@QAAXM@Z	public: void __cdecl Jet::Ellipsoid::SetUp(float)
+2280	0x551c0	?SetVertex@Polygon@Jet@@QAAXABVVector3@2@H@Z	public: void __cdecl Jet::Polygon::SetVertex(class Jet::Vector3 const &,int)
+2306	0x1deb0	?TestCollision@Circle@Jet@@QAA_NABV12@@Z	public: bool __cdecl Jet::Circle::TestCollision(class Jet::Circle const &)
+2307	0x1dc50	?TestCollision@Circle@Jet@@QAA_NABVLine@2@@Z	public: bool __cdecl Jet::Circle::TestCollision(class Jet::Line const &)
+2308	0x1dcf0	?TestCollision@Circle@Jet@@QAA_NABVPlane@2@@Z	public: bool __cdecl Jet::Circle::TestCollision(class Jet::Plane const &)
+2309	0x1dd60	?TestCollision@Circle@Jet@@QAA_NABVSphere@2@@Z	public: bool __cdecl Jet::Circle::TestCollision(class Jet::Sphere const &)
+2310	0x20690	?TestCollision@Cone@Jet@@QAA_NABVLine@2@@Z	public: bool __cdecl Jet::Cone::TestCollision(class Jet::Line const &)
+2311	0x20970	?TestCollision@Cone@Jet@@QAA_NABVSphere@2@@Z	public: bool __cdecl Jet::Cone::TestCollision(class Jet::Sphere const &)
+2312	0x20560	?TestCollision@Cone@Jet@@QAA_NABVVector3@2@@Z	public: bool __cdecl Jet::Cone::TestCollision(class Jet::Vector3 const &)
+2313	0x21990	?TestCollision@Cylinder@Jet@@UAA_NABVLine@2@@Z	public: virtual bool __cdecl Jet::Cylinder::TestCollision(class Jet::Line const &)
+2314	0x21810	?TestCollision@Cylinder@Jet@@UAA_NABVVector3@2@@Z	public: virtual bool __cdecl Jet::Cylinder::TestCollision(class Jet::Vector3 const &)
+2315	0x21b00	?TestCollision@Cylinder@Jet@@UBA_NABV12@@Z	public: virtual bool __cdecl Jet::Cylinder::TestCollision(class Jet::Cylinder const &)const 
+2316	0x4f940	?TestCollision@Cylinder@Jet@@UBA_NABVAxisAlignedBox@2@@Z	public: virtual bool __cdecl Jet::Cylinder::TestCollision(class Jet::AxisAlignedBox const &)const 
+2317	0x21c40	?TestCollision@Cylinder@Jet@@UBA_NABVEllipsoid@2@@Z	public: virtual bool __cdecl Jet::Cylinder::TestCollision(class Jet::Ellipsoid const &)const 
+2318	0x21a40	?TestCollision@Cylinder@Jet@@UBA_NABVSphere@2@@Z	public: virtual bool __cdecl Jet::Cylinder::TestCollision(class Jet::Sphere const &)const 
+2319	0x23d30	?TestCollision@Ellipse@Jet@@QAA_NABVCircle@2@@Z	public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Circle const &)
+2320	0x23930	?TestCollision@Ellipse@Jet@@QAA_NABVLine@2@@Z	public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Line const &)
+2321	0x23a40	?TestCollision@Ellipse@Jet@@QAA_NABVPlane@2@@Z	public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Plane const &)
+2322	0x23ab0	?TestCollision@Ellipse@Jet@@QAA_NABVSphere@2@@Z	public: bool __cdecl Jet::Ellipse::TestCollision(class Jet::Sphere const &)
+2323	0x24e60	?TestCollision@Ellipsoid@Jet@@UAA_NABVLine@2@@Z	public: virtual bool __cdecl Jet::Ellipsoid::TestCollision(class Jet::Line const &)
+2324	0x25070	?TestCollision@Ellipsoid@Jet@@UAA_NABVPlane@2@@Z	public: virtual bool __cdecl Jet::Ellipsoid::TestCollision(class Jet::Plane const &)
+2325	0x24d50	?TestCollision@Ellipsoid@Jet@@UAA_NABVVector3@2@@Z	public: virtual bool __cdecl Jet::Ellipsoid::TestCollision(class Jet::Vector3 const &)
+2326	0x25420	?TestCollision@Ellipsoid@Jet@@UBA_NABV12@@Z	public: virtual bool __cdecl Jet::Ellipsoid::TestCollision(class Jet::Ellipsoid const &)const 
+2327	0x4f940	?TestCollision@Ellipsoid@Jet@@UBA_NABVAxisAlignedBox@2@@Z	public: virtual bool __cdecl Jet::Ellipsoid::TestCollision(class Jet::AxisAlignedBox const &)const 
+2328	0x4f940	?TestCollision@Ellipsoid@Jet@@UBA_NABVCylinder@2@@Z	public: virtual bool __cdecl Jet::Ellipsoid::TestCollision(class Jet::Cylinder const &)const 
+2329	0x25270	?TestCollision@Ellipsoid@Jet@@UBA_NABVSphere@2@@Z	public: virtual bool __cdecl Jet::Ellipsoid::TestCollision(class Jet::Sphere const &)const 
+2360	0x65f0	?TestCollision@Sphere@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Sphere const &)const 
+2361	0x6cd30	?TestCollision@Sphere@Jet@@QBA_NABVAxisAlignedBox@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::AxisAlignedBox const &)const 
+2362	0x6cd10	?TestCollision@Sphere@Jet@@QBA_NABVCylinder@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Cylinder const &)const 
+2363	0x6cd10	?TestCollision@Sphere@Jet@@QBA_NABVEllipsoid@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Ellipsoid const &)const 
+2364	0x64b0	?TestCollision@Sphere@Jet@@QBA_NABVLine@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Line const &)const 
+2365	0x65b0	?TestCollision@Sphere@Jet@@QBA_NABVLineSegment@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::LineSegment const &)const 
+2366	0x6cca0	?TestCollision@Sphere@Jet@@QBA_NABVPlane@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Plane const &)const 
+2367	0x6570	?TestCollision@Sphere@Jet@@QBA_NABVRay@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Ray const &)const 
+2368	0x6cc10	?TestCollision@Sphere@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Vector3 const &)const 
+2369	0x6680	?TestCollision@Sphere@Jet@@QBA_NABVVector3@2@M@Z	public: bool __cdecl Jet::Sphere::TestCollision(class Jet::Vector3 const &,float)const 

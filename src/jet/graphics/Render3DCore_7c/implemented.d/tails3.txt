@@ -1,0 +1,33 @@
+# Render3DCore_7c wave 6 tails (Tails3): U1d1/U1d2/U2/U8/U5a leftovers.
+# U1d1
+?GetSeparation@LineSegment2D@Jet@@QBAMABVLine2D@2@@Z
+?GetApproxSeparation@LineSegment2D@Jet@@QBAMABVLine2D@2@@Z
+?GetSeparation@Polygon2D@Jet@@QBAMABV12@@Z
+?GetSeparationSquared@Polygon2D@Jet@@QBAMABV12@@Z
+?GetApproxSeparation@Polygon2D@Jet@@QBAMABV12@@Z
+?GrahamScan@Polygon2D@Jet@@QAAXXZ
+?TestCollision@LineSegment@Jet@@QBA_NAAVEllipse@2@@Z
+?TestCollision@LineSegment@Jet@@QBA_NAAVEllipsoid@2@@Z
+# U1d2
+?GetMatrix@Ellipse@Jet@@QAA?AVMatrix3@2@XZ
+?GetMatrix@Ellipsoid@Jet@@QBA?AVMatrix3@2@XZ
+?TestCollision@Ellipse@Jet@@QAA_NABVCircle@2@@Z
+?TestCollision@Ellipse@Jet@@QAA_NABVLine@2@@Z
+?TestCollision@Ellipse@Jet@@QAA_NABVPlane@2@@Z
+?TestCollision@Ellipse@Jet@@QAA_NABVSphere@2@@Z
+?TestCollision@Cone@Jet@@QAA_NABVLine@2@@Z
+?TestCollision@Cone@Jet@@QAA_NABVSphere@2@@Z
+# U2
+?ReadConfigData@SplineDefinition@Jet@@QAA_NABVConfigData@2@@Z
+?WriteConfigData@SplineDefinition@Jet@@QBA_NAAVConfigData@2@_N@Z
+?ReadTextFile@SplineDefinition@Jet@@QAA_NPBVResourceDatabase@2@PBD@Z
+?WriteTextFile@SplineDefinition@Jet@@QBA_NPBVResourceDatabase@2@PBD@Z
+# U8 (the four copy-with-transform constructors and GetRay are in the simple-classes unit; these are the two
+# projection helpers)
+?CalculateSphereSize@ViewPort@Jet@@QBA?AURect@2@ABVVector3@2@MABVMatrix4@2@@Z
+?CalculateOrientedBoxSize@ViewPort@Jet@@QBA?AURect@2@ABVOrientedBox@2@ABVMatrix4@2@@Z
+# U5a
+??_7AutoTexMaterialPlugin@Jet@@6B@
+??1AutoTexMaterialPlugin@Jet@@UAE@XZ
+?CreateGeometryChunk@ReflectiveMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@@Z
+?CreateGeometryChunk@GenericShaderMaterial@Jet@@UBAPAVGeometryChunk@2@IIIIW4GeometryType@Material@2@PAVGeometryChunkCreateHint@2@@Z

@@ -1,0 +1,176 @@
+ordinal	rva	mangled	demangled
+72	0x1ec70	??0Circle2D@Jet@@QAE@ABVVector2@1@M@Z	public: __thiscall Jet::Circle2D::Circle2D(class Jet::Vector2 const &,float)
+73	0x1ec70	??0Circle2D@Jet@@QAE@ABVVector3@1@M@Z	public: __thiscall Jet::Circle2D::Circle2D(class Jet::Vector3 const &,float)
+74	0x4fd0	??0Circle2D@Jet@@QAE@XZ	public: __thiscall Jet::Circle2D::Circle2D(void)
+122	0x1e6c0	??0Line2D@Jet@@QAE@ABVVector2@1@0@Z	public: __thiscall Jet::Line2D::Line2D(class Jet::Vector2 const &,class Jet::Vector2 const &)
+123	0x4fd0	??0Line2D@Jet@@QAE@XZ	public: __thiscall Jet::Line2D::Line2D(void)
+124	0x29140	??0Line@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Line::Line(class Jet::Line const &)
+125	0x29180	??0Line@Jet@@QAE@ABVLineSegment@1@@Z	public: __thiscall Jet::Line::Line(class Jet::LineSegment const &)
+126	0x29180	??0Line@Jet@@QAE@ABVRay@1@@Z	public: __thiscall Jet::Line::Line(class Jet::Ray const &)
+127	0x29080	??0Line@Jet@@QAE@ABVVector3@1@0@Z	public: __thiscall Jet::Line::Line(class Jet::Vector3 const &,class Jet::Vector3 const &)
+128	0x290c0	??0Line@Jet@@QAE@QBVVector3@1@@Z	public: __thiscall Jet::Line::Line(class Jet::Vector3 const * const)
+129	0x4a70	??0Line@Jet@@QAE@XZ	public: __thiscall Jet::Line::Line(void)
+130	0x1e6c0	??0LineSegment2D@Jet@@QAE@ABVVector2@1@0@Z	public: __thiscall Jet::LineSegment2D::LineSegment2D(class Jet::Vector2 const &,class Jet::Vector2 const &)
+131	0x4fd0	??0LineSegment2D@Jet@@QAE@XZ	public: __thiscall Jet::LineSegment2D::LineSegment2D(void)
+132	0x2a090	??0LineSegment@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::LineSegment::LineSegment(class Jet::LineSegment const &)
+133	0x29fd0	??0LineSegment@Jet@@QAE@ABVVector3@1@0@Z	public: __thiscall Jet::LineSegment::LineSegment(class Jet::Vector3 const &,class Jet::Vector3 const &)
+134	0x2a0e0	??0LineSegment@Jet@@QAE@QBVVector3@1@@Z	public: __thiscall Jet::LineSegment::LineSegment(class Jet::Vector3 const * const)
+135	0x4c50	??0LineSegment@Jet@@QAE@XZ	public: __thiscall Jet::LineSegment::LineSegment(void)
+228	0x57210	??0Polygon2D@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Polygon2D::Polygon2D(class Jet::Polygon2D const &)
+229	0x54ad0	??0Polygon2D@Jet@@QAE@HPAVVector2@1@_N@Z	public: __thiscall Jet::Polygon2D::Polygon2D(int,class Jet::Vector2 *,bool)
+230	0x54ac0	??0Polygon2D@Jet@@QAE@XZ	public: __thiscall Jet::Polygon2D::Polygon2D(void)
+240	0x58c40	??0Ray@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Ray::Ray(class Jet::Ray const &)
+241	0x58c40	??0Ray@Jet@@QAE@ABVLineSegment@1@@Z	public: __thiscall Jet::Ray::Ray(class Jet::LineSegment const &)
+242	0x58b80	??0Ray@Jet@@QAE@ABVVector3@1@0@Z	public: __thiscall Jet::Ray::Ray(class Jet::Vector3 const &,class Jet::Vector3 const &)
+243	0x58bc0	??0Ray@Jet@@QAE@QBVVector3@1@@Z	public: __thiscall Jet::Ray::Ray(class Jet::Vector3 const * const)
+244	0x4b40	??0Ray@Jet@@QAE@XZ	public: __thiscall Jet::Ray::Ray(void)
+409	0x54af0	??1Polygon2D@Jet@@QAE@XZ	public: __thiscall Jet::Polygon2D::~Polygon2D(void)
+468	0x1f180	??4Circle2D@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Circle2D & __thiscall Jet::Circle2D::operator=(class Jet::Circle2D const &)
+488	0x1ec50	??4Line2D@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Line2D & __thiscall Jet::Line2D::operator=(class Jet::Line2D const &)
+489	0x4b70	??4Line@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Line & __thiscall Jet::Line::operator=(class Jet::Line const &)
+490	0x1ec50	??4LineSegment2D@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::LineSegment2D & __thiscall Jet::LineSegment2D::operator=(class Jet::LineSegment2D const &)
+491	0x4c70	??4LineSegment@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::LineSegment & __thiscall Jet::LineSegment::operator=(class Jet::LineSegment const &)
+520	0x54e40	??4Polygon2D@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Polygon2D & __thiscall Jet::Polygon2D::operator=(class Jet::Polygon2D const &)
+525	0x4b70	??4Ray@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Ray & __thiscall Jet::Ray::operator=(class Jet::Ray const &)
+589	0x294b0	??XLine@Jet@@QAAAAV01@M@Z	public: class Jet::Line & __cdecl Jet::Line::operator*=(float)
+591	0x291c0	??YLine@Jet@@QAAAAV01@ABVVector3@1@@Z	public: class Jet::Line & __cdecl Jet::Line::operator+=(class Jet::Vector3 const &)
+592	0x29470	??ZLine@Jet@@QAAAAV01@ABVVector3@1@@Z	public: class Jet::Line & __cdecl Jet::Line::operator-=(class Jet::Vector3 const &)
+593	0x294e0	??_0Line@Jet@@QAAAAV01@M@Z	public: class Jet::Line & __cdecl Jet::Line::operator/=(float)
+645	0x7d428	??_7Line@Jet@@6B@	const Jet::Line::`vftable'
+646	0x7d43c	??_7LineSegment@Jet@@6B@	const Jet::LineSegment::`vftable'
+709	0x7d450	??_7Ray@Jet@@6B@	const Jet::Ray::`vftable'
+986	0x54da0	?CounterClockwise@Polygon2D@Jet@@IAAHPBVVector2@2@00@Z	protected: int __cdecl Jet::Polygon2D::CounterClockwise(class Jet::Vector2 const *,class Jet::Vector2 const *,class Jet::Vector2 const *)
+1114	0x295e0	?Distance@Line@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Line::Distance(class Jet::Line const &)const 
+1115	0x29520	?Distance@Line@Jet@@QBAMABVVector3@2@@Z	public: float __cdecl Jet::Line::Distance(class Jet::Vector3 const &)const 
+1116	0x2a2c0	?Distance@LineSegment@Jet@@QBAMABVVector3@2@@Z	public: float __cdecl Jet::LineSegment::Distance(class Jet::Vector3 const &)const 
+1118	0x58cb0	?Distance@Ray@Jet@@QBAMABVVector3@2@@Z	public: float __cdecl Jet::Ray::Distance(class Jet::Vector3 const &)const 
+1119	0x4aa0	?DistanceSquared@Line@Jet@@QBAMABVVector3@2@@Z	public: float __cdecl Jet::Line::DistanceSquared(class Jet::Vector3 const &)const 
+1120	0x4e70	?DistanceSquared@LineSegment@Jet@@QBAMABVVector3@2@@Z	public: float __cdecl Jet::LineSegment::DistanceSquared(class Jet::Vector3 const &)const 
+1121	0x4ba0	?DistanceSquared@Ray@Jet@@QBAMABVVector3@2@@Z	public: float __cdecl Jet::Ray::DistanceSquared(class Jet::Vector3 const &)const 
+1201	0x1eff0	?GetApproxSeparation@Circle2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Circle2D::GetApproxSeparation(class Jet::Circle2D const &)const 
+1202	0x1ef50	?GetApproxSeparation@Circle2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::Circle2D::GetApproxSeparation(class Jet::Line2D const &)const 
+1203	0x1f3f0	?GetApproxSeparation@Circle2D@Jet@@QBAMABVLineSegment2D@2@@Z	public: float __cdecl Jet::Circle2D::GetApproxSeparation(class Jet::LineSegment2D const &)const 
+1204	0x1eed0	?GetApproxSeparation@Circle2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Circle2D::GetApproxSeparation(class Jet::Vector2 const &)const 
+1205	0x1e550	?GetApproxSeparation@Line2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Line2D::GetApproxSeparation(class Jet::Line2D const &)const 
+1206	0x1e4a0	?GetApproxSeparation@Line2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Line2D::GetApproxSeparation(class Jet::Vector2 const &)const 
+1207	0x2b030	?GetApproxSeparation@LineSegment2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::LineSegment2D::GetApproxSeparation(class Jet::LineSegment2D const &)const 
+1208	0x2af50	?GetApproxSeparation@LineSegment2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::LineSegment2D::GetApproxSeparation(class Jet::Line2D const &)const 
+1209	0x2ad60	?GetApproxSeparation@LineSegment2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::LineSegment2D::GetApproxSeparation(class Jet::Vector2 const &)const 
+1210	0x10e60	?GetApproxSeparation@Polygon2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Polygon2D::GetApproxSeparation(class Jet::Polygon2D const &)const 
+1211	0x10e60	?GetApproxSeparation@Polygon2D@Jet@@QBAMABVCircle2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetApproxSeparation(class Jet::Circle2D const &)const 
+1212	0x10e60	?GetApproxSeparation@Polygon2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetApproxSeparation(class Jet::Line2D const &)const 
+1213	0x10e60	?GetApproxSeparation@Polygon2D@Jet@@QBAMABVLineSegment2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetApproxSeparation(class Jet::LineSegment2D const &)const 
+1214	0x10e60	?GetApproxSeparation@Polygon2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Polygon2D::GetApproxSeparation(class Jet::Vector2 const &)const 
+1237	0xb210	?GetCenter@Circle2D@Jet@@QBAABVVector2@2@XZ	public: class Jet::Vector2 const & __cdecl Jet::Circle2D::GetCenter(void)const 
+1244	0x54c40	?GetCenter@Polygon2D@Jet@@QBA?AVVector2@2@XZ	public: class Jet::Vector2 __cdecl Jet::Polygon2D::GetCenter(void)const 
+1262	0x4ce0	?GetClosestPoint@LineSegment@Jet@@QBA?AVVector3@2@ABV32@@Z	public: class Jet::Vector3 __cdecl Jet::LineSegment::GetClosestPoint(class Jet::Vector3 const &)const 
+1264	0x6970	?GetConstVertices@Polygon2D@Jet@@QBAPBVVector2@2@XZ	public: class Jet::Vector2 const * __cdecl Jet::Polygon2D::GetConstVertices(void)const 
+1275	0xb210	?GetDirection@Line2D@Jet@@QBAABVVector2@2@XZ	public: class Jet::Vector2 const & __cdecl Jet::Line2D::GetDirection(void)const 
+1276	0xf8f0	?GetDirection@Line@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Line::GetDirection(void)const 
+1277	0xf8f0	?GetDirection@LineSegment@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::LineSegment::GetDirection(void)const 
+1278	0xf8f0	?GetDirection@Ray@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Ray::GetDirection(void)const 
+1284	0x4cb0	?GetEndPoint@LineSegment@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::LineSegment::GetEndPoint(void)const 
+1410	0xa870	?GetNumVerts@Polygon2D@Jet@@QBAHXZ	public: int __cdecl Jet::Polygon2D::GetNumVerts(void)const 
+1423	0x1e720	?GetPoint@Line2D@Jet@@QBAABVVector2@2@XZ	public: class Jet::Vector2 const & __cdecl Jet::Line2D::GetPoint(void)const 
+1424	0x4c60	?GetPoint@Line@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Line::GetPoint(void)const 
+1425	0x4c60	?GetPoint@LineSegment@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::LineSegment::GetPoint(void)const 
+1427	0x4c60	?GetPoint@Ray@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Ray::GetPoint(void)const 
+1445	0x1ecb0	?GetRadius@Circle2D@Jet@@QBAMXZ	public: float __cdecl Jet::Circle2D::GetRadius(void)const 
+1476	0x1ee90	?GetSeparation@Circle2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Circle2D::GetSeparation(class Jet::Circle2D const &)const 
+1477	0x1ee30	?GetSeparation@Circle2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::Circle2D::GetSeparation(class Jet::Line2D const &)const 
+1478	0x1f2d0	?GetSeparation@Circle2D@Jet@@QBAMABVLineSegment2D@2@@Z	public: float __cdecl Jet::Circle2D::GetSeparation(class Jet::LineSegment2D const &)const 
+1479	0x1ee00	?GetSeparation@Circle2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Circle2D::GetSeparation(class Jet::Vector2 const &)const 
+1480	0x1e3e0	?GetSeparation@Line2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Line2D::GetSeparation(class Jet::Line2D const &)const 
+1481	0x1e360	?GetSeparation@Line2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Line2D::GetSeparation(class Jet::Vector2 const &)const 
+1482	0x2ac80	?GetSeparation@LineSegment2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::LineSegment2D::GetSeparation(class Jet::LineSegment2D const &)const 
+1483	0x2ab00	?GetSeparation@LineSegment2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::LineSegment2D::GetSeparation(class Jet::Line2D const &)const 
+1484	0x2a9e0	?GetSeparation@LineSegment2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::LineSegment2D::GetSeparation(class Jet::Vector2 const &)const 
+1485	0x57930	?GetSeparation@Polygon2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Polygon2D::GetSeparation(class Jet::Polygon2D const &)const 
+1486	0x10e60	?GetSeparation@Polygon2D@Jet@@QBAMABVCircle2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparation(class Jet::Circle2D const &)const 
+1487	0x10e60	?GetSeparation@Polygon2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparation(class Jet::Line2D const &)const 
+1488	0x10e60	?GetSeparation@Polygon2D@Jet@@QBAMABVLineSegment2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparation(class Jet::LineSegment2D const &)const 
+1489	0x10e60	?GetSeparation@Polygon2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparation(class Jet::Vector2 const &)const 
+1490	0x1f160	?GetSeparationSquared@Circle2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Circle2D::GetSeparationSquared(class Jet::Circle2D const &)const 
+1491	0x1f120	?GetSeparationSquared@Circle2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::Circle2D::GetSeparationSquared(class Jet::Line2D const &)const 
+1492	0x1f140	?GetSeparationSquared@Circle2D@Jet@@QBAMABVLineSegment2D@2@@Z	public: float __cdecl Jet::Circle2D::GetSeparationSquared(class Jet::LineSegment2D const &)const 
+1493	0x1f080	?GetSeparationSquared@Circle2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Circle2D::GetSeparationSquared(class Jet::Vector2 const &)const 
+1494	0x1e610	?GetSeparationSquared@Line2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Line2D::GetSeparationSquared(class Jet::Line2D const &)const 
+1495	0x1e5a0	?GetSeparationSquared@Line2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Line2D::GetSeparationSquared(class Jet::Vector2 const &)const 
+1496	0x2b360	?GetSeparationSquared@LineSegment2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::LineSegment2D::GetSeparationSquared(class Jet::LineSegment2D const &)const 
+1497	0x2b250	?GetSeparationSquared@LineSegment2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::LineSegment2D::GetSeparationSquared(class Jet::Line2D const &)const 
+1498	0x2b110	?GetSeparationSquared@LineSegment2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::LineSegment2D::GetSeparationSquared(class Jet::Vector2 const &)const 
+1499	0x57950	?GetSeparationSquared@Polygon2D@Jet@@QBAMABV12@@Z	public: float __cdecl Jet::Polygon2D::GetSeparationSquared(class Jet::Polygon2D const &)const 
+1500	0x10e60	?GetSeparationSquared@Polygon2D@Jet@@QBAMABVCircle2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparationSquared(class Jet::Circle2D const &)const 
+1501	0x10e60	?GetSeparationSquared@Polygon2D@Jet@@QBAMABVLine2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparationSquared(class Jet::Line2D const &)const 
+1502	0x10e60	?GetSeparationSquared@Polygon2D@Jet@@QBAMABVLineSegment2D@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparationSquared(class Jet::LineSegment2D const &)const 
+1503	0x10e60	?GetSeparationSquared@Polygon2D@Jet@@QBAMABVVector2@2@@Z	public: float __cdecl Jet::Polygon2D::GetSeparationSquared(class Jet::Vector2 const &)const 
+1576	0xb210	?GetV0@LineSegment2D@Jet@@QBAABVVector2@2@XZ	public: class Jet::Vector2 const & __cdecl Jet::LineSegment2D::GetV0(void)const 
+1577	0x1e720	?GetV1@LineSegment2D@Jet@@QBAABVVector2@2@XZ	public: class Jet::Vector2 const & __cdecl Jet::LineSegment2D::GetV1(void)const 
+1604	0x6970	?GetVertices@Polygon2D@Jet@@QAAPAVVector2@2@XZ	public: class Jet::Vector2 * __cdecl Jet::Polygon2D::GetVertices(void)
+1620	0x57fb0	?GrahamScan@Polygon2D@Jet@@QAAXXZ	public: void __cdecl Jet::Polygon2D::GrahamScan(void)
+1623	0x2a1a0	?InSegment@LineSegment@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::LineSegment::InSegment(class Jet::Vector3 const &)const 
+1738	0x1e2a0	?Intercept@Line2D@Jet@@QBA?AVVector2@2@ABV12@@Z	public: class Jet::Vector2 __cdecl Jet::Line2D::Intercept(class Jet::Line2D const &)const 
+1739	0x1eaa0	?Intercept@LineSegment2D@Jet@@QBA_NABVLine2D@2@AAVVector2@2@@Z	public: bool __cdecl Jet::LineSegment2D::Intercept(class Jet::Line2D const &,class Jet::Vector2 &)const 
+1740	0x1eb70	?Intercept@LineSegment2D@Jet@@QBA_NABVLine2D@2@AAVVector2@2@AAM@Z	public: bool __cdecl Jet::LineSegment2D::Intercept(class Jet::Line2D const &,class Jet::Vector2 &,float &)const 
+1752	0x1edb0	?Intersects@Circle2D@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::Circle2D::Intersects(class Jet::Circle2D const &)const 
+1753	0x1ed20	?Intersects@Circle2D@Jet@@QBA_NABVLine2D@2@@Z	public: bool __cdecl Jet::Circle2D::Intersects(class Jet::Line2D const &)const 
+1754	0x1f1a0	?Intersects@Circle2D@Jet@@QBA_NABVLineSegment2D@2@@Z	public: bool __cdecl Jet::Circle2D::Intersects(class Jet::LineSegment2D const &)const 
+1755	0x1ecd0	?Intersects@Circle2D@Jet@@QBA_NABVVector2@2@@Z	public: bool __cdecl Jet::Circle2D::Intersects(class Jet::Vector2 const &)const 
+1756	0x1e260	?Intersects@Line2D@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::Line2D::Intersects(class Jet::Line2D const &)const 
+1757	0x1e960	?Intersects@LineSegment2D@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::LineSegment2D::Intersects(class Jet::LineSegment2D const &)const 
+1758	0x1e8c0	?Intersects@LineSegment2D@Jet@@QBA_NABVLine2D@2@@Z	public: bool __cdecl Jet::LineSegment2D::Intersects(class Jet::Line2D const &)const 
+1759	0x577a0	?Intersects@Polygon2D@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::Polygon2D::Intersects(class Jet::Polygon2D const &)const 
+1760	0x57630	?Intersects@Polygon2D@Jet@@QBA_NABVCircle2D@2@@Z	public: bool __cdecl Jet::Polygon2D::Intersects(class Jet::Circle2D const &)const 
+1761	0x573a0	?Intersects@Polygon2D@Jet@@QBA_NABVLine2D@2@@Z	public: bool __cdecl Jet::Polygon2D::Intersects(class Jet::Line2D const &)const 
+1762	0x57450	?Intersects@Polygon2D@Jet@@QBA_NABVLineSegment2D@2@@Z	public: bool __cdecl Jet::Polygon2D::Intersects(class Jet::LineSegment2D const &)const 
+1763	0x57320	?Intersects@Polygon2D@Jet@@QBA_NABVVector2@2@@Z	public: bool __cdecl Jet::Polygon2D::Intersects(class Jet::Vector2 const &)const 
+1770	0x1e810	?IsBeside@LineSegment2D@Jet@@QBA_NABVVector2@2@@Z	public: bool __cdecl Jet::LineSegment2D::IsBeside(class Jet::Vector2 const &)const 
+1771	0x293b0	?IsColinear@Line@Jet@@QBA_NABVVector3@2@M@Z	public: bool __cdecl Jet::Line::IsColinear(class Jet::Vector3 const &,float)const 
+1772	0x2a280	?IsColinear@LineSegment@Jet@@QBA_NABVVector3@2@M@Z	public: bool __cdecl Jet::LineSegment::IsColinear(class Jet::Vector3 const &,float)const 
+1773	0x58c80	?IsColinear@Ray@Jet@@QBA_NABVVector3@2@M@Z	public: bool __cdecl Jet::Ray::IsColinear(class Jet::Vector3 const &,float)const 
+1890	0x29390	?Normalize@Line@Jet@@QAAAAV12@XZ	public: class Jet::Line & __cdecl Jet::Line::Normalize(void)
+1891	0x2a2b0	?Normalize@LineSegment@Jet@@QAAXXZ	public: void __cdecl Jet::LineSegment::Normalize(void)
+1893	0x2a2b0	?Normalize@Ray@Jet@@QAAXXZ	public: void __cdecl Jet::Ray::Normalize(void)
+2047	0x29200	?Rotate@Line@Jet@@UAAAAV12@ABVMatrix3@2@@Z	public: virtual class Jet::Line & __cdecl Jet::Line::Rotate(class Jet::Matrix3 const &)
+2048	0x2a360	?Rotate@LineSegment@Jet@@QAAXABVMatrix3@2@@Z	public: void __cdecl Jet::LineSegment::Rotate(class Jet::Matrix3 const &)
+2053	0x294b0	?Scale@Line@Jet@@QAAAAV12@M@Z	public: class Jet::Line & __cdecl Jet::Line::Scale(float)
+2060	0x29300	?SelfRotate@Line@Jet@@QAAAAV12@ABVMatrix3@2@@Z	public: class Jet::Line & __cdecl Jet::Line::SelfRotate(class Jet::Matrix3 const &)
+2080	0x57270	?Set@Polygon2D@Jet@@QAAXABV?$FastDynamicArray@VVector2@Jet@@$0N@U?$Less@VVector2@Jet@@V12@@2@@2@@Z	public: void __cdecl Jet::Polygon2D::Set(class Jet::FastDynamicArray<class Jet::Vector2,13,struct Jet::Less<class Jet::Vector2,class Jet::Vector2> > const &)
+2081	0x54b30	?Set@Polygon2D@Jet@@QAAXHPAVVector2@2@_N@Z	public: void __cdecl Jet::Polygon2D::Set(int,class Jet::Vector2 *,bool)
+2082	0x54b70	?Set@Polygon2D@Jet@@QAA_NH@Z	public: bool __cdecl Jet::Polygon2D::Set(int)
+2109	0x1ec90	?SetCenter@Circle2D@Jet@@QAAXABVVector2@2@@Z	public: void __cdecl Jet::Circle2D::SetCenter(class Jet::Vector2 const &)
+2132	0x1ec90	?SetDirection@Line2D@Jet@@QAAXABVVector2@2@@Z	public: void __cdecl Jet::Line2D::SetDirection(class Jet::Vector2 const &)
+2133	0x4a80	?SetDirection@Line@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Line::SetDirection(class Jet::Vector3 const &)
+2134	0x4a80	?SetDirection@LineSegment@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::LineSegment::SetDirection(class Jet::Vector3 const &)
+2135	0x4a80	?SetDirection@Ray@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Ray::SetDirection(class Jet::Vector3 const &)
+2150	0x4cc0	?SetEndPoint@LineSegment@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::LineSegment::SetEndPoint(class Jet::Vector3 const &)
+2151	0x1e6f0	?SetExtents@LineSegment2D@Jet@@QAAXABVVector2@2@0@Z	public: void __cdecl Jet::LineSegment2D::SetExtents(class Jet::Vector2 const &,class Jet::Vector2 const &)
+2188	0x54b20	?SetNumVerts@Polygon2D@Jet@@QAAXH@Z	public: void __cdecl Jet::Polygon2D::SetNumVerts(int)
+2202	0x1e180	?SetPoint@Line2D@Jet@@QAAXABVVector2@2@@Z	public: void __cdecl Jet::Line2D::SetPoint(class Jet::Vector2 const &)
+2203	0x4b50	?SetPoint@Line@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Line::SetPoint(class Jet::Vector3 const &)
+2204	0x4b50	?SetPoint@LineSegment@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::LineSegment::SetPoint(class Jet::Vector3 const &)
+2205	0x4b50	?SetPoint@Ray@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Ray::SetPoint(class Jet::Vector3 const &)
+2215	0x1ecc0	?SetRadius@Circle2D@Jet@@QAAXM@Z	public: void __cdecl Jet::Circle2D::SetRadius(float)
+2286	0x586a0	?ShellSortTheta@Polygon2D@Jet@@IAAXPAUPointNode@12@AAH@Z	protected: void __cdecl Jet::Polygon2D::ShellSortTheta(struct Jet::Polygon2D::PointNode *,int &)
+2330	0x29aa0	?TestCollision@Line@Jet@@QBA_NVVector3@2@MAAM1@Z	public: bool __cdecl Jet::Line::TestCollision(class Jet::Vector3,float,float &,float &)const 
+2331	0x29950	?TestCollision@Line@Jet@@QBA_NVVector3@2@MAAV32@1@Z	public: bool __cdecl Jet::Line::TestCollision(class Jet::Vector3,float,class Jet::Vector3 &,class Jet::Vector3 &)const 
+2332	0x29860	?TestCollision@Line@Jet@@QBA_NVVector3@2@MAAV32@@Z	public: bool __cdecl Jet::Line::TestCollision(class Jet::Vector3,float,class Jet::Vector3 &)const 
+2333	0x29810	?TestCollision@Line@Jet@@UBA_NABVPlane@2@@Z	public: virtual bool __cdecl Jet::Line::TestCollision(class Jet::Plane const &)const 
+2334	0x29750	?TestCollision@Line@Jet@@UBA_NABVSphere@2@@Z	public: virtual bool __cdecl Jet::Line::TestCollision(class Jet::Sphere const &)const 
+2335	0x2a820	?TestCollision@LineSegment@Jet@@QBA_NAAVCircle@2@@Z	public: bool __cdecl Jet::LineSegment::TestCollision(class Jet::Circle &)const 
+2336	0x2a900	?TestCollision@LineSegment@Jet@@QBA_NAAVEllipse@2@@Z	public: bool __cdecl Jet::LineSegment::TestCollision(class Jet::Ellipse &)const 
+2337	0x2a680	?TestCollision@LineSegment@Jet@@QBA_NAAVEllipsoid@2@@Z	public: bool __cdecl Jet::LineSegment::TestCollision(class Jet::Ellipsoid &)const 
+2338	0x2a4e0	?TestCollision@LineSegment@Jet@@UBA_NABVPlane@2@@Z	public: virtual bool __cdecl Jet::LineSegment::TestCollision(class Jet::Plane const &)const 
+2339	0x2a640	?TestCollision@LineSegment@Jet@@UBA_NABVSphere@2@@Z	public: virtual bool __cdecl Jet::LineSegment::TestCollision(class Jet::Sphere const &)const 
+2355	0x59020	?TestCollision@Ray@Jet@@QBA_NVVector3@2@MAAM1@Z	public: bool __cdecl Jet::Ray::TestCollision(class Jet::Vector3,float,float &,float &)const 
+2356	0x58ed0	?TestCollision@Ray@Jet@@QBA_NVVector3@2@MAAV32@1@Z	public: bool __cdecl Jet::Ray::TestCollision(class Jet::Vector3,float,class Jet::Vector3 &,class Jet::Vector3 &)const 
+2357	0x58de0	?TestCollision@Ray@Jet@@QBA_NVVector3@2@MAAV32@@Z	public: bool __cdecl Jet::Ray::TestCollision(class Jet::Vector3,float,class Jet::Vector3 &)const 
+2358	0x58d10	?TestCollision@Ray@Jet@@UBA_NABVPlane@2@@Z	public: virtual bool __cdecl Jet::Ray::TestCollision(class Jet::Plane const &)const 
+2359	0x58cd0	?TestCollision@Ray@Jet@@UBA_NABVSphere@2@@Z	public: virtual bool __cdecl Jet::Ray::TestCollision(class Jet::Sphere const &)const 
+2377	0x587a0	?Theta@Polygon2D@Jet@@IAAMPBVVector2@2@0@Z	protected: float __cdecl Jet::Polygon2D::Theta(class Jet::Vector2 const *,class Jet::Vector2 const *)
+2390	0x291c0	?Translate@Line@Jet@@UAAAAV12@ABVVector3@2@@Z	public: virtual class Jet::Line & __cdecl Jet::Line::Translate(class Jet::Vector3 const &)
+2391	0x2a2e0	?Translate@LineSegment@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::LineSegment::Translate(class Jet::Vector3 const &)
+2461	0x1e1a0	?WhichSide@Line2D@Jet@@QBA?AW4ClipResult@2@ABVVector2@2@@Z	public: enum Jet::ClipResult __cdecl Jet::Line2D::WhichSide(class Jet::Vector2 const &)const 
+2462	0x1e1f0	?WhichSide@Line2D@Jet@@QBA?AW4ClipResult@2@ABVVector2@2@M@Z	public: enum Jet::ClipResult __cdecl Jet::Line2D::WhichSide(class Jet::Vector2 const &,float)const 
+2463	0x1e730	?WhichSide@LineSegment2D@Jet@@QBA?AW4ClipResult@2@ABVVector2@2@@Z	public: enum Jet::ClipResult __cdecl Jet::LineSegment2D::WhichSide(class Jet::Vector2 const &)const 
+2464	0x1e790	?WhichSide@LineSegment2D@Jet@@QBA?AW4ClipResult@2@ABVVector2@2@M@Z	public: enum Jet::ClipResult __cdecl Jet::LineSegment2D::WhichSide(class Jet::Vector2 const &,float)const 

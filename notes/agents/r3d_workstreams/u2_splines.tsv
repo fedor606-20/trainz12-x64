@@ -1,0 +1,132 @@
+ordinal	rva	mangled	demangled
+32	0x11fe0	??0BSpline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::BSpline::BSpline(class Jet::BSpline const &)
+33	0x12070	??0BSpline@Jet@@QAE@IQBVVector3@1@M_N@Z	public: __thiscall Jet::BSpline::BSpline(unsigned int,class Jet::Vector3 const * const,float,bool)
+34	0x120e0	??0BSpline@Jet@@QAE@IQBVVector3@1@QAM_N@Z	public: __thiscall Jet::BSpline::BSpline(unsigned int,class Jet::Vector3 const * const,float * const,bool)
+35	0x11fb0	??0BSplineSegment@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::BSplineSegment::BSplineSegment(class Jet::BSplineSegment const &)
+36	0x128c0	??0BSplineSegment@Jet@@QAE@ABVVector3@1@000M@Z	public: __thiscall Jet::BSplineSegment::BSplineSegment(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,float)
+39	0xfa40	??0BezierSpline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::BezierSpline::BezierSpline(class Jet::BezierSpline const &)
+40	0xfad0	??0BezierSpline@Jet@@QAE@IQBVVector3@1@@Z	public: __thiscall Jet::BezierSpline::BezierSpline(unsigned int,class Jet::Vector3 const * const)
+41	0xfa10	??0BezierSplineSegment@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::BezierSplineSegment::BezierSplineSegment(class Jet::BezierSplineSegment const &)
+42	0xfda0	??0BezierSplineSegment@Jet@@QAE@ABVVector3@1@000@Z	public: __thiscall Jet::BezierSplineSegment::BezierSplineSegment(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+65	0x1b0a0	??0CardinalSpline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::CardinalSpline::CardinalSpline(class Jet::CardinalSpline const &)
+66	0x1b130	??0CardinalSpline@Jet@@QAE@IQBVVector3@1@M_N@Z	public: __thiscall Jet::CardinalSpline::CardinalSpline(unsigned int,class Jet::Vector3 const * const,float,bool)
+67	0x1b1a0	??0CardinalSpline@Jet@@QAE@IQBVVector3@1@QAM_N@Z	public: __thiscall Jet::CardinalSpline::CardinalSpline(unsigned int,class Jet::Vector3 const * const,float * const,bool)
+68	0x1b070	??0CardinalSplineSegment@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::CardinalSplineSegment::CardinalSplineSegment(class Jet::CardinalSplineSegment const &)
+69	0x1b980	??0CardinalSplineSegment@Jet@@QAE@ABVVector3@1@000M@Z	public: __thiscall Jet::CardinalSplineSegment::CardinalSplineSegment(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,float)
+114	0x28790	??0HermiteSpline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::HermiteSpline::HermiteSpline(class Jet::HermiteSpline const &)
+115	0x28820	??0HermiteSpline@Jet@@QAE@IQBVVector3@1@0_N@Z	public: __thiscall Jet::HermiteSpline::HermiteSpline(unsigned int,class Jet::Vector3 const * const,class Jet::Vector3 const * const,bool)
+116	0x28890	??0HermiteSpline@Jet@@QAE@IQBVVector3@1@_N@Z	public: __thiscall Jet::HermiteSpline::HermiteSpline(unsigned int,class Jet::Vector3 const * const,bool)
+117	0x28700	??0HermiteSplineSegment@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::HermiteSplineSegment::HermiteSplineSegment(class Jet::HermiteSplineSegment const &)
+118	0x28be0	??0HermiteSplineSegment@Jet@@QAE@ABVVector3@1@000@Z	public: __thiscall Jet::HermiteSplineSegment::HermiteSplineSegment(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+294	0xf900	??0Spline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Spline::Spline(class Jet::Spline const &)
+295	0x6cec0	??0Spline@Jet@@QAE@XZ	public: __thiscall Jet::Spline::Spline(void)
+296	0x5fdc0	??0SplineDefinition@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::SplineDefinition::SplineDefinition(class Jet::SplineDefinition const &)
+297	0x6d760	??0SplineDefinition@Jet@@QAE@XZ	public: __thiscall Jet::SplineDefinition::SplineDefinition(void)
+298	0x5ffa0	??0SplineResource@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::SplineResource::SplineResource(class Jet::SplineResource const &)
+299	0x6ea20	??0SplineResource@Jet@@QAE@ABVPString@1@PBVResourceDatabase@1@@Z	public: __thiscall Jet::SplineResource::SplineResource(class Jet::PString const &,class Jet::ResourceDatabase const *)
+300	0xf7b0	??0SplineSegment@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::SplineSegment::SplineSegment(class Jet::SplineSegment const &)
+301	0x6ebc0	??0SplineSegment@Jet@@QAE@ABVVector3@1@@Z	public: __thiscall Jet::SplineSegment::SplineSegment(class Jet::Vector3 const &)
+302	0x6eb70	??0SplineSegment@Jet@@QAE@XZ	public: __thiscall Jet::SplineSegment::SplineSegment(void)
+308	0x6d6d0	??0TCBSpline@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::TCBSpline::TCBSpline(class Jet::TCBSpline const &)
+309	0x713a0	??0TCBSpline@Jet@@QAE@IQBVVector3@1@MMM_N@Z	public: __thiscall Jet::TCBSpline::TCBSpline(unsigned int,class Jet::Vector3 const * const,float,float,float,bool)
+310	0x71420	??0TCBSpline@Jet@@QAE@IQBVVector3@1@QAM11_N@Z	public: __thiscall Jet::TCBSpline::TCBSpline(unsigned int,class Jet::Vector3 const * const,float * const,float * const,float * const,bool)
+311	0x6d6a0	??0TCBSplineSegment@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::TCBSplineSegment::TCBSplineSegment(class Jet::TCBSplineSegment const &)
+312	0x71b90	??0TCBSplineSegment@Jet@@QAE@ABVVector3@1@000MMM@Z	public: __thiscall Jet::TCBSplineSegment::TCBSplineSegment(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,float,float,float)
+341	0x12150	??1BSpline@Jet@@UAE@XZ	public: virtual __thiscall Jet::BSpline::~BSpline(void)
+342	0x71c20	??1BSplineSegment@Jet@@UAE@XZ	public: virtual __thiscall Jet::BSplineSegment::~BSplineSegment(void)
+345	0xfb30	??1BezierSpline@Jet@@UAE@XZ	public: virtual __thiscall Jet::BezierSpline::~BezierSpline(void)
+346	0x71c20	??1BezierSplineSegment@Jet@@UAE@XZ	public: virtual __thiscall Jet::BezierSplineSegment::~BezierSplineSegment(void)
+352	0x1b210	??1CardinalSpline@Jet@@UAE@XZ	public: virtual __thiscall Jet::CardinalSpline::~CardinalSpline(void)
+353	0x71c20	??1CardinalSplineSegment@Jet@@UAE@XZ	public: virtual __thiscall Jet::CardinalSplineSegment::~CardinalSplineSegment(void)
+366	0x28900	??1HermiteSpline@Jet@@UAE@XZ	public: virtual __thiscall Jet::HermiteSpline::~HermiteSpline(void)
+367	0x71c20	??1HermiteSplineSegment@Jet@@UAE@XZ	public: virtual __thiscall Jet::HermiteSplineSegment::~HermiteSplineSegment(void)
+434	0x6ced0	??1Spline@Jet@@UAE@XZ	public: virtual __thiscall Jet::Spline::~Spline(void)
+435	0x6d7a0	??1SplineDefinition@Jet@@UAE@XZ	public: virtual __thiscall Jet::SplineDefinition::~SplineDefinition(void)
+436	0x6ea50	??1SplineResource@Jet@@UAE@XZ	public: virtual __thiscall Jet::SplineResource::~SplineResource(void)
+437	0x71c20	??1SplineSegment@Jet@@UAE@XZ	public: virtual __thiscall Jet::SplineSegment::~SplineSegment(void)
+440	0x714a0	??1TCBSpline@Jet@@UAE@XZ	public: virtual __thiscall Jet::TCBSpline::~TCBSpline(void)
+441	0x71c20	??1TCBSplineSegment@Jet@@UAE@XZ	public: virtual __thiscall Jet::TCBSplineSegment::~TCBSplineSegment(void)
+457	0xf930	??4BSpline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::BSpline & __thiscall Jet::BSpline::operator=(class Jet::BSpline const &)
+458	0x28730	??4BSplineSegment@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::BSplineSegment & __thiscall Jet::BSplineSegment::operator=(class Jet::BSplineSegment const &)
+459	0xf930	??4BezierSpline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::BezierSpline & __thiscall Jet::BezierSpline::operator=(class Jet::BezierSpline const &)
+460	0x28730	??4BezierSplineSegment@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::BezierSplineSegment & __thiscall Jet::BezierSplineSegment::operator=(class Jet::BezierSplineSegment const &)
+465	0xf930	??4CardinalSpline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::CardinalSpline & __thiscall Jet::CardinalSpline::operator=(class Jet::CardinalSpline const &)
+466	0x28730	??4CardinalSplineSegment@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::CardinalSplineSegment & __thiscall Jet::CardinalSplineSegment::operator=(class Jet::CardinalSplineSegment const &)
+484	0xf930	??4HermiteSpline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::HermiteSpline & __thiscall Jet::HermiteSpline::operator=(class Jet::HermiteSpline const &)
+485	0x28730	??4HermiteSplineSegment@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::HermiteSplineSegment & __thiscall Jet::HermiteSplineSegment::operator=(class Jet::HermiteSplineSegment const &)
+547	0xf930	??4Spline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Spline & __thiscall Jet::Spline::operator=(class Jet::Spline const &)
+548	0x5fe10	??4SplineDefinition@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::SplineDefinition & __thiscall Jet::SplineDefinition::operator=(class Jet::SplineDefinition const &)
+549	0x5ffd0	??4SplineResource@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::SplineResource & __thiscall Jet::SplineResource::operator=(class Jet::SplineResource const &)
+550	0x28730	??4SplineSegment@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::SplineSegment & __thiscall Jet::SplineSegment::operator=(class Jet::SplineSegment const &)
+553	0xf930	??4TCBSpline@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::TCBSpline & __thiscall Jet::TCBSpline::operator=(class Jet::TCBSpline const &)
+554	0x28730	??4TCBSplineSegment@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::TCBSplineSegment & __thiscall Jet::TCBSplineSegment::operator=(class Jet::TCBSplineSegment const &)
+608	0x7e464	??_7BSpline@Jet@@6B@	const Jet::BSpline::`vftable'
+609	0x7e450	??_7BSplineSegment@Jet@@6B@	const Jet::BSplineSegment::`vftable'
+612	0x7e230	??_7BezierSpline@Jet@@6B@	const Jet::BezierSpline::`vftable'
+613	0x7e21c	??_7BezierSplineSegment@Jet@@6B@	const Jet::BezierSplineSegment::`vftable'
+619	0x7e6b0	??_7CardinalSpline@Jet@@6B@	const Jet::CardinalSpline::`vftable'
+620	0x7e69c	??_7CardinalSplineSegment@Jet@@6B@	const Jet::CardinalSplineSegment::`vftable'
+641	0x7f258	??_7HermiteSpline@Jet@@6B@	const Jet::HermiteSpline::`vftable'
+642	0x7f244	??_7HermiteSplineSegment@Jet@@6B@	const Jet::HermiteSplineSegment::`vftable'
+734	0x7e20c	??_7Spline@Jet@@6B@	const Jet::Spline::`vftable'
+735	0x857b8	??_7SplineDefinition@Jet@@6B@	const Jet::SplineDefinition::`vftable'
+736	0x857c4	??_7SplineResource@Jet@@6B@	const Jet::SplineResource::`vftable'
+737	0x7e1f8	??_7SplineSegment@Jet@@6B@	const Jet::SplineSegment::`vftable'
+741	0x86464	??_7TCBSpline@Jet@@6B@	const Jet::TCBSpline::`vftable'
+742	0x86450	??_7TCBSplineSegment@Jet@@6B@	const Jet::TCBSplineSegment::`vftable'
+838	0x6cf70	?Add@Spline@Jet@@QAAXPAVSplineSegment@2@@Z	public: void __cdecl Jet::Spline::Add(class Jet::SplineSegment *)
+847	0x5ff30	?AddPoint@SplineDefinition@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::SplineDefinition::AddPoint(class Jet::Vector3 const &)
+1063	0x6eac0	?CreateInstance@SplineResource@Jet@@UBAPAVSpline@2@XZ	public: virtual class Jet::Spline * __cdecl Jet::SplineResource::CreateInstance(void)const 
+1077	0x6e7d0	?CreateSpline@SplineDefinition@Jet@@UAAPAVSpline@2@XZ	public: virtual class Jet::Spline * __cdecl Jet::SplineDefinition::CreateSpline(void)
+1113	0x703b0	?DetermineNumSplineSteps@SplineSegment@Jet@@QBAIIMMM@Z	public: unsigned int __cdecl Jet::SplineSegment::DetermineNumSplineSteps(unsigned int,float,float,float)const 
+1218	0x70250	?GetBinormal@SplineSegment@Jet@@QBAXMAAVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::GetBinormal(float,class Jet::Vector3 &)const 
+1294	0x6fdf0	?GetFirstDerivative@SplineSegment@Jet@@QBAXMAAVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::GetFirstDerivative(float,class Jet::Vector3 &)const 
+1362	0x6d3e0	?GetLength@Spline@Jet@@QBAMI@Z	public: float __cdecl Jet::Spline::GetLength(unsigned int)const 
+1363	0x6f430	?GetLength@SplineSegment@Jet@@UBAMMMI@Z	public: virtual float __cdecl Jet::SplineSegment::GetLength(float,float,unsigned int)const 
+1403	0x70020	?GetNormal@SplineSegment@Jet@@QBAXMAAVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::GetNormal(float,class Jet::Vector3 &)const 
+1409	0x5ff70	?GetNumPoints@SplineDefinition@Jet@@QBAIXZ	public: unsigned int __cdecl Jet::SplineDefinition::GetNumPoints(void)const 
+1418	0x5ff00	?GetParameters@SplineDefinition@Jet@@QBAXAA_NAAM11@Z	public: void __cdecl Jet::SplineDefinition::GetParameters(bool &,float &,float &,float &)const 
+1428	0x5ff80	?GetPointArray@SplineDefinition@Jet@@QAAPAVVector3@2@XZ	public: class Jet::Vector3 * __cdecl Jet::SplineDefinition::GetPointArray(void)
+1429	0x5ff80	?GetPointArray@SplineDefinition@Jet@@QBAPBVVector3@2@XZ	public: class Jet::Vector3 const * __cdecl Jet::SplineDefinition::GetPointArray(void)const 
+1434	0xf9e0	?GetPositionByLength@Spline@Jet@@QBA?AVVector3@2@MI@Z	public: class Jet::Vector3 __cdecl Jet::Spline::GetPositionByLength(float,unsigned int)const 
+1435	0x6d240	?GetPositionByLength@Spline@Jet@@UBAXMAAVVector3@2@I@Z	public: virtual void __cdecl Jet::Spline::GetPositionByLength(float,class Jet::Vector3 &,unsigned int)const 
+1436	0xf8b0	?GetPositionByLength@SplineSegment@Jet@@QBA?AVVector3@2@MMMI@Z	public: class Jet::Vector3 __cdecl Jet::SplineSegment::GetPositionByLength(float,float,float,unsigned int)const 
+1437	0x6ece0	?GetPositionByLength@SplineSegment@Jet@@UBAXMAAVVector3@2@MMI@Z	public: virtual void __cdecl Jet::SplineSegment::GetPositionByLength(float,class Jet::Vector3 &,float,float,unsigned int)const 
+1438	0xf9b0	?GetPositionByRatio@Spline@Jet@@QBA?AVVector3@2@M@Z	public: class Jet::Vector3 __cdecl Jet::Spline::GetPositionByRatio(float)const 
+1439	0x6d0c0	?GetPositionByRatio@Spline@Jet@@UBAXMAAVVector3@2@@Z	public: virtual void __cdecl Jet::Spline::GetPositionByRatio(float,class Jet::Vector3 &)const 
+1440	0xf830	?GetPositionByRatio@SplineSegment@Jet@@QBA?AVVector3@2@M@Z	public: class Jet::Vector3 __cdecl Jet::SplineSegment::GetPositionByRatio(float)const 
+1441	0x6ec60	?GetPositionByRatio@SplineSegment@Jet@@QBAXMAAVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::GetPositionByRatio(float,class Jet::Vector3 &)const 
+1452	0x6f0f0	?GetRatio@SplineSegment@Jet@@UBAMMMMI@Z	public: virtual float __cdecl Jet::SplineSegment::GetRatio(float,float,float,unsigned int)const 
+1474	0x6fe90	?GetSecondDerivative@SplineSegment@Jet@@QBAXMAAVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::GetSecondDerivative(float,class Jet::Vector3 &)const 
+1475	0xf8f0	?GetSegmentConstants@SplineSegment@Jet@@QBAPBVVector3@2@XZ	public: class Jet::Vector3 const * __cdecl Jet::SplineSegment::GetSegmentConstants(void)const 
+1515	0xf8f0	?GetSplineSegmentArray@Spline@Jet@@QBAABV?$FastDynamicArray@PAVSplineSegment@Jet@@$0N@U?$Less@PAVSplineSegment@Jet@@PAV12@@2@@2@XZ	public: class Jet::FastDynamicArray<class Jet::SplineSegment *,13,struct Jet::Less<class Jet::SplineSegment *,class Jet::SplineSegment *> > const & __cdecl Jet::Spline::GetSplineSegmentArray(void)const 
+1523	0x6ff30	?GetTangent@SplineSegment@Jet@@QBAXMAAVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::GetTangent(float,class Jet::Vector3 &)const 
+1545	0x6fef0	?GetThirdDerivative@SplineSegment@Jet@@QBAXMAAVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::GetThirdDerivative(float,class Jet::Vector3 &)const 
+1567	0x6970	?GetType@SplineDefinition@Jet@@QBA?AW4SplineType@12@XZ	public: enum Jet::SplineDefinition::SplineType __cdecl Jet::SplineDefinition::GetType(void)const 
+1797	0x6fd60	?IsNullSplineSegment@SplineSegment@Jet@@QBA_NXZ	public: bool __cdecl Jet::SplineSegment::IsNullSplineSegment(void)const 
+1925	0x6d7c0	?ReadConfigData@SplineDefinition@Jet@@QAA_NABVConfigData@2@@Z	public: bool __cdecl Jet::SplineDefinition::ReadConfigData(class Jet::ConfigData const &)
+1926	0x6e3e0	?ReadTextFile@SplineDefinition@Jet@@QAA_NPBVResourceDatabase@2@PBD@Z	public: bool __cdecl Jet::SplineDefinition::ReadTextFile(class Jet::ResourceDatabase const *,char const *)
+1960	0x6cfa0	?Remove@Spline@Jet@@QAA_NPBVSplineSegment@2@@Z	public: bool __cdecl Jet::Spline::Remove(class Jet::SplineSegment const *)
+1970	0x5ff90	?RemoveAllPoints@SplineDefinition@Jet@@QAAXXZ	public: void __cdecl Jet::SplineDefinition::RemoveAllPoints(void)
+1973	0x6cfe0	?RemoveDelete@Spline@Jet@@QAA_NPAVSplineSegment@2@@Z	public: bool __cdecl Jet::Spline::RemoveDelete(class Jet::SplineSegment *)
+1974	0x6d030	?RemoveDeleteAll@Spline@Jet@@QAAXXZ	public: void __cdecl Jet::Spline::RemoveDeleteAll(void)
+2063	0x12160	?Set@BSpline@Jet@@QAAXIQBVVector3@2@M_N@Z	public: void __cdecl Jet::BSpline::Set(unsigned int,class Jet::Vector3 const * const,float,bool)
+2064	0x124f0	?Set@BSpline@Jet@@QAAXIQBVVector3@2@QAM_N@Z	public: void __cdecl Jet::BSpline::Set(unsigned int,class Jet::Vector3 const * const,float * const,bool)
+2065	0x12940	?Set@BSplineSegment@Jet@@QAAXABVVector3@2@000M@Z	public: void __cdecl Jet::BSplineSegment::Set(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,float)
+2066	0xfb40	?Set@BezierSpline@Jet@@QAAXIQBVVector3@2@@Z	public: void __cdecl Jet::BezierSpline::Set(unsigned int,class Jet::Vector3 const * const)
+2067	0xfe10	?Set@BezierSplineSegment@Jet@@QAAXABVVector3@2@000@Z	public: void __cdecl Jet::BezierSplineSegment::Set(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+2068	0x1b220	?Set@CardinalSpline@Jet@@QAAXIQBVVector3@2@M_N@Z	public: void __cdecl Jet::CardinalSpline::Set(unsigned int,class Jet::Vector3 const * const,float,bool)
+2069	0x1b5b0	?Set@CardinalSpline@Jet@@QAAXIQBVVector3@2@QAM_N@Z	public: void __cdecl Jet::CardinalSpline::Set(unsigned int,class Jet::Vector3 const * const,float * const,bool)
+2070	0x1ba00	?Set@CardinalSplineSegment@Jet@@QAAXABVVector3@2@000M@Z	public: void __cdecl Jet::CardinalSplineSegment::Set(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,float)
+2071	0x28a90	?Set@HermiteSpline@Jet@@QAAXIQBVVector3@2@0_N@Z	public: void __cdecl Jet::HermiteSpline::Set(unsigned int,class Jet::Vector3 const * const,class Jet::Vector3 const * const,bool)
+2072	0x28910	?Set@HermiteSpline@Jet@@QAAXIQBVVector3@2@_N@Z	public: void __cdecl Jet::HermiteSpline::Set(unsigned int,class Jet::Vector3 const * const,bool)
+2073	0x28d60	?Set@HermiteSplineSegment@Jet@@QAAXABVVector3@2@000@Z	public: void __cdecl Jet::HermiteSplineSegment::Set(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+2086	0x6ec10	?Set@SplineSegment@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::SplineSegment::Set(class Jet::Vector3 const &)
+2087	0x714b0	?Set@TCBSpline@Jet@@QAAXIQBVVector3@2@MMM_N@Z	public: void __cdecl Jet::TCBSpline::Set(unsigned int,class Jet::Vector3 const * const,float,float,float,bool)
+2088	0x717e0	?Set@TCBSpline@Jet@@QAAXIQBVVector3@2@QAM11_N@Z	public: void __cdecl Jet::TCBSpline::Set(unsigned int,class Jet::Vector3 const * const,float * const,float * const,float * const,bool)
+2089	0x71c30	?Set@TCBSplineSegment@Jet@@QAAXABVVector3@2@000MMM@Z	public: void __cdecl Jet::TCBSplineSegment::Set(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,float,float,float)
+2158	0x28d60	?SetHermiteSplineData@SplineSegment@Jet@@IAAXABVVector3@2@000@Z	protected: void __cdecl Jet::SplineSegment::SetHermiteSplineData(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+2197	0x5fed0	?SetParameters@SplineDefinition@Jet@@QAAX_NMMM@Z	public: void __cdecl Jet::SplineDefinition::SetParameters(bool,float,float,float)
+2276	0x5fec0	?SetType@SplineDefinition@Jet@@QAAXW4SplineType@12@@Z	public: void __cdecl Jet::SplineDefinition::SetType(enum Jet::SplineDefinition::SplineType)
+2472	0x6db80	?WriteConfigData@SplineDefinition@Jet@@QBA_NAAVConfigData@2@_N@Z	public: bool __cdecl Jet::SplineDefinition::WriteConfigData(class Jet::ConfigData &,bool)const 
+2473	0x6e530	?WriteTextFile@SplineDefinition@Jet@@QBA_NPBVResourceDatabase@2@PBD@Z	public: bool __cdecl Jet::SplineDefinition::WriteTextFile(class Jet::ResourceDatabase const *,char const *)const 

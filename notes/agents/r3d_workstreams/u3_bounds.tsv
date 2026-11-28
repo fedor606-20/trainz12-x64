@@ -1,0 +1,102 @@
+ordinal	rva	mangled	demangled
+206	0x6ab0	??0ParticleAxisAlignedBoundingBox@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParticleAxisAlignedBoundingBox::ParticleAxisAlignedBoundingBox(class Jet::ParticleAxisAlignedBoundingBox const &)
+207	0x50550	??0ParticleAxisAlignedBoundingBox@Jet@@QAE@PAVParticle@1@@Z	public: __thiscall Jet::ParticleAxisAlignedBoundingBox::ParticleAxisAlignedBoundingBox(class Jet::Particle *)
+208	0x50e00	??0ParticleBoundingSphere@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParticleBoundingSphere::ParticleBoundingSphere(class Jet::ParticleBoundingSphere const &)
+209	0x51350	??0ParticleBoundingSphere@Jet@@QAE@PAVParticle@1@@Z	public: __thiscall Jet::ParticleBoundingSphere::ParticleBoundingSphere(class Jet::Particle *)
+210	0x6710	??0ParticleBoundingVolume@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParticleBoundingVolume::ParticleBoundingVolume(class Jet::ParticleBoundingVolume const &)
+211	0x51e70	??0ParticleBoundingVolume@Jet@@QAE@PAVParticle@1@@Z	public: __thiscall Jet::ParticleBoundingVolume::ParticleBoundingVolume(class Jet::Particle *)
+215	0x530b0	??0ParticleOrientedBoundingBox@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParticleOrientedBoundingBox::ParticleOrientedBoundingBox(class Jet::ParticleOrientedBoundingBox const &)
+216	0x531a0	??0ParticleOrientedBoundingBox@Jet@@QAE@PAVParticle@1@@Z	public: __thiscall Jet::ParticleOrientedBoundingBox::ParticleOrientedBoundingBox(class Jet::Particle *)
+219	0x53dd0	??0ParticleVisibleBoundingBox@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::ParticleVisibleBoundingBox::ParticleVisibleBoundingBox(class Jet::ParticleVisibleBoundingBox const &)
+220	0x53e60	??0ParticleVisibleBoundingBox@Jet@@QAE@PAVParticle@1@@Z	public: __thiscall Jet::ParticleVisibleBoundingBox::ParticleVisibleBoundingBox(class Jet::Particle *)
+401	0x51f60	??1ParticleAxisAlignedBoundingBox@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleAxisAlignedBoundingBox::~ParticleAxisAlignedBoundingBox(void)
+402	0x51f60	??1ParticleBoundingSphere@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleBoundingSphere::~ParticleBoundingSphere(void)
+403	0x51f60	??1ParticleBoundingVolume@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleBoundingVolume::~ParticleBoundingVolume(void)
+405	0x51f60	??1ParticleOrientedBoundingBox@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleOrientedBoundingBox::~ParticleOrientedBoundingBox(void)
+407	0x51f60	??1ParticleVisibleBoundingBox@Jet@@UAE@XZ	public: virtual __thiscall Jet::ParticleVisibleBoundingBox::~ParticleVisibleBoundingBox(void)
+511	0x6ae0	??4ParticleAxisAlignedBoundingBox@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParticleAxisAlignedBoundingBox & __thiscall Jet::ParticleAxisAlignedBoundingBox::operator=(class Jet::ParticleAxisAlignedBoundingBox const &)
+512	0x50e60	??4ParticleBoundingSphere@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParticleBoundingSphere & __thiscall Jet::ParticleBoundingSphere::operator=(class Jet::ParticleBoundingSphere const &)
+513	0x6800	??4ParticleBoundingVolume@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParticleBoundingVolume & __thiscall Jet::ParticleBoundingVolume::operator=(class Jet::ParticleBoundingVolume const &)
+515	0x6ae0	??4ParticleOrientedBoundingBox@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParticleOrientedBoundingBox & __thiscall Jet::ParticleOrientedBoundingBox::operator=(class Jet::ParticleOrientedBoundingBox const &)
+517	0x6ae0	??4ParticleVisibleBoundingBox@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::ParticleVisibleBoundingBox & __thiscall Jet::ParticleVisibleBoundingBox::operator=(class Jet::ParticleVisibleBoundingBox const &)
+694	0x7d4fc	??_7ParticleAxisAlignedBoundingBox@Jet@@6B@	const Jet::ParticleAxisAlignedBoundingBox::`vftable'
+695	0x83854	??_7ParticleBoundingSphere@Jet@@6B@	const Jet::ParticleBoundingSphere::`vftable'
+696	0x7d4ac	??_7ParticleBoundingVolume@Jet@@6B@	const Jet::ParticleBoundingVolume::`vftable'
+700	0x839ec	??_7ParticleOrientedBoundingBox@Jet@@6B@	const Jet::ParticleOrientedBoundingBox::`vftable'
+702	0x83a3c	??_7ParticleVisibleBoundingBox@Jet@@6B@	const Jet::ParticleVisibleBoundingBox::`vftable'
+957	0x50c00	?CheckRenderableObjectPosition@ParticleAxisAlignedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@PAV32@@Z	public: virtual class Jet::Render3DPrimitive * __cdecl Jet::ParticleAxisAlignedBoundingBox::CheckRenderableObjectPosition(class Jet::RenderKernel *,class Jet::Render3DPrimitive *)const 
+958	0x51d20	?CheckRenderableObjectPosition@ParticleBoundingSphere@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@PAV32@@Z	public: virtual class Jet::Render3DPrimitive * __cdecl Jet::ParticleBoundingSphere::CheckRenderableObjectPosition(class Jet::RenderKernel *,class Jet::Render3DPrimitive *)const 
+959	0x53700	?CheckRenderableObjectPosition@ParticleOrientedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@PAV32@@Z	public: virtual class Jet::Render3DPrimitive * __cdecl Jet::ParticleOrientedBoundingBox::CheckRenderableObjectPosition(class Jet::RenderKernel *,class Jet::Render3DPrimitive *)const 
+1043	0x6b10	?CreateInstance@ParticleAxisAlignedBoundingBox@Jet@@UBAPAVParticleBoundingVolume@2@PAVParticle@2@@Z	public: virtual class Jet::ParticleBoundingVolume * __cdecl Jet::ParticleAxisAlignedBoundingBox::CreateInstance(class Jet::Particle *)const 
+1044	0x50f10	?CreateInstance@ParticleBoundingSphere@Jet@@UBAPAVParticleBoundingVolume@2@PAVParticle@2@@Z	public: virtual class Jet::ParticleBoundingVolume * __cdecl Jet::ParticleBoundingSphere::CreateInstance(class Jet::Particle *)const 
+1045	0x53150	?CreateInstance@ParticleOrientedBoundingBox@Jet@@UBAPAVParticleBoundingVolume@2@PAVParticle@2@@Z	public: virtual class Jet::ParticleBoundingVolume * __cdecl Jet::ParticleOrientedBoundingBox::CreateInstance(class Jet::Particle *)const 
+1047	0x53e10	?CreateInstance@ParticleVisibleBoundingBox@Jet@@UBAPAVParticleBoundingVolume@2@PAVParticle@2@@Z	public: virtual class Jet::ParticleBoundingVolume * __cdecl Jet::ParticleVisibleBoundingBox::CreateInstance(class Jet::Particle *)const 
+1074	0x50af0	?CreateRenderableObject@ParticleAxisAlignedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@ABVColor@2@@Z	public: virtual class Jet::Render3DPrimitive * __cdecl Jet::ParticleAxisAlignedBoundingBox::CreateRenderableObject(class Jet::RenderKernel *,class Jet::Color const &)const 
+1075	0x51c30	?CreateRenderableObject@ParticleBoundingSphere@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@ABVColor@2@@Z	public: virtual class Jet::Render3DPrimitive * __cdecl Jet::ParticleBoundingSphere::CreateRenderableObject(class Jet::RenderKernel *,class Jet::Color const &)const 
+1076	0x535f0	?CreateRenderableObject@ParticleOrientedBoundingBox@Jet@@UBAPAVRender3DPrimitive@2@PAVRenderKernel@2@ABVColor@2@@Z	public: virtual class Jet::Render3DPrimitive * __cdecl Jet::ParticleOrientedBoundingBox::CreateRenderableObject(class Jet::RenderKernel *,class Jet::Color const &)const 
+1217	0x6a30	?GetAxisAlignedBoundingBox@ParticleBoundingVolume@Jet@@QBAABVAxisAlignedBox@2@_N@Z	public: class Jet::AxisAlignedBox const & __cdecl Jet::ParticleBoundingVolume::GetAxisAlignedBoundingBox(bool)const 
+1225	0x69a0	?GetBoundingSphere@ParticleBoundingVolume@Jet@@QBAABVSphere@2@_N@Z	public: class Jet::Sphere const & __cdecl Jet::ParticleBoundingVolume::GetBoundingSphere(bool)const 
+1252	0x52bf0	?GetChildBoundingAxisAlignBox@ParticleBoundingVolume@Jet@@IBAXAAVAxisAlignedBox@2@@Z	protected: void __cdecl Jet::ParticleBoundingVolume::GetChildBoundingAxisAlignBox(class Jet::AxisAlignedBox &)const 
+1253	0x52880	?GetChildBoundingOrientedBox@ParticleBoundingVolume@Jet@@IBAXAAVOrientedBox@2@@Z	protected: void __cdecl Jet::ParticleBoundingVolume::GetChildBoundingOrientedBox(class Jet::OrientedBox &)const 
+1254	0x52600	?GetChildBoundingSphere@ParticleBoundingVolume@Jet@@IBAXAAVSphere@2@@Z	protected: void __cdecl Jet::ParticleBoundingVolume::GetChildBoundingSphere(class Jet::Sphere &)const 
+1279	0x6970	?GetDirtyFlags@ParticleBoundingVolume@Jet@@QBAKXZ	public: unsigned long __cdecl Jet::ParticleBoundingVolume::GetDirtyFlags(void)const 
+1326	0x69d0	?GetGlobalBoundingSphereCenter@ParticleBoundingVolume@Jet@@QBAABVVector3@2@_N@Z	public: class Jet::Vector3 const & __cdecl Jet::ParticleBoundingVolume::GetGlobalBoundingSphereCenter(bool)const 
+1329	0x6a80	?GetGlobalOrientation@ParticleBoundingVolume@Jet@@QBAABVQuaternion@2@XZ	public: class Jet::Quaternion const & __cdecl Jet::ParticleBoundingVolume::GetGlobalOrientation(void)const 
+1331	0x6a60	?GetGlobalPosition@ParticleBoundingVolume@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::ParticleBoundingVolume::GetGlobalPosition(void)const 
+1336	0x6940	?GetHost@ParticleBoundingVolume@Jet@@QAAPAVParticle@2@XZ	public: class Jet::Particle * __cdecl Jet::ParticleBoundingVolume::GetHost(void)
+1337	0x6940	?GetHost@ParticleBoundingVolume@Jet@@QBAPBVParticle@2@XZ	public: class Jet::Particle const * __cdecl Jet::ParticleBoundingVolume::GetHost(void)const 
+1373	0x6cc0	?GetLocalVolume@ParticleAxisAlignedBoundingBox@Jet@@UBAXAAVAxisAlignedBox@2@@Z	public: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::GetLocalVolume(class Jet::AxisAlignedBox &)const 
+1374	0x6ca0	?GetLocalVolume@ParticleAxisAlignedBoundingBox@Jet@@UBAXAAVOrientedBox@2@@Z	public: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::GetLocalVolume(class Jet::OrientedBox &)const 
+1375	0x6d10	?GetLocalVolume@ParticleAxisAlignedBoundingBox@Jet@@UBAXAAVSphere@2@@Z	public: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::GetLocalVolume(class Jet::Sphere &)const 
+1376	0x51130	?GetLocalVolume@ParticleBoundingSphere@Jet@@UBAXAAVAxisAlignedBox@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingSphere::GetLocalVolume(class Jet::AxisAlignedBox &)const 
+1377	0x510f0	?GetLocalVolume@ParticleBoundingSphere@Jet@@UBAXAAVOrientedBox@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingSphere::GetLocalVolume(class Jet::OrientedBox &)const 
+1378	0x511e0	?GetLocalVolume@ParticleBoundingSphere@Jet@@UBAXAAVSphere@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingSphere::GetLocalVolume(class Jet::Sphere &)const 
+1417	0x6a00	?GetOrientedBoundingBox@ParticleBoundingVolume@Jet@@QBAABVOrientedBox@2@_N@Z	public: class Jet::OrientedBox const & __cdecl Jet::ParticleBoundingVolume::GetOrientedBoundingBox(bool)const 
+1443	0x6aa0	?GetPrimaryVolumeType@ParticleBoundingVolume@Jet@@QBA?AW4PrimaryVolumeType@12@XZ	public: enum Jet::ParticleBoundingVolume::PrimaryVolumeType __cdecl Jet::ParticleBoundingVolume::GetPrimaryVolumeType(void)const 
+1667	0x535c0	?InitInstance@ParticleAxisAlignedBoundingBox@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ParticleAxisAlignedBoundingBox::InitInstance(class Jet::ParticleAxisAlignedBoundingBox &)const 
+1668	0x51bf0	?InitInstance@ParticleBoundingSphere@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ParticleBoundingSphere::InitInstance(class Jet::ParticleBoundingSphere &)const 
+1669	0x52da0	?InitInstance@ParticleBoundingVolume@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ParticleBoundingVolume::InitInstance(class Jet::ParticleBoundingVolume &)const 
+1670	0x535c0	?InitInstance@ParticleOrientedBoundingBox@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::ParticleOrientedBoundingBox::InitInstance(class Jet::ParticleOrientedBoundingBox &)const 
+1781	0x6950	?IsFlagDirty@ParticleBoundingVolume@Jet@@QBA_NK@Z	public: bool __cdecl Jet::ParticleBoundingVolume::IsFlagDirty(unsigned long)const 
+1835	0x505f0	?IsWithinView@ParticleAxisAlignedBoundingBox@Jet@@UBA_NABVViewPoint@2@@Z	public: virtual bool __cdecl Jet::ParticleAxisAlignedBoundingBox::IsWithinView(class Jet::ViewPoint const &)const 
+1836	0x50650	?IsWithinView@ParticleAxisAlignedBoundingBox@Jet@@UBA_NPBVCamera@2@@Z	public: virtual bool __cdecl Jet::ParticleAxisAlignedBoundingBox::IsWithinView(class Jet::Camera const *)const 
+1837	0x53210	?IsWithinView@ParticleBoundingSphere@Jet@@UBA_NABVViewPoint@2@@Z	public: virtual bool __cdecl Jet::ParticleBoundingSphere::IsWithinView(class Jet::ViewPoint const &)const 
+1838	0x513f0	?IsWithinView@ParticleBoundingSphere@Jet@@UBA_NPBVCamera@2@@Z	public: virtual bool __cdecl Jet::ParticleBoundingSphere::IsWithinView(class Jet::Camera const *)const 
+1839	0x53210	?IsWithinView@ParticleOrientedBoundingBox@Jet@@UBA_NABVViewPoint@2@@Z	public: virtual bool __cdecl Jet::ParticleOrientedBoundingBox::IsWithinView(class Jet::ViewPoint const &)const 
+1840	0x513f0	?IsWithinView@ParticleOrientedBoundingBox@Jet@@UBA_NPBVCamera@2@@Z	public: virtual bool __cdecl Jet::ParticleOrientedBoundingBox::IsWithinView(class Jet::Camera const *)const 
+1841	0x277f0	?IsWithinView@ParticleVisibleBoundingBox@Jet@@UBA_NABVViewPoint@2@@Z	public: virtual bool __cdecl Jet::ParticleVisibleBoundingBox::IsWithinView(class Jet::ViewPoint const &)const 
+1842	0x277f0	?IsWithinView@ParticleVisibleBoundingBox@Jet@@UBA_NPBVCamera@2@@Z	public: virtual bool __cdecl Jet::ParticleVisibleBoundingBox::IsWithinView(class Jet::Camera const *)const 
+1897	0x51fe0	?OnChildAdded@ParticleBoundingVolume@Jet@@UAAXPAVParticle@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingVolume::OnChildAdded(class Jet::Particle *)
+1898	0x51fe0	?OnChildRemoved@ParticleBoundingVolume@Jet@@UAAXPAVParticle@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingVolume::OnChildRemoved(class Jet::Particle *)
+1927	0x50900	?RecalculateAxisAlignedBoxVolume@ParticleAxisAlignedBoundingBox@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::RecalculateAxisAlignedBoxVolume(void)const 
+1928	0x51810	?RecalculateAxisAlignedBoxVolume@ParticleBoundingSphere@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleBoundingSphere::RecalculateAxisAlignedBoxVolume(void)const 
+1929	0x53480	?RecalculateAxisAlignedBoxVolume@ParticleOrientedBoundingBox@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleOrientedBoundingBox::RecalculateAxisAlignedBoxVolume(void)const 
+1931	0x52570	?RecalculateGlobalOrientation@ParticleBoundingVolume@Jet@@IBAXXZ	protected: void __cdecl Jet::ParticleBoundingVolume::RecalculateGlobalOrientation(void)const 
+1932	0x524a0	?RecalculateGlobalPosition@ParticleBoundingVolume@Jet@@IBAXXZ	protected: void __cdecl Jet::ParticleBoundingVolume::RecalculateGlobalPosition(void)const 
+1933	0x50aa0	?RecalculateOrientedBoxVolume@ParticleAxisAlignedBoundingBox@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::RecalculateOrientedBoxVolume(void)const 
+1934	0x518d0	?RecalculateOrientedBoxVolume@ParticleBoundingSphere@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleBoundingSphere::RecalculateOrientedBoxVolume(void)const 
+1935	0x53520	?RecalculateOrientedBoxVolume@ParticleOrientedBoundingBox@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleOrientedBoundingBox::RecalculateOrientedBoxVolume(void)const 
+1936	0x52d50	?RecalculateSphereGlobalCenter@ParticleBoundingVolume@Jet@@IBAXXZ	protected: void __cdecl Jet::ParticleBoundingVolume::RecalculateSphereGlobalCenter(void)const 
+1937	0x507b0	?RecalculateSphereVolume@ParticleAxisAlignedBoundingBox@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::RecalculateSphereVolume(void)const 
+1938	0x51720	?RecalculateSphereVolume@ParticleBoundingSphere@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleBoundingSphere::RecalculateSphereVolume(void)const 
+1939	0x533d0	?RecalculateSphereVolume@ParticleOrientedBoundingBox@Jet@@MBAXXZ	protected: virtual void __cdecl Jet::ParticleOrientedBoundingBox::RecalculateSphereVolume(void)const 
+2118	0x51fa0	?SetChildDirtyFlags@ParticleBoundingVolume@Jet@@QAAXK@Z	public: void __cdecl Jet::ParticleBoundingVolume::SetChildDirtyFlags(unsigned long)
+2136	0x6960	?SetDirtyFlags@ParticleBoundingVolume@Jet@@QAAXK@Z	public: void __cdecl Jet::ParticleBoundingVolume::SetDirtyFlags(unsigned long)
+2170	0x6bb0	?SetLocalVolume@ParticleAxisAlignedBoundingBox@Jet@@UAAXABVAxisAlignedBox@2@@Z	public: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::SetLocalVolume(class Jet::AxisAlignedBox const &)
+2171	0x505b0	?SetLocalVolume@ParticleAxisAlignedBoundingBox@Jet@@UAAXABVOrientedBox@2@@Z	public: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::SetLocalVolume(class Jet::OrientedBox const &)
+2172	0x6be0	?SetLocalVolume@ParticleAxisAlignedBoundingBox@Jet@@UAAXABVSphere@2@@Z	public: virtual void __cdecl Jet::ParticleAxisAlignedBoundingBox::SetLocalVolume(class Jet::Sphere const &)
+2173	0x51020	?SetLocalVolume@ParticleBoundingSphere@Jet@@UAAXABVAxisAlignedBox@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingSphere::SetLocalVolume(class Jet::AxisAlignedBox const &)
+2174	0x50fc0	?SetLocalVolume@ParticleBoundingSphere@Jet@@UAAXABVOrientedBox@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingSphere::SetLocalVolume(class Jet::OrientedBox const &)
+2175	0x513a0	?SetLocalVolume@ParticleBoundingSphere@Jet@@UAAXABVSphere@2@@Z	public: virtual void __cdecl Jet::ParticleBoundingSphere::SetLocalVolume(class Jet::Sphere const &)
+2195	0x52100	?SetOrientationChanged@ParticleBoundingVolume@Jet@@QAAXABVQuaternion@2@0@Z	public: void __cdecl Jet::ParticleBoundingVolume::SetOrientationChanged(class Jet::Quaternion const &,class Jet::Quaternion const &)
+2200	0x51f70	?SetParentDirtyFlags@ParticleBoundingVolume@Jet@@QAAXK@Z	public: void __cdecl Jet::ParticleBoundingVolume::SetParentDirtyFlags(unsigned long)
+2209	0x52030	?SetPositionChanged@ParticleBoundingVolume@Jet@@QAAXABVVector3@2@0@Z	public: void __cdecl Jet::ParticleBoundingVolume::SetPositionChanged(class Jet::Vector3 const &,class Jet::Vector3 const &)
+2210	0x522d0	?SetPositionOrientationChanged@ParticleBoundingVolume@Jet@@QAAXABVVector3@2@0ABVQuaternion@2@1@Z	public: void __cdecl Jet::ParticleBoundingVolume::SetPositionOrientationChanged(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Quaternion const &,class Jet::Quaternion const &)
+2221	0x5fec0	?SetRawDirtyFlags@ParticleBoundingVolume@Jet@@IBAXK@Z	protected: void __cdecl Jet::ParticleBoundingVolume::SetRawDirtyFlags(unsigned long)const 
+2222	0x6980	?SetRawDirtyFlags@ParticleBoundingVolume@Jet@@IBAX_NK@Z	protected: void __cdecl Jet::ParticleBoundingVolume::SetRawDirtyFlags(bool,unsigned long)const 
+2349	0x50730	?TestCollision@ParticleAxisAlignedBoundingBox@Jet@@UBA_NABVLineSegment@2@AA_N@Z	public: virtual bool __cdecl Jet::ParticleAxisAlignedBoundingBox::TestCollision(class Jet::LineSegment const &,bool &)const 
+2350	0x506a0	?TestCollision@ParticleAxisAlignedBoundingBox@Jet@@UBA_NABVRay@2@AA_N@Z	public: virtual bool __cdecl Jet::ParticleAxisAlignedBoundingBox::TestCollision(class Jet::Ray const &,bool &)const 
+2351	0x515b0	?TestCollision@ParticleBoundingSphere@Jet@@UBA_NABVLineSegment@2@AA_N@Z	public: virtual bool __cdecl Jet::ParticleBoundingSphere::TestCollision(class Jet::LineSegment const &,bool &)const 
+2352	0x51440	?TestCollision@ParticleBoundingSphere@Jet@@UBA_NABVRay@2@AA_N@Z	public: virtual bool __cdecl Jet::ParticleBoundingSphere::TestCollision(class Jet::Ray const &,bool &)const 
+2353	0x53330	?TestCollision@ParticleOrientedBoundingBox@Jet@@UBA_NABVLineSegment@2@AA_N@Z	public: virtual bool __cdecl Jet::ParticleOrientedBoundingBox::TestCollision(class Jet::LineSegment const &,bool &)const 
+2354	0x53270	?TestCollision@ParticleOrientedBoundingBox@Jet@@UBA_NABVRay@2@AA_N@Z	public: virtual bool __cdecl Jet::ParticleOrientedBoundingBox::TestCollision(class Jet::Ray const &,bool &)const 

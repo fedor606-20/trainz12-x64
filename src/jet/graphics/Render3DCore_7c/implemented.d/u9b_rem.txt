@@ -1,0 +1,32 @@
+# U9b wave 4 remainder: ReferencePoint, the Cell statistics/tree operations, the portal Enter/Leave state, the
+# PhysicalPortal/Mirror cull and warp-camera state, and Corona's cache. See notes/agents/u9b_rem.md.
+#
+# ReferencePoint members are inline in the U9a header; the original definitions differ (the default constructor
+# only clears the name, the copies use x87), so they are emitted as distinct bodies and aliased here.
+??0ReferencePoint@Jet@@QAE@ABVPString@1@ABVVector3@1@ABVQuaternion@1@@Z=?FullCtor@U9bRemRefPoint@Jet@@QAEXABVPString@2@ABVVector3@2@ABVQuaternion@2@@Z
+??0ReferencePoint@Jet@@QAE@XZ=?DefaultCtor@U9bRemRefPoint@Jet@@QAEXXZ
+??4ReferencePoint@Jet@@QAEAAV01@ABV01@@Z=?Assign@U9bRemRefPoint@Jet@@QAEPAVReferencePoint@2@ABV32@@Z
+?GetName@ReferencePoint@Jet@@QBAABVPString@2@XZ=?GetName@U9bRemRefPoint@Jet@@SAPAVPString@2@PAVReferencePoint@2@@Z
+?GetOrientation@ReferencePoint@Jet@@QBAABVQuaternion@2@XZ=?GetOrientation@U9bRemRefPoint@Jet@@SAPAVQuaternion@2@PAVReferencePoint@2@@Z
+?GetPosition@ReferencePoint@Jet@@QBAABVVector3@2@XZ=?GetPosition@U9bRemRefPoint@Jet@@SAPAVVector3@2@PAVReferencePoint@2@@Z
+?GetSubNames@ReferencePoint@Jet@@SAXABVPString@2@AAV32@1@Z=?GetSubNames@AttachmentPoint@Jet@@SAXABVPString@2@AAV32@1@Z
+?SetName@ReferencePoint@Jet@@QAAXABVPString@2@@Z=?SetName@U9bRemRefPoint@Jet@@SAXPAVReferencePoint@2@ABVPString@2@@Z
+?SetOrientation@ReferencePoint@Jet@@QAAXABVQuaternion@2@@Z=?SetOrientation@U9bRemRefPoint@Jet@@SAXPAVReferencePoint@2@ABVQuaternion@2@@Z
+?SetPosition@ReferencePoint@Jet@@QAAXABVVector3@2@@Z=?SetPosition@U9bRemRefPoint@Jet@@SAXPAVReferencePoint@2@ABVVector3@2@@Z
+?Add@Cell@Jet@@UAAXPAVParticle@2@@Z
+?GetStat@Cell@Jet@@SAIW4Stats@12@@Z
+?GetStats@Cell@Jet@@SAPBIXZ
+?InsertParticle@Cell@Jet@@AAAPAVCellNode@2@PAVParticle@2@@Z
+?ObjectMoved@Cell@Jet@@EAAPAVCellNode@2@PAVParticle@2@PAV32@@Z
+?Remove@Cell@Jet@@UAA_NPAVParticle@2@@Z
+?RemoveParticle@Cell@Jet@@AAAXPAVParticle@2@PAVCellNode@2@@Z
+?Reset@Cell@Jet@@SAXXZ
+?ResetAll@Cell@Jet@@SAXXZ
+?stats@Cell@Jet@@0PAIA
+?Enter@Portal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z
+?Leave@Portal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z
+?CreateCamera@PhysicalPortal@Jet@@MBAPAVCamera@2@PAV32@PBVVector3@2@PAXAAVMatrix4@2@@Z
+?Cull@PhysicalPortal@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z
+?IsBackfacing@PhysicalPortal@Jet@@IBA_NPBVCamera@2@@Z
+?Cull@Mirror@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z
+?cache@Corona@Jet@@1PAVParticleFXCache@2@A

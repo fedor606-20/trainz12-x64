@@ -1,0 +1,30 @@
+# Render3DCore_7c exports taken from our code (one mangled name per line); all others forward to
+# Render3DCore_7c_orig.dll.
+#
+# U1a: AxisAlignedBox (notes/Render3DCore.md). Methods that need OrientedBox, Cylinder/Ellipsoid, the 3D line
+# classes or GetMinMaxCollision still forward.
+??0AxisAlignedBox@Jet@@QAE@ABV01@@Z
+??0AxisAlignedBox@Jet@@QAE@ABVVector3@1@0@Z
+??0AxisAlignedBox@Jet@@QAE@IPBVVector3@1@@Z
+??0AxisAlignedBox@Jet@@QAE@IV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@1@@Z
+??0AxisAlignedBox@Jet@@QAE@XZ
+??4AxisAlignedBox@Jet@@QAEAAV01@ABV01@@Z
+??8AxisAlignedBox@Jet@@QBA_NABV01@@Z
+??9AxisAlignedBox@Jet@@QBA_NABV01@@Z
+?CalcBoxLimits@AxisAlignedBox@Jet@@IAAXIV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@Z
+?CalcCorners@AxisAlignedBox@Jet@@QBAXPAVVector3@2@@Z
+?Clamp@AxisAlignedBox@Jet@@QBA?AVVector3@2@ABV32@@Z
+?GetCenter@AxisAlignedBox@Jet@@QBA?AVVector3@2@XZ
+?GetMax@AxisAlignedBox@Jet@@QBAABVVector3@2@XZ
+?GetMin@AxisAlignedBox@Jet@@QBAABVVector3@2@XZ
+?IsEmpty@AxisAlignedBox@Jet@@QBA_NXZ
+?IsWithin@AxisAlignedBox@Jet@@QBA_NABV12@@Z
+?IsWithin@AxisAlignedBox@Jet@@QBA_NABVVector3@2@@Z
+?IsWithin@AxisAlignedBox@Jet@@QBA_NQBVPlane@2@@Z
+?Maximize@AxisAlignedBox@Jet@@QAAXABV12@@Z
+?Minimize@AxisAlignedBox@Jet@@QAAXABV12@@Z
+?SetMax@AxisAlignedBox@Jet@@QAAXABVVector3@2@@Z
+?SetMin@AxisAlignedBox@Jet@@QAAXABVVector3@2@@Z
+?TestCollision@AxisAlignedBox@Jet@@QBA_NABV12@@Z
+?TestCollision@AxisAlignedBox@Jet@@QBA_NABVSphere@2@@Z
+?Zero@AxisAlignedBox@Jet@@QAAXXZ

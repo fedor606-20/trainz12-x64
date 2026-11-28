@@ -1,0 +1,50 @@
+# Render3DCore_7c wave 5 tails (Tails2): exports that became local in this pass.
+# U8: the three class vtables now point into this image; slot order is the same as the original's.
+??_7Camera@Jet@@6B@
+??_7ViewPort@Jet@@6B@
+??_7DebugViewPort@Jet@@6B@
+# U8: Initialize's body was already local and tested by the U8 unit; only the export was forwarded.
+?Initialize@ViewPort@Jet@@AAAXPAVCamera@2@PBURect@2@@Z
+# U2: SplineResource derives the local KernelResource_7c Resource; GetRatio uses the now-local scan body.
+??0SplineResource@Jet@@QAE@ABV01@@Z
+??0SplineResource@Jet@@QAE@ABVPString@1@PBVResourceDatabase@1@@Z
+??1SplineResource@Jet@@UAE@XZ
+??4SplineResource@Jet@@QAEAAV01@ABV01@@Z
+??_7SplineResource@Jet@@6B@
+?CreateInstance@SplineResource@Jet@@UBAPAVSpline@2@XZ
+?LoadTxt@SplineResource@Jet@@MAA?AV?$ResultClass@$1?results@Resource@Jet@@2QBUResultTable@2@BW4Results@Resource@Jet@@@2@PBD@Z
+?GetRatio@SplineSegment@Jet@@UBAMMMMI@Z
+# U9b2: the exported Update takes Modifier* (object+0x18); Tails2::SkeletonUpdateAdaptor adjusts to SkeletonModifier*.
+?Update@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@Modifier@Jet@@2QBUResultTable@2@BW4Results@Modifier@Jet@@@2@M@Z=?SkeletonUpdate@SkeletonUpdateAdaptor@Tails2@Jet@@QAA?AV?$ResultClass@$1?results@Modifier@Jet@@2QBUResultTable@2@BW4Results@Modifier@Jet@@@3@M@Z
+
+# Delegating bodies that U7/U8/U9a/U9b2 already define locally; the export now resolves in this image.
+?Add@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@@Z
+?AddToBoneBlenders@SkeletonModifier@Jet@@IAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@PBV42@_N@Z
+?BatchCalculateDiffuse@AmbientLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z
+?BatchCalculateDiffuse@CubeMapLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z
+?BatchCalculateDiffuse@OmniLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z
+?BatchCalculateDiffuse@ParallelLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z
+?BatchCalculateDiffuse@SpotLight@Jet@@UBAXPAVDisplay@2@HV?$VertexItemPtr@VVector3@Jet@@V?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@2@1V?$VertexItemPtr@KV?$VertexItemPtr@$$CBKVVIPConstHelper@Jet@@@Jet@@@2@ABVMatrix4@2@3PAVMaterial@2@@Z
+?Begin@ViewPort@Jet@@UAAXXZ
+?Cull@Camera@Jet@@UBAXAAVViewPoint@2@@Z
+?End@ViewPort@Jet@@UAAXXZ
+?EnumerateAttachmentPoints@ParticleStructure@Jet@@QAA_NAAV?$FastDynamicArray@PAVAttachmentPoint@Jet@@$0N@U?$Less@PAVAttachmentPoint@Jet@@PAV12@@2@@2@@Z
+?EnumerateAttachmentPoints@ParticleStructure@Jet@@QBA_NAAV?$FastDynamicArray@PBVAttachmentPoint@Jet@@$0N@U?$Less@PBVAttachmentPoint@Jet@@PBV12@@2@@2@@Z
+?GetAllWithin@ViewPort@Jet@@UAAXABVVector2@2@0AAV?$FastDynamicArray@PAVElement@Jet@@$0N@U?$Less@PAVElement@Jet@@PAV12@@2@@2@@Z
+?GetElementAt@ViewPort@Jet@@UAAPAVElement@2@ABVVector2@2@@Z
+?InsertAfter@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@@Z
+?InsertAfter@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@PBV42@@Z
+?InsertBefore@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@@Z
+?InsertBefore@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PAVModifier@2@PBV42@@Z
+?Render@DebugViewPort@Jet@@UAAXXZ
+?Render@ViewPort@Jet@@UAAXXZ
+?RenderDebug@Camera@Jet@@UBAXPAVDisplay@2@AAVDebugViewPort@2@AAVMatrix4@2@K@Z
+?RenderLayer@ViewPort@Jet@@UAAXAAV?$FastDynamicArray@PAVSystemResourceViewer@Jet@@$0N@U?$Less@PAVSystemResourceViewer@Jet@@PAV12@@2@@2@@Z
+?SetCell@Particle@Jet@@QAAXPAVCell@2@@Z
+?SetCurrentReferencePoint@ParticleStructure@Jet@@QAA_NABVPString@2@@Z
+?SwitchParticles@SkeletonModifier@Jet@@QAAXPAVParticle@2@PAV?$FastDynamicArray@PAVBoneBlender@Jet@@$0N@U?$Less@PAVBoneBlender@Jet@@PAV12@@2@@2@1@Z
+?TestCollision@Particle@Jet@@UAA_NABVRay@2@AAVCollisionResult@2@PBV12@@Z
+?TestCollisionGeometry@Particle@Jet@@UBA_NABVRay@2@AAMAAVConstFaceDescriptor@2@@Z
+?Update@DebugViewPort@Jet@@UAAXM@Z
+?Update@ViewPort@Jet@@UAAXM@Z
+?UpdateBoneModifiers@BoneBlender@Jet@@UAA_NM@Z

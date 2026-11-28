@@ -1,0 +1,49 @@
+# U5b multipass materials: 44 exports reconstructed in the workspace. The state classes are reached through
+# MultiPass::StateThunks members (the original thiscall ABI); the cdecl leaves live in Jet::MultiPass::Leaves (their
+# decorated names keep the linker from cutting the original name at an '@' when the two differ). Every other export of
+# the slice stays forwarded: it needs Jet::Material (U5a), the U4 caches, the U6 geometry chunks or the RenderSystem
+# display state.
+??0MPLightRender@MultiPassRenderState@Jet@@QAE@XZ=?MPLightRenderCtor@StateThunks@MultiPass@Jet@@QAEPAXXZ
+??1MPLightRender@MultiPassRenderState@Jet@@MAE@XZ=?MPLightRenderDtor@StateThunks@MultiPass@Jet@@QAEXXZ
+??0MultiPassLightRender@Jet@@QAE@IIIII@Z=?LightRenderCtor@StateThunks@MultiPass@Jet@@QAEPAXIIIII@Z
+?GetNumLights@MultiPassLightRender@Jet@@QBAIW4DLightTypes@2@@Z=?r3d_u5b_light_num_lights@Leaves@MultiPass@Jet@@YAIPBXH@Z
+?GetNumPasses@MultiPassLightRender@Jet@@QBAIXZ=?r3d_u5b_light_num_passes@Leaves@MultiPass@Jet@@YAIPBX@Z
+?GetTotalLights@MultiPassLightRender@Jet@@QBAIXZ=?r3d_u5b_light_total@Leaves@MultiPass@Jet@@YAIPBX@Z
+?AddTexture@MultiPassLightRender@Jet@@QAEXHI@Z=?AddTexture@StateThunks@MultiPass@Jet@@QAEXHI@Z
+?AddVPProperty@MultiPassLightRender@Jet@@QAEXW4MP_RenderProperties@2@II@Z=?AddVPProperty@StateThunks@MultiPass@Jet@@QAEXIII@Z
+?AddTCProperty@MultiPassLightRender@Jet@@QAEXW4MP_RenderProperties@2@II@Z=?AddTCProperty@StateThunks@MultiPass@Jet@@QAEXIII@Z
+?AddScissorLight@MultiPassLightRender@Jet@@QAEXI@Z=?AddScissorLight@StateThunks@MultiPass@Jet@@QAEXI@Z
+??0MultiPassBumpChunkBase@Jet@@QAE@XZ=?BumpChunkBaseCtor@StateThunks@MultiPass@Jet@@QAEPAXXZ
+??0MultiPassBumpChunkBase@Jet@@QAE@ABV01@@Z=?BumpChunkBaseCopyCtor@StateThunks@MultiPass@Jet@@QAEPAXPBX@Z
+?GetSmoothBlendMode@MultiPassNoTextureMaterial@Jet@@QBA_NXZ=?r3d_u5b_notexture_get_smooth@Leaves@MultiPass@Jet@@YAEPBX@Z
+?SetSmoothBlendMode@MultiPassNoTextureMaterial@Jet@@QAAX_N@Z=?r3d_u5b_notexture_set_smooth@Leaves@MultiPass@Jet@@YAXPAXE@Z
+?GetSinglePassMode@MultiPassNoTextureMaterial@Jet@@QBA_NXZ=?r3d_u5b_notexture_get_single@Leaves@MultiPass@Jet@@YAEPBX@Z
+?SetSinglePassMode@MultiPassNoTextureMaterial@Jet@@QAAX_N@Z=?r3d_u5b_notexture_set_single@Leaves@MultiPass@Jet@@YAXPAXE@Z
+?GetIntensityMode@MultiPassNoTextureMaterial@Jet@@QBA_NXZ=?r3d_u5b_notexture_get_intensity@Leaves@MultiPass@Jet@@YAEPBX@Z
+?SetIntensityMode@MultiPassNoTextureMaterial@Jet@@QAAX_N@Z=?r3d_u5b_notexture_set_intensity@Leaves@MultiPass@Jet@@YAXPAXE@Z
+?GetDebugPassMode@MultiPassNoTextureMaterial@Jet@@QBA_NXZ=?r3d_u5b_notexture_get_debug@Leaves@MultiPass@Jet@@YAEPBX@Z
+?SetDebugPassMode@MultiPassNoTextureMaterial@Jet@@QAAX_N@Z=?r3d_u5b_notexture_set_debug@Leaves@MultiPass@Jet@@YAXPAXE@Z
+?GetType@MultiPassNoTextureMaterial@Jet@@UBAABVPString@2@XZ=?r3d_u5b_type_notexture@Leaves@MultiPass@Jet@@YAPBXPBX@Z
+?GetType@MultiPassOneTextureMaterial@Jet@@UBAABVPString@2@XZ=?r3d_u5b_type_onetexture@Leaves@MultiPass@Jet@@YAPBXPBX@Z
+?GetType@MultiPassBumpMaterial@Jet@@UBAABVPString@2@XZ=?r3d_u5b_type_bump@Leaves@MultiPass@Jet@@YAPBXPBX@Z
+?GetType@MultiPassBump2Material@Jet@@UBAABVPString@2@XZ=?r3d_u5b_type_bump2@Leaves@MultiPass@Jet@@YAPBXPBX@Z
+?GetType@MultiPassBumpSpecMaterial@Jet@@UBAABVPString@2@XZ=?r3d_u5b_type_bumpspec@Leaves@MultiPass@Jet@@YAPBXPBX@Z
+?GetType@MultiPassBumpSpec2Material@Jet@@UBAABVPString@2@XZ=?r3d_u5b_type_bumpspec2@Leaves@MultiPass@Jet@@YAPBXPBX@Z
+?GetTexture@MultiPassNoTextureMaterial@Jet@@UAAPAVTexture@2@H@Z=?r3d_u5b_texture_notexture@Leaves@MultiPass@Jet@@YAPAXPAXH@Z
+?GetTexture@MultiPassNoTextureMaterial@Jet@@UBAPBVTexture@2@H@Z=?r3d_u5b_texture_notexture@Leaves@MultiPass@Jet@@YAPAXPAXH@Z
+?GetTexture@MultiPassOneTextureMaterial@Jet@@UAAPAVTexture@2@H@Z=?r3d_u5b_texture_onetexture@Leaves@MultiPass@Jet@@YAPAXPAXH@Z
+?GetTexture@MultiPassOneTextureMaterial@Jet@@UBAPBVTexture@2@H@Z=?r3d_u5b_texture_onetexture@Leaves@MultiPass@Jet@@YAPAXPAXH@Z
+?GetTexture@MultiPassBumpMaterial@Jet@@UAAPAVTexture@2@H@Z=?r3d_u5b_texture_bump@Leaves@MultiPass@Jet@@YAPAXPAXH@Z
+?GetTexture@MultiPassBumpMaterial@Jet@@UBAPBVTexture@2@H@Z=?r3d_u5b_texture_bump@Leaves@MultiPass@Jet@@YAPAXPAXH@Z
+?SetAlphaHint@MultiPassOneTextureMaterial@Jet@@QAAXW4TextureAlpha@2@@Z=?r3d_u5b_onetexture_set_alpha@Leaves@MultiPass@Jet@@YAXPAXI@Z
+?GetAlphaHint@MultiPassOneTextureMaterial@Jet@@QAA?AW4TextureAlpha@2@XZ=?r3d_u5b_onetexture_get_alpha@Leaves@MultiPass@Jet@@YAIPBX@Z
+?Activate@MultiPassNoTextureMaterial@Jet@@UAAXH@Z=?r3d_u5b_activate_notexture@Leaves@MultiPass@Jet@@YAXPAXH@Z
+?Activate@MultiPassOneTextureMaterial@Jet@@UAAXH@Z=?r3d_u5b_activate_onetexture@Leaves@MultiPass@Jet@@YAXPAXH@Z
+?Activate@MultiPassBumpMaterial@Jet@@UAAXH@Z=?r3d_u5b_activate_bump@Leaves@MultiPass@Jet@@YAXPAXH@Z
+?UpdateTextureArray@MultiPassNoTextureMaterial@Jet@@MAAXXZ=?r3d_u5b_update_notexture@Leaves@MultiPass@Jet@@YAXPAX@Z
+?UpdateTextureArray@MultiPassOneTextureMaterial@Jet@@MAAXXZ=?r3d_u5b_update_onetexture@Leaves@MultiPass@Jet@@YAXPAX@Z
+?UpdateTextureArray@MultiPassBumpMaterial@Jet@@MAAXXZ=?r3d_u5b_update_bump@Leaves@MultiPass@Jet@@YAXPAX@Z
+?IsSupported@MultiPassNoTextureMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?r3d_u5b_supported_notexture@Leaves@MultiPass@Jet@@YA_NPAX0AAVPString@3@@Z
+?IsSupported@MultiPassBumpMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?r3d_u5b_supported_onetexture@Leaves@MultiPass@Jet@@YA_NPAX0AAVPString@3@@Z
+?IsSupported@MultiPassOneTextureMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?r3d_u5b_supported_onetexture@Leaves@MultiPass@Jet@@YA_NPAX0AAVPString@3@@Z
+?IsSupported@MultiPassBumpSpecMaterialPlugin@Jet@@UAA_NPAVDisplay@2@AAVPString@2@@Z=?r3d_u5b_supported_bumpspec@Leaves@MultiPass@Jet@@YA_NPAX0AAVPString@3@@Z

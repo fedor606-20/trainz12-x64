@@ -1,0 +1,45 @@
+ordinal	rva	mangled	demangled
+223	0x1ec50	??0Plane@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Plane::Plane(class Jet::Plane const &)
+224	0x5060	??0Plane@Jet@@QAE@ABVVector3@1@00@Z	public: __thiscall Jet::Plane::Plane(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+225	0x4fe0	??0Plane@Jet@@QAE@ABVVector3@1@0@Z	public: __thiscall Jet::Plane::Plane(class Jet::Vector3 const &,class Jet::Vector3 const &)
+226	0x5030	??0Plane@Jet@@QAE@ABVVector3@1@M@Z	public: __thiscall Jet::Plane::Plane(class Jet::Vector3 const &,float)
+227	0x4fd0	??0Plane@Jet@@QAE@XZ	public: __thiscall Jet::Plane::Plane(void)
+519	0x1ec50	??4Plane@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Plane & __thiscall Jet::Plane::operator=(class Jet::Plane const &)
+979	0x55270	?Clip@Plane@Jet@@QBA?AW4ClipResult@2@ABVPolygon@2@AAPAV42@@Z	public: enum Jet::ClipResult __cdecl Jet::Plane::Clip(class Jet::Polygon const &,class Jet::Polygon * &)const 
+1117	0x5dc0	?Distance@Plane@Jet@@QBAMABVVector3@2@@Z	public: float __cdecl Jet::Plane::Distance(class Jet::Vector3 const &)const 
+1178	0x52c0	?Flip@Plane@Jet@@QAAXXZ	public: void __cdecl Jet::Plane::Flip(void)
+1280	0x5330	?GetDistance@Plane@Jet@@QBAMXZ	public: float __cdecl Jet::Plane::GetDistance(void)const 
+1402	0xb210	?GetNormal@Plane@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::Plane::GetNormal(void)const 
+1426	0x5340	?GetPoint@Plane@Jet@@QBA?AVVector3@2@XZ	public: class Jet::Vector3 __cdecl Jet::Plane::GetPoint(void)const 
+1742	0x5650	?Intersect@Plane@Jet@@QBA?AVLine@2@ABV12@@Z	public: class Jet::Line __cdecl Jet::Plane::Intersect(class Jet::Plane const &)const 
+1743	0x5790	?Intersect@Plane@Jet@@QBA?AVVector3@2@ABVLine@2@@Z	public: class Jet::Vector3 __cdecl Jet::Plane::Intersect(class Jet::Line const &)const 
+1744	0x5cc0	?Intersect@Plane@Jet@@QBA?AVVector3@2@ABVLine@2@AAM@Z	public: class Jet::Vector3 __cdecl Jet::Plane::Intersect(class Jet::Line const &,float &)const 
+1745	0x5880	?Intersect@Plane@Jet@@QBA_N_NABVLine@2@AAVVector3@2@@Z	public: bool __cdecl Jet::Plane::Intersect(bool,class Jet::Line const &,class Jet::Vector3 &)const 
+1746	0x5910	?Intersect@Plane@Jet@@QBA_N_NABVLine@2@AAVVector3@2@AAM@Z	public: bool __cdecl Jet::Plane::Intersect(bool,class Jet::Line const &,class Jet::Vector3 &,float &)const 
+1747	0x58e0	?Intersect@Plane@Jet@@QBA_N_NABVLineSegment@2@AAVVector3@2@@Z	public: bool __cdecl Jet::Plane::Intersect(bool,class Jet::LineSegment const &,class Jet::Vector3 &)const 
+1748	0x5b40	?Intersect@Plane@Jet@@QBA_N_NABVLineSegment@2@AAVVector3@2@AAM@Z	public: bool __cdecl Jet::Plane::Intersect(bool,class Jet::LineSegment const &,class Jet::Vector3 &,float &)const 
+1749	0x58b0	?Intersect@Plane@Jet@@QBA_N_NABVRay@2@AAVVector3@2@@Z	public: bool __cdecl Jet::Plane::Intersect(bool,class Jet::Ray const &,class Jet::Vector3 &)const 
+1750	0x5a20	?Intersect@Plane@Jet@@QBA_N_NABVRay@2@AAVVector3@2@AAM@Z	public: bool __cdecl Jet::Plane::Intersect(bool,class Jet::Ray const &,class Jet::Vector3 &,float &)const 
+1769	0x55b0	?IsBehind@Plane@Jet@@QBA_NABVVector3@2@M@Z	public: bool __cdecl Jet::Plane::IsBehind(class Jet::Vector3 const &,float)const 
+1782	0x5600	?IsInFront@Plane@Jet@@QBA_NABVVector3@2@M@Z	public: bool __cdecl Jet::Plane::IsInFront(class Jet::Vector3 const &,float)const 
+1892	0x5290	?Normalize@Plane@Jet@@QAAAAV12@XZ	public: class Jet::Plane & __cdecl Jet::Plane::Normalize(void)
+1916	0x5de0	?Project@Plane@Jet@@QBA?AVVector3@2@ABV32@@Z	public: class Jet::Vector3 __cdecl Jet::Plane::Project(class Jet::Vector3 const &)const 
+2075	0x5200	?Set@Plane@Jet@@QAAXABV12@@Z	public: void __cdecl Jet::Plane::Set(class Jet::Plane const &)
+2076	0x5110	?Set@Plane@Jet@@QAAXABVVector3@2@00@Z	public: void __cdecl Jet::Plane::Set(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+2077	0x5090	?Set@Plane@Jet@@QAAXABVVector3@2@0@Z	public: void __cdecl Jet::Plane::Set(class Jet::Vector3 const &,class Jet::Vector3 const &)
+2078	0x50e0	?Set@Plane@Jet@@QAAXABVVector3@2@M@Z	public: void __cdecl Jet::Plane::Set(class Jet::Vector3 const &,float)
+2079	0x5220	?Set@Plane@Jet@@QAAXPBVVector3@2@@Z	public: void __cdecl Jet::Plane::Set(class Jet::Vector3 const *)
+2146	0x5240	?SetDistance@Plane@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Plane::SetDistance(class Jet::Vector3 const &)
+2147	0x5280	?SetDistance@Plane@Jet@@QAAXM@Z	public: void __cdecl Jet::Plane::SetDistance(float)
+2154	0x62b0	?SetFromTransformPlane@Plane@Jet@@QAAXABVMatrix4@2@_NABV12@M@Z	public: void __cdecl Jet::Plane::SetFromTransformPlane(class Jet::Matrix4 const &,bool,class Jet::Plane const &,float)
+2186	0x3480	?SetNormal@Plane@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::Plane::SetNormal(class Jet::Vector3 const &)
+2187	0x5300	?SetNormal@Plane@Jet@@QAAXMMM@Z	public: void __cdecl Jet::Plane::SetNormal(float,float,float)
+2291	0x55780	?Split@Plane@Jet@@QBAXABVPolygon@2@AAV32@1@Z	public: void __cdecl Jet::Plane::Split(class Jet::Polygon const &,class Jet::Polygon &,class Jet::Polygon &)const 
+2383	0x6260	?Transform@Plane@Jet@@QAAXABVMatrix4@2@_NM@Z	public: void __cdecl Jet::Plane::Transform(class Jet::Matrix4 const &,bool,float)
+2388	0x5f10	?TransformPlane@Plane@Jet@@SAXABVMatrix4@2@_NABVVector3@2@MAAV42@AAMM@Z	public: static void __cdecl Jet::Plane::TransformPlane(class Jet::Matrix4 const &,bool,class Jet::Vector3 const &,float,class Jet::Vector3 &,float &,float)
+2465	0x551f0	?WhichSide@Plane@Jet@@QBA?AW4ClipResult@2@ABVSphere@2@@Z	public: enum Jet::ClipResult __cdecl Jet::Plane::WhichSide(class Jet::Sphere const &)const 
+2466	0x53b0	?WhichSide@Plane@Jet@@QBA?AW4ClipResult@2@ABVVector3@2@@Z	public: enum Jet::ClipResult __cdecl Jet::Plane::WhichSide(class Jet::Vector3 const &)const 
+2467	0x5410	?WhichSide@Plane@Jet@@QBA?AW4ClipResult@2@ABVVector3@2@M@Z	public: enum Jet::ClipResult __cdecl Jet::Plane::WhichSide(class Jet::Vector3 const &,float)const 
+2468	0x5470	?WhichSide@Plane@Jet@@QBA?AW4ClipResult@2@HPBVVector3@2@@Z	public: enum Jet::ClipResult __cdecl Jet::Plane::WhichSide(int,class Jet::Vector3 const *)const 
+2469	0x5e60	?WhichSideAxisBox@Plane@Jet@@QBE?AW4ClipResult@2@ABVVector3@2@0AAM1M@Z	public: enum Jet::ClipResult __thiscall Jet::Plane::WhichSideAxisBox(class Jet::Vector3 const &,class Jet::Vector3 const &,float &,float &,float)const 
+2470	0x5540	?WhichSideSphere@Plane@Jet@@QBA?AW4ClipResult@2@ABVVector3@2@M@Z	public: enum Jet::ClipResult __cdecl Jet::Plane::WhichSideSphere(class Jet::Vector3 const &,float)const 

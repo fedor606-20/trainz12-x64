@@ -1,0 +1,7 @@
+?AddAllToVisible@Cell@Jet@@AAAXPAVCellNode@2@AAVViewPoint@2@ABVMatrix4@2@H@Z
+?CreateCamera@Mirror@Jet@@MBAPAVCamera@2@PAV32@PBVVector3@2@PAXAAVMatrix4@2@@Z
+?CreateCamera@VirtualPortal@Jet@@MBAPAVCamera@2@PAV32@PBVVector3@2@PAXAAVMatrix4@2@@Z
+?Cull@Cell@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@@Z
+?Enter@PhysicalPortal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z
+?Leave@PhysicalPortal@Jet@@UAAXPAVDisplay@2@AAVViewPort@2@AAVMatrix4@2@II@Z
+?Traverse@PhysicalPortal@Jet@@UAAXAAVViewPoint@2@ABVMatrix4@2@PAVCamera@2@@Z

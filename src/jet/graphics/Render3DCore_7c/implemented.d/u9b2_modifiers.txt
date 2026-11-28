@@ -1,0 +1,60 @@
+# U9b2: BoneBlender, BoneModifier and SkeletonModifier state, arrays and wrappers (notes/agents/u9b2_modifiers.md).
+# SkeletonModifier::Update overrides the secondary Modifier base; its export keeps the original body because the
+# exported body takes a Modifier* (object+0x18), while the local override used by the vtable takes the object.
+# The bone-influence blend (BoneBlender::UpdateBoneModifiers), the RTTI AddToBoneBlenders path and the
+# bone-tree SwitchParticles stay forwarded; their vtable slots are local thunks to the original.
+??0BoneBlender@Jet@@QAE@ABV01@@Z
+??0BoneBlender@Jet@@QAE@PAVSkeletonModifier@1@ABVPString@1@PAVParticle@1@@Z
+??0BoneModifier@Jet@@QAE@ABV01@@Z
+??0BoneModifier@Jet@@QAE@ABVPString@1@M0K@Z
+??0BoneModifier@Jet@@QAE@PAVModifierHost@1@ABVPString@1@M1K@Z
+??0BoneModifier@Jet@@QAE@PAVRenderKernel@1@ABVPString@1@M1K@Z
+??0BoneModifier@Jet@@QAE@XZ
+??0SkeletonModifier@Jet@@QAE@ABV01@@Z
+??0SkeletonModifier@Jet@@QAE@PAVParticle@1@M@Z
+??0SkeletonModifier@Jet@@QAE@PAVParticle@1@PAVModifierHost@1@M@Z
+??0SkeletonModifier@Jet@@QAE@PAVParticle@1@PAVRenderKernel@1@M@Z
+??1BoneBlender@Jet@@QAE@XZ
+??1BoneModifier@Jet@@UAE@XZ
+??1SkeletonModifier@Jet@@UAE@XZ
+??4BoneBlender@Jet@@QAEAAV01@ABV01@@Z
+??4BoneModifier@Jet@@QAEAAV01@ABV01@@Z
+??4SkeletonModifier@Jet@@QAEAAV01@ABV01@@Z
+??_7BoneBlender@Jet@@6B@
+??_7BoneModifier@Jet@@6B@
+??_7SkeletonModifier@Jet@@6BModifier@1@@
+??_7SkeletonModifier@Jet@@6BModifierList@1@@
+?Add@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@@Z
+?CreateBlenders@SkeletonModifier@Jet@@IAAXPAVParticle@2@@Z
+?GetBone@BoneBlender@Jet@@QAAPAVParticle@2@XZ
+?GetBone@BoneBlender@Jet@@QBAPBVParticle@2@XZ
+?GetBoneBlender@SkeletonModifier@Jet@@IAAPAVBoneBlender@2@ABVPString@2@@Z
+?GetBoneName@BoneBlender@Jet@@QBAABVPString@2@XZ
+?GetFirstReplaceable@BoneBlender@Jet@@QAAPAVBoneModifier@2@M@Z
+?GetInfluence@BoneModifier@Jet@@UBAMABVPString@2@@Z
+?GetInfluenceInTime@BoneModifier@Jet@@UBAMABVPString@2@@Z
+?GetInfluenceLimit@BoneModifier@Jet@@UBAMABVPString@2@@Z
+?GetInfluenceOutTime@BoneModifier@Jet@@UBAMABVPString@2@@Z
+?GetNumBones@SkeletonModifier@Jet@@QBAHXZ
+?GetRootBone@BoneModifier@Jet@@UBA?AVPString@2@XZ
+?GetRootBone@SkeletonModifier@Jet@@QBA?AVPString@2@XZ
+?GetSkeleton@BoneModifier@Jet@@UAAPAVSkeletonModifier@2@XZ
+?GetUpdateFlag@BoneModifier@Jet@@UBA_NK@Z
+?InsertAfter@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@@Z
+?InsertAfter@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@PBV32@@Z
+?InsertBefore@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@@Z
+?InsertBefore@BoneBlender@Jet@@UAA_NPAVBoneModifier@2@PBV32@@Z
+?Remove@BoneBlender@Jet@@UAA_NABVPString@2@@Z
+?Remove@BoneBlender@Jet@@UAA_NPBVModifier@2@@Z
+?Remove@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@ABVPString@2@@Z
+?Remove@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@PBVModifier@2@@Z
+?RemoveAll@BoneBlender@Jet@@UAEXXZ
+?RemoveAll@SkeletonModifier@Jet@@UAAXXZ
+?RemoveBlender@SkeletonModifier@Jet@@QAA_NPAVBoneBlender@2@_N@Z
+?RemoveBlenders@SkeletonModifier@Jet@@QAAIABV?$FastDynamicArray@PAVBoneBlender@Jet@@$0N@U?$Less@PAVBoneBlender@Jet@@PAV12@@2@@2@_N@Z
+?SetBone@BoneBlender@Jet@@QAAXPAVParticle@2@@Z
+?SetRootBone@BoneModifier@Jet@@UAAXABVPString@2@@Z
+?SetUpdateFlag@BoneModifier@Jet@@UAAXK_N@Z
+?UnlinkBlenders@SkeletonModifier@Jet@@IAAXXZ
+?UpdateModifiers@SkeletonModifier@Jet@@UAA?AV?$ResultClass@$1?results@ModifierHost@Jet@@2QBUResultTable@2@BW4Results@ModifierHost@Jet@@@2@M@Z
+?nullString@BoneModifier@Jet@@2AAVPString@2@A

@@ -1,0 +1,56 @@
+# Unit U11 (u11_statics): BackgroundResource and BackgroundLoadingThread. Only these two classes move; the four
+# NameCheck/StateTable statics, BackgroundLoadingThread::results, all of Facility and the plugin entry still forward
+# to Render3DCore_7c_orig.dll (see notes/agents/u11_statics.md).
+#
+# ??_FBackgroundResource is the compiler-generated default constructor closure: exported from a __fastcall helper,
+# the same way the other units export theirs.
+
+??_7BackgroundLoadingThread@Jet@@6B@
+??_7BackgroundResource@Jet@@6B@
+??_FBackgroundResource@Jet@@QAEXXZ=?BackgroundResourceDefaultClosure@Jet@@YIXPAX0@Z
+??0BackgroundLoadingThread@Jet@@QAE@HW4Priority@Thread@1@@Z
+??0BackgroundResource@Jet@@QAE@PAVBackgroundLoadingThread@1@@Z
+??1BackgroundLoadingThread@Jet@@MAE@XZ
+??1BackgroundResource@Jet@@UAE@XZ
+?Abort@BackgroundResource@Jet@@UAAX_N@Z
+?ActionAbortNow@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionBackgroundLoadData@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionLoadComplete@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionMainThreadInitialize@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionNotifyFailure@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionProcessFailure@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionQueueBackground@BackgroundResource@Jet@@IBA?AW4StateReturn@12@XZ
+?ActionQueueRequest@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionSendLoadComplete@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?ActionUnloadResource@BackgroundResource@Jet@@IAA?AW4StateReturn@12@XZ
+?AddObserver@BackgroundResource@Jet@@QAAXPAVBkgResObserver@2@K@Z
+?BackgroundLoadData@BackgroundResource@Jet@@QAAXXZ
+?CallCallbacks@BackgroundResource@Jet@@IBA?AW4StateReturn@12@K@Z
+?CheckComplete@BackgroundResource@Jet@@QAA_NXZ
+?CheckForComplete@BackgroundLoadingThread@Jet@@UAAXXZ
+?DeleteSelf@BackgroundResource@Jet@@UAAXXZ
+?DequeueResource@BackgroundLoadingThread@Jet@@UAA?AV?$ResultClass@$1?results@BackgroundLoadingThread@Jet@@2QBUResultTable@2@BW4Results@BackgroundLoadingThread@Jet@@@2@PAVBackgroundResource@2@@Z
+?DoAction@BackgroundResource@Jet@@IAA?AW4StateReturn@12@W4Input@12@@Z
+?GetCurrentState@BackgroundResource@Jet@@IBA?AW4State@12@XZ
+?GetResource@BackgroundResource@Jet@@QBAPBVResource@2@XZ
+?GetThreadID@BackgroundLoadingThread@Jet@@QBAKXZ
+?LoadFailed@BackgroundResource@Jet@@IAAXXZ
+?LoadResource@BackgroundResource@Jet@@UAA_NPAVResourceDatabase@2@ABVPString@2@@Z=?BackgroundResourceLoadResourceDatabase@Jet@@YA_NPAVBackgroundResource@1@PBVResourceDatabase@1@ABVPString@1@@Z
+?LoadResource@BackgroundResource@Jet@@UAA_NPBVResource@2@@Z
+?Lock@BackgroundResource@Jet@@IBAXXZ
+?MainThread@BackgroundLoadingThread@Jet@@KGIPAX@Z
+?mainThreadId@BackgroundLoadingThread@Jet@@1KA
+?mainThreadId@BackgroundResource@Jet@@1KA
+?MainThreadLoadComplete@BackgroundResource@Jet@@MBA?AW4BackgroundLoadStatus@2@XZ
+?MainThreadProcessFailure@BackgroundResource@Jet@@MBA?AW4BackgroundLoadStatus@2@XZ
+?OnLoad@BackgroundResource@Jet@@MBAXPBVResource@2@@Z
+?ProcessThread@BackgroundLoadingThread@Jet@@IAAIXZ
+?QueueBackground@BackgroundResource@Jet@@IAAXXZ
+?QueueForDelete@BackgroundLoadingThread@Jet@@UAAXPAVBackgroundResource@2@@Z
+?QueueResource@BackgroundLoadingThread@Jet@@UAA?AV?$ResultClass@$1?results@BackgroundLoadingThread@Jet@@2QBUResultTable@2@BW4Results@BackgroundLoadingThread@Jet@@@2@PAVBackgroundResource@2@@Z
+?RemoveObserver@BackgroundResource@Jet@@QAAXPAVBkgResObserver@2@@Z
+?SetBackgroundThread@BackgroundResource@Jet@@QAAXPAVBackgroundLoadingThread@2@@Z
+?SetThreadPriority@BackgroundLoadingThread@Jet@@QAAXW4Priority@Thread@2@@Z
+?SignalComplete@BackgroundLoadingThread@Jet@@UAA?AV?$ResultClass@$1?results@BackgroundLoadingThread@Jet@@2QBUResultTable@2@BW4Results@BackgroundLoadingThread@Jet@@@2@PAVBackgroundResource@2@@Z
+?UnloadResource@BackgroundResource@Jet@@QAAXXZ
+?Unlock@BackgroundResource@Jet@@IBAXXZ

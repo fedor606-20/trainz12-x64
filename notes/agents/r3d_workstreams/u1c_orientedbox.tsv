@@ -1,0 +1,72 @@
+ordinal	rva	mangled	demangled
+26	0x3200	??0AxisAlignedBox@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::AxisAlignedBox::AxisAlignedBox(class Jet::AxisAlignedBox const &)
+27	0xd9f0	??0AxisAlignedBox@Jet@@QAE@ABVOrientedBox@1@@Z	public: __thiscall Jet::AxisAlignedBox::AxisAlignedBox(class Jet::OrientedBox const &)
+28	0x3170	??0AxisAlignedBox@Jet@@QAE@ABVVector3@1@0@Z	public: __thiscall Jet::AxisAlignedBox::AxisAlignedBox(class Jet::Vector3 const &,class Jet::Vector3 const &)
+29	0x31a0	??0AxisAlignedBox@Jet@@QAE@IPBVVector3@1@@Z	public: __thiscall Jet::AxisAlignedBox::AxisAlignedBox(unsigned int,class Jet::Vector3 const *)
+30	0x31d0	??0AxisAlignedBox@Jet@@QAE@IV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@1@@Z	public: __thiscall Jet::AxisAlignedBox::AxisAlignedBox(unsigned int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>)
+31	0x4fd0	??0AxisAlignedBox@Jet@@QAE@XZ	public: __thiscall Jet::AxisAlignedBox::AxisAlignedBox(void)
+194	0x49210	??0OrientedBox@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::OrientedBox::OrientedBox(class Jet::OrientedBox const &)
+195	0x49280	??0OrientedBox@Jet@@QAE@ABVAxisAlignedBox@1@@Z	public: __thiscall Jet::OrientedBox::OrientedBox(class Jet::AxisAlignedBox const &)
+196	0x491b0	??0OrientedBox@Jet@@QAE@IPBVVector3@1@@Z	public: __thiscall Jet::OrientedBox::OrientedBox(unsigned int,class Jet::Vector3 const *)
+197	0x491e0	??0OrientedBox@Jet@@QAE@IV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@1@@Z	public: __thiscall Jet::OrientedBox::OrientedBox(unsigned int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>)
+198	0x4fd0	??0OrientedBox@Jet@@QAE@XZ	public: __thiscall Jet::OrientedBox::OrientedBox(void)
+456	0x3200	??4AxisAlignedBox@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::AxisAlignedBox & __thiscall Jet::AxisAlignedBox::operator=(class Jet::AxisAlignedBox const &)
+507	0x36c0	??4OrientedBox@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::OrientedBox & __thiscall Jet::OrientedBox::operator=(class Jet::OrientedBox const &)
+563	0x35d0	??8AxisAlignedBox@Jet@@QBA_NABV01@@Z	public: bool __cdecl Jet::AxisAlignedBox::operator==(class Jet::AxisAlignedBox const &)const 
+581	0x3640	??9AxisAlignedBox@Jet@@QBA_NABV01@@Z	public: bool __cdecl Jet::AxisAlignedBox::operator!=(class Jet::AxisAlignedBox const &)const 
+932	0xdc90	?CalcBoxLimits@AxisAlignedBox@Jet@@IAAXIV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@Z	protected: void __cdecl Jet::AxisAlignedBox::CalcBoxLimits(unsigned int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>)
+933	0xdbb0	?CalcCorners@AxisAlignedBox@Jet@@QBAXPAVVector3@2@@Z	public: void __cdecl Jet::AxisAlignedBox::CalcCorners(class Jet::Vector3 *)const 
+934	0x49780	?CalcCorners@OrientedBox@Jet@@QBAXPAVVector3@2@@Z	public: void __cdecl Jet::OrientedBox::CalcCorners(class Jet::Vector3 *)const 
+935	0x3d20	?CalcLocalDir@OrientedBox@Jet@@QBEXABVVector3@2@AAV32@@Z	public: void __thiscall Jet::OrientedBox::CalcLocalDir(class Jet::Vector3 const &,class Jet::Vector3 &)const 
+936	0x3db0	?CalcLocalPos@OrientedBox@Jet@@QBEXABVVector3@2@AAV32@@Z	public: void __thiscall Jet::OrientedBox::CalcLocalPos(class Jet::Vector3 const &,class Jet::Vector3 &)const 
+964	0xe240	?Clamp@AxisAlignedBox@Jet@@QBA?AVVector3@2@ABV32@@Z	public: class Jet::Vector3 __cdecl Jet::AxisAlignedBox::Clamp(class Jet::Vector3 const &)const 
+1215	0x3760	?GetAxis@OrientedBox@Jet@@QBAPBVVector3@2@XZ	public: class Jet::Vector3 const * __cdecl Jet::OrientedBox::GetAxis(void)const 
+1236	0x33d0	?GetCenter@AxisAlignedBox@Jet@@QBA?AVVector3@2@XZ	public: class Jet::Vector3 __cdecl Jet::AxisAlignedBox::GetCenter(void)const 
+1243	0xb210	?GetCenter@OrientedBox@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::OrientedBox::GetCenter(void)const 
+1286	0x3730	?GetExtents@OrientedBox@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::OrientedBox::GetExtents(void)const 
+1386	0x3760	?GetMax@AxisAlignedBox@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::AxisAlignedBox::GetMax(void)const 
+1389	0xb210	?GetMin@AxisAlignedBox@Jet@@QBAABVVector3@2@XZ	public: class Jet::Vector3 const & __cdecl Jet::AxisAlignedBox::GetMin(void)const 
+1390	0xdfc0	?GetMinMaxCollision@AxisAlignedBox@Jet@@QBA_NABVVector3@2@0AAM1@Z	public: bool __cdecl Jet::AxisAlignedBox::GetMinMaxCollision(class Jet::Vector3 const &,class Jet::Vector3 const &,float &,float &)const 
+1391	0x4b030	?GetMinMaxCollision@OrientedBox@Jet@@QBA_NABVVector3@2@0AAM1@Z	public: bool __cdecl Jet::OrientedBox::GetMinMaxCollision(class Jet::Vector3 const &,class Jet::Vector3 const &,float &,float &)const 
+1627	0x49f40	?Init@OrientedBox@Jet@@IAAXHV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@Z	protected: void __cdecl Jet::OrientedBox::Init(int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>)
+1765	0x3af0	?InverseTransform@OrientedBox@Jet@@QAAXABVMatrix3@2@ABVVector3@2@@Z	public: void __cdecl Jet::OrientedBox::InverseTransform(class Jet::Matrix3 const &,class Jet::Vector3 const &)
+1777	0x34f0	?IsEmpty@AxisAlignedBox@Jet@@QBA_NXZ	public: bool __cdecl Jet::AxisAlignedBox::IsEmpty(void)const 
+1779	0x3860	?IsEmpty@OrientedBox@Jet@@QBA_NXZ	public: bool __cdecl Jet::OrientedBox::IsEmpty(void)const 
+1827	0x3370	?IsWithin@AxisAlignedBox@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::AxisAlignedBox::IsWithin(class Jet::AxisAlignedBox const &)const 
+1828	0x32d0	?IsWithin@AxisAlignedBox@Jet@@QBA_NABVVector3@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::IsWithin(class Jet::Vector3 const &)const 
+1829	0xe2c0	?IsWithin@AxisAlignedBox@Jet@@QBA_NQBVPlane@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::IsWithin(class Jet::Plane const * const)const 
+1877	0x49380	?MakeBestFit@OrientedBox@Jet@@QAAXIPBVVector3@2@@Z	public: void __cdecl Jet::OrientedBox::MakeBestFit(unsigned int,class Jet::Vector3 const *)
+1878	0x493b0	?MakeBestFit@OrientedBox@Jet@@QAAXIV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@Z	public: void __cdecl Jet::OrientedBox::MakeBestFit(unsigned int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>)
+1880	0x3230	?Maximize@AxisAlignedBox@Jet@@QAAXABV12@@Z	public: void __cdecl Jet::AxisAlignedBox::Maximize(class Jet::AxisAlignedBox const &)
+1881	0xdb00	?Maximize@AxisAlignedBox@Jet@@QAAXABVOrientedBox@2@@Z	public: void __cdecl Jet::AxisAlignedBox::Maximize(class Jet::OrientedBox const &)
+1882	0x49730	?Maximize@OrientedBox@Jet@@QAAXABV12@@Z	public: void __cdecl Jet::OrientedBox::Maximize(class Jet::OrientedBox const &)
+1883	0x495f0	?Maximize@OrientedBox@Jet@@QAAXABVAxisAlignedBox@2@@Z	public: void __cdecl Jet::OrientedBox::Maximize(class Jet::AxisAlignedBox const &)
+1885	0x4b600	?MinimalBoxForAngles@OrientedBox@Jet@@IAAXHV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@QAM@Z	protected: void __cdecl Jet::OrientedBox::MinimalBoxForAngles(int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>,float * const)
+1886	0x3530	?Minimize@AxisAlignedBox@Jet@@QAAXABV12@@Z	public: void __cdecl Jet::AxisAlignedBox::Minimize(class Jet::AxisAlignedBox const &)
+2096	0x37b0	?SetAxis@OrientedBox@Jet@@QAAXABVVector3@2@00@Z	public: void __cdecl Jet::OrientedBox::SetAxis(class Jet::Vector3 const &,class Jet::Vector3 const &,class Jet::Vector3 const &)
+2097	0x3770	?SetAxis@OrientedBox@Jet@@QAAXPBVVector3@2@@Z	public: void __cdecl Jet::OrientedBox::SetAxis(class Jet::Vector3 const *)
+2113	0x3480	?SetCenter@OrientedBox@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::OrientedBox::SetCenter(class Jet::Vector3 const &)
+2152	0x3740	?SetExtents@OrientedBox@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::OrientedBox::SetExtents(class Jet::Vector3 const &)
+2177	0x34a0	?SetMax@AxisAlignedBox@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::AxisAlignedBox::SetMax(class Jet::Vector3 const &)
+2180	0x3480	?SetMin@AxisAlignedBox@Jet@@QAAXABVVector3@2@@Z	public: void __cdecl Jet::AxisAlignedBox::SetMin(class Jet::Vector3 const &)
+2298	0x3370	?TestCollision@AxisAlignedBox@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::AxisAlignedBox const &)const 
+2299	0x4f940	?TestCollision@AxisAlignedBox@Jet@@QBA_NABVCylinder@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::Cylinder const &)const 
+2300	0x4f940	?TestCollision@AxisAlignedBox@Jet@@QBA_NABVEllipsoid@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::Ellipsoid const &)const 
+2301	0xde90	?TestCollision@AxisAlignedBox@Jet@@QBA_NABVLine@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::Line const &)const 
+2302	0xdf00	?TestCollision@AxisAlignedBox@Jet@@QBA_NABVLineSegment@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::LineSegment const &)const 
+2303	0xde60	?TestCollision@AxisAlignedBox@Jet@@QBA_NABVOrientedBox@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::OrientedBox const &)const 
+2304	0xdec0	?TestCollision@AxisAlignedBox@Jet@@QBA_NABVRay@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::Ray const &)const 
+2305	0xdda0	?TestCollision@AxisAlignedBox@Jet@@QBA_NABVSphere@2@@Z	public: bool __cdecl Jet::AxisAlignedBox::TestCollision(class Jet::Sphere const &)const 
+2340	0x4a9d0	?TestCollision@OrientedBox@Jet@@QBA_NABV12@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::OrientedBox const &)const 
+2341	0x4a9a0	?TestCollision@OrientedBox@Jet@@QBA_NABVAxisAlignedBox@2@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::AxisAlignedBox const &)const 
+2342	0x4f940	?TestCollision@OrientedBox@Jet@@QBA_NABVCylinder@2@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::Cylinder const &)const 
+2343	0x4f940	?TestCollision@OrientedBox@Jet@@QBA_NABVEllipsoid@2@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::Ellipsoid const &)const 
+2344	0x4af00	?TestCollision@OrientedBox@Jet@@QBA_NABVLine@2@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::Line const &)const 
+2345	0x4af70	?TestCollision@OrientedBox@Jet@@QBA_NABVLineSegment@2@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::LineSegment const &)const 
+2346	0x4af30	?TestCollision@OrientedBox@Jet@@QBA_NABVRay@2@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::Ray const &)const 
+2347	0x4a6d0	?TestCollision@OrientedBox@Jet@@QBA_NABVSphere@2@@Z	public: bool __cdecl Jet::OrientedBox::TestCollision(class Jet::Sphere const &)const 
+2381	0x38a0	?Transform@OrientedBox@Jet@@QAAXABVMatrix3@2@ABVVector3@2@@Z	public: void __cdecl Jet::OrientedBox::Transform(class Jet::Matrix3 const &,class Jet::Vector3 const &)
+2382	0x4a440	?Transform@OrientedBox@Jet@@QAAXABVMatrix4@2@@Z	public: void __cdecl Jet::OrientedBox::Transform(class Jet::Matrix4 const &)
+2460	0x4b220	?Volume@OrientedBox@Jet@@KAMPBMIV?$VertexItemPtr@$$CBVVector3@Jet@@VVIPConstHelper@2@@2@@Z	protected: static float __cdecl Jet::OrientedBox::Volume(float const *,unsigned int,class Jet::VertexItemPtr<class Jet::Vector3 const ,class Jet::VIPConstHelper>)
+2474	0x34c0	?Zero@AxisAlignedBox@Jet@@QAAXXZ	public: void __cdecl Jet::AxisAlignedBox::Zero(void)
+2475	0x3800	?Zero@OrientedBox@Jet@@QAAXXZ	public: void __cdecl Jet::OrientedBox::Zero(void)

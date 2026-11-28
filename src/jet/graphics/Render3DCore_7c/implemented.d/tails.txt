@@ -1,0 +1,22 @@
+# Render3DCore_7c tails (wave 4). One mangled name per line, added only after the export links.
+# U1b Plane: the three clippers/plane-plane intersection that needed Polygon / the Line vtable.
+?Clip@Plane@Jet@@QBA?AW4ClipResult@2@ABVPolygon@2@AAPAV42@@Z
+?Split@Plane@Jet@@QBAXABVPolygon@2@AAV32@1@Z
+?Intersect@Plane@Jet@@QBA?AVLine@2@ABV12@@Z
+# U1d1: the three line-family vtables (our objects already use them; the exports now point at our tables) and the
+# segment-vs-circle overload.
+??_7Line@Jet@@6B@
+??_7LineSegment@Jet@@6B@
+??_7Ray@Jet@@6B@
+?TestCollision@LineSegment@Jet@@QBA_NAAVCircle@2@@Z
+# U1d2: Sphere's ray/segment tests, Polygon::Intersect, the Circle test/overlap family, Ellipse::Overlap.
+?TestCollision@Sphere@Jet@@QBA_NABVRay@2@@Z
+?TestCollision@Sphere@Jet@@QBA_NABVLineSegment@2@@Z
+?Intersect@Polygon@Jet@@QBA_NABVLine@2@AAVVector3@2@@Z
+?TestCollision@Circle@Jet@@QAA_NABVLine@2@@Z
+?TestCollision@Circle@Jet@@QAA_NABVPlane@2@@Z
+?TestCollision@Circle@Jet@@QAA_NABV12@@Z
+?Overlap@Circle@Jet@@QAA_NAAVVector3@2@000@Z
+?Overlap@Ellipse@Jet@@QAA_NAAVVector3@2@000@Z
+# U7: ParallelLight's default-constructor closure (fastcall helper receiving `this` in ECX, as the other modules do).
+??_FParallelLight@Jet@@QAEXXZ=?ParallelLightDefaultCtorClosure@Jet@@YIXPAVParallelLight@1@@Z

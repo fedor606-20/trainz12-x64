@@ -1,0 +1,14 @@
+ordinal	rva	mangled	demangled
+108	0x20cd0	??0Geometry@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::Geometry::Geometry(class Jet::Geometry const &)
+109	0x20d50	??0Geometry@Jet@@QAE@XZ	public: __thiscall Jet::Geometry::Geometry(void)
+315	0x20d80	??0TriangleGeometry@Jet@@QAE@ABV01@@Z	public: __thiscall Jet::TriangleGeometry::TriangleGeometry(class Jet::TriangleGeometry const &)
+316	0x20d70	??0TriangleGeometry@Jet@@QAE@XZ	public: __thiscall Jet::TriangleGeometry::TriangleGeometry(void)
+363	0x20d60	??1Geometry@Jet@@UAE@XZ	public: virtual __thiscall Jet::Geometry::~Geometry(void)
+442	0x20d60	??1TriangleGeometry@Jet@@UAE@XZ	public: virtual __thiscall Jet::TriangleGeometry::~TriangleGeometry(void)
+482	0x20db0	??4Geometry@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::Geometry & __thiscall Jet::Geometry::operator=(class Jet::Geometry const &)
+556	0x20db0	??4TriangleGeometry@Jet@@QAEAAV01@ABV01@@Z	public: class Jet::TriangleGeometry & __thiscall Jet::TriangleGeometry::operator=(class Jet::TriangleGeometry const &)
+637	0x7ea28	??_7Geometry@Jet@@6B@	const Jet::Geometry::`vftable'
+743	0x7ea44	??_7TriangleGeometry@Jet@@6B@	const Jet::TriangleGeometry::`vftable'
+1466	0x27ac0	?GetRenderMatrix@Geometry@Jet@@QBA?AVMatrix4@2@ABVViewPort@2@@Z	public: class Jet::Matrix4 __cdecl Jet::Geometry::GetRenderMatrix(class Jet::ViewPort const &)const 
+1652	0x27ae0	?InitInstance@Geometry@Jet@@IBAXAAV12@@Z	protected: void __cdecl Jet::Geometry::InitInstance(class Jet::Geometry &)const 
+2295	0x27aa0	?StoreMatrix@Geometry@Jet@@QAAXABVViewPort@2@ABVMatrix4@2@@Z	public: void __cdecl Jet::Geometry::StoreMatrix(class Jet::ViewPort const &,class Jet::Matrix4 const &)

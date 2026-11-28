@@ -1,0 +1,30 @@
+# U10 remainder (u10_rem): the primitive volume, index-builder and ray-test exports that do not need a live
+# RenderKernel/material manager. BuildGeometry/Init/Add/Cull/TestCollisionGeometry still forward (material chunk
+# contract). See notes/agents/u10_rem.md.
+
+?CalculateBoxVolume@RenderPrimitive@Jet@@IAAXXZ
+?CalculatePrimitiveVolume@RenderPrimitive@Jet@@MAAXXZ
+?CalculatePrimitiveVolume@RenderBox@Jet@@MAAXXZ
+?CalculatePrimitiveVolume@RenderLine@Jet@@MAAXXZ
+?CalculatePrimitiveVolume@RenderPlane@Jet@@MAAXXZ
+?CalculatePrimitiveVolume@RenderPolygon@Jet@@MAAXXZ
+?CalculatePrimitiveVolume@RenderPolyline@Jet@@MAAXXZ
+?CalculatePrimitiveVolume@RenderSpline@Jet@@MAAXXZ
+?CalculatePrimitiveVolume@RenderTube@Jet@@MAAXXZ
+?GetGeometryCenter@RenderPrimitive@Jet@@MBA?AVVector3@2@XZ
+?BuildIndicesWire@RenderBox@Jet@@IAAXHHHHPAGH@Z
+?BuildIndicesSolid@RenderCone@Jet@@IAAXHHPAGH@Z
+?BuildIndicesWire@RenderCone@Jet@@IAAXHHPAGH@Z
+?BuildIndicesSolid@RenderCylinder@Jet@@IAAXHHPAGH@Z
+?BuildIndicesWire@RenderCylinder@Jet@@IAAXHHPAGH@Z
+?BuildIndicesSolid@RenderEllipsoid@Jet@@IAAXHHPAGH@Z
+?BuildIndicesWire@RenderEllipsoid@Jet@@IAAXHHPAGH@Z
+?BuildIndicesSolid@RenderSphere@Jet@@IAAXHHPAGH@Z
+?BuildIndicesWire@RenderSphere@Jet@@IAAXHHPAGH@Z
+?BuildIndicesSolid@RenderPlane@Jet@@IAAXHHHPAGH@Z
+?BuildIndicesWire@RenderPlane@Jet@@IAAXHHHPAGH@Z
+??_FRender2DPrimitive@Jet@@QAEXXZ=@JetRender2DPrimitiveDefaultCtor@8
+??_FRender3DPrimitive@Jet@@QAEXXZ=@JetRender3DPrimitiveDefaultCtor@8
+?GeometryTestCollision@RenderBox@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z
+?GeometryTestCollision@RenderSphere@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z
+?GeometryTestCollision@RenderEllipsoid@Jet@@MBA_NABVRay@2@AAVVector3@2@@Z
